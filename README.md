@@ -2,7 +2,7 @@
 
 ## Summary
 
-Provide a brief description of the project - 150 words.
+Low Light Photosynthesis; how does it work?  what are the lower limits?
 
 ## Highly Qualified Personnel
 
