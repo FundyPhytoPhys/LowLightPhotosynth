@@ -112,7 +112,7 @@ unique(duplicated(SolisenseFiles))
 #design choice 2 file reading functions or add a filetype variable to a single function
 #stringsAsFactors =FALSE somewhere? 
 
-read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(filename = flnm, cdatetime = ymd_hms(file.info(flnm)$ctime))
+read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(filename = flnm)
 }
 
 ```
