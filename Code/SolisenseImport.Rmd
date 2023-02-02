@@ -3,6 +3,8 @@ title: "SolisenseImport"
 author:
 - Maximilian Berthold
 - Douglas A. Campbell
+- Natasha Ryan
+
 date: "`r format(Sys.Date())`"
 output:
   html_document:
@@ -28,25 +30,38 @@ Corrected values for ActPAR for cuvette (no TC) and for jacket (TC)
 # Recalibration for ActPAR to ActPARCorr done post-hoc herein
 # Add more ETR estimators
 
+```{r load libraries}
+library(tidyverse)
+library(lubridate)
+
+#https://googlesheets4.tidyverse.org/
+# library(googledrive)
+# library(googlesheets4)
+
+```
+
+
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE)
-knitr::opts_chunk$set(fig.path='Figs/')
+knitr::opts_chunk$set(fig.path='Output/')
 ```
 
 # Set Project Variables
 ```{r set project variables}
-Project <- "FluorO2"
-DataOut <- file.path("..", "ImportData", "FRRf")
-CalibData <- file.path("..", "CalibrationData")
+Project <- "LOW"
+DataOut <- file.path("..", "Data", "CleanData")
+CalibData <- file.path("..", "Data", "CalibData")
 
 #Temporary RunDate during auditing
-RunDate <- "Refit"
+#RunDate <- "Refit"
 
-DataIn <- file.path("..", "Solisense", RunDate, fsep = .Platform$file.sep)
+DataIn <- file.path("..", "Data", "RawData", fsep = .Platform$file.sep)
 
-FileID <- "refit"
+FileID <- "fit"
 
-FileEncode <- "UTF-8" 
+FileEncode <- "UTF-8"
+#guess_encoding says 'ASCII"
+
 Delimiter <- ","
 
 HeaderRows <- 0
@@ -59,17 +74,6 @@ photons_umol = 6.022E17
 A2_m2 = 1E20
 ```
 
-
-```{r load libraries}
-library(tidyverse)
-library(lubridate)
-#library(magrittr)
-
-#https://googlesheets4.tidyverse.org/
-# library(googledrive)
-# library(googlesheets4)
-
-```
 
 ```{r read ActPAR calibration files}
 #ActPARCal <- readRDS("~/Dropbox/CampbellLabProtocols/ChlorophyllFluorescence/SolisenseInformation/SolisenseInformation_DCCalibParam.Rds")
