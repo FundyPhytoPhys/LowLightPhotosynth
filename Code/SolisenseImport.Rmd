@@ -49,13 +49,13 @@ knitr::opts_chunk$set(fig.path='Output/')
 # Set Project Variables
 ```{r set project variables}
 Project <- "LOW"
-DataOut <- file.path("..", "Data", "CleanData")
-CalibData <- file.path("..", "Data", "CalibData")
+DataOut <- file.path("Data", "CleanData")
+CalibData <- file.path("Data", "CalibData")
 
 #Temporary RunDate during auditing
 #RunDate <- "Refit"
 
-DataIn <- file.path("..", "Data", "RawData", fsep = .Platform$file.sep)
+DataIn <- file.path("Data", "RawData", fsep = .Platform$file.sep)
 
 FileID <- "fit"
 
@@ -99,6 +99,7 @@ Colours_nm
 
 ```
 
+
 ```{r list PSI files for file import}
 SolisenseFiles <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
 SolisenseFiles
@@ -136,9 +137,9 @@ SolFits <- SolisenseFiles %>%
 #Careful about RunDate, which is the label of a RunDate sub-folder.
 SolFitsTrim <- SolFits %>% 
   filter(!grepl("----", DATE)) %>% # remove rows with "----"
-  select(-c("RFID_User_Data", "Barcode_Data", "Lon", "Lat", "GPS_stat", "StDev...34", "Flag.4", "X")) %>% # remove superfluous columns
+  select(-c("RFID_User_Data", "Barcode_Data", "Lon", "Lat", "GPS_stat", "StDev...34", "Flag.4", "X","Light_1.1")) %>% # remove superfluous columns
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "Data/RawData/")) %>%
   separate(Filename, into = c("Project", "YYYYMMDD", "CultureID", "PulseSpace_s", "Ex_WL", "TempCont"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) %>% #time-column may be read in as factor, and as.character changes it to numeric; using lubdridate::hms would only change the format to 13H 4M 2S but does not work later to merge into one DateTime-column
