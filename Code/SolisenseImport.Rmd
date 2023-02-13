@@ -156,10 +156,28 @@ SolFitsTrim <- SolFits %>%
          IR = as.numeric(as.character(Light_6))) %>%
   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
   relocate(ObsDateTime, .after = ObsTime) %>%
-  relocate(CultureID, .before = ObsDate) 
+  relocate(CultureID, .before = ObsDate)
+
+SolFitsTrim2 <- SolFitsTrim %>%
+  group_by(Filename) %>%
+  mutate(Flashnumber = row_number()) %>%
+  relocate(Flashnumber, .before=p)
 ```
 
 XXXX2 Feb 2023XXXX
+
+```{r flashnumber vs Fm}
+SolFitsTime <- SolFitsTrim2[-c(1:24),] %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=PulseSpace_s, colour=PulseSpace_s))+
+  theme_bw()
+SolFitsTime
+```
+
+```{r time vs Fm}
+
+```
+
 
 ```{r ActPARcorr}
 #Add ActPARcorr with proper correction factors for TC and no TC
