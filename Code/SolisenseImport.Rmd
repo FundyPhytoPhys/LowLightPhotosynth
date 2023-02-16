@@ -131,13 +131,20 @@ SolFits <- SolisenseFiles %>%
   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
 
+```{r fix colnames}
+colnames(SolFits)
+Fixnames <- colnames(SolFits)[22:32]
+SolFits2 <- SolFits %>%
+  rename(Fixnames = )
+
+```
 
 ```{r tidy SolFitsTrim}
 #Think of better ways to do this
 #Careful about RunDate, which is the label of a RunDate sub-folder.
 SolFitsTrim <- SolFits %>% 
   filter(!grepl("----", DATE)) %>% # remove rows with "----"
-  select(-c("RFID_User_Data", "Barcode_Data", "Lon", "Lat", "GPS_stat", "StDev...34", "Flag.4", "X","Light_1.1")) %>% # remove superfluous columns
+  select(-c("RFID_User_Data", "Barcode_Data", "Lon", "Lat", "GPS_stat","X","Light_1.1")) %>% # remove superfluous columns
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
   mutate(Filename = str_remove(string = Filename, pattern = "Data/RawData/Fit/")) %>%
   separate(Filename, into = c("Project", "YYYYMMDD", "CultureID","Temp_C", "PulseSpace_s","Ex_WL", "Flashpower"), sep = "([\\/\\_])", remove = FALSE) %>%
@@ -165,16 +172,45 @@ SolFitsTrim2 <-SolFitsTrim %>%
 ```
 
 ```{r flashnumber vs Fm}
-SolFitsTime <- SolFitsTrim2[-c(1:146),] %>%
+#facetbytemp
+SolFitsTrim2 %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=PulseSpace_s, colour=PulseSpace_s))+
   facet_grid("Temp_C") +
   theme_bw()
-SolFitsTime
 ```
 
-```{r time vs Fm}
+```{r flashnumber1 vs Fm}
+#facetbyspacing
+SolFitsTrim2 %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=Temp_C, colour=Temp_C)) +
+  facet_grid("PulseSpace_s") +
+  theme_bw()
+```
 
+```{r Flashnumber vs FvFm}
+SolFitsTrim2 %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
+  facet_grid("PulseSpace_s") +
+  theme_bw()
+```
+
+```{r Flashnumber vs Fo}
+SolFitsTrim2 %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=as.numeric(Fo), group=Temp_C, colour=Temp_C)) +
+  facet_grid("PulseSpace_s") +
+  theme_bw()
+```
+
+```{r Flashnumber vs Sig}
+SolFitsTrim2 %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=as.numeric(Sig), group=Temp_C, colour=Temp_C)) +
+  facet_grid("PulseSpace_s") +
+  theme_bw()
 ```
 
 -----Feb 15 2023-----
