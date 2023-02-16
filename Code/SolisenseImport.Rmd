@@ -30,6 +30,10 @@ Corrected values for ActPAR for cuvette (no TC) and for jacket (TC)
 # Recalibration for ActPAR to ActPARCorr done post-hoc herein
 # Add more ETR estimators
 
+@ravenPutOutLight2000
+
+
+
 ```{r load libraries}
 library(tidyverse)
 library(lubridate)
@@ -419,4 +423,4 @@ SolFitsTrim2 %>%
 saveRDS(SolFitsTrim2, file.path(DataOut, paste(Project, RunDate, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
-
+# Bibliography
