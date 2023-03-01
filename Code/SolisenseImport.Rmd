@@ -82,8 +82,8 @@ A2_m2 = 1E20
 ```{r read ActPAR calibration files}
 #ActPARCal <- readRDS("~/Dropbox/CampbellLabProtocols/ChlorophyllFluorescence/SolisenseInformation/SolisenseInformation_DCCalibParam.Rds")
 
-ActPARCrossCal <- list.files(path = CalibData, full.names = TRUE)  %>%
-       map_df(~readRDS(file  = .))
+ActPARCrossCal <- list.files(path = CalibData, full.names = TRUE) %>%
+     map_df(~readRDS(file  = .))
 
 #intercept set to 0 in lm in SolisenseInformation.Rproj/SolisenseCalibCompare.Rmd
 ActPARCrossCal <- ActPARCrossCal |>
@@ -135,18 +135,21 @@ SolFits <- SolisenseFiles %>%
   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
 
-```{r fix colnames}
-colnames(SolFits)
+```{r fix column names}
+#create new data frame, had to remove extra column
+SolFits2 <- SolFits[-32] 
+#assign correct names
 Fixnames <- colnames(SolFits)[22:32]
-SolFits2 <- SolFits %>%
-  rename(Fixnames = )
+#rename columns 
+colnames(SolFits2)[21:31] <- c(Fixnames)
 
 ```
+
 
 ```{r tidy SolFitsTrim}
 #Think of better ways to do this
 #Careful about RunDate, which is the label of a RunDate sub-folder.
-SolFitsTrim <- SolFits %>% 
+SolFitsTrim <- SolFits2 %>% 
   filter(!grepl("----", DATE)) %>% # remove rows with "----"
   select(-c("RFID_User_Data", "Barcode_Data", "Lon", "Lat", "GPS_stat","X","Light_1.1")) %>% # remove superfluous columns
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
