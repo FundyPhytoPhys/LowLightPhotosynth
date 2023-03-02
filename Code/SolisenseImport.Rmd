@@ -178,6 +178,8 @@ SolFitsTrim2 <-SolFitsTrim %>%
   relocate(Flashnumber, .before=p)
 ```
 
+Basic plots: 
+
 ```{r flashnumber vs Fm}
 #facetbytemp
 SolFitsTrim2 %>%
@@ -220,7 +222,27 @@ SolFitsTrim2 %>%
   theme_bw()
 ```
 
------Feb 15 2023-----
+----------------------------------------------------------------
+
+Analyzing the time series using the Matrix Profile 
+  @vanbenschotenMPANovelCrosslanguage2020
+
+```{r activate packages}
+library(tsmp)
+```
+
+```{r creating a sample time series data frame}
+#for 10c 05S
+TS <- SolFitsTrim2[1:24,c(22,18)]
+TS$Fo = as.numeric(as.character(TS$Fo))
+class(TS$Fo)
+```
+
+@bischoffComputesMatrixProfile
+```{r building a matrix profile}
+matrix <- tsmp(TS, window_size = 4)
+```
+
 
 ```{r ActPARcorr}
 #Add ActPARcorr with proper correction factors for TC and no TC
