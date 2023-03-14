@@ -53,13 +53,14 @@ knitr::opts_chunk$set(fig.path='Output/')
 # Set Project Variables
 ```{r set project variables}
 Project <- "LOW"
-DataOut <- file.path("Data", "CleanData")
+DataOut <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
 
 #Temporary RunDate during auditing
 #RunDate <- "Refit"
 
-DataIn <- file.path("..","Data", "RawData","Fit", fsep = .Platform$file.sep)
+#DataIn <- file.path("..","Data", "RawData","Fit", fsep = .Platform$file.sep)
+DataIn <- file.path("..","Data", "RawData","NoDecay","Fit", fsep = .Platform$file.sep)
 
 FileID <- "fit"
 
@@ -137,11 +138,11 @@ SolFits <- SolisenseFiles %>%
 
 ```{r fix column names}
 #create new data frame, had to remove extra column
-SolFits2 <- SolFits[-32] 
+#SolFits2 <- SolFits[-32] 
 #assign correct names
-Fixnames <- colnames(SolFits)[22:32]
+#Fixnames <- colnames(SolFits)[22:32]
 #rename columns 
-colnames(SolFits2)[21:31] <- c(Fixnames)
+#colnames(SolFits2)[21:31] <- c(Fixnames)
 
 ```
 
@@ -149,14 +150,13 @@ colnames(SolFits2)[21:31] <- c(Fixnames)
 ```{r tidy SolFitsTrim}
 #Think of better ways to do this
 #Careful about RunDate, which is the label of a RunDate sub-folder.
-SolFitsTrim <- SolFits2 %>% 
+SolFitsTrim <- SolFits %>% 
   filter(!grepl("----", DATE)) %>% # remove rows with "----"
-  select(-c("RFID_User_Data", "Barcode_Data", "Lon", "Lat", "GPS_stat","X","Light_1.1")) %>% # remove superfluous columns
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "Lon", "Lat", "GPS_stat","X")) %>% # remove superfluous columns
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/Fit/")) %>%
-  #separate(Filename, into=c("Project", "YYYYMMDD", "CultureID", "PulseSpace_s","Ex_WL"), 
-          # sep = "([\\/\\_])", remove = FALSE) %>%
-  separate(Filename, into = c("Project", "YYYYMMDD", "CultureID","Temp_C", "PulseSpace_s","Ex_WL", "Flashpower"), sep = "([\\/\\_])", remove = FALSE) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/NoDecay/Fit/")) %>%
+  separate(Filename, into=c("YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
+  #separate(Filename, into = c("Project", "YYYYMMDD", "CultureID","Temp_C", "PulseSpace_s","Ex_WL", "Flashpower"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) %>% #time-column may be read in as factor, and as.character changes it to numeric; using lubdridate::hms would only change the format to 13H 4M 2S but does not work later to merge into one DateTime-column
   rename(ObsDate = DATE,
