@@ -146,6 +146,36 @@ SolFits <- SolisenseFiles %>%
 
 ```
 
+```{r tidy SolFitsTrim}
+SolFitsTrim <- SolFits %>% 
+  filter(!grepl("----", DATE)) %>% # remove rows with "----" 
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "Lon", "Lat", "GPS_stat","X", "Alp1QA","Tau1QA","Alp2QA","Tau2QA", "Alp3QA","Tau3QA")) %>% # remove superfluous columns
+  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/NoDecay/Fit/")) %>%
+  separate(Filename, into=c("YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
+  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+          TIME = as.character(TIME)) %>%
+   rename(ObsDate = DATE,
+         ObsTime = TIME,
+         FvFm = "Fv.Fm") %>%
+  mutate(FvFm = as.numeric(as.character(FvFm)),
+         nm445 = as.numeric(as.character(Light_1)),
+         nm470 = as.numeric(as.character(Light_2)),
+         nm505 = as.numeric(as.character(Light_3)),
+         nm535 = as.numeric(as.character(Light_4)),
+         nm590 = as.numeric(as.character(Light_5)),
+         IR = as.numeric(as.character(Light_6))) %>%
+  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
+  relocate(ObsDateTime, .after = ObsTime) %>%
+  relocate(CultureID, .before = ObsDate)
+
+SolFitsTrim2 <-SolFitsTrim %>%
+  group_by(Filename) %>%
+  mutate(Flashnumber = row_number()) %>%
+  relocate(Flashnumber, .before=p) %>%
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
+  ungroup()
+```
 
 ```{r tidy SolFitsTrim}
 #Think of better ways to do this
