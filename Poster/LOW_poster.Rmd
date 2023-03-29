@@ -22,15 +22,15 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # Background
 Light energy absorbed by the photosynthetic pigments of PSII (primarily chlorophyll-a) is distributed variably among three pathways @schubackSingleTurnoverVariableChlorophyll2021:    
-I.	Photochemistry (photochemical quenching of ChlF)    
-II.	Dissipation as heat (non-photochemical quenching of ChlF)   
-III.	Re-emission at longer wavelengths as fluorescence (ChlF)    
+   I.	Photochemistry (photochemical quenching of ChlF)    
+   II.	Dissipation as heat (non-photochemical quenching of ChlF)   
+   III.	Re-emission at longer wavelengths as fluorescence (ChlF)    
 
-A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents @zaharievaEnergeticsKineticsSState2019 @dauTimeresolvedXraySpectroscopy2007 @gatesRealtimeKineticsLight2020: 
+A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents @zaharievaEnergeticsKineticsSState2019 @dauTimeresolvedXraySpectroscopy2007 : 
 
 ![Figure 1: Pathway of s-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states (S0 → S4). Following the accumulation of four oxidizing equivalents, 2 H2O are oxidized to 1 O2. Figure inspired by Gates et al., 2020 and Dau & Haumann, 2007.](Figure_1.png)   
 
-ChlF differs between s-states since the free energy of the water-oxidizing complex depends on the number of electrons/protons removed @dewijnSstateDependenceMiss2002. Occasionally, recombination may result in the loss of charge separation, desynchronizing the s-state cycle and dampening the ChlF periodicity. 
+ChlF differs between s-states since the free energy of the water-oxidizing complex depends on the number of electrons/protons removed. Occasionally, recombination may result in the loss of charge separation, desynchronizing the s-state cycle and dampening the ChlF periodicity. 
 
 
 # Objective    
@@ -38,6 +38,27 @@ Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to ev
 
 # Methods
 
+Use Solisense apparatus and Lift software to deliver short, highly intense pulses of light to diatoms in a temperature-controlled cuvette. 
+
+(start figure)    
+Dark-regulated state        
+   •	Assumptions: sample populated with S0 and S1 oxidation states, all RCII are open, any light-induced energy dissipation processes have been fully reversed @schubackSingleTurnoverVariableChlorophyll2021         
+   •	Maximum fraction of the energy absorbed will enter the photochemistry pathway         
+
+Deliver short, high-intensity flashes         
+   •	Single-turnover technique delivers a rapid series of sub-saturating flashlets (order of microseconds)     
+   •	Transiently reduces electron acceptors in the photosynthetic pathway, closing PSII    
+   •	Maximum fraction of the energy will be partitioned to ChlF    
+
+Repeated flashes at a fixed interval    
+   •	Drive PSII synchronously through the s-state cycle    
+
+1.	Alter the interval between flashes    
+2.	Alter the temperature of the system     
+ (end figure)
+
+Derive the maximum quantum yield of photochemistry in PSII (Fv/Fm)    
+   •	Indicates the maximum efficiency of photochemistry under different conditions 
 
 
 # Results and Discussion
