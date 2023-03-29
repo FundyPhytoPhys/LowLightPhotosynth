@@ -1,5 +1,5 @@
 ---
-title: How I Killed A Bunch of Diatoms
+title: Effects of Temperature and the Frequency of Photon Delivery on the Loss of Synchronization of the S-State Cycle of Photosystem II 
 author:
   - name: Natasha Ryan
     affil: 1
@@ -12,6 +12,7 @@ column_numbers: 3
 output: 
   posterdown::posterdown_html:
     self_contained: false
+csl: nature.csl
 bibliography: Natasha_LowLightPhotosynth.bib
 ---
 
@@ -20,20 +21,27 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 # Background
+Light energy absorbed by the photosynthetic pigments of PSII (primarily chlorophyll-a) is distributed variably among three pathways @schubackSingleTurnoverVariableChlorophyll2021:    
+I.	Photochemistry (photochemical quenching of ChlF)    
+II.	Dissipation as heat (non-photochemical quenching of ChlF)   
+III.	Re-emission at longer wavelengths as fluorescence (ChlF)    
 
-Welcome to `posterdown` ! This is my attempt to provide a semi-smooth workflow for those who wish to take their R Markdown skills to the conference world. Most features from R Markdown are available in this package such as Markdown section notation, figure captioning, and even citations like this one [@R-rmarkdown]. The rest of this example poster will show how you can insert typical conference poster features into your own document. 
+A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents @zaharievaEnergeticsKineticsSState2019 @dauTimeresolvedXraySpectroscopy2007 @gatesRealtimeKineticsLight2020: 
 
-## Objective
+![Figure 1: Pathway of s-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states (S0 → S4). Following the accumulation of four oxidizing equivalents, 2 H2O are oxidized to 1 O2. Figure inspired by Gates et al., 2020 and Dau & Haumann, 2007.](Figure_1.png)   
 
-1. Easy to use reproducible poster design. 
-2. Integration with R Markdown.
-3. Easy transition from `posterdown` to `pagedown` report or manuscript documents [@R-pagedown].
+Occasionally, recombination may result in the loss of charge separation, desynchronizing the s-state cycle and dampening the periodicity. 
+
+
+## Objective    
+Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to evaluate the loss of synchronization of the s-state cycle at different frequencies of photon delivery and temperatures.     
 
 # Methods
 
 This package uses the same workflow approach as the R Markdown you know and love. Basically it goes from RMarkdown > Knitr > Markdown > Pandoc > HTML/CSS > PDF. You can even use the bibliography the same way [@R-posterdown].
 
 # Results
+
 
 Usually you want to have a nice table displaying some important results that you have calculated. In `posterdown` this is as easy as using the `kable` table formatting you are probably use to as per typical R Markdown formatting.
 
@@ -66,8 +74,8 @@ plot(x = data$Sepal.Length,
 Aliquam sed faucibus risus, quis efficitur erat. Vestibulum semper mauris quis tempus eleifend. Aliquam sagittis dictum ipsum, quis viverra ligula eleifend ut. Curabitur sagittis vitae arcu eget faucibus. In non elementum felis. Duis et aliquam nunc. Nunc pulvinar sapien nunc, vel pretium nisi efficitur in. Fusce fringilla maximus leo et maximus. Fusce at ligula laoreet, iaculis mi at, auctor odio. Praesent sed elementum justo. Aenean consectetur risus rhoncus tincidunt efficitur. Praesent dictum mauris at diam maximus maximus [@R-posterdown].
 
 # Future Directions 
-
-Try `posterdown` out! Hopefully you like it!
+The accepted lower limit of the photic zone is 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds @ravenPutOutLight2000. However, some arctic diatoms may achieve net C uptake when 1 photon only reaches a PSII every 0.6-60 seconds. 
+Comparing the duration of s-state synchronicity of temperate and arctic diatoms may help explain how arctic diatoms exploit extremely low light. 
 
 ```{r, include=FALSE}
 knitr::write_bib(c('knitr','rmarkdown','posterdown','pagedown'), 'packages.bib')
