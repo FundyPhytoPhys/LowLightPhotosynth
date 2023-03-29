@@ -40,12 +40,12 @@ Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to ev
 
 Use Solisense apparatus and Lift software to deliver short, highly intense pulses of light to diatoms in a temperature-controlled cuvette. 
 
-(start figure)    
+(start figure 2)    
 Dark-regulated state        
    •	Assumptions: sample populated with S0 and S1 oxidation states, all RCII are open, any light-induced energy dissipation processes have been fully reversed @schubackSingleTurnoverVariableChlorophyll2021         
    •	Maximum fraction of the energy absorbed will enter the photochemistry pathway         
 
-Deliver short, high-intensity flashes         
+Deliver short, high-intensity 445nm flashes 
    •	Single-turnover technique delivers a rapid series of sub-saturating flashlets (order of microseconds)     
    •	Transiently reduces electron acceptors in the photosynthetic pathway, closing PSII    
    •	Maximum fraction of the energy will be partitioned to ChlF    
@@ -55,9 +55,9 @@ Repeated flashes at a fixed interval
 
 1.	Alter the interval between flashes    
 2.	Alter the temperature of the system     
- (end figure)
+ (end figure 2)
 
-Derive the maximum quantum yield of photochemistry in PSII (Fv/Fm)    
+Derive the maximum quantum yield of PSII (Fv/Fm)    
    •	Indicates the maximum efficiency of photochemistry under different conditions 
 
 
@@ -67,7 +67,7 @@ Derive the maximum quantum yield of photochemistry in PSII (Fv/Fm)
 
 As flash spacing increases, we observe fewer synchronous s-state cycles before the periodicity is dampened. This indicates that longer periods of time between flashes increase the incidence of recombination. 
 
-Recombination processes are temperature sensitive. As a result, competition from recombination should decrease with temperature. Therefore, the diatoms at 10°C should maintain a synchronous s-state cycle for longer. However, a more sophisticated time series analysis is required to derive the relationship between temperature and photochemistry for this dataset. 
+We hypothesized that recombination would decrease with temperature since recombination processes are temperature sensitive. As a result, we expected the diatoms at 10°C to maintain a synchronous s-state cycle for longer. However, a more sophisticated time series analysis is required to derive the relationship between temperature and photochemistry for this data set.    
 
 # Future Directions 
 The accepted lower limit of the photic zone is 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds @ravenPutOutLight2000. However, some arctic diatoms may achieve net C uptake when 1 photon only reaches a PSII every 0.6-60 seconds. 
