@@ -30,51 +30,27 @@ A complete water oxidation cycle during oxygenic photosynthesis requires the abs
 
 ![Figure 1: Pathway of s-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states (S0 → S4). Following the accumulation of four oxidizing equivalents, 2 H2O are oxidized to 1 O2. Figure inspired by Gates et al., 2020 and Dau & Haumann, 2007.](Figure_1.png)   
 
-Occasionally, recombination may result in the loss of charge separation, desynchronizing the s-state cycle and dampening the periodicity. 
+ChlF differs between s-states since the free energy of the water-oxidizing complex depends on the number of electrons/protons removed @dewijnSstateDependenceMiss2002. Occasionally, recombination may result in the loss of charge separation, desynchronizing the s-state cycle and dampening the ChlF periodicity. 
 
 
-## Objective    
+# Objective    
 Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to evaluate the loss of synchronization of the s-state cycle at different frequencies of photon delivery and temperatures.     
 
 # Methods
 
-This package uses the same workflow approach as the R Markdown you know and love. Basically it goes from RMarkdown > Knitr > Markdown > Pandoc > HTML/CSS > PDF. You can even use the bibliography the same way [@R-posterdown].
-
-# Results
 
 
-Usually you want to have a nice table displaying some important results that you have calculated. In `posterdown` this is as easy as using the `kable` table formatting you are probably use to as per typical R Markdown formatting.
+# Results and Discussion
 
-You can reference tables like so: Table \@ref(tab:mytable). Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam placerat augue at velit tincidunt semper. Donec elementum porta posuere. Nullam interdum, odio at tincidunt feugiat, turpis nisi blandit eros, eu posuere risus felis non quam. Nam eget lorem odio. Duis et aliquet orci. Phasellus nec viverra est.
+![Figure 3: Maximum quantum yield (Fv/Fm) of PSII in temperate diatoms exposed to single-turnover flashes spaced at 0.5, 1, 2, 4, and 8 seconds at 10 and 18 degrees Celsius.](FvFm_vs_Flashnumber_scaled.png)
 
-```{r mytable, out.width='80%'}
-knitr::kable(iris[1:10, 1:4], caption = 'Table caption.',align = 'c',"html")
-```
+As flash spacing increases, we observe fewer synchronous s-state cycles before the periodicity is dampened. This indicates that longer periods of time between flashes increase the incidence of recombination. 
 
-Or with figures: Figure \@ref(fig:standard-plot), or Figure \@ref(fig:morefigs).
-
-```{r standard-plot, out.width='80%', fig.align='center', fig.cap='Great figure!', fig.height=5}
-plot(mtcars[1:2])
-```
-
-```{r morefigs, out.width='80%', echo=TRUE, fig.cap='Amazing, right?!', fig.height=5}
-data <- iris
-
-plot(x = data$Sepal.Length, 
-     y = data$Sepal.Width, 
-     col = data$Species,
-     pch = 19, 
-     xlab = "Sepal Length (cm)",
-     ylab = "Sepal Width (cm)")
-
-```
-
-# Discussion
-
-Aliquam sed faucibus risus, quis efficitur erat. Vestibulum semper mauris quis tempus eleifend. Aliquam sagittis dictum ipsum, quis viverra ligula eleifend ut. Curabitur sagittis vitae arcu eget faucibus. In non elementum felis. Duis et aliquam nunc. Nunc pulvinar sapien nunc, vel pretium nisi efficitur in. Fusce fringilla maximus leo et maximus. Fusce at ligula laoreet, iaculis mi at, auctor odio. Praesent sed elementum justo. Aenean consectetur risus rhoncus tincidunt efficitur. Praesent dictum mauris at diam maximus maximus [@R-posterdown].
+Recombination processes are temperature sensitive. As a result, competition from recombination should decrease with temperature. Therefore, the diatoms at 10°C should maintain a synchronous s-state cycle for longer. However, a more sophisticated time series analysis is required to derive the relationship between temperature and photochemistry for this dataset. 
 
 # Future Directions 
 The accepted lower limit of the photic zone is 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds @ravenPutOutLight2000. However, some arctic diatoms may achieve net C uptake when 1 photon only reaches a PSII every 0.6-60 seconds. 
+
 Comparing the duration of s-state synchronicity of temperate and arctic diatoms may help explain how arctic diatoms exploit extremely low light. 
 
 ```{r, include=FALSE}
