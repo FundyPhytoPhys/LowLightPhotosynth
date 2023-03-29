@@ -13,7 +13,7 @@ output:
   posterdown::posterdown_html:
     self_contained: false
 csl: nature.csl
-bibliography: LowLightPhotosynthesis_Natasha.bib
+bibliography: Low_Natasha.bib
 ---
 
 ```{r setup, include=FALSE}
