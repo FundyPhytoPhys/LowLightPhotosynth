@@ -4,7 +4,7 @@ author:
 - Natasha Ryan
 - Maximilian Berthold
 - Douglas A. Campbell
-date: "`r format(Sys.Date())`"
+date: "2023-03-29"
 output:
   html_document:
     df_print: paged
@@ -36,20 +36,54 @@ Choose (ask Campbell)
 - Graph/analyze Fm or FvFm    
     which is better     
 
-```{r load libraries}
+
+```r
 library(tidyverse)
+```
+
+```
+## ── Attaching packages ─────────────────────────────────────── tidyverse 1.3.2 ──
+## ✔ ggplot2 3.4.0     ✔ purrr   1.0.1
+## ✔ tibble  3.1.8     ✔ dplyr   1.1.0
+## ✔ tidyr   1.3.0     ✔ stringr 1.5.0
+## ✔ readr   2.1.3     ✔ forcats 1.0.0
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+```
+
+```r
 library(lubridate)
+```
+
+```
+## 
+## Attaching package: 'lubridate'
+## 
+## The following objects are masked from 'package:base':
+## 
+##     date, intersect, setdiff, union
+```
+
+```r
 library(zoo)
 ```
 
-
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE)
-knitr::opts_chunk$set(fig.path='Output/')
+```
+## 
+## Attaching package: 'zoo'
+## 
+## The following objects are masked from 'package:base':
+## 
+##     as.Date, as.Date.numeric
 ```
 
+
+
+
 # Set Project Variables
-```{r set project variables}
+
+```r
 Project <- "LOW"
 DataOut <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
@@ -68,16 +102,17 @@ FileEncode <- "UTF-8"
 Delimiter <- ","
 
 HeaderRows <- 0
-
 ```
 
-```{r conversions}
+
+```r
 us_s = 1000000
 photons_umol = 6.022E17
 A2_m2 = 1E20
 ```
 
-```{r read ActPAR calibration files}
+
+```r
 #ActPARCal <- readRDS("~/Dropbox/CampbellLabProtocols/ChlorophyllFluorescence/SolisenseInformation/SolisenseInformation_DCCalibParam.Rds")
 
 ActPARCrossCal <- list.files(path = CalibData, full.names = TRUE) %>%
@@ -91,43 +126,68 @@ ActPARCrossCal <- ActPARCrossCal |>
          Slope_SE = `std.error_LIFT_Gen_Developer.cal`)
 ```
 
-```{r set colours}
+
+```r
 Wavelengths_nm = c(445, 470, 505, 535, 590)
 Colours_nm = c("darkblue", "dodgerblue", "darkgreen", "yellowgreen",  "darkorange")
 
 
 names(Colours_nm) <- Wavelengths_nm
 Colours_nm
+```
 
+```
+##           445           470           505           535           590 
+##    "darkblue"  "dodgerblue"   "darkgreen" "yellowgreen"  "darkorange"
 ```
 
 
-```{r list PSI files for file import}
+
+```r
 SolisenseFiles <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
 SolisenseFiles
+```
 
+```
+##  [1] "../Data/RawData/NoDecay/Fit/20230309_NaOm1293_10C_05S_fit.csv"
+##  [2] "../Data/RawData/NoDecay/Fit/20230309_NaOm1293_10C_1S_fit.csv" 
+##  [3] "../Data/RawData/NoDecay/Fit/20230309_NaOm1293_10C_2S_fit.csv" 
+##  [4] "../Data/RawData/NoDecay/Fit/20230309_NaOm1293_10C_4S_fit.csv" 
+##  [5] "../Data/RawData/NoDecay/Fit/20230309_NaOm1293_10C_8S_fit.csv" 
+##  [6] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_10C_05S_fit.csv"
+##  [7] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_10C_1S_fit.csv" 
+##  [8] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_10C_2S_fit.csv" 
+##  [9] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_10C_4S_fit.csv" 
+## [10] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_10C_8S_fit.csv" 
+## [11] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_18C_05S_fit.csv"
+## [12] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_18C_1S_fit.csv" 
+## [13] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_18C_2S_fit.csv" 
+## [14] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_18C_4S_fit.csv" 
+## [15] "../Data/RawData/NoDecay/Fit/20230314_NaOm1305_18C_8S_fit.csv"
+```
+
+```r
 #test for duplicate file names
 unique(duplicated(SolisenseFiles))
 ```
 
-```{r data read adds filename and cdate, warning=FALSE, message=FALSE, echo=FALSE}
-#design choice 2 file reading functions or add a filetype variable to a single function
-#stringsAsFactors =FALSE somewhere? 
-
-read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(Filename = flnm)
-}
-
 ```
+## [1] FALSE
+```
+
+
 
 # Create Data Frame 
 purrr::map to read all files
-```{r read Solisense files}
+
+```r
 SolFits <- SolisenseFiles %>%
   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
 
 
-```{r tidy SolFitsTrim ND}
+
+```r
 #for NoDecayDataset
 SolFitsTrim <- SolFits %>% 
   filter(!grepl("----", DATE)) %>% # remove rows with "----" 
@@ -159,7 +219,8 @@ SolFitsTrim2 <-SolFitsTrim[-(1:160),] %>%
   ungroup()
 ```
 
-```{r fix column names}
+
+```r
 #only use this chunk if analyzing data from Data-RawData-WithDecay-Fit
 #create new data frame, had to remove extra column
 #SolFits2 <- SolFits[-32] 
@@ -169,7 +230,8 @@ SolFitsTrim2 <-SolFitsTrim[-(1:160),] %>%
 #colnames(SolFits2)[21:31] <- c(Fixnames)
 ```
 
-```{r tidy SolFitsTrim WD}
+
+```r
 # for WithDecay Fit Dataset
 
 #Think of better ways to do this
@@ -209,7 +271,8 @@ SolFitsTrim2 <-SolFitsTrim[-(1:160),] %>%
 # Basic plots
 
 Fm vs Flashnumber line; facet by temp 
-```{r Fm vs Flashnumber(by T)}
+
+```r
 #facetbytemp
 SolFitsTrim2 %>%
   ggplot()+
@@ -219,8 +282,15 @@ SolFitsTrim2 %>%
   theme_bw()
 ```
 
+```
+## Warning: Removed 60 rows containing missing values (`geom_line()`).
+```
+
+![](Output/Fm vs Flashnumber(by T)-1.png)<!-- -->
+
 Fm vs Flashnumber line; facet by flash spacing
-```{r Fm vs Flashnumber(by S)}
+
+```r
 #facetbyspacing
 SolFitsTrim2 %>%
   ggplot()+
@@ -229,6 +299,12 @@ SolFitsTrim2 %>%
   facet_grid("PulseSpace_s") +
   theme_bw()
 ```
+
+```
+## Warning: Removed 24 rows containing missing values (`geom_line()`).
+```
+
+![](Output/Fm vs Flashnumber(by S)-1.png)<!-- -->
 
 **Very rough** results:   
 At **10c**        
@@ -263,7 +339,8 @@ Biggest gap between 10&18c is at 4s
 
 **One to use** (according to Campbell):    
 FvFm vs Flashnumber point 
-```{r FvFm vs Flashnumber}
+
+```r
 SolFitsTrim2 %>%
   ggplot()+
   geom_point(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
@@ -276,8 +353,11 @@ SolFitsTrim2 %>%
   theme_bw()
 ```
 
+![](Output/FvFm vs Flashnumber-1.png)<!-- -->
+
 FvFm vs Time point
-```{r FvFm vs Time}
+
+```r
 SolFitsTrim2 %>%
   ggplot()+
   geom_point(aes(x=Etime_s, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
@@ -288,8 +368,11 @@ SolFitsTrim2 %>%
   theme_bw()
 ```
 
+![](Output/FvFm vs Time-1.png)<!-- -->
+
 FvFm vs Flashnumber as line; facet by spacing
-```{r FvFm vs Flashnumber (by S)}
+
+```r
 #facet by spacing 
 SolFitsTrim2 %>%
   ggplot()+
@@ -303,8 +386,15 @@ SolFitsTrim2 %>%
   theme_bw()
 ```
 
+```
+## Warning: Removed 32 rows containing missing values (`geom_line()`).
+```
+
+![](Output/FvFm vs Flashnumber (by S)-1.png)<!-- -->
+
 FvFm vs Flashnumber as line; facet by temp
-```{r FvFm vs Flashnumber (by t)}
+
+```r
 # facet by temp
 SolFitsTrim2 %>%
   ggplot()+
@@ -318,6 +408,12 @@ SolFitsTrim2 %>%
   theme_bw()
 ```
 
+```
+## Warning: Removed 80 rows containing missing values (`geom_line()`).
+```
+
+![](Output/FvFm vs Flashnumber (by t)-1.png)<!-- -->
+
 Within each temp, periodicity is weaker with inc pulse spacing    
 
 Fm shows better periodicity than FvFm??   
@@ -327,7 +423,8 @@ But FvFm is closer between temps
 FvFm vs Flashnumber (by t) is kind of easier to read (ask Campbell)   
     
 Try Fo: 
-```{r Fo vs Flashnumber}
+
+```r
 SolFitsTrim2 %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(Fo), group=Temp_C, colour=Temp_C)) +
@@ -336,9 +433,16 @@ SolFitsTrim2 %>%
   theme_bw()
 ```
 
+```
+## Warning: Removed 24 rows containing missing values (`geom_line()`).
+```
+
+![](Output/Fo vs Flashnumber-1.png)<!-- -->
+
 Fo = No. 
 
-```{r save SolFitsTrim2 data}
+
+```r
 saveRDS(SolFitsTrim2, file.path(DataOut, paste(Project, "SolFitsTrim2.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
