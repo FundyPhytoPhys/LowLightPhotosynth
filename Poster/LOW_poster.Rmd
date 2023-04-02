@@ -1,5 +1,6 @@
 ---
-title: Effects of Temperature and the Frequency of Photon Delivery on the Loss of Synchronization of the S-State Cycle of Photosystem II 
+title: Photosynthesis in Near Darkness? 
+subtitle: Effects of Temperature and Frequency of Photon Delivery on Wasteful Slippage of the S-State Cycle in Photosystem II
 author:
   - name: Natasha Ryan
     affil: 1
