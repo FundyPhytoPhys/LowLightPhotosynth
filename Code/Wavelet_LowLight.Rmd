@@ -1,0 +1,177 @@
+---
+title: "Wavelet transformation"
+author:
+- Maximilian Berthold
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+    keep_md: yes
+    fig_caption: yes
+    toc: TRUE
+    toc_float: TRUE   
+csl: plos-one.csl
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+
+```{r load libraries}
+
+library(tidyverse)
+library(readxl)
+library(stringr)
+library(broom)
+library(magrittr)
+library(knitr)
+library(minpack.lm)
+library(OneR)
+library(lubridate)
+library(reshape2)
+library(changepoint)
+library(chngpt)
+library(broom)
+library(Rwave)
+library(WaveletComp)
+
+
+```
+
+# Set Project Variables
+```{r set project variables}
+Project <- "LOW"
+DataIn <- file.path("..","Data", "CleanData")
+CalibData <- file.path("..","Data", "CalibData")
+FileID <- "SolFitsTrim2"
+
+```
+
+
+```{r import clean data}
+
+FitFilesSol <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
+
+read.RDS <- function(flnm){readRDS(flnm) %>%
+    mutate(filename = flnm)
+}
+
+#test for duplicate file names
+unique(duplicated(FitFilesSol))
+
+LOW_SolFits <- FitFilesSol %>%
+  map_df(~read.RDS(flnm = .))
+
+
+```
+
+```{r WVT Test 0.5 s}
+
+LOW_SolFits_05s_10C <- LOW_SolFits %>%
+  filter(Temp_C == "10C",
+         PulseSpace_s == "05S")
+
+WVT_10C_05s <- analyze.wavelet(LOW_SolFits_05s_10C, "FvFm",
+                        method = "Fourier.rand",
+                        loess.span = 0.75, 
+                        dt = 1, dj = 1/500,
+                        lowerPeriod = 2, upperPeriod = 36,
+                        make.pval =TRUE, n.sim = 100)
+
+MP_DeSpBl <- max(WVT_10C_05s$Power)
+
+tiff(filename = "../Output/AvPw_WT_LOW_SolFits_05s_10C.tiff")
+wt.avg(WVT_10C_05s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
+periodlab = "Pulse space 0.5 sec")
+dev.off()
+
+
+tiff(filename = "../Output/WT_LOW_SolFits_05s_10C.tiff")
+wt.image(WVT_10C_05s, periodlab = "Pulse space 0.5 sec",
+legend.params = list(lab = "wavelet power levels"),
+label.time.axis = TRUE,
+plot.legend = FALSE, plot.contour = FALSE,
+maximum.level = 1.001 * MP_DeSpBl,
+show.date = TRUE, date.format = "%F %T",
+main = "Diatoms 10C, 0.5 sec")
+dev.off()
+
+```
+
+
+```{r WVT Test 1 sec}
+
+LOW_SolFits_1s_10C <- LOW_SolFits %>%
+  filter(Temp_C == "10C",
+         PulseSpace_s == "1S")
+
+WVT_10C_1s <- analyze.wavelet(LOW_SolFits_1s_10C, "FvFm",
+                        method = "Fourier.rand",
+                        loess.span = 0.75, 
+                        dt = 1, dj = 1/500,
+                        lowerPeriod = 2, upperPeriod = 36,
+                        make.pval =TRUE, n.sim = 100)
+
+MP_DeSpBl <- max(WVT_10C_1s$Power)
+
+tiff(filename = "../Output/AvPw_WT_LOW_SolFits_1s_10C.tiff")
+wt.avg(WVT_10C_1s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
+periodlab = "Pulse space 1 sec")
+dev.off()
+
+
+tiff(filename = "../Output/WT_LOW_SolFits_1s_10C.tiff")
+wt.image(WVT_10C_1s, periodlab = "Pulse space 1 sec",
+legend.params = list(lab = "wavelet power levels"),
+label.time.axis = TRUE,
+plot.legend = FALSE, plot.contour = FALSE,
+maximum.level = 1.001 * MP_DeSpBl,
+show.date = TRUE, date.format = "%F %T",
+main = "Diatoms 10C, 1 sec")
+dev.off()
+
+```
+
+
+```{r WVT Test 8 sec}
+
+LOW_SolFits_8s_10C <- LOW_SolFits %>%
+  filter(Temp_C == "10C",
+         PulseSpace_s == "8S")
+
+WVT_10C_8s <- analyze.wavelet(LOW_SolFits_8s_10C, "FvFm",
+                        method = "Fourier.rand",
+                        loess.span = 0.75, 
+                        dt = 1, dj = 1/500,
+                        lowerPeriod = 2, upperPeriod = 36,
+                        make.pval =TRUE, n.sim = 100)
+
+MP_DeSpBl <- max(WVT_10C_8s$Power)
+
+tiff(filename = "../Output/AvPw_WT_LOW_SolFits_8s_10C.tiff")
+wt.avg(WVT_10C_8s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
+periodlab = "Pulse space 8 sec")
+dev.off()
+
+
+tiff(filename = "../Output/WT_LOW_SolFits_8s_10C.tiff")
+wt.image(WVT_10C_8s, periodlab = "Pulse space 8 sec",
+legend.params = list(lab = "wavelet power levels"),
+label.time.axis = TRUE,
+plot.legend = FALSE, plot.contour = FALSE,
+maximum.level = 1.001 * MP_DeSpBl,
+show.date = TRUE, date.format = "%F %T",
+main = "Diatoms 10C, 8 sec")
+dev.off()
+
+```
+
+
+```{r reconstructing the signal}
+
+reconstruct(WVT_10C_05s, siglvl = 0.05)
+reconstruct(WVT_10C_1s, siglvl = 0.05)
+
+```
+
