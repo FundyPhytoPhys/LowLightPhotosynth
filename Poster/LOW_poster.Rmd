@@ -1,15 +1,15 @@
 ---
 title: Photosynthesis in Near Darkness? 
-subtitle: Effects of Temperature and Frequency of Photon Delivery on Wasteful Slippage of the S-State Cycle in Photosystem II
+titlebox_height: "10%"
+poster_height: "36in"
+poster_width: "48in"
 author:
   - name: Effects of Temperature and Frequency of Photon Delivery on Wasteful Slippage of the S-State Cycle in Photosystem II
-    affil: 1, 2
-affiliation:
-  - num: 1
-    address: Natasha Ryan
-  - num: 2
-    address: Campbell Lab, Mount Allison University
+primary_colour: "#fffff" 
+title_textcol: "#000000"
+author_textcol: "#000000"
 column_numbers: 3
+sectitle_bgcol: "#88a78e" 
 #logoright_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
 #logoleft_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
 output: 
@@ -22,22 +22,24 @@ bibliography: Low_Natasha.bib
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+#### Natasha Ryan, Maximilian Berthold, Douglas Campbell
+Campbell Lab, Mount Allison University
 
 # Background
 The accepted lower limit of the photic zone is 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds @ravenPutOutLight2000.        
 However, some arctic diatoms may achieve net C uptake when 1 photon only reaches a PSII every 0.6-60 seconds @randelhoff2020.        
 Comparing the duration of s-state synchronicity of temperate and arctic diatoms may help explain how arctic diatoms exploit extremely low light.        
 
-#### Energy Distribution
+**Energy Distribution**   
 Light energy absorbed by the photosynthetic pigments of PSII (primarily chlorophyll-a) is distributed variably among three pathways @schubackSingleTurnoverVariableChlorophyll2021:    
   I. Photochemistry (photochemical quenching of ChlF)    
  II. Dissipation as heat (non-photochemical quenching of ChlF)   
 III. Re-emission at longer wavelengths as fluorescence (ChlF)    
 
-#### S-State Cycle
+**S-State Cycle**   
 A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents  @gatesRealtimeKineticsLight2020@zaharievaEnergeticsKineticsSState2019@dauTimeresolvedXraySpectroscopy2007: 
 
-![Figure 1: Pathway of s-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states (S~0~ → S~4~). Following the accumulation of four oxidizing equivalents, 2 H~2~O are oxidized to 1 O~2~. Figure inspired by Gates et al., 2020 and Dau & Haumann, 2007.](Figure_1.png)   
+![Figure 1: Pathway of s-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states (S~0~ → S~4~). Following the accumulation of four oxidizing equivalents, 2 H~2~O are oxidized to 1 O~2~.](Figure_1.png)   
 
 ChlF differs between s-states since the free energy of the water-oxidizing complex depends on the number of electrons/protons removed @dewijnSstateDependenceMiss2002. Occasionally, recombination may result in the loss of charge separation, desynchronizing the s-state cycle and dampening the ChlF periodicity. 
 
