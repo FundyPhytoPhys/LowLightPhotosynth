@@ -2,9 +2,18 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>LOW_poster.knit</title>
+
+
+
+
+
 
 
 <!--
@@ -16,16 +25,12 @@ Font-awesome icons ie github or twitter
 <!--
 Google fonts api stuff
 -->
+<link href='https://fonts.googleapis.com/css?family=Palatino' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css?family=Palatino' rel='stylesheet'>
 
-
-
-<title>Photosynthesis in Near Darkness?</title>
-
-
-
-
-
-
+<!--
+Here are the required style attributes for css to make this poster work :)
+-->
 <style>
 @page {
 size: 48in 36in;
@@ -33,160 +38,15 @@ margin: 0;
 padding: 0;
 }
 body {
-margin: 0;
-font-size: 45px;
+margin: 0px;
+padding: 0px;
 width: 48in;
 height: 36in;
-padding: 0;
 text-align: justify;
-font-family: Palatino;
+font-size: 45px;
+line-height: 1.05;
 }
-.poster_wrap {
-width: 48in;
-height: 36in;
-padding: 0cm;
-}
-.title_container {
-width: 48in;
-height: calc(36in * 0.15);
-overflow: hidden;
-background-color: #88a78e;
-border: 0 solid #0b4545;
-}
-.logo_left {
-float: left;
-width: 10%;
-height: 100%;
-background-color: #88a78e;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-.logo_right {
-float: right;
-width: 10%;
-height: 100%;
-background-color: #88a78e;
-display: flex;
-align-items: center;
-justify-content: center;
-}
-.poster_title {
-text-align: center;
-position: relative;
-float: left;
-width: 80%;
-height: 100%;
-color: #000000;
-top: 50%;
-transform: translateY(-50%);
--webkit-transform: translateY(-50%);
-}
-#title {
-font-family: Palatino;
-}
-/* unvisited link */
-a:link {
-color: #cc0000;
-}
-.mybreak {
-  break-before: column;
-}
-/* visited link */
-a:visited {
-color: #cc0000;
-}
-
-/* mouse over link */
-a:hover {
-color: #cc0000;
-}
-
-/* selected link */
-a:active {
-color: #cc0000;
-}
-.poster_body {
--webkit-column-count: 3; /* Chrome, Safari, Opera */
--moz-column-count: 3; /* Firefox */
-column-count: 3;
--webkit-column-fill: auto;
--moz-column-fill: auto;
-column-fill: auto;
--webkit-column-rule-width: 1mm;
--moz-column-rule-width: 1mm;
-column-rule-width: 1mm;
--webkit-column-rule-style: dashed;
--moz-column-rule-style: dashed;
-column-rule-style: dashed;
--webkit-column-rule-color: #88a78e;
--moz-column-rule-color: #88a78e;
-column-rule-color: #88a78e;
-column-gap: 1em;
-padding-left: 0.5em;
-padding-right: 0.5em;
-height: 100%;
-color: #000000
-background-color: #ffffff;
-}
-.poster_title h1 {
-font-size: 75pt;
-margin: 0;
-border: 0;
-font-weight: normal;
-}
-.poster_body_wrap{
-width: calc(48in + 0 + 0);
-height: calc(36in * 0.83);
-padding-top: calc(36in * 0.005);
-padding-bottom: calc(36in * 0.01);
-background-color: #ffffff;
-}
-.poster_title h3 {
-color: #000000;
-font-size: 50pt;
-margin: 0;
-border: 0;
-font-weight: normal;
-}
-.poster_title h3 > sup {
-  font-size: 35pt;
-  margin-left: 0.02em;
-}
-.poster_title h5 {
-color: #FFFFFF;
-font-size: 35pt;
-margin: 0;
-border: 0;
-font-weight: normal;
-}
-img {
-margin-top: 2cm;
-margin-bottom: 0;
-}
-.section {
-  padding: 0.2em;
-}
-.poster_body h1 {
-text-align: center;
-color: #FFFFFF;
-font-size: 65pt;
-border: 2mm solid #88a78e;
-background-color: #88a78e;
-border-radius: 4mm 0mm;
-margin-top: 2mm;
-margin-bottom: 2mm;
-font-weight: normal;
-}
-.poster_body h2 {
-color: #000000;
-font-size: 40pt;
-padding-left: 4mm;
-font-weight: normal;
-}
-.span {
-width: 200%;
-}
+/* RMarkdown Class Styles */
 /* center align leaflet map,
 from https://stackoverflow.com/questions/52112119/center-leaflet-in-a-rmarkdown-document */
 .html-widget {
@@ -204,71 +64,297 @@ background-color: #dddddd40;
 border-radius: 4mm;
 padding: 4mm;
 width: 75%;
-/* align-items: center; */
 margin: auto;
-padding-left: 2cm;
+margin-top: 1em;
+margin-bottom: 1em;
+/* align-items: center; */
 }
 code.sourceCode.r{
 background-color: transparent;
 font-size: 20pt;
 border-radius: 2mm;
 }
-.caption {
-font-size: 25pt;
-}
-.table caption {
-font-size: 25pt;
-padding-bottom: 3mm;
-
-}
 code {
-font-size: 1em;
+font-size: 25pt;
 font-family: monospace;
-background-color: #00808024;
+background-color: #00808324;
 color: #88a78e;
 padding: 1.2mm;
+line-height: 1;
 border-radius: 2mm;
-}
-.poster_title code {
-font-size: 1em;
-}
-table {
-font-size: 40px;
-margin: auto;
-border-top: 3px solid #666;
-border-bottom: 3px solid #666;
-}
-table thead th {
-border-bottom: 3px solid #ddd;
-}
-td {
-padding: 8px;
-}
-th {
-padding: 15px;
 }
 caption {
 margin-bottom: 10px;
-}
-.poster_body p {
-margin-right: 4mm;
-margin-left: 4mm;
-margin-top: 6mm;
-margin-bottom: 10mm;
-}
-.poster_body ol {
-margin-right: 4mm;
-margin-left: 4mm;
-}
-#ul {
-margin-right: 4mm;
-margin-left: 4mm;
-}
-.references p {
 font-size: 20pt;
+font-style: italic;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #00808320;
+}
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  border-spacing: 0;
+  font-size: 40%;
+  border-style: none;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-right: 1em;
+  padding-left: 1em;
+  line-height: 1em;
+}
+table {
+  margin: auto;
+}
+th {
+  padding-left: 5mm;
+  padding-right: 5mm;
+}
+.caption {
+font-size: 20pt;
+font-style: italic;
+padding-top: 0;
+}
+.references {
+font-size: 20px;
+line-height: 90%;
+}
+/* Create three unequal columns that floats next to each other */
+.column {
+float: left;
+padding: 0px;
+}
+.outer {
+width: 48in;
+height: calc(36in *  (1 - 0.15 - 0 - 0.01) );
+-webkit-column-count: 3; /* Chrome, Safari, Opera */
+-moz-column-count: 3; /* Firefox */
+column-count: 3;
+-webkit-column-fill: auto;
+-moz-column-fill: auto;
+column-fill: auto;
+column-gap: 0;
+padding-left: 0cm;
+padding-right: 0cm;
+/* -webkit-column-rule-width: 50%;
+-moz-column-rule-width: 50%;
+column-rule-width: 50%; */
+-webkit-column-rule-style: none;
+-moz-column-rule-style: none;
+column-rule-style: none;
+-webkit-column-rule-color: black;
+-moz-column-rule-color: black;
+column-rule-color: black;
+background-color: #ffffff;
+font-family: Palatino;
+margin-top: calc(36in *  0.15 );
+padding-top: 1em;
+padding-bottom: 1em;
+}
+span.citation {
+  color: #008083;
+  font-weight: bold;
+}
+a {
+text-decoration: none;
+color: #008083;
+}
+#title {
+font-size: 125pt;
+text-align: left;
+margin: 0;
+line-height: 98%;
+border-bottom: 0;
+font-weight: normal;
+background: 0;
+}
+#author {
+color: #88a78e;
+margin: 0;
+line-height: 85%;
+font-size: 1.17em;
+}
+#affiliation {
+padding-top: 0.1em;
+color: ;
+font-style: italic;
+font-size: 25px;
+margin: 0;
+}
+sup {
+color: #cc0000;
+}
+.affiliation sup {
+font-size: 20px;
+}
+.author {
+text-align: left;
+}
+.author sup {
+font-size: 30px;
+}
+.author_extra {
+color: #008083;
+margin: 0;
+line-height: 85%;
+font-size: 35px;
+text-align: left;
+}
+.outer h1, h2, h3, h4, h5, h6 {
+text-align: center;
+margin: 0;
+font-weight: bold;
+}
+.section h1 {
+  text-align:center;
+  padding-bottom:5px;
+  background:
+    linear-gradient(
+      to left,
+      #ffffff 1%,
+      #ffffff 20%,
+      #88a78e75 33%,
+      #88a78e 50%,
+      #88a78e75 66%,
+      #ffffff 80%,
+      #ffffff 99%
+    )
+    left
+    bottom
+    #ffffff
+    no-repeat;
+  background-size:100% 5px ;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+.outer h2 {
+text-align: center;
+}
+.outer p, .level2 {
+color: #000000;
+}
+.outer ol {
+padding-left: 8%;
+padding-right: 8%;
+text-align: left;
+}
+.main {
+width: 48in;
+height: calc(36in * 0.15);
+position: absolute;
+background-color: #88a78e;
+color: #00000090;
+font-family: Palatino;
+background-image: linear-gradient(#88a78e 50%,#008083);
+}
+.main strong {
+color: #000000;
+}
+.main strong > sup {
+color: #000000;
+}
+.main sup {
+color: #00000090;
+}
+#main-img-left {
+width: 10%;
+left: 0.5in;
+bottom: 0.2in;
+position: absolute;
+}
+#main-img-center {
+width: 10%;
+left: calc(48in * 0.45);
+bottom: 0.5in;
+position: absolute;
+}
+#main-img-right {
+width: 10%;
+right: 0.5in;
+bottom: 0.2in;
+position: absolute;
+}
+.main p {
+font-size: 80px;
+font-family: Palatino;
+text-align: center;
+margin: 0;
+position: absolute;
+top: 50%;
+-ms-transform: translateY(-50%);
+transform: translateY(-50%);
+margin-left: 1em;
+}
+.fab {
+color: #00000030;
+font-size: 25px;
+}
+.twitter, i {
+color: #00000030;
+font-size: 35px;
+text-decoration: none;
+}
+a.email {
+text-decoration: none;
+color: #00000030;
+font-size: 35px;
+}
+.envelope {
+color: #00000030;
+font-size: 5px;
+text-decoration: none;
+}
+.poster_wrap {
+width: 48in;
+height: 36in;
+padding: 0cm;
+}
+.main_bottom {
+width: 48in;
+height: calc(36in * 0);
+margin-top: calc(36in * (1 - 0));
+position: absolute;
+background-color: #88a78e;
+background-image: linear-gradient(#008083 10%, #88a78e);
+}
+.section {
+  padding-left: 10mm;
+  padding-right: 10mm;
+}
+span > #tab:mytable {
+  font-weight: bold;
 }
 .orcid img {
-  width: 1em;
+  width: 3%;
+}
+.emphasis {
+  background-color: #008080;
+  color: #ffffff;
+  border: solid #0b2045 3mm;
+  margin: 1em;
+  padding-left: 0;
+  padding-right: 0;
+}
+.emphasis h1 {
+  font-weight: bold;
+  background: none;
+  background-color: #0b2045;
+  padding-bottom: 5mm;
+  padding-top: 1mm;
+  margin-top: -1mm;
+  margin-right: -1mm;
+  margin-left: -1mm;
+}
+.emphasis blockquote {
+  border: 0;
+}
+.emphasis ol {
+  padding: 0;
+  padding-left: 8%;
+  font-size: 100%;
+  font-weight: bold;
+}
+.emphasis p {
+  color: #ffffff;
 }
 </style>
 </head>
@@ -276,33 +362,33 @@ font-size: 20pt;
 
 
 <div class="poster_wrap">
-<div class="title_container">
-<!-- Left Logo  -->
-<div class="logo_left">
-</div>
-<!-- Poster Title -->
-<div class= "poster_title">
-<h1 id="title">Photosynthesis in Near Darkness?</h1>
-<h3 id="author">Effects of Temperature and Frequency of Photon Delivery on Wasteful Slippage of the S-State Cycle in Photosystem II<sup></sup></h3><br>
+
+<div class="column outer">
+<div class="section">
+
+<h3 id="author" class="author">
+
+Natasha M. Ryan<sup> </sup><br>
+
+ Maximilian Berthold<sup> </sup><br>
+
+ Douglas A. Campbell<sup> </sup><br>
+
+ </h3>
+
+<h5 id="author_extra", class="author_extra">
+   Mount Allison University Biology Department<sup></sup>
+</h5>
+
 
 </div>
-<!-- Right Logo  -->
-<div class="logo_right">
-</div>
-</div>
 
-<div class='poster_body_wrap'>
-<div class='poster_body'>
-<div id="natasha-ryan-maximilian-berthold-douglas-campbell" class="section level2">
-<h2>Natasha Ryan, Maximilian Berthold, Douglas Campbell</h2>
-<p>Campbell Lab, Mount Allison University</p>
-</div>
 <div id="background" class="section level1">
 <h1>Background</h1>
-<p>Accepted lower limit of the photic zone: 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds<span class="citation"><sup>1</sup></span>. Some arctic diatoms achieve net C uptake with 1 photon only reaching a PSII every 0.6-60 seconds<span class="citation"><sup>2</sup></span>.</p>
-<p>Comparing the persistence of s-state synchronicity in temperate and arctic diatoms may help explain how arctic diatoms exploit extremely low light.</p>
+<p>The accepted lower limit of the photic zone: 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds<span class="citation"><sup><a href="#ref-ravenPutOutLight2000" role="doc-biblioref">1</a></sup></span>. Some arctic diatoms achieve net C uptake with 1 photon only reaching a PSII every 0.6-60 seconds<span class="citation"><sup><a href="#ref-randelhoff2020" role="doc-biblioref">2</a></sup></span>.</p>
+<p>Comparing the persistence of S-state synchronicity in temperate and arctic diatoms may help explain how arctic diatoms exploit extremely low light, by limiting wasteful slippage.</p>
 <p><strong>Energy Distribution</strong><br />
-Light energy absorbed by the photosynthetic pigments of PSII (primarily chl-a) is distributed variably among three pathways<span class="citation"><sup>3</sup></span>:</p>
+Light energy absorbed by the photosynthetic pigments of PSII (primarily chl-a) is distributed variably among three pathways<span class="citation"><sup><a href="#ref-schubackSingleTurnoverVariableChlorophyll2021" role="doc-biblioref">3</a></sup></span>:</p>
 <ul>
 <li>Photochemistry (photochemical quenching of ChlF)<br />
 </li>
@@ -311,37 +397,33 @@ Light energy absorbed by the photosynthetic pigments of PSII (primarily chl-a) i
 <li>Re-emission at longer wavelengths as fluorescence (ChlF)</li>
 </ul>
 <p><strong>S-State Cycle</strong><br />
-A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents<span class="citation"><sup>4</sup></span><span class="citation"><sup>5</sup></span><span class="citation"><sup>6</sup></span>:</p>
+A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents<span class="citation"><sup><a href="#ref-gatesRealtimeKineticsLight2020" role="doc-biblioref">4</a></sup></span><span class="citation"><sup><a href="#ref-zaharievaEnergeticsKineticsSState2019" role="doc-biblioref">5</a></sup></span><span class="citation"><sup><a href="#ref-dauTimeresolvedXraySpectroscopy2007" role="doc-biblioref">6</a></sup></span>:</p>
 <div class="figure">
 <img src="figure_sstate.png" alt="" />
-<p class="caption">Figure 1: Pathway of s-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states (S<sub>0</sub> → S<sub>4</sub>). Following the accumulation of four oxidizing equivalents, 2 H<sub>2</sub>O are oxidized to 1 O<sub>2</sub>.</p>
+<p class="caption">Figure 1: Pathway of S-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states. Following the accumulation of four oxidizing equivalents, 2 H<sub>2</sub>O are oxidized to 1 O<sub>2</sub>.</p>
 </div>
-<p>ChlF differs between s-states since the free energy of the water-oxidizing complex depends on the number of electrons/protons removed<span class="citation"><sup>7</sup></span>. A loss of charge separation through recombination desynchronizes the s-state cycle, dampening the periodic changes in ChlF.</p>
+<p>ChlF varies between S-states since the free energy of the water-oxidizing complex depends on the number of electrons removed<span class="citation"><sup><a href="#ref-dewijnSstateDependenceMiss2002" role="doc-biblioref">7</a></sup></span>. A loss of charge separation through recombination desynchronizes the S-state cycle, dampening the periodic changes in ChlF and causing wasteful slippage.</p>
 </div>
 <div id="objective" class="section level1">
 <h1>Objective</h1>
-<p>Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to evaluate the loss of synchronization of the s-state cycle at different frequencies of photon delivery and temperatures.</p>
+<p>Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to evaluate the loss of synchronization of the S-state cycle at different frequencies of photon delivery and temperatures.</p>
 </div>
 <div id="methods" class="section level1">
 <h1>Methods</h1>
-<p>Use Solisense apparatus and Lift software to deliver short, highly intense pulses of light to diatoms (<em>Thalassiosira pseudonana</em>) in a temperature-controlled cuvette<span class="citation"><sup>3</sup></span>.</p>
+<p>Use Solisense apparatus and Lift software to deliver short, highly intense pulses of light to diatoms (<em>Thalassiosira pseudonana</em>) in a temperature-controlled cuvette<span class="citation"><sup><a href="#ref-schubackSingleTurnoverVariableChlorophyll2021" role="doc-biblioref">3</a></sup></span>.</p>
 <div class="figure">
 <img src="figure_methods.png" alt="" />
 <p class="caption">Figure 2: Single-turnover variable chlorophyll fluorescence approach for evaluating photochemical efficiency</p>
 </div>
-<p>Derive the maximum quantum yield of PSII (F<sub>v</sub>/F<sub>m</sub>)</p>
-<ul>
-<li>Indicates the maximum efficiency of photochemistry under different conditions</li>
-</ul>
 </div>
-<div id="results-and-discussion" class="section level1">
-<h1>Results and Discussion</h1>
+<div id="results" class="section level1">
+<h1>Results</h1>
 <div class="figure">
 <img src="FvFm_vs_Flashnumber_scaled.png" alt="" />
 <p class="caption">Figure 3: Maximum quantum yield (Fv/Fm) of PSII in temperate diatoms exposed to single-turnover flashes spaced at 0.5, 1, 2, 4, and 8 seconds at 10 and 18 degrees Celsius.</p>
 </div>
-<p>As flash spacing increases, we observe fewer synchronous s-state cycles before the periodicity is dampened. This indicates that longer periods of time between flashes increase the incidence of recombination.</p>
-<p>We hypothesized that recombination would decrease with temperature since recombination processes are temperature sensitive. As a result, we expected the diatoms at 10°C to maintain a synchronous s-state cycle for longer. However, a more sophisticated time series analysis is required to derive the relationship between temperature and photochemistry for this data set.</p>
+<p>As flash spacing increases, we observe fewer synchronous S-state cycles before the periodicity is dampened. This indicates that longer periods of time between flashes increase the incidence of recombination and wasteful slippage.</p>
+<p>We hypothesized that recombination would decrease with temperature since recombination processes are temperature sensitive. Initial Fast Fourier Transform analysis (M. Berthold) indeed indicates that the diatoms at 10°C maintain a synchronous S-state cycle for longer, and therefore may maintain productive electron transport under lower light levels.</p>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
@@ -369,9 +451,16 @@ A complete water oxidation cycle during oxygenic photosynthesis requires the abs
 </div>
 </div>
 </div>
-</div>
-</div>
 
+</div>
+<div class="main">
+<p><strong>Photosynthesis in Near Darkness?</strong><br><br> Effects of Temperature and Frequency of Photon Delivery on Wasteful Slippage of the S-State Cycle in Photosystem II</p>
+</div>
+<div class="main_bottom">
+<img id="main-img-left" src=>
+<img id="main-img-center" src=>
+<img id="main-img-right" src=>
+</div>
 </div>
 
 

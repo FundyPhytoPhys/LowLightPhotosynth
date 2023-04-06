@@ -1,48 +1,32 @@
 ---
-main_topsize: 0.15 
-main_bottomsize: 0
+title: Photosynthesis in Near Darkness? 
+titlebox_height: "10%"
 poster_height: "36in"
 poster_width: "48in"
-font_family: 'Palatino'
 author:
-  - name: 'Natasha M. Ryan'
-    main: true
-  - name: 'Maximilian Berthold'
-    main: true
-  - name: 'Douglas A. Campbell'
-    main: true
-  - name: 'Mount Allison University Biology Department'
+  - name: Effects of Temperature and Frequency of Photon Delivery on Wasteful Slippage of the S-State Cycle in Photosystem II
 primary_colour: "#88a78e" 
-secondary_colour: "#008083" 
-main_fontfamily: 'Palatino'
-main_textcol: "#000000"
-main_textsize: '80px'
-main_findings:
-  - "**Photosynthesis in Near Darkness?**"
-  - "Effects of Temperature and Frequency of Photon Delivery on Wasteful Slippage of the S-State Cycle in Photosystem II"
+title_textcol: "#000000"
+author_textcol: "#000000"
+column_numbers: 3
+sectitle_bgcol: "#88a78e" 
+#logoright_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
+#logoleft_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
 output: 
-  posterdown::posterdown_betterport:
+  posterdown::posterdown_html:
     self_contained: false
-    pandoc_args: --mathjax
-    number_sections: false
 csl: nature.csl
 bibliography: Low_Natasha.bib
-link-citations: true
 ---
 
-```{r, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE,
-                      warning = FALSE,
-                      tidy = FALSE,
-                      message = FALSE,
-                      fig.align = 'center',
-                      out.width = "100%")
-options(knitr.table.format = "html") 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
 ```
+## Natasha Ryan, Maximilian Berthold, Douglas A. Campbell
 
+Mount Allison University Biology
 
 # Background
-
 The accepted lower limit of the photic zone: 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds @ravenPutOutLight2000. Some arctic diatoms achieve net C uptake with 1 photon only reaching a PSII every 0.6-60 seconds @randelhoff2020.           
 
   Comparing the persistence of S-state synchronicity in temperate and arctic diatoms may help explain how arctic diatoms exploit extremely low light, by limiting wasteful slippage.      
@@ -52,8 +36,8 @@ Light energy absorbed by the photosynthetic pigments of PSII (primarily chl-a) i
 
   * Photochemistry (photochemical quenching of ChlF)    
   * Dissipation as heat (non-photochemical quenching of ChlF)   
-  * Re-emission at longer wavelengths as fluorescence (ChlF)  
-  
+  * Re-emission at longer wavelengths as fluorescence (ChlF)    
+
 **S-State Cycle**   
 A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents  @gatesRealtimeKineticsLight2020@zaharievaEnergeticsKineticsSState2019@dauTimeresolvedXraySpectroscopy2007:  
 
@@ -61,9 +45,10 @@ A complete water oxidation cycle during oxygenic photosynthesis requires the abs
 
 ChlF varies between S-states since the free energy of the water-oxidizing complex depends on the number of electrons removed @dewijnSstateDependenceMiss2002. A loss of charge separation through recombination desynchronizes the S-state cycle, dampening the periodic changes in ChlF and causing wasteful slippage. 
 
-# Objective   
-Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to evaluate the loss of synchronization of the S-state cycle at different frequencies of photon delivery and temperatures.     
 
+
+# Objective    
+Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to evaluate the loss of synchronization of the S-state cycle at different frequencies of photon delivery and temperatures.     
 
 # Methods
 
@@ -71,14 +56,17 @@ Use Solisense apparatus and Lift software to deliver short, highly intense pulse
 
 ![Figure 2: Single-turnover variable chlorophyll fluorescence approach for evaluating photochemical efficiency](figure_methods.png)
 
+Derive the maximum quantum yield of PSII (F~V~/F~M~ = F~M~-F~0~/F~M~) for each sequential flash
 
-# Results
+
+# Results and Discussion
 
 ![Figure 3: Maximum quantum yield (Fv/Fm) of PSII in temperate diatoms exposed to single-turnover flashes spaced at 0.5, 1, 2, 4, and 8 seconds at 10 and 18 degrees Celsius.](FvFm_vs_Flashnumber_scaled.png)
 
 As flash spacing increases, we observe fewer synchronous S-state cycles before the periodicity is dampened. This indicates that longer periods of time between flashes increase the incidence of recombination and wasteful slippage.
 
-We hypothesized that recombination would decrease with temperature since recombination processes are temperature sensitive. Initial Fast Fourier Transform analysis (M. Berthold) indeed indicates that the diatoms at 10°C maintain a synchronous S-state cycle for longer, and therefore may maintain productive electron transport under lower light levels.
+We hypothesized that recombination would decrease with temperature since recombination processes are temperature sensitive. Initial Fast Fourier Transform analysis (M. Berthold) indeed indicates that the diatoms at 10°C maintain a synchronous S-state cycle for longer, and therefore may maintain productive electron transport under lower light levels. 
 
 
 # References
+
