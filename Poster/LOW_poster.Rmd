@@ -5,7 +5,7 @@ poster_height: "36in"
 poster_width: "48in"
 author:
   - name: Effects of Temperature and Frequency of Photon Delivery on Wasteful Slippage of the S-State Cycle in Photosystem II
-primary_colour: "#fffff" 
+primary_colour: "#88a78e" 
 title_textcol: "#000000"
 author_textcol: "#000000"
 column_numbers: 3
@@ -22,53 +22,43 @@ bibliography: Low_Natasha.bib
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
-#### Natasha Ryan, Maximilian Berthold, Douglas Campbell
+## Natasha Ryan, Maximilian Berthold, Douglas Campbell
+
 Campbell Lab, Mount Allison University
 
 # Background
-The accepted lower limit of the photic zone is 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds @ravenPutOutLight2000.        
-However, some arctic diatoms may achieve net C uptake when 1 photon only reaches a PSII every 0.6-60 seconds @randelhoff2020.        
-Comparing the duration of s-state synchronicity of temperate and arctic diatoms may help explain how arctic diatoms exploit extremely low light.        
+Accepted lower limit of the photic zone: 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds @ravenPutOutLight2000. Some arctic diatoms achieve net C uptake with 1 photon only reaching a PSII every 0.6-60 seconds @randelhoff2020.           
 
-**Energy Distribution**   
-Light energy absorbed by the photosynthetic pigments of PSII (primarily chlorophyll-a) is distributed variably among three pathways @schubackSingleTurnoverVariableChlorophyll2021:    
-  I. Photochemistry (photochemical quenching of ChlF)    
- II. Dissipation as heat (non-photochemical quenching of ChlF)   
-III. Re-emission at longer wavelengths as fluorescence (ChlF)    
+  Comparing the persistence of s-state synchronicity in temperate and arctic diatoms may help explain how arctic diatoms exploit extremely low light.        
+
+**Energy Distribution**  
+Light energy absorbed by the photosynthetic pigments of PSII (primarily chl-a) is distributed variably among three pathways @schubackSingleTurnoverVariableChlorophyll2021:  
+
+  * Photochemistry (photochemical quenching of ChlF)    
+  * Dissipation as heat (non-photochemical quenching of ChlF)   
+  * Re-emission at longer wavelengths as fluorescence (ChlF)    
 
 **S-State Cycle**   
-A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents  @gatesRealtimeKineticsLight2020@zaharievaEnergeticsKineticsSState2019@dauTimeresolvedXraySpectroscopy2007: 
+A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents  @gatesRealtimeKineticsLight2020@zaharievaEnergeticsKineticsSState2019@dauTimeresolvedXraySpectroscopy2007:  
 
-![Figure 1: Pathway of s-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states (S~0~ → S~4~). Following the accumulation of four oxidizing equivalents, 2 H~2~O are oxidized to 1 O~2~.](Figure_1.png)   
+![Figure 1: Pathway of s-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states (S~0~ → S~4~). Following the accumulation of four oxidizing equivalents, 2 H~2~O are oxidized to 1 O~2~.](figure_sstate.png)
 
-ChlF differs between s-states since the free energy of the water-oxidizing complex depends on the number of electrons/protons removed @dewijnSstateDependenceMiss2002. Occasionally, recombination may result in the loss of charge separation, desynchronizing the s-state cycle and dampening the ChlF periodicity. 
+ChlF differs between s-states since the free energy of the water-oxidizing complex depends on the number of electrons/protons removed @dewijnSstateDependenceMiss2002. A loss of charge separation through recombination desynchronizes the s-state cycle, dampening the periodic changes in ChlF. 
+
+
 
 # Objective    
 Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to evaluate the loss of synchronization of the s-state cycle at different frequencies of photon delivery and temperatures.     
 
 # Methods
 
-Use Solisense apparatus and Lift software to deliver short, highly intense pulses of light to diatoms in a temperature-controlled cuvette. 
+Use Solisense apparatus and Lift software to deliver short, highly intense pulses of light to diatoms (*Thalassiosira pseudonana*) in a temperature-controlled cuvette @schubackSingleTurnoverVariableChlorophyll2021.   
 
-(start figure 2)    
-Dark-regulated state        
-   •	Assumptions: sample populated with S0 and S1 oxidation states, all RCII are open, any light-induced energy dissipation processes have been fully reversed @schubackSingleTurnoverVariableChlorophyll2021         
-   •	Maximum fraction of the energy absorbed will enter the photochemistry pathway         
+![Figure 2: Single-turnover variable chlorophyll fluorescence approach for evaluating photochemical efficiency](figure_methods.png)
 
-Deliver short, high-intensity 445nm flashes 
-   •	Single-turnover technique delivers a rapid series of sub-saturating flashlets (order of microseconds)     
-   •	Transiently reduces electron acceptors in the photosynthetic pathway, closing PSII    
-   •	Maximum fraction of the energy will be partitioned to ChlF    
+Derive the maximum quantum yield of PSII (F~v~/F~m~)   
 
-Repeated flashes at a fixed interval    
-   •	Drive PSII synchronously through the s-state cycle    
-
-1.	Alter the interval between flashes    
-2.	Alter the temperature of the system     
- (end figure 2)
-
-Derive the maximum quantum yield of PSII (Fv/Fm)    
-   •	Indicates the maximum efficiency of photochemistry under different conditions 
+  *  Indicates the maximum efficiency of photochemistry under different conditions 
 
 
 # Results and Discussion
