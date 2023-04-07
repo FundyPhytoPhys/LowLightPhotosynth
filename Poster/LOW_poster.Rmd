@@ -3,7 +3,7 @@ main_topsize: 0.15
 main_bottomsize: 0.0
 poster_height: "36in"
 poster_width: "48in"
-font_family: 'Palatino'
+font_family: 'Times New Roman'
 author:
   - name: 'Natasha M. Ryan'
     main: true
@@ -14,7 +14,7 @@ author:
   - name: 'Mount Allison University Biology Department'
 primary_colour: "#284c42" 
 secondary_colour: "#284c42" 
-main_fontfamily: 'Palatino'
+main_fontfamily: 'Times New Roman'
 main_textcol: "#FFFFFF"
 main_textsize: '105px'
 main_findings:
@@ -86,3 +86,4 @@ We hypothesized that recombination would decrease with temperature since recombi
 
 
 # References
+
