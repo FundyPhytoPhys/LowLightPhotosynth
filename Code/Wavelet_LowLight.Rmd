@@ -206,6 +206,7 @@ dev.off()
 
 reconstruct(WVT_10C_05s, siglvl = 0.05)
 reconstruct(WVT_10C_1s, siglvl = 0.05)
+reconstruct(WVT_10C_8s, siglvl = 0.05)
 
 ```
 
