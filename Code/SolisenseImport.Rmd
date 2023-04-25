@@ -273,6 +273,24 @@ SolFitsTrim2 %>%
   theme(legend.position = "right") + xlab("Flash Number") + ylab("Maximum Quantum Yield of PSII") + 
   labs(colour="Temperature °C") +
   theme_bw(base_size = 14)
+
+SolFitsTrim2 %>%
+  filter(PulseSpace_s %in% c("1S", "8S")) %>%
+  ggplot()+
+  geom_point(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
+  geom_line(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C), size = 0.2) +
+  facet_grid(cols = vars(PulseSpace_s), rows = vars(Temp_C)) +
+  scale_x_continuous(limits=c(0,16), breaks=seq(0,16,4)) +
+  scale_colour_manual(values = c("lightsteelblue3","palevioletred4")) +
+  theme(legend.position = "right") + xlab("Flash Number") + ylab("Maximum Quantum Yield of PSII") + 
+  labs(colour="Temperature °C") +
+  theme_bw(base_size = 14)
+
+ggsave(
+  "DiatomFlashCycles.png",
+  plot = last_plot(),
+  path = file.path("..", "Output")
+)
 ```
 
 FvFm vs Time point
