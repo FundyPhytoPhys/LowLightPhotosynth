@@ -100,6 +100,40 @@ dev.off()
 ```
 
 
+```{r WVT Test 0.5 s}
+
+LOW_SolFits_05s_18C <- LOW_SolFits %>%
+  filter(Temp_C == "18C",
+         PulseSpace_s == "05S")
+
+WVT_18C_05s <- analyze.wavelet(LOW_SolFits_05s_18C, "FvFm",
+                        method = "Fourier.rand",
+                        loess.span = 0.75, 
+                        dt = 1, dj = 1/500,
+                        lowerPeriod = 2, upperPeriod = 36,
+                        make.pval =TRUE, n.sim = 100)
+
+MP_DeSpBl <- max(WVT_18C_05s$Power)
+
+tiff(filename = "../Output/AvPw_WT_LOW_SolFits_05s_18C.tiff")
+wt.avg(WVT_18C_05s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
+periodlab = "Pulse space 0.5 sec")
+dev.off()
+
+
+tiff(filename = "../Output/WT_LOW_SolFits_05s_18C.tiff")
+wt.image(WVT_18C_05s, periodlab = "Pulse space 0.5 sec",
+legend.params = list(lab = "wavelet power levels"),
+label.time.axis = TRUE,
+plot.legend = FALSE, plot.contour = FALSE,
+maximum.level = 1.001 * MP_DeSpBl,
+show.date = TRUE, date.format = "%F %T",
+main = "Diatoms 18C, 0.5 sec")
+dev.off()
+
+```
+
+
 ```{r WVT Test 1 sec}
 
 LOW_SolFits_1s_10C <- LOW_SolFits %>%
