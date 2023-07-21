@@ -27,7 +27,7 @@ library(broom)
 library(magrittr)
 library(knitr)
 library(minpack.lm)
-library(OneR)
+#library(OneR)
 library(lubridate)
 library(reshape2)
 library(changepoint)
@@ -82,14 +82,15 @@ WVT_10C_05s <- analyze.wavelet(LOW_SolFits_05s_10C, "FvFm",
 
 MP_DeSpBl <- max(WVT_10C_05s$Power)
 
-tiff(filename = "../Output/AvPw_WT_LOW_SolFits_05s_10C.tiff")
-wt.avg(WVT_10C_05s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
+#sequential lines act like they are piped; need to run as a unit
+png(filename = "../Output/AvPw_WT_LOW_SolFits_05s_10C.png")
+wt.avg(WVT_10C_05s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
 periodlab = "Periodicity",
 main = "Diatoms 10C, Pulse space 0.5 sec")
 dev.off()
 
-
-tiff(filename = "../Output/WT_LOW_SolFits_05s_10C.tiff")
+#y axis is log2 scale not linear
+png(filename = "../Output/WT_LOW_SolFits_05s_10C.png")
 wt.image(WVT_10C_05s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
@@ -117,14 +118,14 @@ WVT_18C_05s <- analyze.wavelet(LOW_SolFits_05s_18C, "FvFm",
 
 MP_DeSpBl <- max(WVT_18C_05s$Power)
 
-tiff(filename = "../Output/AvPw_WT_LOW_SolFits_05s_18C.tiff")
+png(filename = "../Output/AvPw_WT_LOW_SolFits_05s_18C.png")
 wt.avg(WVT_18C_05s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
 periodlab = "Periodicity",
 main = "Diatoms 18C, Pulse space 0.5 sec")
 dev.off()
 
 
-tiff(filename = "../Output/WT_LOW_SolFits_05s_18C.tiff")
+png(filename = "../Output/WT_LOW_SolFits_05s_18C.png")
 wt.image(WVT_18C_05s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
@@ -152,14 +153,14 @@ WVT_10C_8s <- analyze.wavelet(LOW_SolFits_8s_10C, "FvFm",
 
 MP_DeSpBl <- max(WVT_10C_8s$Power)
 
-tiff(filename = "../Output/AvPw_WT_LOW_SolFits_8s_10C.tiff")
+png(filename = "../Output/AvPw_WT_LOW_SolFits_8s_10C.png")
 wt.avg(WVT_10C_8s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
 periodlab = "Periodicity",
 main = "Diatoms 10C, Pulse space 8 sec")
 dev.off()
 
 
-tiff(filename = "../Output/WT_LOW_SolFits_8s_10C.tiff")
+png(filename = "../Output/WT_LOW_SolFits_8s_10C.png")
 wt.image(WVT_10C_8s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
@@ -187,14 +188,14 @@ WVT_18C_8s <- analyze.wavelet(LOW_SolFits_8s_18C, "FvFm",
 
 MP_DeSpBl <- max(WVT_18C_8s$Power)
 
-tiff(filename = "../Output/AvPw_WT_LOW_SolFits_8s_18C.tiff")
+png(filename = "../Output/AvPw_WT_LOW_SolFits_8s_18C.png")
 wt.avg(WVT_18C_8s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
 periodlab = "Periodicity",
 main = "Diatoms 18C, Pulse space 8 sec")
 dev.off()
 
 
-tiff(filename = "../Output/WT_LOW_SolFits_8s_18C.tiff")
+png(filename = "../Output/WT_LOW_SolFits_8s_18C.png")
 wt.image(WVT_18C_8s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
