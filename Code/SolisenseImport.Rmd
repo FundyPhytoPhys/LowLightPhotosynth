@@ -147,6 +147,9 @@ SolFitsTrim <- SolFits %>%
          nm535 = as.numeric(as.character(Light_4)),
          nm590 = as.numeric(as.character(Light_5)),
          IR = as.numeric(as.character(Light_6))) %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "S")) |>
+  mutate(PulseSpace_s = if_else(PulseSpace_s %in% c("05"), "0.5", PulseSpace_s)) |>
+  mutate(PulseSpace_s = as.numeric(PulseSpace_s)) |>
   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
   relocate(ObsDateTime, .after = ObsTime) %>%
   relocate(CultureID, .before = ObsDate)
@@ -213,7 +216,7 @@ Fm vs Flashnumber line; facet by temp
 #facetbytemp
 SolFitsTrim2 %>%
   ggplot()+
-  geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=PulseSpace_s, colour=PulseSpace_s))+
+  geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=PulseSpace_s, colour = as.factor(PulseSpace_s))) +
   scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
   facet_grid("Temp_C") +
   theme_bw()
@@ -275,10 +278,10 @@ SolFitsTrim2 %>%
   theme_bw(base_size = 14)
 
 SolFitsTrim2 %>%
-  filter(PulseSpace_s %in% c("1S", "8S")) %>%
+  filter(PulseSpace_s %in% c(0.5, 8)) %>%
   ggplot()+
   geom_point(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
-  geom_line(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C), size = 0.2) +
+  geom_line(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C), linewidth = 0.2) +
   facet_grid(cols = vars(PulseSpace_s), rows = vars(Temp_C)) +
   scale_x_continuous(limits=c(0,16), breaks=seq(0,16,4)) +
   scale_colour_manual(values = c("lightsteelblue3","palevioletred4")) +
