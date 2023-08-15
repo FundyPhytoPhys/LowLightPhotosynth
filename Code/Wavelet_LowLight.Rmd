@@ -71,7 +71,7 @@ LOW_SolFits <- FitFilesSol %>%
 
 LOW_SolFits_05s_10C <- LOW_SolFits %>%
   filter(Temp_C == "10C",
-         PulseSpace_s == "05S")
+         PulseSpace_s == 0.5)
 
 WVT_10C_05s <- analyze.wavelet(LOW_SolFits_05s_10C, "FvFm",
                         method = "white.noise",
@@ -107,7 +107,7 @@ dev.off()
 
 LOW_SolFits_05s_18C <- LOW_SolFits %>%
   filter(Temp_C == "18C",
-         PulseSpace_s == "05S")
+         PulseSpace_s == 0.5)
 
 WVT_18C_05s <- analyze.wavelet(LOW_SolFits_05s_18C, "FvFm",
                         method = "white.noise",
@@ -142,7 +142,7 @@ dev.off()
 
 LOW_SolFits_8s_10C <- LOW_SolFits %>%
   filter(Temp_C == "10C",
-         PulseSpace_s == "8S")
+         PulseSpace_s == 8)
 
 WVT_10C_8s <- analyze.wavelet(LOW_SolFits_8s_10C, "FvFm",
                         method = "white.noise",
@@ -177,7 +177,7 @@ dev.off()
 
 LOW_SolFits_8s_18C <- LOW_SolFits %>%
   filter(Temp_C == "18C",
-         PulseSpace_s == "8S")
+         PulseSpace_s == 8)
 
 WVT_18C_8s <- analyze.wavelet(LOW_SolFits_8s_18C, "FvFm",
                         method = "white.noise",
