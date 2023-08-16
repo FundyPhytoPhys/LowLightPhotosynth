@@ -1,0 +1,107 @@
+---
+title: "Recombination Probabilities"
+author:
+- Douglas A. Campbell
+- Natasha Ryan
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+    keep_md: yes
+    fig_caption: yes
+    toc: TRUE
+    toc_float: TRUE   
+csl: plos-one.csl
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+
+```{r load libraries}
+
+library(tidyverse)
+library(readxl)
+library(stringr)
+library(broom)
+library(magrittr)
+library(knitr)
+library(minpack.lm)
+#library(OneR)
+library(lubridate)
+library(reshape2)
+library(changepoint)
+library(chngpt)
+library(broom)
+library(Rwave)
+library(WaveletComp)
+
+
+```
+
+# Set Project Variables
+```{r set project variables}
+Project <- "LOW"
+DataIn <- file.path("..","Data", "CleanData")
+CalibData <- file.path("..","Data", "CalibData")
+FileID <- "SolFitsTrim2"
+
+```
+
+
+```{r import clean data}
+
+FitFilesSol <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
+
+read.RDS <- function(flnm){readRDS(flnm) %>%
+    mutate(filename = flnm)
+}
+
+#test for duplicate file names
+unique(duplicated(FitFilesSol))
+
+LOW_SolFits <- FitFilesSol %>%
+  map_df(~read.RDS(flnm = .))
+
+
+```
+
+```{r dummy data}
+DummyData <- tibble(FlashTrain = c(1:12), FM = c(63, 56, 56, 60, 59, 57, 58, 59, 58, 57, 58, 58))
+
+DummyData |>
+  ggplot() +
+  geom_line(aes(x = FlashTrain, y = FM)) +
+  theme_bw()
+```
+
+```{r start variables}
+PSIIo <- 1000 #PSII)
+sigmaPSII <- 250e-20 #m2 photon-1
+FlashletEx <- 30000 #umol photons m-2 s-1
+Flashlet_s <- 1.2e-6
+FlashTrain <- 40
+Dark_s <- 2e-6
+Photons_umol <- 6.33E17
+
+qp <- 0.95
+ExcitPSIIFlashTrain = FlashletEx * Photons_umol * sigmaPSII * FlashTrain * Flashlet_s
+
+ExcitPSIIFlashTrain
+
+tau_s = 1e-3
+
+PSIIreopen = PSIIo - (PSIIo * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s)))
+
+PSIIreopen
+```
+
+Measure fraction of PSII closed after a flashtrain; that gives fraction of PSII that 'miss' advancing
+Use Poisson distribution to estimate probability of double turnover during tau
+Check on simulataneous rates arithmetic
+
+```{r simulation}
+Simulate <- tibble(Flash = c(0:12), PSIIclose = PSIIo * qp^Flash, PSIIre = PSIIclose - (PSIIclose * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s))), PSIInet = PSIIclose - PSIIre)
+```
+
