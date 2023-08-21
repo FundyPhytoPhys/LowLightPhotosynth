@@ -55,6 +55,7 @@ Dark_s <- 2e-6
 Photons_umol <- 6.33E17
 
 SNL <- 0.01
+Recomb <- 0.05
 
 qp <- 0.95
 ExcitPSIIPhotons = FlashletEx * Photons_umol * sigmaPSII * FlashTrain * Flashlet_s
@@ -100,7 +101,11 @@ Use Poisson distribution to estimate probability of double turnover during tau
 Check on simulataneous rates arithmetic
 
 ```{r simulation}
-Simulate <- tibble(Flash = c(0:59), SState = rep(c(1:4),times = 15), PSIIclose = PSIIo * qp^Flash, PSIIre = PSIIclose - (PSIIclose * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s))), PSIInet = PSIIclose - PSIIre) |>
+Simulate <- tibble(Flash = c(0:59),
+                   SState = rep(c(1:4),times = 15),
+                   PSIIclose = PSIIo * qp^Flash,
+                   PSIIreopen = PSIIclose - (PSIIclose * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s))),
+                   PSIInet = PSIIclose - PSIIreopen) |>
   mutate(YSPSII = case_when(SState == 1 ~ 1,
                            SState == 2 ~ 0.9,
                            SState == 3 ~ 0.9,
@@ -123,17 +128,18 @@ Simulate |>
   geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
   theme_bw()
 ```
+
+
 ```{r simulation with noise}
 Simulate <- Simulate |>
   mutate(PSIInetnoise = PSIInet * (1 + rnorm(n=10, sd=SNL))) |>
   mutate(FMnoise = ((PSIInetnoise * YSPSII) + ((PSIIo - PSIInetnoise) * meanYSPSII))/PSIIo) |> 
-  mutate(SignifFlashnoise = if_else(FMnoise <= YSPSIIupper & FM >= YSPSIIlower, 0, 1))
-
-|>
-  mutate(FlashnoiseThreshold = )
-
-
-select(Simulate, SignifFlashnoise == 1)
+  mutate(SignifFlashnoise = if_else(FMnoise <= YSPSIIupper & FM >= YSPSIIlower, 0, 1)) |>
+  mutate(FlashThreshold =  as.numeric(filter(Simulate, SignifFlashnoise == 1) |>
+  slice_tail(n = 1) |>
+   select(Flash))
+  )
+  
 
 Simulate |> 
   ggplot() +
@@ -141,5 +147,40 @@ Simulate |>
   geom_point(aes(x = Flash, y = FMnoise, colour = as.factor(SignifFlashnoise))) +
   geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
   geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
+  geom_vline(xintercept = Simulate$FlashThreshold[1], linetype = "dashed", colour = "green") +
+  geom_text(aes(x = FlashThreshold[1] + 1, y = 0.5, label = paste("Significance Threshold", FlashThreshold[1]))) +
   theme_bw()
 ```
+```{r simulate with recombination}
+Simulate <- Simulate |>
+  mutate(PSIIreopenrecomb = PSIIreopen - (PSIIreopen * Recomb), .after = PSIIreopen) |>
+  mutate(PSIInetrecomb = PSIInet - PSIIreopenrecomb, .after = PSIInet) |>
+  mutate(PSIInetrecombnoise = PSIInetrecomb * (1 + rnorm(n=10, sd=SNL))) |>
+  mutate(FMrecombnoise = ((PSIInetrecombnoise * YSPSII) + ((PSIIo - PSIInetrecombnoise) * meanYSPSII))/PSIIo) |>
+  mutate(SignifFlashrecombnoise = if_else(FMrecombnoise <= YSPSIIupper & FMrecombnoise >= YSPSIIlower, 0, 1)) |>
+  mutate(FlashrecombnoiseThreshold =  as.numeric(filter(Simulate, SignifFlashrecombnoise == 1) |>
+  slice_tail(n = 1) |>
+   select(Flash))
+  )
+
+#Issue with PSIIo does not take into account re-closure of PSIIo upon subsequent flashes
+
+
+
+
+  
+  Simulate |> 
+  ggplot() +
+    #geom_point(aes(x = Flash, y = PSIInetnoise/PSIIo)) + 
+    geom_point(aes(x = Flash, y = PSIInetrecombnoise/PSIIo), colour = "red") +
+    #geom_point(aes(x = Flash, y = FMnoise, colour = as.factor(SignifFlashnoise))) +
+    geom_point(aes(x = Flash, y = FMrecombnoise, colour = as.factor(SignifFlashrecombnoise))) +
+    geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
+    geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
+    geom_vline(xintercept = Simulate$FlashrecombnoiseThreshold[1], linetype = "dashed", colour = "red") +
+    geom_text(aes(x = FlashrecombnoiseThreshold[1] + 1, y = 0.5, label = paste("Significance Threshold with Recombination", FlashrecombnoiseThreshold[1]))) +
+    geom_vline(xintercept = Simulate$FlashThreshold[1], linetype = "dashed", colour = "darkgreen") +
+  geom_text(aes(x = FlashThreshold[1] + 1, y = 0.6, label = paste("Significance Threshold", FlashThreshold[1]))) +
+  theme_bw()
+```
+
