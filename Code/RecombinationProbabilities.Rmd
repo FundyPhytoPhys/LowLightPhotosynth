@@ -45,6 +45,29 @@ FileID <- "SolFitsTrim2"
 ```
 
 
+```{r start variables}
+PSIIo <- 1000 #PSII)
+sigmaPSII <- 250e-20 #m2 photon-1
+FlashletEx <- 30000 #umol photons m-2 s-1
+Flashlet_s <- 1.2e-6
+FlashTrain <- 40
+Dark_s <- 2e-6
+Photons_umol <- 6.33E17
+
+SNL <- 0.01
+
+qp <- 0.95
+ExcitPSIIPhotons = FlashletEx * Photons_umol * sigmaPSII * FlashTrain * Flashlet_s
+
+ExcitPSIIPhotons
+
+tau_s = 1e-3
+
+PSIIreopen = PSIIo - (PSIIo * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s)))
+
+PSIIreopen
+```
+
 ```{r import clean data}
 
 FitFilesSol <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
@@ -71,45 +94,52 @@ DummyData |>
   theme_bw()
 ```
 
-```{r start variables}
-PSIIo <- 1000 #PSII)
-sigmaPSII <- 250e-20 #m2 photon-1
-FlashletEx <- 30000 #umol photons m-2 s-1
-Flashlet_s <- 1.2e-6
-FlashTrain <- 40
-Dark_s <- 2e-6
-Photons_umol <- 6.33E17
-
-qp <- 0.95
-ExcitPSIIFlashTrain = FlashletEx * Photons_umol * sigmaPSII * FlashTrain * Flashlet_s
-
-ExcitPSIIFlashTrain
-
-tau_s = 1e-3
-
-PSIIreopen = PSIIo - (PSIIo * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s)))
-
-PSIIreopen
-```
 
 Measure fraction of PSII closed after a flashtrain; that gives fraction of PSII that 'miss' advancing
 Use Poisson distribution to estimate probability of double turnover during tau
 Check on simulataneous rates arithmetic
 
 ```{r simulation}
-Simulate <- tibble(Flash = c(0:23), SState = rep(c(1:4),times = 6), PSIIclose = PSIIo * qp^Flash, PSIIre = PSIIclose - (PSIIclose * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s))), PSIInet = PSIIclose - PSIIre) |>
-  mutate(YPSII = case_when(SState == 1 ~ 1,
+Simulate <- tibble(Flash = c(0:59), SState = rep(c(1:4),times = 15), PSIIclose = PSIIo * qp^Flash, PSIIre = PSIIclose - (PSIIclose * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s))), PSIInet = PSIIclose - PSIIre) |>
+  mutate(YSPSII = case_when(SState == 1 ~ 1,
                            SState == 2 ~ 0.9,
                            SState == 3 ~ 0.9,
                            SState == 4 ~ 1)) |>
-  mutate(FM = ((PSIInet * YPSII) + (PSIIo - PSIInet) * 0.95)/PSIIo)
+  mutate(meanYSPSII = mean(YSPSII)) |>
+  mutate(FM = ((PSIInet * YSPSII) + ((PSIIo - PSIInet) * meanYSPSII))/PSIIo) |>
+  mutate(YSPSIIupper = meanYSPSII + (meanYSPSII * SNL),
+         YSPSIIlower = meanYSPSII - (meanYSPSII * SNL)) |>
+  mutate(SignifFlash = if_else(FM <= YSPSIIupper & FM >= YSPSIIlower, 0, 1))
+
 ```
+
 
 ```{r simulate plot}
 Simulate |>
   ggplot() +
   geom_point(aes(x = Flash, y = PSIInet/PSIIo)) +
-  geom_point(aes(x = Flash, y = FM), colour = "red") +
+  geom_point(aes(x = Flash, y = FM, colour = as.factor(SignifFlash))) +
+  geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
+  geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
   theme_bw()
 ```
+```{r simulation with noise}
+Simulate <- Simulate |>
+  mutate(PSIInetnoise = PSIInet * (1 + rnorm(n=10, sd=SNL))) |>
+  mutate(FMnoise = ((PSIInetnoise * YSPSII) + ((PSIIo - PSIInetnoise) * meanYSPSII))/PSIIo) |> 
+  mutate(SignifFlashnoise = if_else(FMnoise <= YSPSIIupper & FM >= YSPSIIlower, 0, 1))
 
+|>
+  mutate(FlashnoiseThreshold = )
+
+
+select(Simulate, SignifFlashnoise == 1)
+
+Simulate |> 
+  ggplot() +
+  geom_point(aes(x = Flash, y = PSIInetnoise/PSIIo)) +
+  geom_point(aes(x = Flash, y = FMnoise, colour = as.factor(SignifFlashnoise))) +
+  geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
+  geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
+  theme_bw()
+```
