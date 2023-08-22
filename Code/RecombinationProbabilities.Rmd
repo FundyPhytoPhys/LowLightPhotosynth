@@ -161,8 +161,8 @@ Simulate <- Simulate |>
     geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
     geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
     geom_vline(xintercept = Simulate$FlashrecombnoiseThreshold[1], linetype = "dashed", colour = "red") +
-    geom_text(aes(x = FlashrecombnoiseThreshold[1] + 1, y = 0.5, label = paste("Significance Threshold", SNL,  "With Recombination", Recomb, FlashrecombnoiseThreshold[1], sep = " "))) +
+    geom_text(aes(x = FlashrecombnoiseThreshold[1] + 1, y = 0.5, label = paste("Signif Thresh:", FlashrecombnoiseThreshold[1], "SNL:", SNL, "qP:", qp,  "Recomb:", Recomb,  sep = " "))) +
   geom_vline(xintercept = Simulate$FlashThreshold[1], linetype = "dashed", colour = "darkgreen") +
-  geom_text(aes(x = FlashThreshold[1] + 1, y = 0.6,  label = paste("Significance Threshold", SNL, FlashThreshold[1], sep = " ")), colour = "darkgreen") +
+  geom_text(aes(x = FlashThreshold[1] + 1, y = 0.6,  label = paste("Signif Thresh:", FlashThreshold[1], "SNL:", SNL, "qP:", qp, sep = " ")), colour = "darkgreen") +
   theme_bw()
 ```
