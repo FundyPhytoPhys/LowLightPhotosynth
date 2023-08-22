@@ -56,6 +56,7 @@ Photons_umol <- 6.33E17
 
 SNL <- 0.005
 Recomb <- 0.2
+RecombFit <- 0
 
 qp <- 0.95
 ExcitPSIIPhotons = FlashletEx * Photons_umol * sigmaPSII * FlashTrain * Flashlet_s
@@ -176,11 +177,19 @@ https://rstudio-pubs-static.s3.amazonaws.com/140054_deff0e911755406a87a2492d46f8
 
 ```{r find recomb}
 Simulate <- Simulate |>
-  mutate(FMgap2 = (FM - FMrecombnoise)^2,
+   mutate(FMfit = (((PSIIadvance - (PSIIadvance * RecombFit)) * (1 + rnorm(n=10, sd = SNL)) * YSPSII) + ((PSIIo - (PSIIadvance - (PSIIadvance * RecombFit)) * (1 + rnorm(n=10, sd = SNL))) * meanYSPSII))/PSIIo) |>
+    mutate(FMga2p = (FMfit - FMrecombnoise)^2,
          FMsum2 = sum(FMgap2))
 
 
-
+ Simulate |> 
+  ggplot() +
+   geom_point(aes(x = Flash, y = FMrecombnoise, colour = as.factor(SignifFlashrecombnoise))) +
+   geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
+   geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
+   geom_point(aes(x = Flash, y = FMfit)) +
+   geom_point(aes(x = Flash, y = FM)) +
+  theme_bw()
 ```
 
 fmgap <- function(FM, FMrecombnoise) {
