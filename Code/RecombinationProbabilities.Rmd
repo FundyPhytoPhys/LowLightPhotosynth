@@ -176,9 +176,11 @@ Simulate <- Simulate |>
 https://rstudio-pubs-static.s3.amazonaws.com/140054_deff0e911755406a87a2492d46f86d90.html
 
 ```{r find recomb}
+#RecombFit <- 0.5
+
 Simulate <- Simulate |>
    mutate(FMfit = (((PSIIadvance - (PSIIadvance * RecombFit)) * (1 + rnorm(n=10, sd = SNL)) * YSPSII) + ((PSIIo - (PSIIadvance - (PSIIadvance * RecombFit)) * (1 + rnorm(n=10, sd = SNL))) * meanYSPSII))/PSIIo) |>
-    mutate(FMga2p = (FMfit - FMrecombnoise)^2,
+    mutate(FMgap2 = (FMfit - FMrecombnoise)^2,
          FMsum2 = sum(FMgap2))
 
 
@@ -190,6 +192,7 @@ Simulate <- Simulate |>
    geom_point(aes(x = Flash, y = FMfit)) +
    geom_point(aes(x = Flash, y = FM)) +
   theme_bw()
+ 
 ```
 
 fmgap <- function(FM, FMrecombnoise) {
