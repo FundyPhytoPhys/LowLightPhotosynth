@@ -129,7 +129,12 @@ LOW_SolFits %>%
 ```
 
 ```{r exp decay function}
-expeqn <- function(x, Intercept, mu){Intercept*exp(x*mu)}
+exp_eqn <- function(x, Intercept, mu){Intercept*exp(x*mu)
+  }
+
+expplateau_eqn <- function(x, Intercept, Plateau, mu){Plateau + (Intercept - Plateau)*exp(x*mu)
+                                                              }
+
 
 ```
 
@@ -137,16 +142,30 @@ expeqn <- function(x, Intercept, mu){Intercept*exp(x*mu)}
 
 SolFitsModels <- LOW_SolFits |>
   nest(.by = c("Filename", "Temp_C", "PulseSpace_s", "SState")) |>
-  mutate(FmSStates_model = map(data, possibly(~nlsLM(.$Fmrunnorm ~ expeqn(x = .$Flashnumber, Intercept, mu),
+  mutate(FmSStates_model = map(data, ~nlsLM(.$Fmrunnorm ~ exp_eqn(x = .$Flashnumber, Intercept, mu),
                                       data = .x,
                                       start = list(Intercept = 1.1, mu = 0.01),
                                       control = nls.lm.control(maxiter = 100)
                                       )
-                                      ))
+                                      )
          ) |>
   mutate(FmSStates_Tidy = map(FmSStates_model, broom::tidy),
         FmSStates_Glance = map(FmSStates_model, broom::glance),
         FmStates_Augment = map(FmSStates_model, broom::augment))
+
+SolFitsModelsPlateau <- LOW_SolFits |>
+  nest(.by = c("Filename", "Temp_C", "PulseSpace_s", "SState")) |>
+  mutate(FmSStates_model = map(data, ~nlsLM(.$Fmrunnorm ~ expplateau_eqn(x = .$Flashnumber, Intercept, Plateau = 1,  mu),
+                                      data = .x,
+                                      start = list(Intercept = 1.1, mu = 0.01),
+                                      control = nls.lm.control(maxiter = 100)
+                                      )
+                                      )
+         ) |>
+  mutate(FmSStates_Tidy = map(FmSStates_model, broom::tidy),
+        FmSStates_Glance = map(FmSStates_model, broom::glance),
+        FmStates_Augment = map(FmSStates_model, broom::augment))
+
   
 # Adding legend for lines
 #https://community.rstudio.com/t/adding-manual-legend-to-ggplot2/41651/2
@@ -158,7 +177,18 @@ SolFitsModels <- LOW_SolFits |>
 SolFitsModels %>%
   unnest(FmSStates_Tidy) |>
   filter(term == "mu") |>
-  ggplot(aes(x = PulseSpace_s, y = estimate)) +
+  ggplot() +
+  geom_point(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
+  geom_line(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
+  facet_grid(cols = vars(Temp_C)) +
+  theme_bw()
+
+SolFitsModelsPlateau |>
+  unnest(FmSStates_Tidy) |>
+  filter(term == "mu") |>
+  ggplot() +
+  geom_point(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
+  geom_line(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
   facet_grid(cols = vars(Temp_C)) +
   theme_bw()
     
