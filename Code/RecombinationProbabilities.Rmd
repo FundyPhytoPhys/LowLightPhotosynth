@@ -128,10 +128,29 @@ LOW_SolFits %>%
 
 ```
 
-```{r FvFm excursion from run average}
+```{r exp decay function}
+expeqn <- function(x, Intercept, mu){Intercept*exp(x*mu)}
 
-LOW_SolFits <- LOW_SolFits |>
-  group_by
+```
+
+```{r decay models}
+head(LOW_SolFits)
+
+
+SolFitsModels <- LOW_SolFits |>
+  nest(.by = c("Filename", "SState")) |>
+  mutate(FmSStates_model = map(data, possibly(~nlsLM(.$Fmrunnorm ~ expeqn(x = .$Flashnumber, Intercept, mu),
+                                      data = .x,
+                                      start = list(Intercept = 1.1, mu = 0.01),
+                                      control = nls.lm.control(maxiter = 100)
+                                      )
+                                      ))
+         ) |>
+  mutate(FmSStates_Tidy = map(FmSStates_model, broom::tidy),
+        FmSStates_Glance = map(FmSStates_model, broom::glance),
+        FmStates_Augment = map(FmSStates_model, broom::augment))
+  
+    
 
 ```
 
