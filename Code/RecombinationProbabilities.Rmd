@@ -134,11 +134,9 @@ expeqn <- function(x, Intercept, mu){Intercept*exp(x*mu)}
 ```
 
 ```{r decay models}
-head(LOW_SolFits)
-
 
 SolFitsModels <- LOW_SolFits |>
-  nest(.by = c("Filename", "SState")) |>
+  nest(.by = c("Filename", "Temp_C", "PulseSpace_s", "SState")) |>
   mutate(FmSStates_model = map(data, possibly(~nlsLM(.$Fmrunnorm ~ expeqn(x = .$Flashnumber, Intercept, mu),
                                       data = .x,
                                       start = list(Intercept = 1.1, mu = 0.01),
@@ -150,7 +148,34 @@ SolFitsModels <- LOW_SolFits |>
         FmSStates_Glance = map(FmSStates_model, broom::glance),
         FmStates_Augment = map(FmSStates_model, broom::augment))
   
+# Adding legend for lines
+#https://community.rstudio.com/t/adding-manual-legend-to-ggplot2/41651/2
+
+# line_colours = c("ETRqpOxbo" = "green",
+#             "fitted" = "black",
+#             "residual" = "red")
+
+SolFitsModels %>%
+  unnest(FmSStates_Tidy) |>
+  filter(term == "mu") |>
+  ggplot(aes(x = PulseSpace_s, y = estimate)) +
+  facet_grid(cols = vars(Temp_C)) +
+  theme_bw()
     
+  #facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
+
+
+# 
+# 
+# +
+#   geom_point(aes(y = ETRqpOxbo, colour =  "ETRqpOxbo")) +
+#   geom_line(aes(y = `.fitted`, colour = "fitted")) +
+#   geom_point(aes(y = `.resid`, colour = "residual"), size = 0.5) +
+#   geom_hline(yintercept = 0, linetype = "dashed") + 
+#   labs(colour = "Legend", title = "LRC") + 
+#   scale_colour_manual(values = line_colours) +
+#   scale_x_continuous(expand = c(0,0)) +
+
 
 ```
 
