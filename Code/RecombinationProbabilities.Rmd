@@ -40,7 +40,7 @@ library(WaveletComp)
 Project <- "LOW"
 DataIn <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
-FileID <- "SolFitsTrim2"
+FileID <- "SolFitsTrim"
 
 ```
 
@@ -63,7 +63,7 @@ RecombFit <- 0 #goal fitted value for average Recombination probability; more so
 
 qp <- 0.9 #fraction of PSII closed during an excitation flashtrain; available from Solisense
 
-ExcitPSIIPhotons = FlashletEx * Photons_umol * sigmaPSII * FlashTrain * Flashlet_s
+ExcitPSIIPhotons = FlashletEx_uE * Photons_umol * sigmaPSII_m2 * FlashTrain * Flashlet_s
 
 ExcitPSIIPhotons  #could be substrate for Poisson distribution modelling of fraction of 'missed' PSII that do not get excited during a flash
 
@@ -88,17 +88,53 @@ unique(duplicated(FitFilesSol))
 LOW_SolFits <- FitFilesSol |>
   purrr::map_df(~read.RDS(flnm = .))
 
+head(LOW_SolFits)
 
-```
-
-```{r dummy data}
-DummyData <- tibble(FlashTrain = c(1:12), FM = c(63, 56, 56, 60, 59, 57, 58, 59, 58, 57, 58, 58))
-
-DummyData |>
+LOW_SolFits %>%
   ggplot() +
-  geom_line(aes(x = FlashTrain, y = FM)) +
+  geom_point(aes(x = Flashnumber, y = Fm)) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
   theme_bw()
+  
 ```
+
+```{r nominal SState}
+LOW_SolFits <- LOW_SolFits |>
+  mutate(SState = case_when(Flashnumber %% 4 == 0 ~ 1,
+                    Flashnumber %% 4 == 1 ~ 2,
+                    Flashnumber %% 4 == 2 ~ 3, 
+                    Flashnumber %% 4 == 3 ~ 4))
+
+LOW_SolFits %>%
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(SState))) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
+  theme_bw()
+
+LOW_SolFits %>%
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = Sigrunnorm, colour = as.factor(SState))) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
+  theme_bw()
+
+LOW_SolFits %>%
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = Forunnorm, colour = as.factor(SState))) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
+  theme_bw()
+
+```
+
+```{r FvFm excursion from run average}
+
+LOW_SolFits <- LOW_SolFits |>
+  group_by
+
+```
+
 
 
 Measure fraction of PSII closed after a flashtrain; that gives fraction of PSII that 'miss' advancing
@@ -107,7 +143,10 @@ Check on simulataneous rates arithmetic
 
 ```{r simulation}
 Simulate <- tibble(Flash = c(0:59),
-                   SState = rep(c(1:4),times = 15),
+                   SState = case_when(Flash %% 4 == 0 ~ 1,
+                    Flash %% 4 == 1 ~ 2,
+                    Flash %% 4 == 2 ~ 3, 
+                    Flash %% 4 == 3 ~ 4),
                    PSIIadvance = PSIIo * qp^Flash) |> #actually multiple issues encompassed by this estimate
   mutate(YSPSII = case_when(SState == 1 ~ 1,  #these values extractable from data
                            SState == 2 ~ 0.9,
@@ -154,30 +193,31 @@ Rate constants for 'known' processes; recombination then the third factor influe
 It is possible that recombination would show up as one of the three 'tau' for reopening.
 Alternate extraction of amplitude of recombination from 'amplitudes' for fast, medium & slow kinetic phases of reopening.
 
-```{r simulate with recombination and noise}
+```{r simulate with recombination}
 Simulate <- Simulate |>
   #mutate(PSIIadvancerecomb = PSIIadvance - (PSIIadvance * Recomb), .after = PSIIreopen) |>
   mutate(PSIIadvancerecomb = PSIIadvance - (PSIIadvance * Recomb), .after = PSIIadvance) |>
-  mutate(PSIIadvancerecombnoise = PSIIadvancerecomb * (1 + rnorm(n=10, sd = SNL))) |>
-  mutate(FMrecombnoise = ((PSIIadvancerecombnoise * YSPSII) + ((PSIIo - PSIIadvancerecombnoise) * meanYSPSII))/PSIIo) |>
-  mutate(SignifFlashrecombnoise = if_else(FMrecombnoise <= YSPSIIupper & FMrecombnoise >= YSPSIIlower, 0, 1)) |>
-  mutate(FlashrecombnoiseThreshold =  as.numeric(filter(Simulate, SignifFlashrecombnoise == 1) |>
+
+  mutate(FMrecomb = ((PSIIadvancerecomb * YSPSII) + ((PSIIo - PSIIadvancerecomb) * meanYSPSII))/PSIIo) |>
+  mutate(SignifFlashrecomb = if_else(FMrecomb <= YSPSIIupper & FMrecomb >= YSPSIIlower, 0, 1)) |>
+  mutate(FlashrecombThreshold =  as.numeric(filter(Simulate, SignifFlashrecomb == 1) |>
   slice_tail(n = 1) |>
    select(Flash))
   )
+
+#remove noise factor for simplicity for now
+# mutate(PSIIadvancerecombnoise = PSIIadvancerecomb * (1 + rnorm(n=10, sd = SNL))) |>
 
 #Issue with PSIIo does not take into account re-closure of PSIIo upon subsequent flashes, but they will be out of sync
 
   Simulate |> 
   ggplot() +
-    #geom_point(aes(x = Flash, y = PSIInetnoise/PSIIo)) + 
-    geom_point(aes(x = Flash, y = PSIIadvancerecombnoise/PSIIo), colour = "red") +
-    #geom_point(aes(x = Flash, y = FMnoise, colour = as.factor(SignifFlashnoise))) +
-    geom_point(aes(x = Flash, y = FMrecombnoise, colour = as.factor(SignifFlashrecombnoise))) +
+    geom_point(aes(x = Flash, y = PSIIadvancerecomb/PSIIo), colour = "red") +
+    geom_point(aes(x = Flash, y = FMrecomb, colour = as.factor(SignifFlashrecomb))) +
     geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
     geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
-    geom_vline(xintercept = Simulate$FlashrecombnoiseThreshold[1], linetype = "dashed", colour = "red") +
-    geom_text(aes(x = FlashrecombnoiseThreshold[1] + 1, y = 0.5, label = paste("Signif Thresh:", FlashrecombnoiseThreshold[1], "SNL:", SNL, "qP:", qp,  "Recomb:", Recomb,  sep = " "))) +
+    geom_vline(xintercept = Simulate$FlashrecombThreshold[1], linetype = "dashed", colour = "red") +
+    geom_text(aes(x = FlashrecombThreshold[1] + 1, y = 0.5, label = paste("Signif Thresh:", FlashrecombThreshold[1], "SNL:", SNL, "qP:", qp,  "Recomb:", Recomb,  sep = " "))) +
   geom_vline(xintercept = Simulate$FlashThreshold[1], linetype = "dashed", colour = "darkgreen") +
   geom_text(aes(x = FlashThreshold[1] + 1, y = 0.6,  label = paste("Signif Thresh:", FlashThreshold[1], "SNL:", SNL, "qP:", qp, sep = " ")), colour = "darkgreen") +
   theme_bw()
@@ -192,14 +232,16 @@ Consider fitting curves with eqns and then optimizing parameters of equation.
 #RecombFit <- 0.5
 
 Simulate <- Simulate |>
-   mutate(FMfit = (((PSIIadvance - (PSIIadvance * RecombFit)) * (1 + rnorm(n=10, sd = SNL)) * YSPSII) + ((PSIIo - (PSIIadvance - (PSIIadvance * RecombFit)) * (1 + rnorm(n=10, sd = SNL))) * meanYSPSII))/PSIIo) |>
-    mutate(FMgap2 = (FMfit - FMrecombnoise)^2,
+   mutate(FMfit = (((PSIIadvance - (PSIIadvance * RecombFit)) * YSPSII) + ((PSIIo - (PSIIadvance - (PSIIadvance * RecombFit))) * meanYSPSII))/PSIIo) |>
+    mutate(FMgap2 = (FMfit - FMrecomb)^2,
          FMsum2 = sum(FMgap2))
 
+#remove noise factor for simplicity
+# * (1 + rnorm(n=10, sd = SNL))
 
  Simulate |> 
   ggplot() +
-   geom_point(aes(x = Flash, y = FMrecombnoise, colour = as.factor(SignifFlashrecombnoise))) +
+   geom_point(aes(x = Flash, y = FMrecomb, colour = as.factor(SignifFlashrecomb))) +
    geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
    geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
    geom_point(aes(x = Flash, y = FMfit)) +
@@ -220,3 +262,11 @@ curve(revenues, from = 0, to = 300, xname = 'Price', ylab = 'Revenues', main = '
 
 par(mfrow = c(1, 1))
 optimize(revenues, interval = c(50, 150), maximum = TRUE)
+
+```{r extracting SState}
+Flash <- c(0:59)
+
+
+SState
+```
+

@@ -140,7 +140,10 @@ SolFitsTrim <- SolFits %>%
    rename(ObsDate = DATE,
          ObsTime = TIME,
          FvFm = "Fv.Fm") %>%
-  mutate(FvFm = as.numeric(as.character(FvFm)),
+  mutate(Sig = as.numeric(as.character(Sig)),
+         Fo = as.numeric(as.character(Fo)),
+         Fm = as.numeric(as.character(Fm)),
+         FvFm = as.numeric(as.character(FvFm)),
          nm445 = as.numeric(as.character(Light_1)),
          nm470 = as.numeric(as.character(Light_2)),
          nm505 = as.numeric(as.character(Light_3)),
@@ -154,13 +157,18 @@ SolFitsTrim <- SolFits %>%
   relocate(ObsDateTime, .after = ObsTime) %>%
   relocate(CultureID, .before = ObsDate)
 
-SolFitsTrim2 <-SolFitsTrim[-(1:160),] %>%
+SolFitsTrim <-SolFitsTrim[-(1:160),] %>%
   group_by(Filename) %>%
+  mutate(Sigrunnorm =  Sig/mean(Sig, na.rm = TRUE),
+         Forunnorm = Fo/mean(Fo, na.rm = TRUE),
+         Fmrunnorm = Fm/mean(Fm, na.rm = TRUE),
+         FvFmrunnorm = FvFm/mean(FvFm, na.rm = TRUE)) |>
   mutate(Flashnumber = row_number()) %>%
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
 ```
+
 
 ```{r fix column names}
 #only use this chunk if analyzing data from Data-RawData-WithDecay-Fit
@@ -201,7 +209,7 @@ SolFitsTrim2 <-SolFitsTrim[-(1:160),] %>%
  # relocate(ObsDateTime, .after = ObsTime) %>%
  # relocate(CultureID, .before = ObsDate)
 
-#SolFitsTrim2 <-SolFitsTrim %>%
+#SolFitsTrim <-SolFitsTrim %>%
 #  group_by(Filename) %>%
  # mutate(Flashnumber = row_number()) %>%
  # relocate(Flashnumber, .before=p) %>%
@@ -214,7 +222,7 @@ SolFitsTrim2 <-SolFitsTrim[-(1:160),] %>%
 Fm vs Flashnumber line; facet by temp 
 ```{r Fm vs Flashnumber(by T)}
 #facetbytemp
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=PulseSpace_s, colour = as.factor(PulseSpace_s))) +
   scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
@@ -225,7 +233,7 @@ SolFitsTrim2 %>%
 Fm vs Flashnumber line; facet by flash spacing
 ```{r Fm vs Flashnumber(by S)}
 #facetbyspacing
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=Temp_C, colour=Temp_C)) +
   scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
@@ -267,7 +275,7 @@ Biggest gap between 10&18c is at 4s
 **One to use** (according to Campbell):    
 FvFm vs Flashnumber point 
 ```{r FvFm vs Flashnumber}
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   ggplot()+
   geom_point(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
   facet_grid("PulseSpace_s") +
@@ -277,7 +285,7 @@ SolFitsTrim2 %>%
   labs(colour="Temperature °C") +
   theme_bw(base_size = 14)
 
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   filter(PulseSpace_s %in% c(0.5, 8)) %>%
   ggplot()+
   geom_point(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
@@ -298,7 +306,7 @@ ggsave(
 
 FvFm vs Time point
 ```{r FvFm vs Time}
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   ggplot()+
   geom_point(aes(x=Etime_s, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
   facet_grid("PulseSpace_s") +
@@ -311,7 +319,7 @@ SolFitsTrim2 %>%
 FvFm vs Flashnumber as line; facet by spacing
 ```{r FvFm vs Flashnumber (by S)}
 #facet by spacing 
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
   facet_grid("PulseSpace_s") +
@@ -325,7 +333,7 @@ SolFitsTrim2 %>%
 FvFm vs Flashnumber as line; facet by temp
 ```{r FvFm vs Flashnumber (by t)}
 # facet by temp
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(FvFm), group=PulseSpace_s, colour=PulseSpace_s)) +
   facet_grid("Temp_C") +
@@ -347,7 +355,7 @@ FvFm vs Flashnumber (by t) is kind of easier to read (ask Campbell)
     
 Try Fo: 
 ```{r Fo vs Flashnumber}
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(Fo), group=Temp_C, colour=Temp_C)) +
   scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
@@ -357,9 +365,11 @@ SolFitsTrim2 %>%
 
 Fo = No. 
 
-```{r save SolFitsTrim2 data}
-saveRDS(SolFitsTrim2, file.path(DataOut, paste(Project, "SolFitsTrim2.Rds", sep = "_"), fsep = .Platform$file.sep))
+```{r save SolFitsTrim data}
+saveRDS(SolFitsTrim, file.path(DataOut, paste(Project, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
+
+
 
 FFT Transform         
 @cernaFundamentalsFFTBasedSignal2000    
@@ -440,7 +450,7 @@ end chunk {r prelimplots}
 Oxborough & Baker 1997 for Fo'
 
 start chunk {r estimate parameters}
-SolFitsTrim2 <- SolFitsTrim %>%
+SolFitsTrim <- SolFitsTrim %>%
   group_by(Source.DataFile, CultureID, Ex_WL, TempCont) %>%
   mutate(Fodark = Fo[1],
          Fmdark = Fm[1],
@@ -482,7 +492,7 @@ SolFitsTrim2 <- SolFitsTrim %>%
 end chunk {r estimate parameters}
 
 start chunk {r prelimplots2}
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   filter(Dark1s == 0) %>%
   ggplot() +
   geom_point(aes(x = ActPARCorr, y = aLHIIOxbomax, colour = as.factor(TempCont))) +
@@ -491,7 +501,7 @@ SolFitsTrim2 %>%
   facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
   theme_bw()
 
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   filter(Dark1s == 0) %>%
   ggplot() +
   geom_point(aes(x = ActPARCorr, y = ETRqpOxbo, colour = as.factor(TempCont))) +
@@ -512,7 +522,7 @@ SolFitsTrim2 %>%
    coord_fixed(xlim = c(0,1), ylim = c(0,1), ratio = 1) +
    theme_bw()
 
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   filter(Dark1s == 0) %>%
   ggplot() +
   geom_point(aes(x = Ctauav, y = qpOxbo, colour = as.factor(TempCont))) +
@@ -523,7 +533,7 @@ SolFitsTrim2 %>%
   coord_fixed(xlim = c(0,1), ylim = c(0,1), ratio = 1) +
   theme_bw()
 
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   filter(Dark1s == 0) %>%
   ggplot() +
   geom_point(aes(x = ActPARCorr, y = JVPSII_ETRtauav_FoSig, colour = as.factor(TempCont))) +
@@ -532,7 +542,7 @@ SolFitsTrim2 %>%
   facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
   theme_bw()
 
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   filter(Dark1s == 0) %>%
   ggplot() +
   geom_point(aes(x = 
@@ -544,7 +554,7 @@ SolFitsTrim2 %>%
   facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
   theme_bw()
 
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   filter(Dark1s == 0) %>%
   ggplot() +
   geom_point(aes(x =  JVPSII_ETRqpOxbo_FoSig, y = JVPSII_aLHIIOxbomax, colour = as.factor(TempCont))) +
@@ -557,7 +567,7 @@ SolFitsTrim2 %>%
 
   #ETRGorbo works well for blue light but appears to fail for 590 nm; possible issue with low FV/FM with PBsome excitation?
 
-SolFitsTrim2 %>%
+SolFitsTrim %>%
   #filter(Dark1s == 0) %>%
   ggplot() +
   geom_point(aes(x = ETRCtauav, y = ETRGorbo, colour = as.factor(TempCont))) +
