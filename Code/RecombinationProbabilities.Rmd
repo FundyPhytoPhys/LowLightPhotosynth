@@ -185,7 +185,7 @@ SolFitsModels %>%
 
 SolFitsModelsPlateau |>
   unnest(FmSStates_Tidy) |>
-  filter(term == "mu") |>
+  filter(term == "Intercept") |>
   ggplot() +
   geom_point(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
   geom_line(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
