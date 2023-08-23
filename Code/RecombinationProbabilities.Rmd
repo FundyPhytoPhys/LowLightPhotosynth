@@ -46,24 +46,28 @@ FileID <- "SolFitsTrim2"
 
 
 ```{r start variables}
-PSIIo <- 1000 #PSII)
-sigmaPSII <- 250e-20 #m2 photon-1
-FlashletEx <- 30000 #umol photons m-2 s-1
-Flashlet_s <- 1.2e-6
-FlashTrain <- 100
-Dark_s <- 2e-6
-Photons_umol <- 6.33E17
+PSIIo <- 1000 #PSII #possible number from Solisense
+sigmaPSII_m2 <- 250e-20 #m2 photon-1 #actual number from Solisense
+FlashletEx_uE <- 30000 #umol photons m-2 s-1 set by Solisense
+Flashlet_s <- 1.2e-6 #duration of flashlet set by Solisense
+FlashTrain <- 100 #number of sequential flashlets in the induction phase of flash set by Solisense
+Dark_s <- 2e-6 #duration of dark period b/t sequential flashlets set by Solisense
+Photons_umol <- 6.33E17 #conversion photons in a umol
 
-SNL <- 0.005
-Recomb <- 0.2
-RecombFit <- 0
+SNL <- 0.005 #value for the signal to noise ratio; available from Solisense
 
-qp <- 0.95
+
+Recomb <- 0.2 #fractional probability of average Recombination loss from PSII advancing through SState; could be a vector of 4 values, 1 for each SState
+
+RecombFit <- 0 #goal fitted value for average Recombination probability; more sophisticated model might generate vector of 4 values
+
+qp <- 0.9 #fraction of PSII closed during an excitation flashtrain; available from Solisense
+
 ExcitPSIIPhotons = FlashletEx * Photons_umol * sigmaPSII * FlashTrain * Flashlet_s
 
-ExcitPSIIPhotons
+ExcitPSIIPhotons  #could be substrate for Poisson distribution modelling of fraction of 'missed' PSII that do not get excited during a flash
 
-tau_s = 1e-3
+tau_s = 1e-3 #lifetime for re-opening of PSII after excitation flash train; available from Solisense
 
 PSIIreopen = PSIIo - (PSIIo * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s)))
 
@@ -104,8 +108,8 @@ Check on simulataneous rates arithmetic
 ```{r simulation}
 Simulate <- tibble(Flash = c(0:59),
                    SState = rep(c(1:4),times = 15),
-                   PSIIadvance = PSIIo * qp^Flash) |>
-  mutate(YSPSII = case_when(SState == 1 ~ 1,
+                   PSIIadvance = PSIIo * qp^Flash) |> #actually multiple issues encompassed by this estimate
+  mutate(YSPSII = case_when(SState == 1 ~ 1,  #these values extractable from data
                            SState == 2 ~ 0.9,
                            SState == 3 ~ 0.9,
                            SState == 4 ~ 1)) |>
@@ -142,6 +146,13 @@ Simulate |>
   theme_bw()
 ```
 
+Is there a flaw, b/c recombination 'reopens' PSII and will be caught by the qP closure parameter at the end of the flashtrain?
+Is so will need to explicitly model PSII closure as:
+(photons m-2 s-1) * (m2 photon) closure
+1/tau reopening
+Rate constants for 'known' processes; recombination then the third factor influencing reopening.
+It is possible that recombination would show up as one of the three 'tau' for reopening.
+Alternate extraction of amplitude of recombination from 'amplitudes' for fast, medium & slow kinetic phases of reopening.
 
 ```{r simulate with recombination and noise}
 Simulate <- Simulate |>
@@ -174,6 +185,8 @@ Simulate <- Simulate |>
 
 # Set up optimization function to chose level of Recombination that matches data, with inputs of 'known' qP for expected SState cycling in the absence of Recombination
 https://rstudio-pubs-static.s3.amazonaws.com/140054_deff0e911755406a87a2492d46f86d90.html
+
+Consider fitting curves with eqns and then optimizing parameters of equation.
 
 ```{r find recomb}
 #RecombFit <- 0.5
