@@ -24,8 +24,7 @@ library(tidyverse)
 library(readxl)
 library(stringr)
 library(broom)
-library(magrittr)
-library(knitr)
+#library(knitr)
 library(minpack.lm)
 #library(OneR)
 library(lubridate)
@@ -44,7 +43,7 @@ library(WaveletComp)
 Project <- "LOW"
 DataIn <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
-FileID <- "SolFitsTrim2"
+FileID <- "SolFitsTrim"
 
 ```
 
@@ -63,11 +62,151 @@ unique(duplicated(FitFilesSol))
 LOW_SolFits <- FitFilesSol %>%
   map_df(~read.RDS(flnm = .))
 
+#add column for nominal SState for PSII that 'advance' with flash
+LOW_SolFits <- LOW_SolFits |>
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4))
+```
+
+```{r WVT Test 4 s 10C}
+
+LOW_SolFits_4s_10C <- LOW_SolFits %>%
+  filter(Temp_C == "10C",
+         PulseSpace_s == 4)
+
+WVT_10C_4s <- analyze.wavelet(LOW_SolFits_4s_10C, "FvFm",
+                        method = "white.noise",
+                        loess.span = 0, 
+                        dt = 1, dj = 1/500,
+                        lowerPeriod = 2, upperPeriod = 36,
+                        make.pval =TRUE, n.sim = 100)
+
+MP_DeSpBl <- max(WVT_10C_4s$Power)
+
+#sequential lines act like they are piped; need to run as a unit
+png(filename = "../Output/AvPw_WT_LOW_SolFits_4s_10C.png")
+wt.avg(WVT_10C_4s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
+periodlab = "Periodicity",
+main = "Diatoms 10C, Pulse space 4 sec")
+dev.off()
+
+#y axis is log2 scale not linear
+png(filename = "../Output/WT_LOW_SolFits_4s_10C.png")
+wt.image(WVT_10C_4s, periodlab = "Periodicity",
+legend.params = list(lab = "wavelet power levels"),
+label.time.axis = TRUE,
+plot.legend = TRUE, plot.contour = TRUE,
+maximum.level = 1.001 * MP_DeSpBl,
+show.date = TRUE, date.format = "%F %S",
+main = "Diatoms 10C, Pulse space 4 sec")
+dev.off()
+
+```
+```{r WVT Test 2 s 10C}
+
+LOW_SolFits_2s_10C <- LOW_SolFits %>%
+  filter(Temp_C == "10C",
+         PulseSpace_s == 2)
+
+WVT_10C_2s <- analyze.wavelet(LOW_SolFits_2s_10C, "FvFm",
+                        method = "white.noise",
+                        loess.span = 0, 
+                        dt = 1, dj = 1/500,
+                        lowerPeriod = 2, upperPeriod = 36,
+                        make.pval =TRUE, n.sim = 100)
+
+MP_DeSpBl <- max(WVT_10C_2s$Power)
+
+#sequential lines act like they are piped; need to run as a unit
+png(filename = "../Output/AvPw_WT_LOW_SolFits_2s_10C.png")
+wt.avg(WVT_10C_2s, show.siglvl = TRUE, siglvl =  0.05, maximum.level = 1,   #set level to mark significance
+periodlab = "Periodicity",
+main = "Diatoms 10C, Pulse space 2 sec")
+dev.off()
+
+#y axis is log2 scale not linear
+png(filename = "../Output/WT_LOW_SolFits_2s_10C.png")
+wt.image(WVT_10C_2s, periodlab = "Periodicity",
+legend.params = list(lab = "wavelet power levels"),
+label.time.axis = TRUE,
+plot.legend = TRUE, plot.contour = TRUE,
+maximum.level = 1.001 * MP_DeSpBl,
+show.date = TRUE, date.format = "%F %S",
+main = "Diatoms 10C, Pulse space 2 sec")
+dev.off()
 
 ```
 
+```{r WVT Test 2 s 18C}
 
-```{r WVT Test 0.5 s}
+LOW_SolFits_2s_18C <- LOW_SolFits %>%
+  filter(Temp_C == "18C",
+         PulseSpace_s == 2)
+
+WVT_18C_2s <- analyze.wavelet(LOW_SolFits_2s_18C, "FvFm",
+                        method = "white.noise",
+                        loess.span = 0, 
+                        dt = 1, dj = 1/500,
+                        lowerPeriod = 2, upperPeriod = 36,
+                        make.pval =TRUE, n.sim = 100)
+
+MP_DeSpBl <- max(WVT_18C_2s$Power)
+
+png(filename = "../Output/AvPw_WT_LOW_SolFits_2s_18C.png")
+wt.avg(WVT_18C_2s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
+periodlab = "Periodicity",
+main = "Diatoms 18C, Pulse space 2 sec")
+dev.off()
+
+
+png(filename = "../Output/WT_LOW_SolFits_2s_18C.png")
+wt.image(WVT_18C_2s, periodlab = "Periodicity",
+legend.params = list(lab = "wavelet power levels"),
+label.time.axis = TRUE,
+plot.legend = TRUE, plot.contour = TRUE,
+maximum.level = 1.001 * MP_DeSpBl,
+show.date = TRUE, date.format = "%F %T",
+main = "Diatoms 18C, Pulse space 2 sec")
+dev.off()
+
+```
+```{r WVT Test 4 s 18C}
+
+LOW_SolFits_4s_18C <- LOW_SolFits %>%
+  filter(Temp_C == "18C",
+         PulseSpace_s == 4)
+
+WVT_18C_4s <- analyze.wavelet(LOW_SolFits_4s_18C, "FvFm",
+                        method = "white.noise",
+                        loess.span = 0, 
+                        dt = 1, dj = 1/500,
+                        lowerPeriod = 2, upperPeriod = 36,
+                        make.pval =TRUE, n.sim = 100)
+
+MP_DeSpBl <- max(WVT_18C_4s$Power)
+
+png(filename = "../Output/AvPw_WT_LOW_SolFits_4s_18C.png")
+wt.avg(WVT_18C_4s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
+periodlab = "Periodicity",
+main = "Diatoms 18C, Pulse space 4 sec")
+dev.off()
+
+
+png(filename = "../Output/WT_LOW_SolFits_4s_18C.png")
+wt.image(WVT_18C_4s, periodlab = "Periodicity",
+legend.params = list(lab = "wavelet power levels"),
+label.time.axis = TRUE,
+plot.legend = TRUE, plot.contour = TRUE,
+maximum.level = 1.001 * MP_DeSpBl,
+show.date = TRUE, date.format = "%F %T",
+main = "Diatoms 18C, Pulse space 4 sec")
+dev.off()
+
+```
+
+```{r WVT Test 0.5 s 10C}
 
 LOW_SolFits_05s_10C <- LOW_SolFits %>%
   filter(Temp_C == "10C",
@@ -103,7 +242,7 @@ dev.off()
 ```
 
 
-```{r WVT Test 0.5 s}
+```{r WVT Test 0.5 s 18C}
 
 LOW_SolFits_05s_18C <- LOW_SolFits %>%
   filter(Temp_C == "18C",
@@ -138,7 +277,7 @@ dev.off()
 ```
 
 
-```{r WVT Test 8 sec}
+```{r WVT Test 8 sec 10C}
 
 LOW_SolFits_8s_10C <- LOW_SolFits %>%
   filter(Temp_C == "10C",
@@ -173,7 +312,7 @@ dev.off()
 ```
 
 
-```{r WVT Test 8 sec}
+```{r WVT Test 8 sec 18C}
 
 LOW_SolFits_8s_18C <- LOW_SolFits %>%
   filter(Temp_C == "18C",
