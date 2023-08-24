@@ -100,10 +100,10 @@ LOW_SolFits %>%
 
 ```{r nominal SState}
 LOW_SolFits <- LOW_SolFits |>
-  mutate(SState = case_when(Flashnumber %% 4 == 0 ~ 1,
-                    Flashnumber %% 4 == 1 ~ 2,
-                    Flashnumber %% 4 == 2 ~ 3, 
-                    Flashnumber %% 4 == 3 ~ 4))
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4))
 
 LOW_SolFits %>%
   ggplot() +
@@ -133,38 +133,25 @@ exp_eqn <- function(x, Intercept, mu){Intercept*exp(x*mu)
   }
 
 expplateau_eqn <- function(x, Intercept, Plateau, mu){Plateau + (Intercept - Plateau)*exp(x*mu)
-                                                              }
-
-
+  }
 ```
 
-```{r decay models}
+
+```{r decay to plateau models}
 
 SolFitsModels <- LOW_SolFits |>
+ # filter(SState == 1) |>
   nest(.by = c("Filename", "Temp_C", "PulseSpace_s", "SState")) |>
-  mutate(FmSStates_model = map(data, ~nlsLM(.$Fmrunnorm ~ exp_eqn(x = .$Flashnumber, Intercept, mu),
+  mutate(FvFmSStates_model = map(data, possibly(~nlsLM(.$FvFmrunnorm ~ expplateau_eqn(x = .$Flashnumber, Intercept, Plateau = 1,  mu),
                                       data = .x,
                                       start = list(Intercept = 1.1, mu = 0.01),
                                       control = nls.lm.control(maxiter = 100)
                                       )
-                                      )
+                                      ), NULL)
          ) |>
-  mutate(FmSStates_Tidy = map(FmSStates_model, broom::tidy),
-        FmSStates_Glance = map(FmSStates_model, broom::glance),
-        FmStates_Augment = map(FmSStates_model, broom::augment))
-
-SolFitsModelsPlateau <- LOW_SolFits |>
-  nest(.by = c("Filename", "Temp_C", "PulseSpace_s", "SState")) |>
-  mutate(FmSStates_model = map(data, ~nlsLM(.$Fmrunnorm ~ expplateau_eqn(x = .$Flashnumber, Intercept, Plateau = 1,  mu),
-                                      data = .x,
-                                      start = list(Intercept = 1.1, mu = 0.01),
-                                      control = nls.lm.control(maxiter = 100)
-                                      )
-                                      )
-         ) |>
-  mutate(FmSStates_Tidy = map(FmSStates_model, broom::tidy),
-        FmSStates_Glance = map(FmSStates_model, broom::glance),
-        FmStates_Augment = map(FmSStates_model, broom::augment))
+  mutate(FvFmSStates_Tidy = map(FvFmSStates_model, broom::tidy),
+        FvFmSStates_Glance = map(FvFmSStates_model, broom::glance),
+        FvFmSStates_Augment = map(FvFmSStates_model, broom::augment))
 
   
 # Adding legend for lines
@@ -175,37 +162,21 @@ SolFitsModelsPlateau <- LOW_SolFits |>
 #             "residual" = "red")
 
 SolFitsModels %>%
-  unnest(FmSStates_Tidy) |>
+  unnest(FvFmSStates_Augment) |>
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(SState))) +
+  geom_line(aes(x = Flashnumber, y = .fitted, colour = as.factor(SState))) +
+  facet_grid(cols = vars(Temp_C), rows = vars(PulseSpace_s)) +
+  theme_bw()
+
+SolFitsModels %>%
+  unnest(FvFmSStates_Tidy) |>
   filter(term == "mu") |>
   ggplot() +
   geom_point(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
   geom_line(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
   facet_grid(cols = vars(Temp_C)) +
   theme_bw()
-
-SolFitsModelsPlateau |>
-  unnest(FmSStates_Tidy) |>
-  filter(term == "Intercept") |>
-  ggplot() +
-  geom_point(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
-  geom_line(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
-  facet_grid(cols = vars(Temp_C)) +
-  theme_bw()
-    
-  #facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
-
-
-# 
-# 
-# +
-#   geom_point(aes(y = ETRqpOxbo, colour =  "ETRqpOxbo")) +
-#   geom_line(aes(y = `.fitted`, colour = "fitted")) +
-#   geom_point(aes(y = `.resid`, colour = "residual"), size = 0.5) +
-#   geom_hline(yintercept = 0, linetype = "dashed") + 
-#   labs(colour = "Legend", title = "LRC") + 
-#   scale_colour_manual(values = line_colours) +
-#   scale_x_continuous(expand = c(0,0)) +
-
 
 ```
 
