@@ -40,7 +40,11 @@ library(broom)
 Project <- "LOW"
 DataIn <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
+
 FileID <- "SolFitsTrim"
+
+#Data with decay poor; go back to Solisense and re-fit to generate more files with decay data
+#FileID <- "SolFitsDecayTrim"
 
 ```
 
@@ -133,8 +137,18 @@ exp_eqn <- function(x, Intercept, mu){Intercept*exp(x*mu)
   }
 
 expplateau_eqn <- function(x, Intercept, Plateau, mu){Plateau + (Intercept - Plateau)*exp(x*mu)
+}
+
+#Create single fitting function to make it easier to optimize?
+expplateauSState_eqn <- function(sstate, x, Plateau, Intercept1, Intercept2, Intercept3, Intercept4,  mu1, mu2, mu3, mu4){
+  case_when(sstate == 1 ~ Plateau + (Intercept1 - Plateau)*exp(x*mu1),
+            sstate == 2 ~ Plateau + (Intercept2 - Plateau)*exp(x*mu2),
+            sstate == 3 ~ Plateau + (Intercept3 - Plateau)*exp(x*mu3),
+            sstate == 4 ~ Plateau + (Intercept4 - Plateau)*exp(x*mu4)
+  )
   }
 ```
+
 
 
 ```{r FvFm decay to plateau models}
@@ -153,7 +167,27 @@ SolFitsModels <- LOW_SolFits |>
         FvFmSStates_Glance = map(FvFmSStates_model, broom::glance),
         FvFmSStates_Augment = map(FvFmSStates_model, broom::augment))
 
-  
+ #Not working
+
+SolFitsModels2 <- LOW_SolFits |>
+  nest(.by = c("Filename", "Temp_C", "PulseSpace_s", "SState")) |>
+  mutate(FvFmSStates4_model = map2(.x = SState,  .y = data, ~nlsLM(.y$FvFmrunnorm ~ expplateauSState_eqn(sstate = .x,  x = .y$Flashnumber, Plateau = 1, Intercept1, Intercept2, Intercept3, Intercept4,  mu1, mu2, mu3, mu4),
+                                      data = .y,
+                                      start = list(Intercept1 = 1, Intercept2 = 1, Intercept3 = 1, Intercept4 = 1, mu1 = 0.1, mu2 = 0.1, mu3 = 0.1, mu4 = 0.1),
+                                      control = nls.lm.control(maxiter = 100)
+                                      )
+                                      )
+  )
+                                   
+                                   
+                                   
+  #                                  , NULL)
+  #        ) |>
+  # mutate(FvFmSStates_Tidy = map(FvFmSStates_model, broom::tidy),
+  #       FvFmSStates_Glance = map(FvFmSStates_model, broom::glance),
+  #       FvFmSStates_Augment = map(FvFmSStates_model, broom::augment))
+
+ 
 # Adding legend for lines
 #https://community.rstudio.com/t/adding-manual-legend-to-ggplot2/41651/2
 
@@ -186,6 +220,34 @@ SolFitsModels %>%
   geom_line(aes(x = PulseSpace_s, y = log10(estimate), colour = as.factor(SState))) +
   facet_grid(cols = vars(Temp_C)) +
   theme_bw()
+
+```
+```{r filter for reasonable mu and intercept}
+SolFitsModelsFilter <- SolFitsModels |>
+  unnest(FvFmSStates_Tidy) |>
+  filter(estimate > -2 & estimate < 2) |>
+  select(-c("statistic")) |>
+  pivot_wider(names_from = "term", values_from = c("estimate", "std.error", "p.value"))
+
+SolFitsModelsFilter |>
+  ggplot() +
+  geom_point(aes(x = PulseSpace_s, y = estimate_mu, colour = as.factor(SState))) +
+  geom_line(aes(x = PulseSpace_s, y = estimate_mu, colour = as.factor(SState))) +
+  facet_grid(cols = vars(Temp_C)) +
+  theme_bw()
+
+SolFitsModelsFilter |>
+  ggplot() +
+  geom_point(aes(x = PulseSpace_s, y = estimate_Intercept, colour = as.factor(SState))) +
+  geom_line(aes(x = PulseSpace_s, y = estimate_Intercept, colour = as.factor(SState))) +
+  facet_grid(cols = vars(Temp_C)) +
+  theme_bw()
+
+# |>
+#   group_by(Temp_C, SState) |>
+#   mutate(SState_mu_av = mean(estimate_mu),
+#          SState_intercept_av = mean(estimate_Intercept)) |>
+#   ungroup()
 
 ```
 
