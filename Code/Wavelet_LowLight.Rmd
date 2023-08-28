@@ -108,9 +108,11 @@ dev.off()
 
 LOW_SolFits_2s_10C <- LOW_SolFits %>%
   filter(Temp_C == "10C",
-         PulseSpace_s == 2)
+         PulseSpace_s == 2) 
 
-WVT_10C_2s <- analyze.wavelet(LOW_SolFits_2s_10C, "FvFm",
+
+WVT_10C_2s <-
+ analyze.wavelet(LOW_SolFits_2s_10C, "FvFm",
                         method = "white.noise",
                         loess.span = 0, 
                         dt = 1, dj = 1/500,
