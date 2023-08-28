@@ -22,16 +22,16 @@ editor_options:
 ```{r load libraries}
 
 library(tidyverse)
-library(readxl)
-library(stringr)
+#library(readxl)
+#library(stringr)
 library(broom)
 library(minpack.lm)
 #library(OneR)
-library(changepoint)
-library(chngpt)
+#library(changepoint)
+#library(chngpt)
 library(broom)
-library(Rwave)
-library(WaveletComp)
+#library(Rwave)
+#library(WaveletComp)
 
 ```
 
@@ -137,7 +137,7 @@ expplateau_eqn <- function(x, Intercept, Plateau, mu){Plateau + (Intercept - Pla
 ```
 
 
-```{r decay to plateau models}
+```{r FvFm decay to plateau models}
 
 SolFitsModels <- LOW_SolFits |>
  # filter(SState == 1) |>
@@ -175,6 +175,15 @@ SolFitsModels %>%
   ggplot() +
   geom_point(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
   geom_line(aes(x = PulseSpace_s, y = estimate, colour = as.factor(SState))) +
+  facet_grid(cols = vars(Temp_C)) +
+  theme_bw()
+
+SolFitsModels %>%
+  unnest(FvFmSStates_Tidy) |>
+  filter(term == "Intercept") |>
+  ggplot() +
+  geom_point(aes(x = PulseSpace_s, y = log10(estimate), colour = as.factor(SState))) +
+  geom_line(aes(x = PulseSpace_s, y = log10(estimate), colour = as.factor(SState))) +
   facet_grid(cols = vars(Temp_C)) +
   theme_bw()
 

@@ -58,7 +58,7 @@ CalibData <- file.path("..","Data", "CalibData")
 #RunDate <- "Refit"
 
 #DataIn <- file.path("..","Data", "RawData","Fit", fsep = .Platform$file.sep)
-DataIn <- file.path("..","Data", "RawData","NoDecay","Fit", fsep = .Platform$file.sep)
+DataIn <- file.path("..","Data", "RawData","WithDecay","Fit", fsep = .Platform$file.sep)
 
 FileID <- "fit"
 
@@ -122,34 +122,29 @@ read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.deli
 # Create Data Frame 
 purrr::map to read all files
 ```{r read Solisense files}
-SolFits <- SolisenseFiles %>%
+SolFitsDecay <- SolisenseFiles %>%
   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
 
-
+# Odd issue in WithDecay files, with ChiSq appearing a second time after QARredMax column, offsetting column headers from proper data columns
 ```{r tidy SolFitsTrim ND}
 #for NoDecayDataset
-SolFitsTrim <- SolFits %>% 
+SolFitsDecayTrim <- SolFitsDecay %>% 
   filter(!grepl("----", DATE)) %>% # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "Lon", "Lat", "GPS_stat","X")) %>% # remove superfluous columns
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X", "Light_1.1")) %>% # remove superfluous columns
+  rename(.cols = c(Fo::Tau3QA))
+
+
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/NoDecay/Fit/")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/WithDecay/Fit/")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "LOW_")) %>%
   separate(Filename, into=c("YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) %>%
    rename(ObsDate = DATE,
          ObsTime = TIME,
-         FvFm = "Fv.Fm") %>%
-  mutate(Sig = as.numeric(as.character(Sig)),
-         Fo = as.numeric(as.character(Fo)),
-         Fm = as.numeric(as.character(Fm)),
-         FvFm = as.numeric(as.character(FvFm)),
-         nm445 = as.numeric(as.character(Light_1)),
-         nm470 = as.numeric(as.character(Light_2)),
-         nm505 = as.numeric(as.character(Light_3)),
-         nm535 = as.numeric(as.character(Light_4)),
-         nm590 = as.numeric(as.character(Light_5)),
-         IR = as.numeric(as.character(Light_6))) %>%
+         FvFm = "Fv.Fm") |>
+  type_convert() |>
   mutate(PulseSpace_s = str_remove(PulseSpace_s, "S")) |>
   mutate(PulseSpace_s = if_else(PulseSpace_s %in% c("05"), "0.5", PulseSpace_s)) |>
   mutate(PulseSpace_s = as.numeric(PulseSpace_s)) |>
@@ -157,7 +152,23 @@ SolFitsTrim <- SolFits %>%
   relocate(ObsDateTime, .after = ObsTime) %>%
   relocate(CultureID, .before = ObsDate)
 
-SolFitsTrim <-SolFitsTrim[-(1:160),] %>%
+
+# %>%
+#   mutate(Sig = as.numeric(as.character(Sig)),
+#          Fo = as.numeric(as.character(Fo)),
+#          Fm = as.numeric(as.character(Fm)),
+#          FvFm = as.numeric(as.character(FvFm)),
+#          
+#          nm445 = as.numeric(as.character(Light_1)),
+#          nm470 = as.numeric(as.character(Light_2)),
+#          nm505 = as.numeric(as.character(Light_3)),
+#          nm535 = as.numeric(as.character(Light_4)),
+#          nm590 = as.numeric(as.character(Light_5)),
+#          IR = as.numeric(as.character(Light_6))) %>%
+
+
+
+SolFitsDecayTrim <-SolFitsDecayTrim[-(1:160),] %>%
   group_by(Filename) %>%
   mutate(Sigrunnorm =  Sig/mean(Sig, na.rm = TRUE),
          Forunnorm = Fo/mean(Fo, na.rm = TRUE),
@@ -167,6 +178,8 @@ SolFitsTrim <-SolFitsTrim[-(1:160),] %>%
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
+
+head(SolFitsDecayTrim)
 ```
 
 
