@@ -131,10 +131,15 @@ SolFitsDecay <- SolisenseFiles %>%
 #for NoDecayDataset
 SolFitsDecayTrim <- SolFitsDecay %>% 
   filter(!grepl("----", DATE)) %>% # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X", "Light_1.1")) %>% # remove superfluous columns
-  rename(.cols = c(Fo::Tau3QA))
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X", "Light_1.1"))  # remove superfluous columns
 
+OldNames <- c("Chisq", "Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA")
+NewNames <- c("Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA","Tau3QANew")
 
+SolFitsDecayTrim <- SolFitsDecayTrim |>
+  rename_with(~ NewNames[which(OldNames == .x)], .cols = OldNames) |>
+  select(-c(Tau3QA)) |>
+  rename(Tau3QA = Tau3QANew) |>
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
   mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/WithDecay/Fit/")) %>%
   mutate(Filename = str_remove(string = Filename, pattern = "LOW_")) %>%
@@ -235,7 +240,7 @@ head(SolFitsDecayTrim)
 Fm vs Flashnumber line; facet by temp 
 ```{r Fm vs Flashnumber(by T)}
 #facetbytemp
-SolFitsTrim %>%
+SolFitsDecayTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=PulseSpace_s, colour = as.factor(PulseSpace_s))) +
   scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
@@ -246,7 +251,7 @@ SolFitsTrim %>%
 Fm vs Flashnumber line; facet by flash spacing
 ```{r Fm vs Flashnumber(by S)}
 #facetbyspacing
-SolFitsTrim %>%
+SolFitsDecayTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=Temp_C, colour=Temp_C)) +
   scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
@@ -288,7 +293,7 @@ Biggest gap between 10&18c is at 4s
 **One to use** (according to Campbell):    
 FvFm vs Flashnumber point 
 ```{r FvFm vs Flashnumber}
-SolFitsTrim %>%
+SolFitsDecayTrim %>%
   ggplot()+
   geom_point(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
   facet_grid("PulseSpace_s") +
@@ -298,7 +303,7 @@ SolFitsTrim %>%
   labs(colour="Temperature °C") +
   theme_bw(base_size = 14)
 
-SolFitsTrim %>%
+SolFitsDecayTrim %>%
   filter(PulseSpace_s %in% c(0.5, 8)) %>%
   ggplot()+
   geom_point(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
@@ -311,7 +316,7 @@ SolFitsTrim %>%
   theme_bw(base_size = 14)
 
 ggsave(
-  "DiatomFlashCycles.png",
+  "DiatomFlashCyclesDecay.png",
   plot = last_plot(),
   path = file.path("..", "Output")
 )
@@ -319,7 +324,7 @@ ggsave(
 
 FvFm vs Time point
 ```{r FvFm vs Time}
-SolFitsTrim %>%
+SolFitsDecayTrim %>%
   ggplot()+
   geom_point(aes(x=Etime_s, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
   facet_grid("PulseSpace_s") +
@@ -332,7 +337,7 @@ SolFitsTrim %>%
 FvFm vs Flashnumber as line; facet by spacing
 ```{r FvFm vs Flashnumber (by S)}
 #facet by spacing 
-SolFitsTrim %>%
+SolFitsDecayTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
   facet_grid("PulseSpace_s") +
@@ -346,7 +351,7 @@ SolFitsTrim %>%
 FvFm vs Flashnumber as line; facet by temp
 ```{r FvFm vs Flashnumber (by t)}
 # facet by temp
-SolFitsTrim %>%
+SolFitsDecayTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(FvFm), group=PulseSpace_s, colour=PulseSpace_s)) +
   facet_grid("Temp_C") +
@@ -368,7 +373,7 @@ FvFm vs Flashnumber (by t) is kind of easier to read (ask Campbell)
     
 Try Fo: 
 ```{r Fo vs Flashnumber}
-SolFitsTrim %>%
+SolFitsDecayTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=as.numeric(Fo), group=Temp_C, colour=Temp_C)) +
   scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
@@ -379,7 +384,7 @@ SolFitsTrim %>%
 Fo = No. 
 
 ```{r save SolFitsTrim data}
-saveRDS(SolFitsTrim, file.path(DataOut, paste(Project, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(SolFitsDecayTrim, file.path(DataOut, paste(Project, "SolFitsDecayTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 
