@@ -415,8 +415,22 @@ for(i in c(1:19)) {
     mutate(FMgap2 = (FMfit - FMrecomb)^2,
          FMsum2 = sum(FMgap2))
   OutputVector <- c(OutputVector,  Simulate$FMsum2[1])
-  OptRecomb = min(OutputVector, na.rm = TRUE)
-  OptRecomb
+  OptIndex = which(OutputVector == min(OutputVector, na.rm = TRUE))
+  OptRecomb <- RecombVec[OptIndex]
 }
+
+Simulate2 <- Simulate |>
+   mutate(FMfit = (((PSIIadvance - (PSIIadvance * OptRecomb)) * YSPSII) + ((PSIIo - (PSIIadvance - (PSIIadvance * OptRecomb))) * meanYSPSII))/PSIIo) |>
+    mutate(FMgap2 = (FMfit - FMrecomb)^2,
+         FMsum2 = sum(FMgap2))
+
+ Simulate2 |> 
+  ggplot() +
+   geom_point(aes(x = Flashnumber, y = FMrecomb, colour = as.factor(SignifFlashrecomb))) +
+   geom_line(aes(x = Flashnumber, y = YSPSIIupper), linetype = "dashed", colour = "green") +
+   geom_line(aes(x = Flashnumber, y = YSPSIIlower), linetype = "dashed", colour = "green") +
+   geom_point(aes(x = Flashnumber, y = FMfit)) +
+   geom_point(aes(x = Flashnumber, y = FM)) +
+  theme_bw()
 ```
 
