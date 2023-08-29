@@ -111,8 +111,8 @@ LOW_SolFits <- LOW_SolFits |>
 
 LOW_SolFits %>%
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(SState))) +
-  geom_hline(yintercept = 1, linetype = "dashed") +
+  geom_point(aes(x = Flashnumber, y = log(FvFmrunnorm), colour = as.factor(SState))) +
+  geom_hline(yintercept = log(1), linetype = "dashed") +
   facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
   theme_bw()
 
@@ -170,7 +170,7 @@ SolFitsModels <- LOW_SolFits |>
  #Not working
 
 SolFitsModels2 <- LOW_SolFits |>
-  nest(.by = c("Filename", "Temp_C", "PulseSpace_s", "SState")) |>
+  nest(.by = c("Filename", "Temp_C","PulseSpace_s",  "SState")) |>
   mutate(FvFmSStates4_model = map2(.x = SState,  .y = data, ~nlsLM(.y$FvFmrunnorm ~ expplateauSState_eqn(sstate = .x,  x = .y$Flashnumber, Plateau = 1, Intercept1, Intercept2, Intercept3, Intercept4,  mu1, mu2, mu3, mu4),
                                       data = .y,
                                       start = list(Intercept1 = 1, Intercept2 = 1, Intercept3 = 1, Intercept4 = 1, mu1 = 0.1, mu2 = 0.1, mu3 = 0.1, mu4 = 0.1),
@@ -222,6 +222,8 @@ SolFitsModels %>%
   theme_bw()
 
 ```
+
+
 ```{r filter for reasonable mu and intercept}
 SolFitsModelsFilter <- SolFitsModels |>
   unnest(FvFmSStates_Tidy) |>
@@ -258,12 +260,12 @@ Use Poisson distribution to estimate probability of double turnover during tau
 Check on simulataneous rates arithmetic
 
 ```{r simulation}
-Simulate <- tibble(Flash = c(0:59),
-                   SState = case_when(Flash %% 4 == 0 ~ 1,
-                    Flash %% 4 == 1 ~ 2,
-                    Flash %% 4 == 2 ~ 3, 
-                    Flash %% 4 == 3 ~ 4),
-                   PSIIadvance = PSIIo * qp^Flash) |> #actually multiple issues encompassed by this estimate
+Simulate <- tibble(Flashnumber = c(0:59),
+                  SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4),
+                   PSIIadvance = PSIIo * qp^Flashnumber) |> #actually multiple issues encompassed by this estimate
   mutate(YSPSII = case_when(SState == 1 ~ 1,  #these values extractable from data
                            SState == 2 ~ 0.9,
                            SState == 3 ~ 0.9,
@@ -277,7 +279,7 @@ Simulate <- tibble(Flash = c(0:59),
 Simulate <- Simulate |>
    mutate(FlashThreshold =  as.numeric(filter(Simulate, SignifFlash == 1) |>
   slice_tail(n = 1) |>
-   select(Flash))
+   select(Flashnumber))
    )
 
                   #PSIIreopen = PSIIclose - (PSIIclose * exp(-1/tau_s  * FlashTrain * (Flashlet_s + Dark_s))) # have measured qP C from Solisense
@@ -290,10 +292,10 @@ Simulate <- Simulate |>
 ```{r simulate plot}
 Simulate |>
   ggplot() +
-  geom_point(aes(x = Flash, y = PSIIadvance/PSIIo)) +
-  geom_point(aes(x = Flash, y = FM, colour = as.factor(SignifFlash))) +
-  geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
-  geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
+  geom_point(aes(x = Flashnumber, y = PSIIadvance/PSIIo)) +
+  geom_point(aes(x = Flashnumber, y = FM, colour = as.factor(SignifFlash))) +
+  geom_line(aes(x = Flashnumber, y = YSPSIIupper), linetype = "dashed", colour = "green") +
+  geom_line(aes(x = Flashnumber, y = YSPSIIlower), linetype = "dashed", colour = "green") +
   geom_vline(xintercept = Simulate$FlashThreshold[1], linetype = "dashed", colour = "darkgreen") +
   geom_text(aes(x = FlashThreshold[1] + 1, y = 0.6, label = paste("Significance Threshold", SNL, FlashThreshold[1], sep = " ")), colour = "darkgreen") +
   
@@ -318,7 +320,7 @@ Simulate <- Simulate |>
   mutate(SignifFlashrecomb = if_else(FMrecomb <= YSPSIIupper & FMrecomb >= YSPSIIlower, 0, 1)) |>
   mutate(FlashrecombThreshold =  as.numeric(filter(Simulate, SignifFlashrecomb == 1) |>
   slice_tail(n = 1) |>
-   select(Flash))
+   select(Flashnumber))
   )
 
 #remove noise factor for simplicity for now
@@ -328,24 +330,31 @@ Simulate <- Simulate |>
 
   Simulate |> 
   ggplot() +
-    geom_point(aes(x = Flash, y = PSIIadvancerecomb/PSIIo), colour = "red") +
-    geom_point(aes(x = Flash, y = FMrecomb, colour = as.factor(SignifFlashrecomb))) +
-    geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
-    geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
+    geom_point(aes(x = Flashnumber, y = PSIIadvancerecomb/PSIIo), colour = "red") +
+    geom_point(aes(x = Flashnumber, y = FMrecomb, colour = as.factor(SignifFlashrecomb))) +
+    geom_line(aes(x = Flashnumber, y = YSPSIIupper), linetype = "dashed", colour = "green") +
+    geom_line(aes(x = Flashnumber, y = YSPSIIlower), linetype = "dashed", colour = "green") +
     geom_vline(xintercept = Simulate$FlashrecombThreshold[1], linetype = "dashed", colour = "red") +
     geom_text(aes(x = FlashrecombThreshold[1] + 1, y = 0.5, label = paste("Signif Thresh:", FlashrecombThreshold[1], "SNL:", SNL, "qP:", qp,  "Recomb:", Recomb,  sep = " "))) +
   geom_vline(xintercept = Simulate$FlashThreshold[1], linetype = "dashed", colour = "darkgreen") +
   geom_text(aes(x = FlashThreshold[1] + 1, y = 0.6,  label = paste("Signif Thresh:", FlashThreshold[1], "SNL:", SNL, "qP:", qp, sep = " ")), colour = "darkgreen") +
   theme_bw()
 ```
+# Ask Zbigniew about estimation of PSII closure in Solisense software;
+Is it more sophisticated than:
+[PSII]o x sigmaPSII x I  -> [PSII]closed
+[PSII]closed x 1/tau -> [PSII]open
+
+If not, then estimate gap b/t 'simple' qp and 'actual' qp and attribute to Recombination?
 
 # Set up optimization function to chose level of Recombination that matches data, with inputs of 'known' qP for expected SState cycling in the absence of Recombination
 https://rstudio-pubs-static.s3.amazonaws.com/140054_deff0e911755406a87a2492d46f86d90.html
 
 Consider fitting curves with eqns and then optimizing parameters of equation.
 
+
 ```{r find recomb}
-#RecombFit <- 0.5
+RecombFit <- 0.5
 
 Simulate <- Simulate |>
    mutate(FMfit = (((PSIIadvance - (PSIIadvance * RecombFit)) * YSPSII) + ((PSIIo - (PSIIadvance - (PSIIadvance * RecombFit))) * meanYSPSII))/PSIIo) |>
@@ -357,11 +366,11 @@ Simulate <- Simulate |>
 
  Simulate |> 
   ggplot() +
-   geom_point(aes(x = Flash, y = FMrecomb, colour = as.factor(SignifFlashrecomb))) +
-   geom_line(aes(x = Flash, y = YSPSIIupper), linetype = "dashed", colour = "green") +
-   geom_line(aes(x = Flash, y = YSPSIIlower), linetype = "dashed", colour = "green") +
-   geom_point(aes(x = Flash, y = FMfit)) +
-   geom_point(aes(x = Flash, y = FM)) +
+   geom_point(aes(x = Flashnumber, y = FMrecomb, colour = as.factor(SignifFlashrecomb))) +
+   geom_line(aes(x = Flashnumber, y = YSPSIIupper), linetype = "dashed", colour = "green") +
+   geom_line(aes(x = Flashnumber, y = YSPSIIlower), linetype = "dashed", colour = "green") +
+   geom_point(aes(x = Flashnumber, y = FMfit)) +
+   geom_point(aes(x = Flashnumber, y = FM)) +
   theme_bw()
  
 ```
@@ -379,10 +388,35 @@ curve(revenues, from = 0, to = 300, xname = 'Price', ylab = 'Revenues', main = '
 par(mfrow = c(1, 1))
 optimize(revenues, interval = c(50, 150), maximum = TRUE)
 
-```{r extracting SState}
-Flash <- c(0:59)
+f <- function(x) {
+  dfSum <- df[1,1]
+  for (i in 1:nrow(df)) {
+    dfSum = dfSum + df[i,1]*x - df[i,3]}
+  dfSum
+}
 
+# solve (or optimize)...
+s <- uniroot(f, lower=0, upper=1)
 
-SState
+```{r minimize sum of squares}
+
+RecombFit <- 0.01
+Simulate <- Simulate |>
+   mutate(FMfit = (((PSIIadvance - (PSIIadvance * RecombFit)) * YSPSII) + ((PSIIo - (PSIIadvance - (PSIIadvance * RecombFit))) * meanYSPSII))/PSIIo) |>
+    mutate(FMgap2 = (FMfit - FMrecomb)^2,
+         FMsum2 = sum(FMgap2))
+
+OutputVector <- c()
+RecombVec <- seq(from = 0.05, to = 0.95, by = 0.05)
+for(i in c(1:19)) {
+  FindRecomb = RecombVec[i]
+  Simulate <- Simulate |>
+   mutate(FMfit = (((PSIIadvance - (PSIIadvance * FindRecomb)) * YSPSII) + ((PSIIo - (PSIIadvance - (PSIIadvance * FindRecomb))) * meanYSPSII))/PSIIo) |>
+    mutate(FMgap2 = (FMfit - FMrecomb)^2,
+         FMsum2 = sum(FMgap2))
+  OutputVector <- c(OutputVector,  Simulate$FMsum2[1])
+  OptRecomb = min(OutputVector, na.rm = TRUE)
+  OptRecomb
+}
 ```
 
