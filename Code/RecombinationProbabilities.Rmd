@@ -111,8 +111,8 @@ LOW_SolFits <- LOW_SolFits |>
 
 LOW_SolFits %>%
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = log(FvFmrunnorm), colour = as.factor(SState))) +
-  geom_hline(yintercept = log(1), linetype = "dashed") +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(SState))) +
+  geom_hline(yintercept = 1, linetype = "dashed") +
   facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
   theme_bw()
 
@@ -169,16 +169,16 @@ SolFitsModels <- LOW_SolFits |>
 
  #Not working
 
-SolFitsModels2 <- LOW_SolFits |>
-  nest(.by = c("Filename", "Temp_C","PulseSpace_s",  "SState")) |>
-  mutate(FvFmSStates4_model = map2(.x = SState,  .y = data, ~nlsLM(.y$FvFmrunnorm ~ expplateauSState_eqn(sstate = .x,  x = .y$Flashnumber, Plateau = 1, Intercept1, Intercept2, Intercept3, Intercept4,  mu1, mu2, mu3, mu4),
-                                      data = .y,
-                                      start = list(Intercept1 = 1, Intercept2 = 1, Intercept3 = 1, Intercept4 = 1, mu1 = 0.1, mu2 = 0.1, mu3 = 0.1, mu4 = 0.1),
-                                      control = nls.lm.control(maxiter = 100)
-                                      )
-                                      )
-  )
-                                   
+# SolFitsModels2 <- LOW_SolFits |>
+#   nest(.by = c("Filename", "Temp_C","PulseSpace_s",  "SState")) |>
+#   mutate(FvFmSStates4_model = map2(.x = SState,  .y = data, ~nlsLM(.y$FvFmrunnorm ~ expplateauSState_eqn(sstate = .x,  x = .y$Flashnumber, Plateau = 1, Intercept1, Intercept2, Intercept3, Intercept4,  mu1, mu2, mu3, mu4),
+#                                       data = .y,
+#                                       start = list(Intercept1 = 1, Intercept2 = 1, Intercept3 = 1, Intercept4 = 1, mu1 = 0.1, mu2 = 0.1, mu3 = 0.1, mu4 = 0.1),
+#                                       control = nls.lm.control(maxiter = 100)
+#                                       )
+#                                       )
+#   )
+#                                    
                                    
                                    
   #                                  , NULL)
@@ -266,15 +266,15 @@ Simulate <- tibble(Flashnumber = c(0:59),
                     Flashnumber %% 4 == 3 ~ 3, 
                     Flashnumber %% 4 == 0 ~ 4),
                    PSIIadvance = PSIIo * qp^Flashnumber) |> #actually multiple issues encompassed by this estimate
-  mutate(YSPSII = case_when(SState == 1 ~ 1,  #these values extractable from data
-                           SState == 2 ~ 0.9,
-                           SState == 3 ~ 0.9,
-                           SState == 4 ~ 1)) |>
+  mutate(YSPSII = case_when(SState == 1 ~ 1.05,  #these values extractable from data
+                           SState == 2 ~ 0.95,
+                           SState == 3 ~ 0.95,
+                           SState == 4 ~ 1.05)) |>
   mutate(meanYSPSII = mean(YSPSII)) |>
-  mutate(FM = ((PSIIadvance * YSPSII) + ((PSIIo - PSIIadvance) * meanYSPSII))/PSIIo) |>
+  mutate(FVFM = ((PSIIadvance * YSPSII) + ((PSIIo - PSIIadvance) * meanYSPSII))/PSIIo) |>
   mutate(YSPSIIupper = meanYSPSII + (meanYSPSII * SNL),
          YSPSIIlower = meanYSPSII - (meanYSPSII * SNL)) |>
-  mutate(SignifFlash = if_else(FM <= YSPSIIupper & FM >= YSPSIIlower, 0, 1))
+  mutate(SignifFlash = if_else(FVFM <= YSPSIIupper & FVFM >= YSPSIIlower, 0, 1))
 
 Simulate <- Simulate |>
    mutate(FlashThreshold =  as.numeric(filter(Simulate, SignifFlash == 1) |>
@@ -293,7 +293,7 @@ Simulate <- Simulate |>
 Simulate |>
   ggplot() +
   geom_point(aes(x = Flashnumber, y = PSIIadvance/PSIIo)) +
-  geom_point(aes(x = Flashnumber, y = FM, colour = as.factor(SignifFlash))) +
+  geom_point(aes(x = Flashnumber, y = FVFM, colour = as.factor(SignifFlash))) +
   geom_line(aes(x = Flashnumber, y = YSPSIIupper), linetype = "dashed", colour = "green") +
   geom_line(aes(x = Flashnumber, y = YSPSIIlower), linetype = "dashed", colour = "green") +
   geom_vline(xintercept = Simulate$FlashThreshold[1], linetype = "dashed", colour = "darkgreen") +
