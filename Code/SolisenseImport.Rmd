@@ -39,6 +39,8 @@ Choose (ask Campbell)
 ```{r load libraries}
 library(tidyverse)
 library(lubridate)
+library(googlesheets4)
+library(googledrive)
 library(zoo)
 ```
 
@@ -51,14 +53,18 @@ knitr::opts_chunk$set(fig.path='Output/')
 # Set Project Variables
 ```{r set project variables}
 Project <- "LOW"
+TargetTaxa <- "Chlorella"
 DataOut <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
+
+ChlDataURL <- "https://docs.google.com/spreadsheets/d/1K4ibFMAjxHUszMHw-beBns0cqNqF2G7nZDF9Drm8MAQ/edit#gid=0"
 
 #Temporary RunDate during auditing
 #RunDate <- "Refit"
 
 #DataIn <- file.path("..","Data", "RawData","Fit", fsep = .Platform$file.sep)
-DataIn <- file.path("..","Data", "RawData","NoDecay","Fit", fsep = .Platform$file.sep)
+DataIn <- file.path("..","Data", "RawData","Chlorella", "NoDecay", fsep = .Platform$file.sep)
+DataRefDecay <- file.path("..","Data", "RawData","Chlorella", "RefDecay", fsep = .Platform$file.sep)
 
 FileID <- "fit"
 
@@ -91,6 +97,15 @@ ActPARCrossCal <- ActPARCrossCal |>
          Slope_SE = `std.error_LIFT_Gen_Developer.cal`)
 ```
 
+```{r read ChlData}
+gs4_deauth()
+
+ChlData <- read_sheet(ChlDataURL)
+
+
+```
+
+
 ```{r set colours}
 Wavelengths_nm = c(445, 470, 505, 535, 590)
 Colours_nm = c("darkblue", "dodgerblue", "darkgreen", "yellowgreen",  "darkorange")
@@ -122,28 +137,29 @@ read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.deli
 # Create Data Frame 
 purrr::map to read all files
 ```{r read Solisense files}
-SolFitsDecay <- SolisenseFiles %>%
+SolFits <- SolisenseFiles %>%
   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
 
 # Odd issue in WithDecay files, with ChiSq appearing a second time after QARredMax column, offsetting column headers from proper data columns
 ```{r tidy SolFitsTrim ND}
 #for NoDecayDataset
-SolFitsDecayTrim <- SolFitsDecay %>% 
+SolFitsTrim <- SolFits %>% 
   filter(!grepl("----", DATE)) %>% # remove rows with "----" 
   select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X" ))  # remove superfluous columns
 
 #OldNames <- c("Chisq", "Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA")
 #NewNames <- c("Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA","Tau3QANew")
 
-SolFitsDecayTrim <- SolFitsDecayTrim |>
+SolFitsTrim <- SolFitsTrim |>
   #rename_with(~ NewNames[which(OldNames == .x)], .cols = OldNames) |>
   #select(-c(Tau3QA)) |>
-  r#ename(Tau3QA = Tau3QANew) |>
+  #rename(Tau3QA = Tau3QANew) |>
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/NoDecay/Fit/")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "LOW_")) %>%
-  separate(Filename, into=c("YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
+  #mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/NoDecay/")) %>%
+    mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
+ # mutate(Filename = str_remove(string = Filename, pattern = "LOW_")) %>%
+  separate(Filename, into=c("Species", "Type", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) %>%
    rename(ObsDate = DATE,
@@ -155,7 +171,8 @@ SolFitsDecayTrim <- SolFitsDecayTrim |>
   mutate(PulseSpace_s = as.numeric(PulseSpace_s)) |>
   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
   relocate(ObsDateTime, .after = ObsTime) %>%
-  relocate(CultureID, .before = ObsDate)
+  relocate(CultureID, .before = ObsDate) |>
+  type_convert()
 
 
 # %>%
@@ -171,20 +188,19 @@ SolFitsDecayTrim <- SolFitsDecayTrim |>
 #          nm590 = as.numeric(as.character(Light_5)),
 #          IR = as.numeric(as.character(Light_6))) %>%
 
-
-
-SolFitsDecayTrim <-SolFitsDecayTrim[-(1:160),] %>%
+#normalize values to final stretch of 10 values from 'randomized' PSII pool
+SolFitsTrim <-SolFitsTrim %>%
   group_by(Filename) %>%
-  mutate(Sigrunnorm =  Sig/mean(Sig, na.rm = TRUE),
-         Forunnorm = Fo/mean(Fo, na.rm = TRUE),
-         Fmrunnorm = Fm/mean(Fm, na.rm = TRUE),
-         FvFmrunnorm = FvFm/mean(FvFm, na.rm = TRUE)) |>
+  mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
+         Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
+         Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
+         FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) |>
   mutate(Flashnumber = row_number()) %>%
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
 
-head(SolFitsDecayTrim)
+head(SolFitsTrim)
 ```
 
 
@@ -240,20 +256,20 @@ head(SolFitsDecayTrim)
 Fm vs Flashnumber line; facet by temp 
 ```{r Fm vs Flashnumber(by T)}
 #facetbytemp
-SolFitsDecayTrim %>%
+SolFitsTrim %>%
   ggplot()+
-  geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=PulseSpace_s, colour = as.factor(PulseSpace_s))) +
-  scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
+  geom_line(aes(x=Flashnumber, y=Fmrunnorm, group=PulseSpace_s, colour = as.factor(PulseSpace_s))) +
+  #scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
   facet_grid("Temp_C") +
   theme_bw()
 ```
 
-Fm vs Flashnumber line; facet by flash spacing
+Fmrunnorm vs Flashnumber line; facet by flash spacing
 ```{r Fm vs Flashnumber(by S)}
 #facetbyspacing
-SolFitsDecayTrim %>%
+SolFitsTrim %>%
   ggplot()+
-  geom_line(aes(x=Flashnumber, y=as.numeric(Fm), group=Temp_C, colour=Temp_C)) +
+  geom_line(aes(x=Flashnumber, y= Fmrunnorm, group=Temp_C, colour=Temp_C)) +
   scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
   facet_grid("PulseSpace_s") +
   theme_bw()
@@ -289,6 +305,9 @@ At 18c, same pattern in flash duration but overall shorter
 
 Biggest gap between 10&18c is at 4s   
     -why?   
+
+XXXXXX
+
 
 **One to use** (according to Campbell):    
 FvFm vs Flashnumber point 
