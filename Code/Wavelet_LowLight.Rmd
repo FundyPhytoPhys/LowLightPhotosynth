@@ -43,6 +43,7 @@ library(WaveletComp)
 Project <- "LOW"
 DataIn <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
+TargetTaxa = "Chlorella"
 FileID <- "SolFitsTrim"
 
 ```
@@ -50,7 +51,7 @@ FileID <- "SolFitsTrim"
 
 ```{r import clean data}
 
-FitFilesSol <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
+FitFilesSol <- list.files(path = DataIn, pattern = paste(TargetTaxa,FileID, sep = "_"), full.names = TRUE)
 
 read.RDS <- function(flnm){readRDS(flnm) %>%
     mutate(filename = flnm)
@@ -86,21 +87,21 @@ WVT_10C_4s <- analyze.wavelet(LOW_SolFits_4s_10C, "FvFm",
 MP_DeSpBl <- max(WVT_10C_4s$Power)
 
 #sequential lines act like they are piped; need to run as a unit
-png(filename = "../Output/AvPw_WT_LOW_SolFits_4s_10C.png")
+png(filename = "../Output/AvPw_WT_LOW_Chlorella_SolFits_4s_10C.png")
 wt.avg(WVT_10C_4s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
 periodlab = "Periodicity",
-main = "Diatoms 10C, Pulse space 4 sec")
+main = "Chlorella_ 10C, Pulse space 4 sec")
 dev.off()
 
 #y axis is log2 scale not linear
-png(filename = "../Output/WT_LOW_SolFits_4s_10C.png")
+png(filename = "../Output/WT_LOW_Chlorella_SolFits_4s_10C.png")
 wt.image(WVT_10C_4s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
 plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
 show.date = TRUE, date.format = "%F %S",
-main = "Diatoms 10C, Pulse space 4 sec")
+main = "Chlorella_ 10C, Pulse space 4 sec")
 dev.off()
 
 ```
@@ -122,21 +123,21 @@ WVT_10C_2s <-
 MP_DeSpBl <- max(WVT_10C_2s$Power)
 
 #sequential lines act like they are piped; need to run as a unit
-png(filename = "../Output/AvPw_WT_LOW_SolFits_2s_10C.png")
+png(filename = "../Output/AvPw_WT_LOW_Chlorella_SolFits_2s_10C.png")
 wt.avg(WVT_10C_2s, show.siglvl = TRUE, siglvl =  0.05, maximum.level = 1,   #set level to mark significance
 periodlab = "Periodicity",
-main = "Diatoms 10C, Pulse space 2 sec")
+main = "Chlorella 10C, Pulse space 2 sec")
 dev.off()
 
 #y axis is log2 scale not linear
-png(filename = "../Output/WT_LOW_SolFits_2s_10C.png")
+png(filename = "../Output/WT_LOW_Chlorella_SolFits_2s_10C.png")
 wt.image(WVT_10C_2s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
 plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
 show.date = TRUE, date.format = "%F %S",
-main = "Diatoms 10C, Pulse space 2 sec")
+main = "Chlorella 10C, Pulse space 2 sec")
 dev.off()
 
 ```
@@ -156,21 +157,21 @@ WVT_18C_2s <- analyze.wavelet(LOW_SolFits_2s_18C, "FvFm",
 
 MP_DeSpBl <- max(WVT_18C_2s$Power)
 
-png(filename = "../Output/AvPw_WT_LOW_SolFits_2s_18C.png")
+png(filename = "../Output/AvPw_WT_LOW_Chlorella_SolFits_2s_18C.png")
 wt.avg(WVT_18C_2s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
 periodlab = "Periodicity",
-main = "Diatoms 18C, Pulse space 2 sec")
+main = "Chlorella 18C, Pulse space 2 sec")
 dev.off()
 
 
-png(filename = "../Output/WT_LOW_SolFits_2s_18C.png")
+png(filename = "../Output/WT_LOW_Chlorella_SolFits_2s_18C.png")
 wt.image(WVT_18C_2s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
 plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
 show.date = TRUE, date.format = "%F %T",
-main = "Diatoms 18C, Pulse space 2 sec")
+main = "Chlorella 18C, Pulse space 2 sec")
 dev.off()
 
 ```
@@ -189,91 +190,91 @@ WVT_18C_4s <- analyze.wavelet(LOW_SolFits_4s_18C, "FvFm",
 
 MP_DeSpBl <- max(WVT_18C_4s$Power)
 
-png(filename = "../Output/AvPw_WT_LOW_SolFits_4s_18C.png")
+png(filename = "../Output/AvPw_WT_LOW_Chlorella_SolFits_4s_18C.png")
 wt.avg(WVT_18C_4s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
 periodlab = "Periodicity",
-main = "Diatoms 18C, Pulse space 4 sec")
+main = "Chlorella 18C, Pulse space 4 sec")
 dev.off()
 
 
-png(filename = "../Output/WT_LOW_SolFits_4s_18C.png")
+png(filename = "../Output/WT_LOW_Chlorella_SolFits_4s_18C.png")
 wt.image(WVT_18C_4s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
 plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
 show.date = TRUE, date.format = "%F %T",
-main = "Diatoms 18C, Pulse space 4 sec")
+main = "Chlorella 18C, Pulse space 4 sec")
 dev.off()
 
 ```
 
-```{r WVT Test 0.5 s 10C}
+```{r WVT Test 1 s 10C}
 
-LOW_SolFits_05s_10C <- LOW_SolFits %>%
+LOW_SolFits_1s_10C <- LOW_SolFits %>%
   filter(Temp_C == "10C",
-         PulseSpace_s == 0.5)
+         PulseSpace_s == 1)
 
-WVT_10C_05s <- analyze.wavelet(LOW_SolFits_05s_10C, "FvFm",
+WVT_10C_1s <- analyze.wavelet(LOW_SolFits_1s_10C, "FvFm",
                         method = "white.noise",
                         loess.span = 0, 
                         dt = 1, dj = 1/500,
                         lowerPeriod = 2, upperPeriod = 36,
                         make.pval =TRUE, n.sim = 100)
 
-MP_DeSpBl <- max(WVT_10C_05s$Power)
+MP_DeSpBl <- max(WVT_10C_1s$Power)
 
 #sequential lines act like they are piped; need to run as a unit
-png(filename = "../Output/AvPw_WT_LOW_SolFits_05s_10C.png")
-wt.avg(WVT_10C_05s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
+png(filename = "../Output/AvPw_WT_LOW_Chlorella_SolFits_1s_10C.png")
+wt.avg(WVT_10C_1s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
 periodlab = "Periodicity",
-main = "Diatoms 10C, Pulse space 0.5 sec")
+main = "Chlorella 10C, Pulse space 1 sec")
 dev.off()
 
 #y axis is log2 scale not linear
-png(filename = "../Output/WT_LOW_SolFits_05s_10C.png")
-wt.image(WVT_10C_05s, periodlab = "Periodicity",
+png(filename = "../Output/WT_LOW_Chlorella_SolFits_1s_10C.png")
+wt.image(WVT_10C_1s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
 plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
 show.date = TRUE, date.format = "%F %S",
-main = "Diatoms 10C, Pulse space 0.5 sec")
+main = "Chlorella 10C, Pulse space 1 sec")
 dev.off()
 
 ```
 
 
-```{r WVT Test 0.5 s 18C}
+```{r WVT Test 1 s 18C}
 
-LOW_SolFits_05s_18C <- LOW_SolFits %>%
+LOW_SolFits_1s_18C <- LOW_SolFits %>%
   filter(Temp_C == "18C",
-         PulseSpace_s == 0.5)
+         PulseSpace_s == 1)
 
-WVT_18C_05s <- analyze.wavelet(LOW_SolFits_05s_18C, "FvFm",
+WVT_18C_1s <- analyze.wavelet(LOW_SolFits_1s_18C, "FvFm",
                         method = "white.noise",
                         loess.span = 0, 
                         dt = 1, dj = 1/500,
                         lowerPeriod = 2, upperPeriod = 36,
                         make.pval =TRUE, n.sim = 100)
 
-MP_DeSpBl <- max(WVT_18C_05s$Power)
+MP_DeSpBl <- max(WVT_18C_1s$Power)
 
-png(filename = "../Output/AvPw_WT_LOW_SolFits_05s_18C.png")
-wt.avg(WVT_18C_05s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
+png(filename = "../Output/AvPw_WT_LOW_Chlorella_SolFits_1s_18C.png")
+wt.avg(WVT_18C_1s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
 periodlab = "Periodicity",
-main = "Diatoms 18C, Pulse space 0.5 sec")
+main = "Chlorella 18C, Pulse space 1 sec")
 dev.off()
 
 
-png(filename = "../Output/WT_LOW_SolFits_05s_18C.png")
-wt.image(WVT_18C_05s, periodlab = "Periodicity",
+png(filename = "../Output/WT_LOW_Chlorella_SolFits_1s_18C.png")
+wt.image(WVT_18C_1s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
 plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
 show.date = TRUE, date.format = "%F %T",
-main = "Diatoms 18C, Pulse space 0.5 sec")
+main = "Chlorella 18C, Pulse space 1 sec")
 dev.off()
 
 ```
@@ -294,21 +295,21 @@ WVT_10C_8s <- analyze.wavelet(LOW_SolFits_8s_10C, "FvFm",
 
 MP_DeSpBl <- max(WVT_10C_8s$Power)
 
-png(filename = "../Output/AvPw_WT_LOW_SolFits_8s_10C.png")
+png(filename = "../Output/AvPw_WT_LOW_Chlorella_SolFits_8s_10C.png")
 wt.avg(WVT_10C_8s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
 periodlab = "Periodicity",
-main = "Diatoms 10C, Pulse space 8 sec")
+main = "Chlorella 10C, Pulse space 8 sec")
 dev.off()
 
 
-png(filename = "../Output/WT_LOW_SolFits_8s_10C.png")
+png(filename = "../Output/WT_LOW_Chlorella_SolFits_8s_10C.png")
 wt.image(WVT_10C_8s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
 plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
 show.date = TRUE, date.format = "%F %T",
-main = "Diatoms 10C, Pulse space 8 sec")
+main = "Chlorella 10C, Pulse space 8 sec")
 dev.off()
 
 ```
@@ -329,21 +330,21 @@ WVT_18C_8s <- analyze.wavelet(LOW_SolFits_8s_18C, "FvFm",
 
 MP_DeSpBl <- max(WVT_18C_8s$Power)
 
-png(filename = "../Output/AvPw_WT_LOW_SolFits_8s_18C.png")
+png(filename = "../Output/AvPw_WT_LOW_Chlorella_SolFits_8s_18C.png")
 wt.avg(WVT_18C_8s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
 periodlab = "Periodicity",
-main = "Diatoms 18C, Pulse space 8 sec")
+main = "Chlorella 18C, Pulse space 8 sec")
 dev.off()
 
 
-png(filename = "../Output/WT_LOW_SolFits_8s_18C.png")
+png(filename = "../Output/WT_LOW_Chlorella_SolFits_8s_18C.png")
 wt.image(WVT_18C_8s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
 plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
 show.date = TRUE, date.format = "%F %T",
-main = "Diatoms 18C, Pulse space 8 sec")
+main = "Chlorella 18C, Pulse space 8 sec")
 dev.off()
 
 ```
@@ -353,9 +354,9 @@ dev.off()
 
 ```{r reconstructing the signal}
 
-reconstruct(WVT_10C_05s, siglvl = 0.05)
+reconstruct(WVT_10C_1s, siglvl = 0.05)
 reconstruct(WVT_10C_8s, siglvl = 0.05)
-reconstruct(WVT_18C_05s, siglvl = 0.05)
+reconstruct(WVT_18C_1s, siglvl = 0.05)
 reconstruct(WVT_18C_8s, siglvl = 0.05)
 ```
 
