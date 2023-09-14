@@ -58,7 +58,7 @@ CalibData <- file.path("..","Data", "CalibData")
 #RunDate <- "Refit"
 
 #DataIn <- file.path("..","Data", "RawData","Fit", fsep = .Platform$file.sep)
-DataIn <- file.path("..","Data", "RawData","WithDecay","Fit", fsep = .Platform$file.sep)
+DataIn <- file.path("..","Data", "RawData","NoDecay","Fit", fsep = .Platform$file.sep)
 
 FileID <- "fit"
 
@@ -131,17 +131,17 @@ SolFitsDecay <- SolisenseFiles %>%
 #for NoDecayDataset
 SolFitsDecayTrim <- SolFitsDecay %>% 
   filter(!grepl("----", DATE)) %>% # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X", "Light_1.1"))  # remove superfluous columns
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X" ))  # remove superfluous columns
 
-OldNames <- c("Chisq", "Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA")
-NewNames <- c("Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA","Tau3QANew")
+#OldNames <- c("Chisq", "Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA")
+#NewNames <- c("Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA","Tau3QANew")
 
 SolFitsDecayTrim <- SolFitsDecayTrim |>
-  rename_with(~ NewNames[which(OldNames == .x)], .cols = OldNames) |>
-  select(-c(Tau3QA)) |>
-  rename(Tau3QA = Tau3QANew) |>
+  #rename_with(~ NewNames[which(OldNames == .x)], .cols = OldNames) |>
+  #select(-c(Tau3QA)) |>
+  r#ename(Tau3QA = Tau3QANew) |>
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/WithDecay/Fit/")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/NoDecay/Fit/")) %>%
   mutate(Filename = str_remove(string = Filename, pattern = "LOW_")) %>%
   separate(Filename, into=c("YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
