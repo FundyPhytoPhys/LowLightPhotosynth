@@ -53,7 +53,7 @@ knitr::opts_chunk$set(fig.path='Output/')
 # Set Project Variables
 ```{r set project variables}
 Project <- "LOW"
-TargetTaxa <- "Chlorella"
+TargetTaxa <- "Tpseudonana"
 DataOut <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
 
@@ -63,8 +63,8 @@ ChlDataURL <- "https://docs.google.com/spreadsheets/d/1K4ibFMAjxHUszMHw-beBns0cq
 #RunDate <- "Refit"
 
 #DataIn <- file.path("..","Data", "RawData","Fit", fsep = .Platform$file.sep)
-DataIn <- file.path("..","Data", "RawData","Chlorella", "NoDecay", fsep = .Platform$file.sep)
-DataRefDecay <- file.path("..","Data", "RawData","Chlorella", "RefDecay", fsep = .Platform$file.sep)
+DataIn <- file.path("..","Data", "RawData", TargetTaxa, "NoDecay", fsep = .Platform$file.sep)
+DataRefDecay <- file.path("..","Data", "RawData",TargetTaxa, "RefDecay", fsep = .Platform$file.sep)
 
 FileID <- "fit"
 
@@ -167,7 +167,8 @@ SolFitsTrim <- SolFitsTrim |>
          FvFm = "Fv.Fm") |>
   type_convert() |>
   mutate(PulseSpace_s = str_remove(PulseSpace_s, "S")) |>
-  mutate(PulseSpace_s = if_else(PulseSpace_s %in% c("05"), "0.5", PulseSpace_s)) |>
+  filter(PulseSpace_s %in% c(1, 2, 4, 8, 16)) |>  #remove rows with other PulseSpace_s
+ # mutate(PulseSpace_s = if_else(PulseSpace_s %in% c("05"), "0.5", PulseSpace_s)) |>
   mutate(PulseSpace_s = as.numeric(PulseSpace_s)) |>
   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
   relocate(ObsDateTime, .after = ObsTime) %>%
@@ -191,11 +192,13 @@ SolFitsTrim <- SolFitsTrim |>
 #normalize values to final stretch of 10 values from 'randomized' PSII pool
 SolFitsTrim <-SolFitsTrim %>%
   group_by(Filename) %>%
+  arrange(ObsTime) |>
   mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
          Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
          Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
          FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) |>
   mutate(Flashnumber = row_number()) %>%
+  mutate(Flashnumber2 = rank(ObsTime)) |>
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
@@ -258,9 +261,16 @@ Fm vs Flashnumber line; facet by temp
 #facetbytemp
 SolFitsTrim %>%
   ggplot()+
-  geom_line(aes(x=Flashnumber, y=Fmrunnorm, group=PulseSpace_s, colour = as.factor(PulseSpace_s))) +
-  #scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
-  facet_grid("Temp_C") +
+  geom_line(aes(x=Flashnumber, y=Fmrunnorm, colour = as.factor(PulseSpace_s))) +
+  facet_grid(rows = vars(Temp_C)) +
+  labs(title = TargetTaxa) +
+  theme_bw()
+
+SolFitsTrim %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=Flashnumber2, colour = as.factor(PulseSpace_s))) +
+  facet_grid(rows = vars(Temp_C)) +
+  labs(title = TargetTaxa) +
   theme_bw()
 ```
 
@@ -269,11 +279,18 @@ Fmrunnorm vs Flashnumber line; facet by flash spacing
 #facetbyspacing
 SolFitsTrim %>%
   ggplot()+
-  geom_line(aes(x=Flashnumber, y= Fmrunnorm, group=Temp_C, colour=Temp_C)) +
-  scale_x_continuous(limits=c(0,20), breaks=seq(0,20,4)) +
-  facet_grid("PulseSpace_s") +
+  geom_line(aes(x=ObsTime, y= Fmrunnorm)) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
+  labs(title = TargetTaxa) +
   theme_bw()
 ```
+
+
+```{r save SolFitsTrim data}
+saveRDS(SolFitsTrim, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+```
+
+
 
 **Very rough** results:   
 At **10c**        
@@ -314,7 +331,7 @@ FvFm vs Flashnumber point
 ```{r FvFm vs Flashnumber}
 SolFitsDecayTrim %>%
   ggplot()+
-  geom_point(aes(x=Flashnumber, y=as.numeric(FvFm), group=Temp_C, colour=Temp_C)) +
+  geom_point(aes(x=Flashnumber, y= FvFm, group=Temp_C, colour=Temp_C)) +
   facet_grid("PulseSpace_s") +
   scale_x_continuous(limits=c(0,16), breaks=seq(0,16,4)) +
   scale_colour_manual(values = c("lightsteelblue3","palevioletred4")) +
@@ -446,173 +463,3 @@ SolFitsTrim <- SolFitsTrim %>%
 
 SolFitsTrim[1,]
 
-#generate column with duration of light step in s
-#add a column adding Dark1s based upon any step < 5 s
-#replace NA for first dark with nominal 181;  issue will be changing durations of light steps across each run
-SolFitsTrim <- SolFitsTrim %>%
-  group_by(Source.DataFile, CultureID, Ex_WL) %>%
-  #mutate(Step_s = as.numeric(ObsDateTime - lag(ObsDateTime)), .after = ObsDateTime) %>%
-  mutate(Step_s = replace_na(as.numeric(ObsDateTime - lag(ObsDateTime)), 181), .after = ObsDateTime) %>% 
-  mutate(LR_s = as.numeric(ObsDateTime - ObsDateTime[1]), .after = Step_s) %>%
-  mutate(Dark1s = if_else(Step_s > 5, 0, 1), .after = Step_s) %>%
-  relocate(Ex_WL, .after = Dark1s) %>%
-  relocate(ActPAR, .after = Ex_WL)
-#Figure out how to cope with final step at 0 PAR, not followed by Dark1s step
-#separate Dark1s rows
-#Figure out how to re-match Dark1s to appropriate light steps
-
-end chunk {r ActPARcorr}
-
-start chunk {r prelimplots}
-SolFitsTrim %>%
-  filter(Dark1s == 0) %>%
-  filter(Tau2QA < 20000) %>%
-  ggplot() +
-  geom_point(aes(x = ActPARCorr, y = Tau2QA, colour = as.factor(TempCont), size = LR_s)) +
-  #scale_colour_manual(values = Colours_nm) +
-  facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-  theme_bw()
-
-SolFitsTrim %>%
-  #filter(Dark1s != 0) %>%
-  ggplot() +
-  geom_point(aes(x = ActPARCorr, y = Alp2QA, colour = as.factor(TempCont), size = LR_s)) +
-  #scale_colour_manual(values = Colours_nm) +
-  facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-  theme_bw() 
-
-end chunk {r prelimplots}
-
-
-Oxborough & Baker 1997 for Fo'
-
-start chunk {r estimate parameters}
-SolFitsTrim <- SolFitsTrim %>%
-  group_by(Source.DataFile, CultureID, Ex_WL, TempCont) %>%
-  mutate(Fodark = Fo[1],
-         Fmdark = Fm[1],
-         Sigdark = Sig[1],
-         TauAv = ((Tau1QA * Alp1QA) + (Tau2QA * Alp2QA))/(Alp1QA + Alp2QA),
-         aLHIIdark = (Fmdark * Fodark)/(Fmdark - Fodark),
-         Fomin = min(Fo, na.rm = TRUE),
-         Fmmax = max(Fm, na.rm = TRUE),
-         FoOxbo = Fomin/(((Fmmax - Fomin)/Fmmax) + (Fomin/Fm)),
-         Sigmax = max(Sig, na.rm = TRUE),
-         #aLHIIminmax = (Fmmax * Fomin)/(Fmmax - Fomin),
-         aLHIIOxbomax = (Fmmax * FoOxbo)/(Fmmax - FoOxbo),
-         Sig_m2psii = Sig/A2_m2,
-         ActPARCorr_photonsm2s = ActPARCorr *  photons_umol,
-         #Ctau1 = 1/(1 + (Sig_m2psii * ActPARCorr_photonsm2s * (Tau1QA/us_s))),
-         #Ctau2 = 1/(1 + (Sig_m2psii * ActPARCorr_photonsm2s * (Tau2QA/us_s))),
-         Ctauav = 1/(1 + (Sig_m2psii * ActPARCorr_photonsm2s * (TauAv/us_s))),
-         #qp = (Fm - Fo)/(Fm - lead(Fo)), #(Fm' - Fs)/(Fm' - Fo'); messes up every 2nd row from double tap data but then filter out rows from 'dark'
-         qpOxbo = (Fm - Fo)/(Fm - FoOxbo),
-         #JVPSII_aLHIIminmax = ActPARCorr_photonsm2s * aLHIIminmax * FvFm, #issue with FvFm in cyanobacteria; minimized with blue light excitation
-         #JVPSII_aLHIIdark = ActPARCorr_photonsm2s * aLHIIdark * FvFm,
-         JVPSII_aLHIIOxbomax = ActPARCorr_photonsm2s * aLHIIOxbomax * FvFm,
-         #ETRCtau1 = Sig_m2psii * Ctau1 * ActPARCorr_photonsm2s,
-         #ETRCtau2 = Sig_m2psii * Ctau2 * ActPARCorr_photonsm2s,
-         ETRCtauav = Sig_m2psii * Ctauav * ActPARCorr_photonsm2s,
-         #ETRqp = Sig_m2psii * qp * ActPARCorr_photonsm2s,
-         ETRqpOxbo = Sig_m2psii * qpOxbo * ActPARCorr_photonsm2s,
-         #ETRGorbo = (1/TauAv[7])*((ActPARCorr*FvFm)/(ActPARCorr[7]*FvFm[7])) * us_s,
-         TestTauAvSat = 1/TauAv[ActPARCorr_photonsm2s == max(ActPARCorr_photonsm2s)],
-         ETRGorbo = (1/TauAv[ActPARCorr_photonsm2s == max(ActPARCorr_photonsm2s)])*((ActPARCorr_photonsm2s*FvFm)/(max(ActPARCorr_photonsm2s))*(FvFm[ActPARCorr_photonsm2s == max(ActPARCorr_photonsm2s)])) * us_s,
-                                                                                    #Pmax x scaling for change in yield and light
-*(#)*relies upon phiPSII which is not absolute in cyanos
-         JVPSII_ETRtauav_FoSig = ETRCtauav * Fomin/Sigmax, #Sigmax not converted A2_m2
-         JVPSII_ETRqpOxbo_FoSig = ETRqpOxbo * Fomin/Sigmax,
-         JVPSII_ETRtauav_aLHII_Sig = ETRCtauav * aLHIIOxbomax/Sigmax,
-         JVPSII_ETRqpOxbo_aLHII_Sig = ETRqpOxbo * aLHIIOxbomax/Sigmax) %>%
-  ungroup()
-
-end chunk {r estimate parameters}
-
-start chunk {r prelimplots2}
-SolFitsTrim %>%
-  filter(Dark1s == 0) %>%
-  ggplot() +
-  geom_point(aes(x = ActPARCorr, y = aLHIIOxbomax, colour = as.factor(TempCont))) +
-  #geom_point(aes(x = ActPARCorr, y = aLHIIminmax), shape = "cross") +
-  #scale_colour_manual(values = Colours_nm) +
-  facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-  theme_bw()
-
-SolFitsTrim %>%
-  filter(Dark1s == 0) %>%
-  ggplot() +
-  geom_point(aes(x = ActPARCorr, y = ETRqpOxbo, colour = as.factor(TempCont))) +
-  geom_point(aes(x = ActPARCorr, y = ETRGorbo), shape = "cross") +
-  #scale_colour_manual(values = Colours_nm) +
-  facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-  theme_bw()
-
-
- SolFitsTrim %>%
-   filter(Dark1s == 0) %>%
-   ggplot() +
-   geom_point(aes(x = Ctau1, y = qp, colour = as.factor(TempCont))) +
-   #geom_point(aes(x = ActPARCorr, y = aLHIIminmax), shape = "cross") +
-   #scale_colour_manual(values = Colours_nm) +
-   facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-   geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
-   coord_fixed(xlim = c(0,1), ylim = c(0,1), ratio = 1) +
-   theme_bw()
-
-SolFitsTrim %>%
-  filter(Dark1s == 0) %>%
-  ggplot() +
-  geom_point(aes(x = Ctauav, y = qpOxbo, colour = as.factor(TempCont))) +
-  #geom_point(aes(x = ActPARCorr, y = aLHIIminmax), shape = "cross") +
-  #scale_colour_manual(values = Colours_nm) +
-  facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
-  coord_fixed(xlim = c(0,1), ylim = c(0,1), ratio = 1) +
-  theme_bw()
-
-SolFitsTrim %>%
-  filter(Dark1s == 0) %>%
-  ggplot() +
-  geom_point(aes(x = ActPARCorr, y = JVPSII_ETRtauav_FoSig, colour = as.factor(TempCont))) +
-  #geom_point(aes(x = ActPARCorr, y = aLHIIminmax), shape = "cross") +
-  #scale_colour_manual(values = Colours_nm) +
-  facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-  theme_bw()
-
-SolFitsTrim %>%
-  filter(Dark1s == 0) %>%
-  ggplot() +
-  geom_point(aes(x = 
-         JVPSII_ETRqpOxbo_FoSig, y = JVPSII_ETRtauav_aLHII_Sig, colour = as.factor(TempCont))) +
-  #geom_point(aes(x = ActPARCorr, y = aLHIIminmax), shape = "cross") +
-  #scale_colour_manual(values = Colours_nm) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
-  coord_fixed(ratio = 1) +
-  facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-  theme_bw()
-
-SolFitsTrim %>%
-  filter(Dark1s == 0) %>%
-  ggplot() +
-  geom_point(aes(x =  JVPSII_ETRqpOxbo_FoSig, y = JVPSII_aLHIIOxbomax, colour = as.factor(TempCont))) +
-  #geom_point(aes(x = ActPARCorr, y = aLHIIminmax), shape = "cross") +
-  #scale_colour_manual(values = Colours_nm) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
-  #coord_fixed(ratio = 1) +
-  facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-  theme_bw()
-
-  #ETRGorbo works well for blue light but appears to fail for 590 nm; possible issue with low FV/FM with PBsome excitation?
-
-SolFitsTrim %>%
-  #filter(Dark1s == 0) %>%
-  ggplot() +
-  geom_point(aes(x = ETRCtauav, y = ETRGorbo, colour = as.factor(TempCont))) +
-  #geom_point(aes(x = ActPARCorr, y = aLHIIminmax), shape = "cross") +
-  #scale_colour_manual(values = Colours_nm) +
-  geom_abline(intercept = 0, slope = 1, linetype = "dashed") + 
-  #coord_fixed(ratio = 1) +
-  facet_grid(cols = vars(Ex_WL), rows = vars(CultureID)) +
-  theme_bw()
-
-end chunk {r prelimplots2}
