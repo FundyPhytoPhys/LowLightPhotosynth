@@ -53,18 +53,19 @@ knitr::opts_chunk$set(fig.path='Output/')
 # Set Project Variables
 ```{r set project variables}
 Project <- "LOW"
-TargetTaxa <- "Tpseudonana"
+TargetTaxa <- "Chlamy"
 DataOut <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
 
-ChlDataURL <- "https://docs.google.com/spreadsheets/d/1K4ibFMAjxHUszMHw-beBns0cqNqF2G7nZDF9Drm8MAQ/edit#gid=0"
+#ChlDataURL <- "https://docs.google.com/spreadsheets/d/1K4ibFMAjxHUszMHw-beBns0cqNqF2G7nZDF9Drm8MAQ/edit#gid=0"
 
 #Temporary RunDate during auditing
 #RunDate <- "Refit"
 
 #DataIn <- file.path("..","Data", "RawData","Fit", fsep = .Platform$file.sep)
-DataIn <- file.path("..","Data", "RawData", TargetTaxa, "NoDecay", fsep = .Platform$file.sep)
-DataRefDecay <- file.path("..","Data", "RawData",TargetTaxa, "RefDecay", fsep = .Platform$file.sep)
+DataIn <- file.path("..","Data", "RawData", TargetTaxa, fsep = .Platform$file.sep)
+DataRefDecay <- file.path("..","Data", "RawData",TargetTaxa, "DecayRef", fsep = .Platform$file.sep)
+DataRLC <- file.path("..","Data", "RawData",TargetTaxa, "RLC", fsep = .Platform$file.sep)
 
 FileID <- "fit"
 
@@ -144,50 +145,39 @@ SolFits <- SolisenseFiles %>%
 # Odd issue in WithDecay files, with ChiSq appearing a second time after QARredMax column, offsetting column headers from proper data columns
 ```{r tidy SolFitsTrim ND}
 #for NoDecayDataset
-SolFitsTrim <- SolFits %>% 
-  filter(!grepl("----", DATE)) %>% # remove rows with "----" 
+SolFitsTrim <- SolFits |>
+  filter(!grepl("----", DATE)) |> # remove rows with "----" 
   select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X" ))  # remove superfluous columns
 
 #OldNames <- c("Chisq", "Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA")
 #NewNames <- c("Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA","Tau3QANew")
 
+head(SolFitsTrim)
+
 SolFitsTrim <- SolFitsTrim |>
   #rename_with(~ NewNames[which(OldNames == .x)], .cols = OldNames) |>
   #select(-c(Tau3QA)) |>
   #rename(Tau3QA = Tau3QANew) |>
-  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) |>
   #mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/NoDecay/")) %>%
-    mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
+    mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
  # mutate(Filename = str_remove(string = Filename, pattern = "LOW_")) %>%
-  separate(Filename, into=c("Species", "Type", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
+  separate(Filename, into=c("Species", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) %>%
    rename(ObsDate = DATE,
          ObsTime = TIME,
          FvFm = "Fv.Fm") |>
   type_convert() |>
-  mutate(PulseSpace_s = str_remove(PulseSpace_s, "S")) |>
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) |>  #s vs S
   filter(PulseSpace_s %in% c(1, 2, 4, 8, 16)) |>  #remove rows with other PulseSpace_s
- # mutate(PulseSpace_s = if_else(PulseSpace_s %in% c("05"), "0.5", PulseSpace_s)) |>
+ # mutate(PulseSpace_s = if_else(PulseSpace_s %in% c("05"), "0.5", PulseSpace_s))
   mutate(PulseSpace_s = as.numeric(PulseSpace_s)) |>
   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
   relocate(ObsDateTime, .after = ObsTime) %>%
   relocate(CultureID, .before = ObsDate) |>
   type_convert()
 
-
-# %>%
-#   mutate(Sig = as.numeric(as.character(Sig)),
-#          Fo = as.numeric(as.character(Fo)),
-#          Fm = as.numeric(as.character(Fm)),
-#          FvFm = as.numeric(as.character(FvFm)),
-#          
-#          nm445 = as.numeric(as.character(Light_1)),
-#          nm470 = as.numeric(as.character(Light_2)),
-#          nm505 = as.numeric(as.character(Light_3)),
-#          nm535 = as.numeric(as.character(Light_4)),
-#          nm590 = as.numeric(as.character(Light_5)),
-#          IR = as.numeric(as.character(Light_6))) %>%
 
 #normalize values to final stretch of 10 values from 'randomized' PSII pool
 SolFitsTrim <-SolFitsTrim %>%
@@ -261,8 +251,8 @@ Fm vs Flashnumber line; facet by temp
 #facetbytemp
 SolFitsTrim %>%
   ggplot()+
-  geom_line(aes(x=Flashnumber, y=Fmrunnorm, colour = as.factor(PulseSpace_s))) +
-  facet_grid(rows = vars(Temp_C)) +
+  geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(PulseSpace_s))) +
+  facet_grid(rows = vars(Temp_C, ObsDate), cols = vars(CultureID)) +
   labs(title = TargetTaxa) +
   theme_bw()
 
