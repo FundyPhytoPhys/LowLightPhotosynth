@@ -386,10 +386,13 @@ SolFitsTrim2 %>%
 
 
 ```{r save SolFitsTrim data}
-saveRDS(SolFitsTrim, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(SolFitsTrim2, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
-
+XXXX
+Import RLC data
+Import DecayRef data? (or use Tau from RLC?)
+Merge with MetaData
 
 **Very rough** results:   
 At **10c**        
