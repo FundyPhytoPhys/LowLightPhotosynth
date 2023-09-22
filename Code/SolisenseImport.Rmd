@@ -371,12 +371,14 @@ SolFitsTrim2  |>
 
 
 
-Fmrunnorm vs Flashnumber line; facet by flash spacing
+FvFm vs Flashnumber line; facet by flash spacing
 ```{r Fm vs Flashnumber(by S)}
 #facetbyspacing
-SolFitsTrim %>%
+SolFitsTrim2 %>%
+  filter(CultureID == "MaPo1001") |>
+  #filter(ObsDate == "2023-09-20") |>
   ggplot()+
-  geom_line(aes(x=ObsTime, y= Fmrunnorm)) +
+  geom_line(aes(x=Flashnumber2, y= FvFm, colour = as.factor(ObsDate))) +
   facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
   labs(title = TargetTaxa) +
   theme_bw()
