@@ -291,6 +291,77 @@ PulseSpace_16, 8C (extra points at end)
 MaPo1005
 PulseSpace_16, 22C (extra points at end of run)
 
+```{r manually trim data}
+SolFitsTrim20230918_MaPo1001 <- SolFitsTrim |>
+   filter(ObsDate == "2023-09-18",
+          CultureID == "MaPo1001") |>
+  group_by(Temp_C, PulseSpace_s) |>
+  slice_max(order_by = Flashnumber2, n = 32) |>
+  #mutate(Flashnumber2 = c(1:length(Flashnumber))) |>
+  ungroup()
+
+SolFitsTrim20230918_MaPo1001  |>
+  ggplot()+
+  geom_line(aes(x=Flashnumber2, y=FvFm, colour = as.factor(PulseSpace_s))) +
+  facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID)) +
+  labs(title = TargetTaxa) +
+  theme_bw()
+
+
+SolFitsTrim20230918_MaPo1002  |>
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(PulseSpace_s))) +
+  facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID)) +
+  labs(title = TargetTaxa) +
+  theme_bw()
+
+SolFitsTrim20230918_MaPo1002 <- SolFitsTrim |>
+   filter(ObsDate == "2023-09-18",
+          CultureID == "MaPo1002",
+          Flashnumber2 <= 32)
+
+SolFitsTrim20230918_MaPo1002  |>
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(PulseSpace_s))) +
+  facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID)) +
+  labs(title = TargetTaxa) +
+  theme_bw()
+
+SolFitsTrim20230919 <- SolFitsTrim |>
+  filter(ObsDate == "2023-09-19",
+         Flashnumber2 <= 32)
+
+SolFitsTrim20230919  |>
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(PulseSpace_s))) +
+  facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID)) +
+  labs(title = TargetTaxa) +
+  theme_bw()
+
+SolFitsTrim20230920 <- SolFitsTrim |>
+  filter(ObsDate == "2023-09-20",
+         Flashnumber2 <= 32)
+
+SolFitsTrim20230920  |>
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(PulseSpace_s))) +
+  facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID)) +
+  labs(title = TargetTaxa) +
+  theme_bw()
+
+SolFitsTrim2 <- rbind(SolFitsTrim20230918_MaPo1002, SolFitsTrim20230919, SolFitsTrim20230920)
+
+SolFitsTrim2  |>
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(PulseSpace_s))) +
+  facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID, ObsDate)) +
+  labs(title = TargetTaxa) +
+  theme_bw()
+
+```
+
+
+
 Fmrunnorm vs Flashnumber line; facet by flash spacing
 ```{r Fm vs Flashnumber(by S)}
 #facetbyspacing
