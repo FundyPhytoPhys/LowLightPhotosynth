@@ -126,6 +126,10 @@ SolisenseFiles
 
 #test for duplicate file names
 unique(duplicated(SolisenseFiles))
+
+RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
+RLCFiles
+
 ```
 
 ```{r data read adds filename and cdate, warning=FALSE, message=FALSE, echo=FALSE}
@@ -142,6 +146,10 @@ purrr::map to read all files
 ```{r read Solisense files}
 SolFits <- SolisenseFiles %>%
   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
+
+RLCFits <- RLCFiles %>%
+  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
+
 ```
 
 # Odd issue in WithDecay files, with ChiSq appearing a second time after QARredMax column, offsetting column headers from proper data columns
@@ -247,6 +255,51 @@ head(SolFitsTrim)
   #ungroup()
 ```
 
+
+```{r tidy SolFitsTrim ND}
+#for NoDecayDataset
+RLCFitsTrim <- RLCFits |>
+  filter(!grepl("----", DATE)) |> # remove rows with "----" 
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X" ))  # remove superfluous columns
+
+head(RLCFitsTrim)
+
+RLCFitsTrim <- RLCFitsTrim |>
+  mutate(Filename = str_remove(string = Filename, pattern = "_RLC_fit.csv")) |>
+    mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
+  separate(Filename, into=c("Species", "Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) %>%
+  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+          TIME = as.character(TIME)) %>%
+   rename(ObsDate = DATE,
+         ObsTime = TIME,
+         FvFm = "Fv.Fm") |>
+  mutate(Temp_C = str_remove(Temp_C, "C")) |>
+  type_convert() |>
+  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
+  relocate(ObsDateTime, .after = ObsTime) %>%
+  relocate(CultureID, .before = ObsDate) |>
+  type_convert()
+
+
+RLCFitsTrim <- RLCFitsTrim |>
+  group_by(Filename) |>
+  arrange(ObsTime) |>
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000) %>%
+  ungroup()
+
+RLCFitsTrim <- RLCFitsTrim |>
+  rowwise() |>
+  mutate(PAR_ue = sum(Light_1, Light_2, Light_3, Light_4, Light_5, Light_6)) |>
+  group_by(Filename) |>
+  mutate(Dark1s = case_when(row_number() == 1 ~ 0,
+                            row_number() %% 2 == 0 & row_number() > 1 ~ 0,
+                            row_number() %% 2 == 1 & row_number() > 1 ~ 1)) |>
+  ungroup()
+     
+
+head(RLCFitsTrim)
+```
+
 # Basic plots
 
 Fm vs Flashnumber line; facet by temp 
@@ -264,6 +317,13 @@ SolFitsTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=Flashnumber2, colour = as.factor(PulseSpace_s))) +
   facet_grid(rows = vars(Temp_C)) +
+  labs(title = TargetTaxa) +
+  theme_bw()
+
+RLCFitsTrim %>%
+  ggplot()+
+  geom_line(aes(x = PAR_ue, y = FvFm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(CultureID)) +
   labs(title = TargetTaxa) +
   theme_bw()
 ```
@@ -382,6 +442,13 @@ SolFitsTrim2 %>%
   facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
   labs(title = TargetTaxa) +
   theme_bw()
+```
+
+RLC Plots
+```{r rlc plots}
+RLCFitsTrim |>
+  ggplot() +
+  geom_line(aes())
 ```
 
 
