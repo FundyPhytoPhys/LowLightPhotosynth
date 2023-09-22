@@ -59,6 +59,8 @@ CalibData <- file.path("..","Data", "CalibData")
 
 #ChlDataURL <- "https://docs.google.com/spreadsheets/d/1K4ibFMAjxHUszMHw-beBns0cqNqF2G7nZDF9Drm8MAQ/edit#gid=0"
 
+ChlamyMetadata <- "https://docs.google.com/spreadsheets/d/1m8Pjwj4DL10AwdsQo2G3boymSWG1Oq-gJDzjU0csRKs/edit?pli=1#gid=0"
+
 #Temporary RunDate during auditing
 #RunDate <- "Refit"
 
@@ -99,9 +101,9 @@ ActPARCrossCal <- ActPARCrossCal |>
 ```
 
 ```{r read ChlData}
-gs4_deauth()
-
-ChlData <- read_sheet(ChlDataURL)
+# gs4_deauth()
+# 
+# ChlData <- read_sheet(ChlDataURL)
 
 
 ```
@@ -250,9 +252,10 @@ Fm vs Flashnumber line; facet by temp
 ```{r Fm vs Flashnumber(by T)}
 #facetbytemp
 SolFitsTrim %>%
+  filter(ObsDate == "2023-09-18") |>
   ggplot()+
   geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(PulseSpace_s))) +
-  facet_grid(rows = vars(Temp_C, ObsDate), cols = vars(CultureID)) +
+  facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID)) +
   labs(title = TargetTaxa) +
   theme_bw()
 
@@ -263,6 +266,30 @@ SolFitsTrim %>%
   labs(title = TargetTaxa) +
   theme_bw()
 ```
+
+File issues to fix:
+2023-09-18
+MaPo1001
+PulseSpace_s 1, 4C (double)  (keep 2nd run)
+PulseSpace_s 16, 12C (triple)  (keep last run? difficult to tell?)
+PulseSpace 16_s, 4C (missing)  (try to figure out order of measurements)?
+
+MaPo1002
+PulseSpace_s 16, 8C, (extra points at end)
+
+MaPo1003
+PulseSpace_s 8, 8C (missing) (try to figure out order of measurements)?
+
+2023-09-19
+MaPo1001
+PulseSpace_16, 4C (extra points at end)
+
+MaPo1004
+PulseSpace_16, 8C (extra points at end)
+
+2023-09-20
+MaPo1005
+PulseSpace_16, 22C (extra points at end of run)
 
 Fmrunnorm vs Flashnumber line; facet by flash spacing
 ```{r Fm vs Flashnumber(by S)}
