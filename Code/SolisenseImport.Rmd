@@ -436,12 +436,20 @@ FvFm vs Flashnumber line; facet by flash spacing
 #facetbyspacing
 SolFitsTrim2 %>%
   filter(CultureID == "MaPo1001") |>
-  #filter(ObsDate == "2023-09-20") |>
+  filter(ObsDate == "2023-09-18") |>
+  filter(PulseSpace_s %in% c(1, 8)) |>
+  filter(Temp_C %in% c(4, 12)) |>
   ggplot()+
-  geom_line(aes(x=Flashnumber2, y= FvFm, colour = as.factor(ObsDate))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
-  labs(title = TargetTaxa) +
+  geom_line(aes(x=Flashnumber2, y= FvFm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(PulseSpace_s)) +
+  labs(title = paste("Antarctic Lake", TargetTaxa), x = "Flash Number", y = "Maximum Quantum Yield of PSII") +
   theme_bw()
+
+ggsave(
+  "AntarcticChlamyFlashCyclesDecay.png",
+  plot = last_plot(),
+  path = file.path("..", "Output")
+)
 ```
 
 RLC Plots
