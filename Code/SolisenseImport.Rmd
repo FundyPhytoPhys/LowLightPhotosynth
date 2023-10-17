@@ -53,13 +53,14 @@ knitr::opts_chunk$set(fig.path='Output/')
 # Set Project Variables
 ```{r set project variables}
 Project <- "LOW"
-TargetTaxa <- "Chlamy"
+#TargetTaxa <- "Chlamy"
+TargetTaxa <- "Takuvik"
 DataOut <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
 
 #ChlDataURL <- "https://docs.google.com/spreadsheets/d/1K4ibFMAjxHUszMHw-beBns0cqNqF2G7nZDF9Drm8MAQ/edit#gid=0"
 
-ChlamyMetadata <- "https://docs.google.com/spreadsheets/d/1m8Pjwj4DL10AwdsQo2G3boymSWG1Oq-gJDzjU0csRKs/edit?pli=1#gid=0"
+#ChlamyMetadata <- "https://docs.google.com/spreadsheets/d/1m8Pjwj4DL10AwdsQo2G3boymSWG1Oq-gJDzjU0csRKs/edit?pli=1#gid=0"
 
 #Temporary RunDate during auditing
 #RunDate <- "Refit"
@@ -119,7 +120,12 @@ Colours_nm
 
 ```
 
+# Metadata Import
+```{r import metadata}
+TakuvikMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1OC22KJy-VdQU9r1-PYvQaJO42_ugdFcHmRHWbMYOHUc/edit?usp=sharing")
+```
 
+# Fit File Import
 ```{r list PSI files for file import}
 SolisenseFiles <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
 SolisenseFiles
@@ -155,22 +161,22 @@ RLCFits <- RLCFiles %>%
 # Odd issue in WithDecay files, with ChiSq appearing a second time after QARredMax column, offsetting column headers from proper data columns
 ```{r tidy SolFitsTrim ND}
 #for NoDecayDataset
-SolFitsTrim <- SolFits |>
+SolFitsTrim <- SolFits %>%
   filter(!grepl("----", DATE)) |> # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X" ))  # remove superfluous columns
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6"))  # remove superfluous columns
 
 #OldNames <- c("Chisq", "Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA")
 #NewNames <- c("Fo", "Fm","Fv.Fm", "Sig", "p","Alp1QA","Tau1QA","Alp2QA","Tau2QA","Alp3QA","Tau3QANew")
 
 head(SolFitsTrim)
 
-SolFitsTrim <- SolFitsTrim |>
+SolFitsTrim <- SolFitsTrim %>%
   #rename_with(~ NewNames[which(OldNames == .x)], .cols = OldNames) |>
   #select(-c(Tau3QA)) |>
   #rename(Tau3QA = Tau3QANew) |>
-  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) |>
+  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
   #mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/NoDecay/")) %>%
-    mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
+    mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
  # mutate(Filename = str_remove(string = Filename, pattern = "LOW_")) %>%
   separate(Filename, into=c("Species", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
@@ -207,9 +213,8 @@ SolFitsTrim <-SolFitsTrim %>%
 head(SolFitsTrim)
 ```
 
-
 ```{r fix column names}
-#only use this chunk if analyzing data from Data-RawData-WithDecay-Fit
+#only use this chunk if analyzing data from Data-RawData-Pilot-WithDecay-Fit
 #create new data frame, had to remove extra column
 #SolFits2 <- SolFits[-32] 
 #assign correct names
@@ -217,6 +222,47 @@ head(SolFitsTrim)
 #rename columns 
 #colnames(SolFits2)[21:31] <- c(Fixnames)
 ```
+
+
+```{r parallel SolFitsTrim for Tauvik Data}
+#for NoDecay Data
+SolFitsTrim <- SolFits %>%
+  filter(!grepl("----", DATE)) %>% # remove rows with "----" 
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X", "Light_2", "Light_3","Light_4","Light_5","Light_6")) #remove extra columns
+  
+SolFitsTrim <- SolFitsTrim %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
+  separate(Filename, into=c("Location", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
+  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD)) %>%
+  rename("ObsDate" = "DATE", "ObsTime" = "TIME", "FvFm" = "Fv.Fm") %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  type_convert() %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%  #s vs S
+  filter(PulseSpace_s %in% c(1, 2, 4, 8, 16)) %>%  #remove rows with other PulseSpace_s
+  mutate(PulseSpace_s = as.numeric(PulseSpace_s)) %>%
+  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
+  relocate(ObsDateTime, .after = ObsTime) %>%
+  relocate(CultureID, .before = ObsDate) %>%
+  type_convert()
+
+#normalize values to final stretch of 10 values from 'randomized' PSII pool
+SolFitsTrim <- SolFitsTrim %>%
+  group_by(Filename) %>%
+  #arrange(ObsTime)%>%
+  #mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
+         #Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
+         #Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
+         #FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) 
+  mutate(Flashnumber = row_number()) %>%
+  mutate(Flashnumber2 = rank(ObsTime)) %>%
+  relocate(Flashnumber, .before=p) %>%
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
+  ungroup()
+
+```
+
+
 
 ```{r tidy SolFitsTrim WD}
 # for WithDecay Fit Dataset
@@ -260,14 +306,12 @@ head(SolFitsTrim)
 #for NoDecayDataset
 RLCFitsTrim <- RLCFits |>
   filter(!grepl("----", DATE)) |> # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X" ))  # remove superfluous columns
-
-head(RLCFitsTrim)
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X"))  # remove superfluous columns
 
 RLCFitsTrim <- RLCFitsTrim |>
   mutate(Filename = str_remove(string = Filename, pattern = "_RLC_fit.csv")) |>
     mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
-  separate(Filename, into=c("Species", "Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) %>%
+  separate(Filename, into=c("Location", "Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) %>%
    rename(ObsDate = DATE,
@@ -300,13 +344,31 @@ RLCFitsTrim <- RLCFitsTrim |>
 head(RLCFitsTrim)
 ```
 
+
+#Separate Takuvik Data by Taxa 
+Link ID with Species 
+Mutate to add species in SolFits Trim 
+Graph group_by Taxon
+```{r merge data}
+SolFitsTrim2 <- SolFitsTrim %>%
+  rename("ID"= "CultureID") %>%
+  left_join(TakuvikMetadata, select(TakuvikMetadata$Strain))
+```
+```{r}
+SolFitsTrim2 <- SolFitsTrim %>%
+  rename("ID"= "CultureID") %>%
+  left_join(TakuvikMetadata, by = "ID")
+```
+
+
+
 # Basic plots
 
 Fm vs Flashnumber line; facet by temp 
 ```{r Fm vs Flashnumber(by T)}
 #facetbytemp
 SolFitsTrim %>%
-  filter(ObsDate == "2023-09-18") |>
+  #filter(ObsDate == "2023-09-26") |>
   ggplot()+
   geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(PulseSpace_s))) +
   facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID)) +
