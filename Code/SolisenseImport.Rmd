@@ -250,17 +250,17 @@ SolFitsTrim <- SolFitsTrim %>%
 SolFitsTrim <- SolFitsTrim %>%
   group_by(Filename) %>%
   #arrange(ObsTime)%>%
-  #mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
-         #Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
-         #Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
-         #FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) 
+  mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
+         Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
+         Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
+         FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
   mutate(Flashnumber = row_number()) %>%
   mutate(Flashnumber2 = rank(ObsTime)) %>%
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
-
 ```
+
 
 
 
@@ -302,7 +302,7 @@ SolFitsTrim <- SolFitsTrim %>%
 ```
 
 
-```{r tidy SolFitsTrim ND}
+```{r tidy RLC Fits}
 #for NoDecayDataset
 RLCFitsTrim <- RLCFits |>
   filter(!grepl("----", DATE)) |> # remove rows with "----" 
@@ -345,20 +345,66 @@ head(RLCFitsTrim)
 ```
 
 
-#Separate Takuvik Data by Taxa 
+#Takuvik File Issues 
+```{r}
+SolFitsTrim %>%
+  filter(Flashnumber > 32)
+```
+
+
+20230925_SeGu1002_2C_16s
+20230926_SeGu1001_10C_8s
+20230927_SeGu1001_0C_16s
+20230927_SeGu1008_0C_16s
+- 1 extra flash
+
+20230925_SeGu1003_2C_16s
+- 49 flashes
+
+20230925_SeGu1004_2C_16s
+- 37 flashes 
+
+20230925_SeGu1005_2C_16s
+- 120 flashes 
+
+20230925_SeGu1005_2C_8s
+- 64 flashes 
+
+20230925_SeGu1006_2C_16s
+20230926_SeGu1001_0C_16s
+20230926_SeGu1008_10C_16s
+20230927_SeGu1001_10C_16s
+- 34 flashes 
+
+20230926_SeGu1001_6C_16s
+- 70 flashes 
+
+20230926_SeGu1008_6C_16s
+- 39 flashes 
+
+20230927_SeGu1008_2C_16s
+- 65 flashes
+
+20230927_SeGu1008_6C_16s 
+- 38 flashes 
+
+```{r trim}
+SolFitsTrim2 <- SolFitsTrim %>%
+    filter(Flashnumber %in% c(1:32))
+#for now since I don't know where the errors are
+```
+
+
 Link ID with Species 
 Mutate to add species in SolFits Trim 
 Graph group_by Taxon
+Issue: Many ys per x need to somehow assign names to IDs
 ```{r merge data}
 SolFitsTrim2 <- SolFitsTrim %>%
-  rename("ID"= "CultureID") %>%
-  left_join(TakuvikMetadata, select(TakuvikMetadata$Strain))
+  rename("ID"= "CultureID")%>%
+  inner_join(TakuvikMetadata[,c("ID", "Strain")], by = "ID")
 ```
-```{r}
-SolFitsTrim2 <- SolFitsTrim %>%
-  rename("ID"= "CultureID") %>%
-  left_join(TakuvikMetadata, by = "ID")
-```
+
 
 
 
@@ -367,21 +413,27 @@ SolFitsTrim2 <- SolFitsTrim %>%
 Fm vs Flashnumber line; facet by temp 
 ```{r Fm vs Flashnumber(by T)}
 #facetbytemp
-SolFitsTrim %>%
+SolFitsTrim2 %>%
   #filter(ObsDate == "2023-09-26") |>
   ggplot()+
-  geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(PulseSpace_s))) +
-  facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID)) +
+  geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(CultureID))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
   labs(title = TargetTaxa) +
   theme_bw()
+```
 
+
+```{r Fm vs Flashnumber(by T)}
 SolFitsTrim %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=Flashnumber2, colour = as.factor(PulseSpace_s))) +
   facet_grid(rows = vars(Temp_C)) +
   labs(title = TargetTaxa) +
   theme_bw()
+```
 
+
+```{r Fm vs Flashnumber(by T)}
 RLCFitsTrim %>%
   ggplot()+
   geom_line(aes(x = PAR_ue, y = FvFm)) +
@@ -390,7 +442,7 @@ RLCFitsTrim %>%
   theme_bw()
 ```
 
-File issues to fix:
+# Chlamy File issues:S
 2023-09-18
 MaPo1001
 PulseSpace_s 1, 4C (double)  (keep 2nd run)
@@ -523,6 +575,10 @@ RLCFitsTrim |>
 
 
 ```{r save SolFitsTrim data}
+saveRDS(SolFitsTrim2, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+```
+
+```{r save Takuvik Data}
 saveRDS(SolFitsTrim2, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
