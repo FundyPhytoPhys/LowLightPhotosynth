@@ -209,46 +209,6 @@ head(SolFitsTrim)
 ```
 
 
-```{r parallel SolFitsTrim for Tauvik Data}
-#for NoDecay Data
-SolFitsTrim <- SolFits %>%
-  filter(!grepl("----", DATE)) %>% # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X", "Light_2", "Light_3","Light_4","Light_5","Light_6")) #remove extra columns
-  
-SolFitsTrim <- SolFitsTrim %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
-  separate(Filename, into=c("Location", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
-  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD)) %>%
-  rename("ObsDate" = "DATE", "ObsTime" = "TIME", "FvFm" = "Fv.Fm") %>%
-  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
-  type_convert() %>%
-  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%  #s vs S
-  filter(PulseSpace_s %in% c(1, 2, 4, 8, 16)) %>%  #remove rows with other PulseSpace_s
-  mutate(PulseSpace_s = as.numeric(PulseSpace_s)) %>%
-  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
-  relocate(ObsDateTime, .after = ObsTime) %>%
-  relocate(CultureID, .before = ObsDate) %>%
-  type_convert()
-
-#normalize values to final stretch of 10 values from 'randomized' PSII pool
-SolFitsTrim <- SolFitsTrim %>%
-  group_by(Filename) %>%
-  #arrange(ObsTime)%>%
-  mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
-         Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
-         Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
-         FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
-  mutate(Flashnumber = row_number()) %>%
-  mutate(Flashnumber2 = rank(ObsTime)) %>%
-  relocate(Flashnumber, .before=p) %>%
-  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
-  ungroup()
-```
-
-
-
-
 ```{r tidy SolFitsTrim WD}
 # for WithDecay Fit Dataset
 
@@ -328,80 +288,6 @@ RLCFitsTrim <- RLCFitsTrim |>
 
 head(RLCFitsTrim)
 ```
-
-
-#Takuvik File Issues 
-```{r}
-SolFitsTrim %>%
-  filter(Flashnumber > 32)
-```
-
-
-**Unresolved**
-20230925_SeGu1005_2C_8s   - 2 full runs, keep second 
-20230927_SeGu1008_2C_16s  - contains 2 full runs, keep second 
-20230926_SeGu1001_6C_16s  - last 32 are a run, but spacing is 19s? bad run, computer should have replacement 
-
-**To fix**
-20230925_SeGu1005_2C_16s  - keep flashes 58-89
-
-code all of those to keep the last 32 
-20230925_SeGu1002_2C_16s  - remove first flash 
-20230926_SeGu1001_10C_8s  - remove first flash 
-20230927_SeGu1001_0C_16s  - remove first flash
-20230927_SeGu1008_0C_16s  - remove first flash
-20230925_SeGu1003_2C_16   - keep last 32
-20230925_SeGu1004_2C_16s  - keep last 32
-20230925_SeGu1006_2C_16s  - keep last 32
-20230926_SeGu1001_0C_16s  - keep last 32
-20230926_SeGu1008_10C_16s - keep last 32
-20230927_SeGu1001_10C_16s - keep last 32
-20230926_SeGu1008_6C_16s  - keep last 32
-20230927_SeGu1008_6C_16s  - keep last 32
-
-
-```{r manual trim Takuvik}
-SolFitsTrim_last32 <- SolFitsTrim %>%
-   filter(!Filename %in% c('Takuvik/20230925_SeGu1005_2C_16s', 'Takuvik/20230926_SeGu1001_6C_16s', 'Takuvik/20230927_SeGu1008_2C_16s','Takuvik/20230925_SeGu1005_2C_8s')) %>% 
-  group_by(Filename) %>%
-  slice(tail(row_number(),32)) %>% 
-  mutate(Flashnumber2 = row_number()) %>%
-  ungroup()
-
-SolFitsTrimSeGu1005_2C_16s <- SolFitsTrim %>%
-  filter(Filename == 'Takuvik/20230925_SeGu1005_2C_16s') %>%
-  filter(Flashnumber %in% c(58:89)) %>%
-  mutate(Flashnumber2 = row_number())
-
-#SolFitsTrimSeGu1005_2C_8s <- SolFitsTrim %>%
- # filter(Filename == 'Takuvik/20230925_SeGu1005_2C_8s') %>%
- # slice() %>% 
- # mutate(Flashnumber2 = row_number()) 
-
-#SolFitsTrimSeGu1008_2C_16s <- SolFitsTrim %>%
- # filter(Filename == '20230927_SeGu1008_2C_16s') %>%
- # slice() %>% 
- # mutate(Flashnumber2 = row_number())
-  
-#SolFitsTrim2 <- rbind(SolFitsTrim_last32, SolFitsTrimSeGu1005_2C_16s,SolFitsTrimSeGu1005_2C_8s, SolFitsTrimSeGu1008_2C_16s) 
-```
-
-
-
-
-
-
-
-Link ID with Species 
-Mutate to add species in SolFits Trim 
-Graph group_by Taxon
-**Issue: Many ys per x need to somehow assign names to IDs**
-```{r merge data}
-SolFitsTrim2 <- SolFitsTrim2 %>%
-  rename("ID"= "CultureID")%>%
-  inner_join(TakuvikMetadata[,c("ID", "Strain")], by = "ID")
-```
-
 
 
 
@@ -575,9 +461,6 @@ RLCFitsTrim |>
 saveRDS(SolFitsTrim2, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
-```{r save Takuvik Data}
-saveRDS(SolFitsTrim2, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
-```
 
 XXXX
 Import RLC data
