@@ -338,9 +338,9 @@ SolFitsTrim %>%
 
 
 **Unresolved**
-20230925_SeGu1005_2C_8s   - 2 full runs
-20230927_SeGu1008_2C_16s  - contains 2 full runs
-20230926_SeGu1001_6C_16s  - last 32 are a run, but spacing is 19s?
+20230925_SeGu1005_2C_8s   - 2 full runs, keep second 
+20230927_SeGu1008_2C_16s  - contains 2 full runs, keep second 
+20230926_SeGu1001_6C_16s  - last 32 are a run, but spacing is 19s? bad run, computer should have replacement 
 
 **To fix**
 20230925_SeGu1005_2C_16s  - keep flashes 58-89
