@@ -260,6 +260,17 @@ SolFitsFragilariopsis <- SolFitsTrim2 %>%
   filter(CultureID %in% c("SeGu1001","SeGu1003","SeGu1006","SeGu1008"))
 ```
 
+Fragilariopsis
+4 trials for each interval at 0C and 10C
+    - except 20230927_SeGu1006_10C_16s only has 31
+6 runs at 2C for 1,2,4,8s
+    - 7 for 16s
+5 runs at 6C for 1,2,4, 16s
+
+Chaeotoceros (only done at 2C)
+3 runs at 1, 2, 4, 16s 
+2 runs at 8s 
+
 
 # Test Plot
 ```{r}

@@ -110,7 +110,7 @@ RLCFits <- RLCFiles %>%
 ```{r tidy dataset}
 SolFitsTrim <- SolFits %>%
   filter(!grepl("----", DATE)) %>%
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X", "Light_2", "Light_3","Light_4","Light_5","Light_6")) %>%
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6")) %>%
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
   mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
   separate(Filename, into=c("Species", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
@@ -262,6 +262,16 @@ SolFitsReinhardtii <- SolFitsTrim2 %>%
   filter(CultureID %in% c("MaPo1005", "MaPo1006"))
 ```
 
+Overall: 
+
+2 full runs at each temp/spacing combination except:
+    - 20230919_MaPo1002_12C_16s only has 31 flashes
+    - 20230918_MaPo1001_12C_8s only has 30 flashes     
+    - 1 run of Chlamydomonas malina (MaPo1003 at 8C, 8s)
+    - Chlamydomonas priscuii has 3 runs for each 
+        - except 4C, 16s, which only has 2 
+    
+  
 
 # Test Plots
 ```{r}
@@ -301,6 +311,27 @@ RLCFitsTrim %>%
   facet_grid(rows = vars(Temp_C), cols = vars(CultureID)) +
   labs(title = TargetData) +
   theme_bw()
+```
+
+```{r}
+#facetbyspacing
+SolFitsTrim2 %>%
+  filter(CultureID == "MaPo1001") |>
+  filter(ObsDate == "2023-09-18") |>
+  filter(PulseSpace_s %in% c(1, 8)) |>
+  filter(Temp_C %in% c(4, 12)) |>
+  ggplot()+
+  geom_line(aes(x=Flashnumber2, y= FvFm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(PulseSpace_s)) +
+  labs(title = paste("Antarctic Lake", "Chlamydomonas"), x = "Flash Number", y = "Maximum Quantum Yield of PSII") +
+  theme_bw()
+
+#ggsave(
+ # "AntarcticChlamyFlashCyclesDecay.png",
+ # plot = last_plot(),
+ # path = file.path("..", "Output")
+#)
+```
 ```
 
 ```{r save Data}
