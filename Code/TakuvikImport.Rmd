@@ -275,8 +275,9 @@ Chaeotoceros (only done at 2C)
 # Test Plot
 ```{r}
 SolFitsFragilariopsis %>%
+  filter(Temp_C %in% c("2","10"), PulseSpace_s%in% c("1","8"), CultureID == "SeGu1001") %>%
   ggplot() +
-  geom_line(aes(x=Flashnumber2, y=FvFm, colour = as.factor(CultureID))) +
+  geom_line(aes(x=Flashnumber2, y=FvFm)) +
   facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
   labs(title = "Fragilariopsis_cylindrus") +
   theme_bw()
