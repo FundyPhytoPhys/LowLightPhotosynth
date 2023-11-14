@@ -6,8 +6,8 @@ Low Light Photosynthesis; how does it work?  what are the lower limits?
 
 ## Highly Qualified Personnel
 
-- Name, Institution, email, ORCID 0000-0000-0000-0000
-
+- Natasha M. Ryan, Mount Allison University, nmryan@mta.ca,
+- 
 ## Principle Investigators
 
 - Douglas A. Campbell, Mount Allison University, dcampbel@mta.ca, ORCID 0000-0001-8996-5463
@@ -26,14 +26,14 @@ Low Light Photosynthesis; how does it work?  what are the lower limits?
 
 ## Keywords
 
-List keywords separated by commas
+Photosystem II, S-States, Recombination, Diatoms, Chlamydomonas, Low Temperature
 
 ## Additional information and support
 
 - Sensitive Data Flag - Human Participants:  NO
-- Sensitive Data Flag - Indigenous Partnerships: YES or NO
-- Sensitive Data Flag - Government Partnerships: YES or NO
-- Sensitive Data Flag - Industry Partnerships: YES or NO
+- Sensitive Data Flag - Indigenous Partnerships: NO
+- Sensitive Data Flag - Government Partnerships: NO
+- Sensitive Data Flag - Industry Partnerships: NO
 - Access Restrictions
 
 ## Software  
