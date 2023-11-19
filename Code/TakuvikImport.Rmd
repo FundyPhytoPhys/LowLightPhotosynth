@@ -288,7 +288,7 @@ SolFitsFragilariopsis %>%
   theme_bw()
 
 
-ggsave("FragilariopsisFlashCyclesDecay.png",
+#ggsave("FragilariopsisFlashCyclesDecay.png",
   plot = last_plot(),
   path = file.path("..", "Output"))
 ```
