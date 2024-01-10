@@ -184,7 +184,11 @@ main = "Fragilariopsis 16s, 10C, d")
 ```
 
 ```{r}
-WVT_16s_10C_a$Power.pval
+power_16s_10C_a <- as.data.frame(WVT_16s_10C_a$Power)
+pval_16s_10C_a <- as.data.frame(WVT_16s_10C_a$Power.pval)
+
+test <- colMeans(pval_16s_10C_a)
+test
 ```
 
 ### 8s
@@ -1203,6 +1207,7 @@ maximum.level = 1.001 * MP_DeSpBl_2s_6c_e,
 #show.date = TRUE, date.format = "%F %S",
 main = "Fragilariopsis 2s, 6C, e")
 ```
+
 
 ### 1s
 
