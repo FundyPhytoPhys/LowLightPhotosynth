@@ -66,53 +66,315 @@ SolFits <- SolFits |>
                     Flashnumber %% 4 == 0 ~ 4))
 ```
 
-# 10°C
 
-### 16s
-```{r WVT Test 16 s 10C}
-SolFits_16s_10C <- SolFits %>%
-  filter(Temp_C == "10",
-         PulseSpace_s == 16)
-  
-SolFits_16s_10C_a <- SolFits_16s_10C[1:32,]
-SolFits_16s_10C_b <- SolFits_16s_10C[33:64,]
-SolFits_16s_10C_c <- SolFits_16s_10C[65:96,]
-SolFits_16s_10C_d <- SolFits_16s_10C[97:127,] #last run missing a flash
+```{r create functions}
+wavelet <- function(data){wavelet_result <- analyze.wavelet(data, "FvFm",
+                                     method = "white.noise",
+                                     loess.span = 0,
+                                     dt = 1, dj = 1/250,
+                                     lowerPeriod = 1, upperPeriod = 32,
+                                     make.pval = TRUE, n.sim = 100)
+result_name <- paste(deparse(substitute(data)), "_wavelet_result")
+  assign(result_name, wavelet_result, envir = .GlobalEnv)
+return(wavelet_result)
+}
 
-
-WVT_16s_10C_a <- analyze.wavelet(SolFits_16s_10C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_16s_10C_b <- analyze.wavelet(SolFits_16s_10C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_16s_10C_c <- analyze.wavelet(SolFits_16s_10C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_16s_10C_d <- analyze.wavelet(SolFits_16s_10C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_16s_10C_a, siglvl = 0.05)
-reconstruct(WVT_16s_10C_b, siglvl = 0.05)
-reconstruct(WVT_16s_10C_c, siglvl = 0.05)
-reconstruct(WVT_16s_10C_d, siglvl = 0.05)
+reconstructwave <- function(wavelet_list, siglvl = 0.05) {
+  reconstructed_list <- lapply(wavelet_list, function(wave) {
+    reconstruct(wave, siglvl = siglvl)
+  })
+   recon_name <- paste(deparse(substitute(wavelet_list)), "_reconstructed")
+  assign(recon_name, reconstructed_list, envir = .GlobalEnv)
+  return(reconstructed_list)
+}
 ```
+
+
+# 10°C
+```{r WVT 16s 10C}
+Data_16S_10C <- list(
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(97:127)))
+  
+wavelet_16s_10C <- lapply(Data_16S_10C, wavelet)
+
+reconstructwave(wavelet_16s_10C)
+```
+
+
+```{r WVT 8s 10C}
+Data_8S_10C <- list(
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 8) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 8) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 8) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 8) %>% slice(97:128)))
+
+wavelet_8s_10C <- lapply(Data_8S_10C, wavelet)
+
+reconstructwave(wavelet_8s_10C)
+```
+
+
+```{r WVT 4s 10C}
+Data_4S_10C <- list(
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 4) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 4) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 4) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 4) %>% slice(97:128)))
+
+wavelet_4s_10C <- lapply(Data_4S_10C, wavelet)
+
+reconstructwave(wavelet_4s_10C)
+```
+
+
+```{r WVT 2s 10C}
+Data_2S_10C <- list(
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 2) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 2) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 2) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 2) %>% slice(97:128)))
+
+wavelet_2s_10C <- lapply(Data_2S_10C, wavelet)
+
+reconstructwave(wavelet_2s_10C)
+```
+
+
+```{r WVT 1s 10C}
+Data_1S_10C <- list(
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 1) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 1) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 1) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 1) %>% slice(97:128)))
+
+wavelet_1s_10C <- lapply(Data_1S_10C, wavelet)
+
+reconstructwave(wavelet_1s_10C)
+```
+
+
+# 6°C
+
+```{r WVT 16s 6C}
+Data_16S_6C <- list(
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(65:96)), # something odd 
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(97:128)),
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(129:160)))
+
+wavelet_16s_6C <- lapply(Data_16S_6C, wavelet)
+
+reconstructwave(wavelet_16s_6C)
+```
+
+
+```{r WVT 8s 16C}
+Data_8S_6C <- list(
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(1:32)), #funky
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(65:96)),  
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(97:128)),
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(129:160)))
+
+wavelet_8s_6C <- lapply(Data_8S_6C, wavelet)
+
+reconstructwave(wavelet_8s_6C)
+```
+
+
+```{r WVT 4s 6C}
+Data_4S_6C <- list(
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(1:32)), #funky
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(65:96)),  
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(97:128)),
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(129:160)))
+
+wavelet_4s_6C <- lapply(Data_4S_6C, wavelet)
+
+reconstructwave(wavelet_4s_6C)
+```
+
+
+```{r WVT 2s 6C}
+Data_2S_6C <- list(
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(1:32)), #funky
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(65:96)), #also funky 
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(97:128)),
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(129:160)))
+
+wavelet_2s_6C <- lapply(Data_2S_6C, wavelet)
+
+reconstructwave(wavelet_2s_6C)
+```
+
+
+```{r WVT 1s 6C}
+Data_1S_6C <- list(
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(1:32)), #funky
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(97:128)),
+  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(129:160)))
+
+wavelet_1s_6C <- lapply(Data_1S_6C, wavelet)
+
+reconstructwave(wavelet_1s_6C)
+```
+
+# 2°C
+
+```{r WVT 16s 2C}
+Data_16S_2C <- list(
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(65:96)), #funky
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(97:128)), #funky
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(129:160)), #funky
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(161:192)),
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(193:224)))
+
+wavelet_16s_2C <- lapply(Data_16S_2C, wavelet)
+
+reconstructwave(wavelet_16s_2C)
+```
+
+
+```{r WVT 8s 2C}
+Data_8S_2C <- list(
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(33:64)), #funky
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(97:128)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(129:160)),
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(161:192)))
+
+wavelet_8s_2C <- lapply(Data_8S_2C, wavelet)
+
+reconstructwave(wavelet_8s_2C)
+```
+
+
+```{r WVT 4s 2C}
+Data_4S_2C <- list(
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(33:64)), #funky
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(97:128)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(129:160)),
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(161:192)))
+
+wavelet_4s_2C <- lapply(Data_4S_2C, wavelet)
+
+reconstructwave(wavelet_4s_2C)
+```
+
+
+```{r WVT 2s 2C}
+Data_2S_2C <- list(
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(33:64)),
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(97:128)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(129:160)),
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(161:192)))
+
+wavelet_2s_2C <- lapply(Data_2S_2C, wavelet)
+
+reconstructwave(wavelet_2s_2C)
+```
+
+
+```{r WVT 1s 2C}
+Data_1S_2C <- list(
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(33:64)), #funky
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(97:128)), 
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(129:160)),
+  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(161:192)))
+
+wavelet_1s_2C <- lapply(Data_1S_2C, wavelet)
+
+reconstructwave(wavelet_1s_2C)
+```
+
+# 0°C
+
+```{r WVT 16s 0C}
+Data_16S_0C <- list(
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 16) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 16) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 16) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 16) %>% slice(97:128))) 
+
+wavelet_16s_0C <- lapply(Data_16S_0C, wavelet)
+
+reconstructwave(wavelet_16s_0C)
+```
+
+```{r WVT 8s 0C}
+Data_8S_0C <- list(
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 8) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 8) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 8) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 8) %>% slice(97:128))) 
+
+wavelet_8s_0C <- lapply(Data_8S_0C, wavelet)
+
+reconstructwave(wavelet_8s_0C)
+```
+
+```{r WVT 4s 0C}
+Data_4S_0C <- list(
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 4) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 4) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 4) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 4) %>% slice(97:128))) 
+
+wavelet_4s_0C <- lapply(Data_4S_0C, wavelet)
+
+reconstructwave(wavelet_4s_0C)
+```
+
+
+```{r WVT 2s 0C}
+Data_2S_0C <- list(
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 2) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 2) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 2) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 2) %>% slice(97:128))) 
+
+wavelet_2s_0C <- lapply(Data_2S_0C, wavelet)
+
+reconstructwave(wavelet_2s_0C)
+```
+
+
+```{r WVT 1s 0C}
+Data_1S_0C <- list(
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 1) %>% slice(1:32)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 1) %>% slice(33:64)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 1) %>% slice(65:96)), 
+  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 1) %>% slice(97:128))) 
+
+wavelet_1s_0C <- lapply(Data_1S_0C, wavelet)
+
+reconstructwave(wavelet_1s_0C)
+```
+
+
+
+
+
+
+
+
 
 
 ```{r Plot of wavelet power 16 s 10C}
@@ -183,1206 +445,8 @@ maximum.level = 1.001 * MP_DeSpBl_16s_10c_d,
 main = "Fragilariopsis 16s, 10C, d")
 ```
 
-```{r}
-power_16s_10C_a <- as.data.frame(WVT_16s_10C_a$Power)
-pval_16s_10C_a <- as.data.frame(WVT_16s_10C_a$Power.pval)
 
-test <- colMeans(pval_16s_10C_a)
-test
-```
 
-### 8s
-
-```{r WVT Test 8 s 10C}
-SolFits_8s_10C <- SolFits %>%
-  filter(Temp_C == "10",
-         PulseSpace_s == 8)
-  
-SolFits_8s_10C_a <- SolFits_8s_10C[1:32,]
-SolFits_8s_10C_b <- SolFits_8s_10C[33:64,]
-SolFits_8s_10C_c <- SolFits_8s_10C[65:96,]
-SolFits_8s_10C_d <- SolFits_8s_10C[97:128,] 
-
-
-WVT_8s_10C_a <- analyze.wavelet(SolFits_8s_10C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_8s_10C_b <- analyze.wavelet(SolFits_8s_10C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_8s_10C_c <- analyze.wavelet(SolFits_8s_10C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_8s_10C_d <- analyze.wavelet(SolFits_8s_10C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_8s_10C_a, siglvl = 0.05)
-reconstruct(WVT_8s_10C_b, siglvl = 0.05)
-reconstruct(WVT_8s_10C_c, siglvl = 0.05)
-reconstruct(WVT_8s_10C_d, siglvl = 0.05)
-```
-
-```{r Plot of wavelet power 8 s 10C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_8s_10C.png")
-wt.avg(WVT_8s_10C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 8s, 10C, a") 
-#dev.off()
-
-wt.avg(WVT_8s_10C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 8s, 10C, b") 
-
-wt.avg(WVT_8s_10C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 8s, 10C, c") 
-
-wt.avg(WVT_8s_10C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 8s, 10C, d")
-```
-
-
-```{r Image plot of wavelet power spectrum 8 s 10C}
-MP_DeSpBl_8s_10c_a <- max(WVT_8s_10C_a$Power)
-MP_DeSpBl_8s_10c_b <- max(WVT_8s_10C_b$Power)
-MP_DeSpBl_8s_10c_c <- max(WVT_8s_10C_c$Power)
-MP_DeSpBl_8s_10c_d <- max(WVT_8s_10C_d$Power)
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_8s_10C.png")
-wt.image(WVT_8s_10C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_8s_10c_a,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 8s, 10C, a")
-#dev.off()
-
-wt.image(WVT_8s_10C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_8s_10c_b,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 8s, 10C, b")
-
-wt.image(WVT_8s_10C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_8s_10c_c,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 8s, 10C, c")
-
-wt.image(WVT_8s_10C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_8s_10c_d,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 8s, 10C, d")
-```
-
-### 4s
-
-```{r WVT Test 4 s 10C}
-SolFits_4s_10C <- SolFits %>%
-  filter(Temp_C == "10",
-         PulseSpace_s == 4)
-  
-SolFits_4s_10C_a <- SolFits_4s_10C[1:32,]
-SolFits_4s_10C_b <- SolFits_4s_10C[33:64,]
-SolFits_4s_10C_c <- SolFits_4s_10C[65:96,]
-SolFits_4s_10C_d <- SolFits_4s_10C[97:128,] 
-
-
-WVT_4s_10C_a <- analyze.wavelet(SolFits_4s_10C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_4s_10C_b <- analyze.wavelet(SolFits_4s_10C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_4s_10C_c <- analyze.wavelet(SolFits_4s_10C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_4s_10C_d <- analyze.wavelet(SolFits_4s_10C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_4s_10C_a, siglvl = 0.05)
-reconstruct(WVT_4s_10C_b, siglvl = 0.05)
-reconstruct(WVT_4s_10C_c, siglvl = 0.05)
-reconstruct(WVT_4s_10C_d, siglvl = 0.05)
-```
-
-
-```{r Plot of wavelet power 4 s 10C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_4s_10C.png")
-wt.avg(WVT_4s_10C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 4s, 10C, a") 
-#dev.off()
-
-wt.avg(WVT_4s_10C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 4s, 10C, b") 
-
-wt.avg(WVT_4s_10C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 4s, 10C, c") 
-
-wt.avg(WVT_4s_10C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 4s, 10C, d")
-```
-
-```{r Image plot of wavelet power spectrum 4 s 10C}
-MP_DeSpBl_4s_10c_a <- max(WVT_4s_10C_a$Power)
-MP_DeSpBl_4s_10c_b <- max(WVT_4s_10C_b$Power)
-MP_DeSpBl_4s_10c_c <- max(WVT_4s_10C_c$Power)
-MP_DeSpBl_4s_10c_d <- max(WVT_4s_10C_d$Power)
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_4s_10C.png")
-wt.image(WVT_4s_10C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_4s_10c_a,
-show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 4s, 10C, a")
-#dev.off()
-
-wt.image(WVT_4s_10C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_4s_10c_b,
-show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 4s, 10C, b")
-
-wt.image(WVT_4s_10C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_4s_10c_c,
-show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 4s, 10C, c")
-
-wt.image(WVT_4s_10C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_4s_10c_d,
-show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 4s, 10C, d")
-```
-
-
-### 2s 
-```{r WVT Test 2 s 10C}
-SolFits_2s_10C <- SolFits %>%
-  filter(Temp_C == "10",
-         PulseSpace_s == 2)
-  
-SolFits_2s_10C_a <- SolFits_2s_10C[1:32,]
-SolFits_2s_10C_b <- SolFits_2s_10C[33:64,]
-SolFits_2s_10C_c <- SolFits_2s_10C[65:96,]
-SolFits_2s_10C_d <- SolFits_2s_10C[97:128,] 
-
-
-WVT_2s_10C_a <- analyze.wavelet(SolFits_2s_10C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_2s_10C_b <- analyze.wavelet(SolFits_2s_10C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_2s_10C_c <- analyze.wavelet(SolFits_2s_10C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_2s_10C_d <- analyze.wavelet(SolFits_2s_10C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_2s_10C_a, siglvl = 0.05)
-reconstruct(WVT_2s_10C_b, siglvl = 0.05)
-reconstruct(WVT_2s_10C_c, siglvl = 0.05)
-reconstruct(WVT_2s_10C_d, siglvl = 0.05)
-```
-
-
-```{r Plot of wavelet power 2 s 10C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_2s_10C.png")
-wt.avg(WVT_2s_10C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 2s, 10C, a") 
-#dev.off()
-
-wt.avg(WVT_2s_10C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 2s, 10C, b") 
-
-wt.avg(WVT_2s_10C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 2s, 10C, c") 
-
-wt.avg(WVT_2s_10C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 2s, 10C, d")
-```
-
-
-```{r Image plot of wavelet power spectrum 2 s 10C}
-MP_DeSpBl_2s_10c_a <- max(WVT_2s_10C_a$Power)
-MP_DeSpBl_2s_10c_b <- max(WVT_2s_10C_b$Power)
-MP_DeSpBl_2s_10c_c <- max(WVT_2s_10C_c$Power)
-MP_DeSpBl_2s_10c_d <- max(WVT_2s_10C_d$Power)
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_2s_10C.png")
-wt.image(WVT_2s_10C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_2s_10c_a,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 2s, 10C, a")
-#dev.off()
-
-wt.image(WVT_2s_10C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_2s_10c_b,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 2s, 10C, b")
-
-wt.image(WVT_2s_10C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_2s_10c_c,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 2s, 10C, c")
-
-wt.image(WVT_2s_10C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_2s_10c_d,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 2s, 10C, d")
-```
-
-### 1s 
-
-```{r WVT Test 1 s 10C}
-SolFits_1s_10C <- SolFits %>%
-  filter(Temp_C == "10",
-         PulseSpace_s == 1)
-  
-SolFits_1s_10C_a <- SolFits_1s_10C[1:32,]
-SolFits_1s_10C_b <- SolFits_1s_10C[33:64,]
-SolFits_1s_10C_c <- SolFits_1s_10C[65:96,]
-SolFits_1s_10C_d <- SolFits_1s_10C[97:128,] 
-
-
-WVT_1s_10C_a <- analyze.wavelet(SolFits_1s_10C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_1s_10C_b <- analyze.wavelet(SolFits_1s_10C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_1s_10C_c <- analyze.wavelet(SolFits_1s_10C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_1s_10C_d <- analyze.wavelet(SolFits_1s_10C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_1s_10C_a, siglvl = 0.05)
-reconstruct(WVT_1s_10C_b, siglvl = 0.05)
-reconstruct(WVT_1s_10C_c, siglvl = 0.05)
-reconstruct(WVT_1s_10C_d, siglvl = 0.05)
-```
-
-```{r Plot of wavelet power 1 s 10C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_1s_10C.png")
-wt.avg(WVT_1s_10C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 1s, 10C, a") 
-#dev.off()
-
-wt.avg(WVT_1s_10C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 1s, 10C, b") 
-
-wt.avg(WVT_1s_10C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 1s, 10C, c") 
-
-wt.avg(WVT_1s_10C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 1s, 10C, d")
-```
-
-```{r Image plot of wavelet power spectrum 1 s 10C}
-MP_DeSpBl_1s_10c_a <- max(WVT_1s_10C_a$Power)
-MP_DeSpBl_1s_10c_b <- max(WVT_1s_10C_b$Power)
-MP_DeSpBl_1s_10c_c <- max(WVT_1s_10C_c$Power)
-MP_DeSpBl_1s_10c_d <- max(WVT_1s_10C_d$Power)
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_1s_10C.png")
-wt.image(WVT_1s_10C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_1s_10c_a,
-show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 1s, 10C, a")
-#dev.off()
-
-wt.image(WVT_1s_10C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_1s_10c_b,
-show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 1s, 10C, b")
-
-wt.image(WVT_1s_10C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_1s_10c_c,
-show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 1s, 10C, c")
-
-wt.image(WVT_1s_10C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_1s_10c_d,
-show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 1s, 10C, d")
-```
-
-
-# 6°C
-
-### 16s
-```{r WVT Test 16 s 6C}
-SolFits_16s_6C <- SolFits %>%
-  filter(Temp_C == "6",
-         PulseSpace_s == 16)
-  
-SolFits_16s_6C_a <- SolFits_16s_6C[1:32,]
-SolFits_16s_6C_b <- SolFits_16s_6C[33:64,]
-SolFits_16s_6C_c <- SolFits_16s_6C[65:96,] # something odd with this trial 
-SolFits_16s_6C_d <- SolFits_16s_6C[97:128,] 
-SolFits_16s_6C_e <- SolFits_16s_6C[129:160,] 
-
-WVT_16s_6C_a <- analyze.wavelet(SolFits_16s_6C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_16s_6C_b <- analyze.wavelet(SolFits_16s_6C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_16s_6C_c <- analyze.wavelet(SolFits_16s_6C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_16s_6C_d <- analyze.wavelet(SolFits_16s_6C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_16s_6C_e <- analyze.wavelet(SolFits_16s_6C_e, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_16s_6C_a, siglvl = 0.05)
-reconstruct(WVT_16s_6C_b, siglvl = 0.05)
-reconstruct(WVT_16s_6C_c, siglvl = 0.05)
-reconstruct(WVT_16s_6C_d, siglvl = 0.05)
-reconstruct(WVT_16s_6C_e, siglvl = 0.05)
-```
-
-
-```{r Plot of wavelet power 16 s 6C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_8s_6C.png")
-wt.avg(WVT_16s_6C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 16s, 6C, a") 
-#dev.off()
-
-wt.avg(WVT_16s_6C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 16s, 6C, b") 
-
-wt.avg(WVT_16s_6C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 16s, 6C, c") 
-
-wt.avg(WVT_16s_6C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 16s, 6C, d")
-
-wt.avg(WVT_16s_6C_e, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 16s, 6C, e")
-```
-
-
-```{r Image plot of wavelet power spectrum 16 s 6C}
-MP_DeSpBl_16s_6c_a <- max(WVT_16s_6C_a$Power)
-MP_DeSpBl_16s_6c_b <- max(WVT_16s_6C_b$Power)
-MP_DeSpBl_16s_6c_c <- max(WVT_16s_6C_c$Power)
-MP_DeSpBl_16s_6c_d <- max(WVT_16s_6C_d$Power)
-MP_DeSpBl_16s_6c_e <- max(WVT_16s_6C_e$Power)
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_8s_6C.png")
-wt.image(WVT_16s_6C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_16s_6c_a,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 16s, 6C, a")
-#dev.off()
-
-wt.image(WVT_16s_6C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_16s_6c_b,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 16s, 6C, b")
-
-wt.image(WVT_16s_6C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_16s_6c_c,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 16s, 6C, c")
-
-wt.image(WVT_16s_6C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_16s_6c_d,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 16s, 6C, d")
-
-wt.image(WVT_16s_6C_e, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_16s_6c_e,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 16s, 6C, e")
-```
-
-### 8s
-
-```{r WVT Test 8 s 6C}
-SolFits_8s_6C <- SolFits %>%
-  filter(Temp_C == "6",
-         PulseSpace_s == 8)
-  
-SolFits_8s_6C_a <- SolFits_8s_6C[1:32,] #funky
-SolFits_8s_6C_b <- SolFits_8s_6C[33:64,]
-SolFits_8s_6C_c <- SolFits_8s_6C[65:96,]
-SolFits_8s_6C_d <- SolFits_8s_6C[97:128,] 
-SolFits_8s_6C_e <- SolFits_8s_6C[129:160,] 
-
-
-
-WVT_8s_6C_a <- analyze.wavelet(SolFits_8s_6C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_8s_6C_b <- analyze.wavelet(SolFits_8s_6C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_8s_6C_c <- analyze.wavelet(SolFits_8s_6C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_8s_6C_d <- analyze.wavelet(SolFits_8s_6C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_8s_6C_e <- analyze.wavelet(SolFits_8s_6C_e, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_8s_6C_a, siglvl = 0.05)
-reconstruct(WVT_8s_6C_b, siglvl = 0.05)
-reconstruct(WVT_8s_6C_c, siglvl = 0.05)
-reconstruct(WVT_8s_6C_d, siglvl = 0.05)
-reconstruct(WVT_8s_6C_e, siglvl = 0.05)
-```
-
-```{r Plot of wavelet power 8 s 6C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_8s_6C.png")
-wt.avg(WVT_8s_6C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 8s, 6C, a") 
-#dev.off()
-
-wt.avg(WVT_8s_6C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 8s, 6C, b") 
-
-wt.avg(WVT_8s_6C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 8s, 6C, c") 
-
-wt.avg(WVT_8s_6C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 8s, 6C, d")
-
-wt.avg(WVT_8s_6C_e, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 8s, 6C, e")
-```
-
-```{r Image plot of wavelet power spectrum 8 s 6C}
-MP_DeSpBl_8s_6c_a <- max(WVT_8s_6C_a$Power)
-MP_DeSpBl_8s_6c_b <- max(WVT_8s_6C_b$Power)
-MP_DeSpBl_8s_6c_c <- max(WVT_8s_6C_c$Power)
-MP_DeSpBl_8s_6c_d <- max(WVT_8s_6C_d$Power)
-MP_DeSpBl_8s_6c_e <- max(WVT_8s_6C_e$Power)
-
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_8s_6C.png")
-wt.image(WVT_8s_6C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_8s_6c_a,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 8s, 6C, a")
-#dev.off()
-
-wt.image(WVT_8s_6C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_8s_6c_b,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 8s, 6C, b")
-
-wt.image(WVT_8s_6C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_8s_6c_c,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 8s, 6C, c")
-
-wt.image(WVT_8s_6C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_8s_6c_d,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 8s, 6C, d")
-
-wt.image(WVT_8s_6C_e, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_8s_6c_e,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 8s, 6C, e")
-```
-
-### 4s
-
-```{r WVT Test 4 s 6C}
-SolFits_4s_6C <- SolFits %>%
-  filter(Temp_C == "6",
-         PulseSpace_s == 4)
-  
-SolFits_4s_6C_a <- SolFits_4s_6C[1:32,] #funky
-SolFits_4s_6C_b <- SolFits_4s_6C[33:64,]
-SolFits_4s_6C_c <- SolFits_4s_6C[65:96,]
-SolFits_4s_6C_d <- SolFits_4s_6C[97:128,] 
-SolFits_4s_6C_e <- SolFits_4s_6C[129:160,] 
-
-
-WVT_4s_6C_a <- analyze.wavelet(SolFits_4s_6C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_4s_6C_b <- analyze.wavelet(SolFits_4s_6C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_4s_6C_c <- analyze.wavelet(SolFits_4s_6C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_4s_6C_d <- analyze.wavelet(SolFits_4s_6C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_4s_6C_e <- analyze.wavelet(SolFits_4s_6C_e, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_4s_6C_a, siglvl = 0.05)
-reconstruct(WVT_4s_6C_b, siglvl = 0.05)
-reconstruct(WVT_4s_6C_c, siglvl = 0.05)
-reconstruct(WVT_4s_6C_d, siglvl = 0.05)
-reconstruct(WVT_4s_6C_e, siglvl = 0.05)
-```
-
-
-```{r Plot of wavelet power 4 s 6C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_4s_6C.png")
-wt.avg(WVT_4s_6C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 4s, 6C, a") 
-#dev.off()
-
-wt.avg(WVT_4s_6C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 4s, 6C, b") 
-
-wt.avg(WVT_4s_6C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 4s, 6C, c") 
-
-wt.avg(WVT_4s_6C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 4s, 6C, d")
-
-wt.avg(WVT_4s_6C_e, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 4s, 6C, e")
-```
-
-
-```{r Image plot of wavelet power spectrum 4 s 6C}
-MP_DeSpBl_4s_6c_a <- max(WVT_4s_6C_a$Power)
-MP_DeSpBl_4s_6c_b <- max(WVT_4s_6C_b$Power)
-MP_DeSpBl_4s_6c_c <- max(WVT_4s_6C_c$Power)
-MP_DeSpBl_4s_6c_d <- max(WVT_4s_6C_d$Power)
-MP_DeSpBl_4s_6c_e <- max(WVT_4s_6C_e$Power)
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_4s_6C.png")
-wt.image(WVT_4s_6C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_4s_6c_a,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 4s, 6C, a")
-#dev.off()
-
-wt.image(WVT_4s_6C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_4s_6c_b,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 4s, 6C, b")
-
-wt.image(WVT_4s_6C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_4s_6c_c,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 4s, 6C, c")
-
-wt.image(WVT_4s_6C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_4s_6c_d,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 4s, 6C, d")
-
-wt.image(WVT_4s_6C_e, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_4s_6c_e,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 4s, 6C, e")
-```
-
-### 2s
-
-```{r WVT Test 2 s 6C}
-SolFits_2s_6C <- SolFits %>%
-  filter(Temp_C == "6",
-         PulseSpace_s == 2)
-  
-SolFits_2s_6C_a <- SolFits_2s_6C[1:32,] #funky
-SolFits_2s_6C_b <- SolFits_2s_6C[33:64,]
-SolFits_2s_6C_c <- SolFits_2s_6C[65:96,] #also funky
-SolFits_2s_6C_d <- SolFits_2s_6C[97:128,] 
-SolFits_2s_6C_e <- SolFits_2s_6C[129:160,] 
-
-
-
-WVT_2s_6C_a <- analyze.wavelet(SolFits_2s_6C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_2s_6C_b <- analyze.wavelet(SolFits_2s_6C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_2s_6C_c <- analyze.wavelet(SolFits_2s_6C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_2s_6C_d <- analyze.wavelet(SolFits_2s_6C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_2s_6C_e <- analyze.wavelet(SolFits_2s_6C_e, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_2s_6C_a, siglvl = 0.05)
-reconstruct(WVT_2s_6C_b, siglvl = 0.05)
-reconstruct(WVT_2s_6C_c, siglvl = 0.05)
-reconstruct(WVT_2s_6C_d, siglvl = 0.05)
-reconstruct(WVT_2s_6C_e, siglvl = 0.05)
-```
-
-```{r Plot of wavelet power 2 s 6C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_2s_6C.png")
-wt.avg(WVT_2s_6C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 2s, 6C, a") 
-#dev.off()
-
-wt.avg(WVT_2s_6C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 2s, 6C, b") 
-
-wt.avg(WVT_2s_6C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 2s, 6C, c") 
-
-wt.avg(WVT_2s_6C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 2s, 6C, d")
-
-wt.avg(WVT_2s_6C_e, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 2s, 6C, e")
-```
-
-```{r Image plot of wavelet power spectrum 2 s 6C}
-MP_DeSpBl_2s_6c_a <- max(WVT_2s_6C_a$Power)
-MP_DeSpBl_2s_6c_b <- max(WVT_2s_6C_b$Power)
-MP_DeSpBl_2s_6c_c <- max(WVT_2s_6C_c$Power)
-MP_DeSpBl_2s_6c_d <- max(WVT_2s_6C_d$Power)
-MP_DeSpBl_2s_6c_e <- max(WVT_2s_6C_e$Power)
-
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_2s_6C.png")
-wt.image(WVT_2s_6C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_2s_6c_a,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 2s, 6C, a")
-#dev.off()
-
-wt.image(WVT_2s_6C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_2s_6c_b,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 2s, 6C, b")
-
-wt.image(WVT_2s_6C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_2s_6c_c,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 2s, 6C, c")
-
-wt.image(WVT_2s_6C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_2s_6c_d,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 2s, 6C, d")
-
-wt.image(WVT_2s_6C_e, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_2s_6c_e,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 2s, 6C, e")
-```
-
-
-### 1s
-
-```{r WVT Test 1 s 6C}
-SolFits_1s_6C <- SolFits %>%
-  filter(Temp_C == "6",
-         PulseSpace_s == 1)
-  
-SolFits_1s_6C_a <- SolFits_1s_6C[1:32,] #funky
-SolFits_1s_6C_b <- SolFits_1s_6C[33:64,]
-SolFits_1s_6C_c <- SolFits_1s_6C[65:96,]
-SolFits_1s_6C_d <- SolFits_1s_6C[97:128,] 
-SolFits_1s_6C_e <- SolFits_1s_6C[129:160,] 
-
-
-WVT_1s_6C_a <- analyze.wavelet(SolFits_1s_6C_a, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_1s_6C_b <- analyze.wavelet(SolFits_1s_6C_b, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_1s_6C_c <- analyze.wavelet(SolFits_1s_6C_c, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_1s_6C_d <- analyze.wavelet(SolFits_1s_6C_d, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-WVT_1s_6C_e <- analyze.wavelet(SolFits_1s_6C_e, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-reconstruct(WVT_1s_6C_a, siglvl = 0.05)
-reconstruct(WVT_1s_6C_b, siglvl = 0.05)
-reconstruct(WVT_1s_6C_c, siglvl = 0.05)
-reconstruct(WVT_1s_6C_d, siglvl = 0.05)
-reconstruct(WVT_1s_6C_e, siglvl = 0.05)
-```
-
-
-```{r Plot of wavelet power 1 s 6C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_1s_6C.png")
-wt.avg(WVT_1s_6C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 1s, 6C, a") 
-#dev.off()
-
-wt.avg(WVT_1s_6C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 1s, 6C, b") 
-
-wt.avg(WVT_1s_6C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 1s, 6C, c") 
-
-wt.avg(WVT_1s_6C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 1s, 6C, d")
-
-wt.avg(WVT_1s_6C_e, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 1s, 6C, e")
-```
-
-
-```{r Image plot of wavelet power spectrum 1 s 6C}
-MP_DeSpBl_1s_6c_a <- max(WVT_1s_6C_a$Power)
-MP_DeSpBl_1s_6c_b <- max(WVT_1s_6C_b$Power)
-MP_DeSpBl_1s_6c_c <- max(WVT_1s_6C_c$Power)
-MP_DeSpBl_1s_6c_d <- max(WVT_1s_6C_d$Power)
-MP_DeSpBl_1s_6c_e <- max(WVT_1s_6C_e$Power)
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_1s_6C.png")
-wt.image(WVT_1s_6C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_1s_6c_a,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 1s, 6C, a")
-#dev.off()
-
-wt.image(WVT_1s_6C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_1s_6c_b,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 1s, 6C, b")
-
-wt.image(WVT_1s_6C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_1s_6c_c,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 1s, 6C, c")
-
-wt.image(WVT_1s_6C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_1s_6c_d,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 1s, 6C, d")
-
-wt.image(WVT_1s_6C_e, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_1s_6c_e,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 1s, 6C, e")
-```
-
-
-
-```{r WVT Test 2 s 2C}
-
-LOW_SolFits_2s_2C <- LOW_SolFits %>%
-  filter(Temp_C == "2",
-         PulseSpace_s == 2)
-
-WVT_2C_2s <- analyze.wavelet(LOW_SolFits_2s_2C, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-MP_DeSpBl <- max(WVT_2C_2s$Power)
-
-png(filename = "../Output/AvPw_WT_LOW_Fragilariopsis_SolFits_2s_2C.png")
-wt.avg(WVT_2C_2s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
-periodlab = "Periodicity",
-main = "Fragilariopsis 2C, Pulse space 2 sec")
-dev.off()
-
-
-png(filename = "../Output/WT_LOW_Fragilariopsis_SolFits_2s_2C.png")
-wt.image(WVT_2C_2s, periodlab = "Periodicity",
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl,
-show.date = TRUE, date.format = "%F %T",
-main = "Fragilariopsis 2C, Pulse space 2 sec")
-dev.off()
-
-```
 ```{r WVT Test 4 s 10C}
 
 LOW_SolFits_4s_10C <- LOW_SolFits %>%
@@ -1452,40 +516,6 @@ dev.off()
 
 ```
 
-
-```{r WVT Test 1 s 2C}
-
-LOW_SolFits_1s_2C <- LOW_SolFits %>%
-  filter(Temp_C == "2",
-         PulseSpace_s == 1)
-
-WVT_2C_1s <- analyze.wavelet(LOW_SolFits_1s_2C, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-MP_DeSpBl <- max(WVT_2C_1s$Power)
-
-png(filename = "../Output/AvPw_WT_LOW_Fragilariopsis_SolFits_1s_2C.png")
-wt.avg(WVT_2C_1s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
-periodlab = "Periodicity",
-main = "Fragilariopsis 2C, Pulse space 1 sec")
-dev.off()
-
-
-png(filename = "../Output/WT_LOW_Fragilariopsis_SolFits_1s_2C.png")
-wt.image(WVT_2C_1s, periodlab = "Periodicity",
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl,
-show.date = TRUE, date.format = "%F %T",
-main = "Fragilariopsis 2C, Pulse space 1 sec")
-dev.off()
-
-```
 
 
 ```{r WVT Test 8 sec 10C}
