@@ -1,6 +1,7 @@
 ---
 title: "Wavelet transformation"
 author:
+- Natasha Ryan
 - Maximilian Berthold
 date: "`r format(Sys.Date())`"
 output:
@@ -18,6 +19,7 @@ editor_options:
 
 ```{r load libraries}
 library(tidyverse)
+library(doBy)
 library(readxl)
 library(stringr)
 library(broom)
@@ -33,33 +35,90 @@ library(Rwave)
 library(WaveletComp)
 ```
 
+
 # Set Project Variables
 ```{r set project variables}
 Project <- "LOW"
 DataIn <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
-#TargetTaxa = "Chlorella"
-TargetData <- "Takuvik"
-TargetTaxa <- "Fragilariopsis"
 FileID <- "SolFitsTrim"
 ```
 
+```{r create functions}
+#function for wavelet transformation 
+wavelet <- function(data){wavelet_result <- analyze.wavelet(data, "FvFmrunnorm",
+                                     method = "white.noise",
+                                     loess.span = 0,
+                                     dt = 1, dj = 1/250,
+                                     lowerPeriod = 1, upperPeriod = 32,
+                                     make.pval = TRUE, n.sim = 100)
+#result_name <- paste(deparse(substitute(data)), "_wavelet_result")
+#  assign(result_name, wavelet_result, envir = .GlobalEnv)
+return(wavelet_result)
+}
 
-```{r import clean data}
-FitFilesSol <- list.files(path = DataIn, pattern = paste(TargetData,TargetTaxa,FileID, sep = "_"), full.names = TRUE)
+
+
+#function for wavelet reconstruction 
+reconstructwave <- function(wavelet_list, siglvl = 0.05) {
+  reconstructed_list <- lapply(wavelet_list, function(wave) {
+    reconstruct(wave, siglvl = siglvl)
+  })
+   #recon_name <- paste(deparse(substitute(wavelet_list)), "_reconstructed")
+  #assign(recon_name, reconstructed_list, envir = .GlobalEnv)
+  return(reconstructed_list)
+}
+
+
+
+#function to extract the number of oscillating flashes from the reconstruction 
+damping <- function(reconstructed) {
+  result_list <- lapply(reconstructed, function(condition) {
+    return(condition$series)
+  })
+
+  result_df <- data.frame(x = character(0), damping.index = integer(0), stringsAsFactors = FALSE)
+  
+  for (x in names(result_list)) {
+    extract <- result_list[[x]]
+    
+    extract$difference <- c(NA, diff(extract$`FvFmrunnorm.r`))
+    
+    cycling.flashes <- which(extract$difference != 0)
+    
+    damping.index <- max(cycling.flashes)
+    
+    result_df <- rbind(result_df, data.frame(condition = x, damping.index = damping.index))
+  }
+  
+  return(result_df)
+}
+```
+
+
+# Takuvik
+
+### Import 
+```{r set takuvik import variables}
+TakuvikData <- "Takuvik"
+TakuvikTaxa <- "Fragilariopsis"
+```
+
+```{r import clean takuvik data}
+FitFilesFc <- list.files(path = DataIn, pattern = paste(TakuvikData,TakuvikTaxa,FileID, sep = "_"), full.names = TRUE) #Fc henceforth refers to Fragilariopsis cylindrus
 
 read.RDS <- function(flnm){readRDS(flnm) %>%
     mutate(filename = flnm)
 }
 
 #test for duplicate file names
-unique(duplicated(FitFilesSol))
+unique(duplicated(FitFilesFc))
 
-SolFits <- FitFilesSol %>%
+SolFitsFc <- FitFilesFc %>%
   map_df(~read.RDS(flnm = .))
 
 #add column for nominal SState for PSII that 'advance' with flash
-SolFits <- SolFits |>
+SolFitsFc <- SolFitsFc |>
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
                     Flashnumber %% 4 == 2 ~ 2,
                     Flashnumber %% 4 == 3 ~ 3, 
@@ -67,48 +126,341 @@ SolFits <- SolFits |>
 ```
 
 
-```{r create functions}
-wavelet <- function(data){wavelet_result <- analyze.wavelet(data, "FvFmrunnorm",
-                                     method = "white.noise",
-                                     loess.span = 0,
-                                     dt = 1, dj = 1/250,
-                                     lowerPeriod = 1, upperPeriod = 32,
-                                     make.pval = TRUE, n.sim = 100)
-result_name <- paste(deparse(substitute(data)), "_wavelet_result")
-  assign(result_name, wavelet_result, envir = .GlobalEnv)
-return(wavelet_result)
-}
-
-reconstructwave <- function(wavelet_list, siglvl = 0.05) {
-  reconstructed_list <- lapply(wavelet_list, function(wave) {
-    reconstruct(wave, siglvl = siglvl)
-  })
-   recon_name <- paste(deparse(substitute(wavelet_list)), "_reconstructed")
-  assign(recon_name, reconstructed_list, envir = .GlobalEnv)
-  return(reconstructed_list)
-}
+```{r cleaning up Takuvik trials}
+SolFitsFc_clean <- SolFitsFc %>%
+  filter(!Filename %in% c("Takuvik/20230926_SeGu1008_6C_16s", "Takuvik/20230926_SeGu1001_6C_8s", "Takuvik/20230926_SeGu1001_6C_4s", "Takuvik/20230926_SeGu1001_6C_2s", "Takuvik/20230926_SeGu1008_6C_2s", "Takuvik/20230926_SeGu1001_6C_1s", "Takuvik/20230925_SeGu1003_2C_16s", "Takuvik/20230925_SeGu1006_2C_16s", "Takuvik/20230925_SeGu1003_2C_8s", "Takuvik/20230925_SeGu1003_2C_8s", "Takuvik/20230925_SeGu1003_2C_2s"))
 ```
 
 
-# 10°C
+```{r condense takuvik trials}
+Fcdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsFc_clean, FUN=c(mean, var)) 
+Fcdata <- Fcdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
 
-```{r}
-test.data <- SolFits %>% 
-  filter(Temp_C == "10", PulseSpace_s == 16)v
+Fcdata_l <- list(
+  (Fcdata %>% filter(Temp_C == "10", PulseSpace_s == 16)), 
+  (Fcdata %>% filter(Temp_C == "10", PulseSpace_s == 8)),
+  (Fcdata %>% filter(Temp_C == "10", PulseSpace_s == 4)),
+  (Fcdata %>% filter(Temp_C == "10", PulseSpace_s == 2)), 
+  (Fcdata %>% filter(Temp_C == "10", PulseSpace_s == 1)),
+  (Fcdata %>% filter(Temp_C == "6", PulseSpace_s == 16)),
+  (Fcdata %>% filter(Temp_C == "6", PulseSpace_s == 8)),
+  (Fcdata %>% filter(Temp_C == "6", PulseSpace_s == 4)),
+  (Fcdata %>% filter(Temp_C == "6", PulseSpace_s == 2)), 
+  (Fcdata %>% filter(Temp_C == "6", PulseSpace_s == 1)),
+  (Fcdata %>% filter(Temp_C == "2", PulseSpace_s == 16)),
+  (Fcdata %>% filter(Temp_C == "2", PulseSpace_s == 8)),
+  (Fcdata %>% filter(Temp_C == "2", PulseSpace_s == 4)),
+  (Fcdata %>% filter(Temp_C == "2", PulseSpace_s == 2)), 
+  (Fcdata %>% filter(Temp_C == "2", PulseSpace_s == 1)),
+  (Fcdata %>% filter(Temp_C == "0", PulseSpace_s == 16)),
+  (Fcdata %>% filter(Temp_C == "0", PulseSpace_s == 8)),
+  (Fcdata %>% filter(Temp_C == "0", PulseSpace_s == 4)),
+  (Fcdata %>% filter(Temp_C == "0", PulseSpace_s == 2)), 
+  (Fcdata %>% filter(Temp_C == "0", PulseSpace_s == 1)))
 
-test.fit <- analyze.wavelet(test.data, "FvFmrunnorm",
-                                     method = "white.noise",
-                                     loess.span = 0,
-                                     dt = 1, dj = 1/250,
-                                     lowerPeriod = 1, upperPeriod = 32,
-                                     make.pval = TRUE, n.sim = 100)
-
-reconstruct(test.fit)
-
-
+names(Fcdata_l) <- c("10c_16s", "10c_8s", "10c_4s","10c_2s", "10c_1s",
+                      "6c_16s", "6c_8s", "6c_4s","6c_2s", "6c_1s",
+                      "2c_16s", "2c_8s", "2c_4s","2c_2s", "2c_1s",
+                      "0c_16s", "0c_8s", "0c_4s","0c_2s", "0c_1s")
 ```
 
 
+### FFT 
+```{r wavelet transformation Fc}
+Fc_wavelets <- lapply(Fcdata_l, wavelet)
+```
+
+```{r reconstruct waves Fc}
+Fc_reconstructed <- reconstructwave(Fc_wavelets)
+```
+
+```{r damping index Fc}
+Fc_damping <- damping(Fc_reconstructed)
+```
+
+
+# Ottawa 
+
+### Import 
+```{r set ottawa import variables}
+TargetGenus <- "Chlamydomonas"
+TargetSpecies1 <- "ICEMDV"        #henceforth Ci
+TargetSpecies2 <- "malina"        #henceforth Cm
+TargetSpecies3 <- "priscuii"      #henceforth Cp
+TargetSpecies4 <- "reinhardtii"   #henceforth Cr
+```
+
+```{r import clean ottawa data}
+#Ci
+FitFilesCi <- list.files(path = DataIn, pattern = paste(TargetGenus,TargetSpecies1,FileID, sep = "_"), full.names = TRUE)
+
+unique(duplicated(FitFilesCi)) #test for duplicate file names
+
+SolFitsCi <- FitFilesCi %>% map_df(~read.RDS(flnm = .))
+
+SolFitsCi <- SolFitsCi |> #add column for nominal SState for PSII that 'advance' with flash
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4)) 
+
+
+#Cm
+FitFilesCm <- list.files(path = DataIn, pattern = paste(TargetGenus,TargetSpecies2,FileID, sep = "_"), full.names = TRUE)
+
+unique(duplicated(FitFilesCm)) #test for duplicate file names
+
+SolFitsCm <- FitFilesCm %>% map_df(~read.RDS(flnm = .))
+
+SolFitsCm <- SolFitsCm |> #add column for nominal SState for PSII that 'advance' with flash
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4)) 
+
+
+#Cp
+FitFilesCp <- list.files(path = DataIn, pattern = paste(TargetGenus,TargetSpecies3,FileID, sep = "_"), full.names = TRUE)
+
+unique(duplicated(FitFilesCp)) #test for duplicate file names
+
+SolFitsCp <- FitFilesCp %>% map_df(~read.RDS(flnm = .))
+
+SolFitsCp <- SolFitsCp |> #add column for nominal SState for PSII that 'advance' with flash
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4)) 
+
+
+#Cr
+FitFilesCr <- list.files(path = DataIn, pattern = paste(TargetGenus,TargetSpecies4,FileID, sep = "_"), full.names = TRUE)
+
+unique(duplicated(FitFilesCr)) #test for duplicate file names
+
+SolFitsCr <- FitFilesCr %>% map_df(~read.RDS(flnm = .))
+
+SolFitsCr <- SolFitsCr |> #add column for nominal SState for PSII that 'advance' with flash
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4)) 
+```
+
+### Ci 
+Possibly wonky: Chlamy/20230918_MaPo1002_8C_16s, Chlamy/20230919_MaPo1002_4C_16s, Chlamy/20230919_MaPo1002_8C_16s
+
+```{r cleaning up Ci trials}
+SolFitsCi <- SolFitsCi %>%
+  filter(!Filename %in% c("Chlamy/20230918_MaPo1002_8C_16s", "Chlamy/20230919_MaPo1002_4C_16s"))
+                          #, "Chlamy/20230919_MaPo1002_8C_16s"))
+```
+
+
+```{r condense Ci trials}
+Cidata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCi, FUN=c(mean)) 
+Cidata <- Cidata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
+
+Cidata_l <- list(
+  (Cidata %>% filter(Temp_C == "12", PulseSpace_s == 16)), 
+  (Cidata %>% filter(Temp_C == "12", PulseSpace_s == 8)),
+  (Cidata %>% filter(Temp_C == "12", PulseSpace_s == 4)),
+  (Cidata %>% filter(Temp_C == "12", PulseSpace_s == 2)), 
+  (Cidata %>% filter(Temp_C == "12", PulseSpace_s == 1)),
+  (Cidata %>% filter(Temp_C == "8", PulseSpace_s == 16)), #empty b/c both trials are wonky 
+  (Cidata %>% filter(Temp_C == "8", PulseSpace_s == 8)),
+  (Cidata %>% filter(Temp_C == "8", PulseSpace_s == 4)),
+  (Cidata %>% filter(Temp_C == "8", PulseSpace_s == 2)), 
+  (Cidata %>% filter(Temp_C == "8", PulseSpace_s == 1)),
+  (Cidata %>% filter(Temp_C == "4", PulseSpace_s == 16)),
+  (Cidata %>% filter(Temp_C == "4", PulseSpace_s == 8)),
+  (Cidata %>% filter(Temp_C == "4", PulseSpace_s == 4)),
+  (Cidata %>% filter(Temp_C == "4", PulseSpace_s == 2)), 
+  (Cidata %>% filter(Temp_C == "4", PulseSpace_s == 1)))
+
+names(Cidata_l) <- c("12c_16s", "12c_8s", "12c_4s","12c_2s", "12c_1s",
+                      "8c_16s", "8c_8s", "8c_4s","8c_2s", "8c_1s",
+                      "4c_16s", "4c_8s", "4c_4s","4c_2s", "4c_1s")
+```
+
+```{r wavelet transformation Ci}
+Ci_wavelets <- lapply(Cidata_l, wavelet)
+```
+
+```{r reconstruct waves Ci}
+Ci_reconstructed <- reconstructwave(Ci_wavelets)
+```
+
+```{r damping index Ci}
+Ci_damping <- damping(Ci_reconstructed)
+```
+
+### Cm 
+Possibly wonky: Chlamy/20230919_MaPo1003_8C_16s, Chlamy/20230919_MaPo1003_4C_16s, Chlamy/20230918_MaPo1003_8C_16s
+
+```{r cleaning up Cm trials}
+SolFitsCm <- SolFitsCm %>%
+  filter(!Filename %in% c("Chlamy/20230919_MaPo1003_8C_16s", "Chlamy/20230919_MaPo1003_4C_16s", "Chlamy/20230918_MaPo1003_8C_16s"))
+```
+
+```{r condense Cm trials}
+Cmdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCm, FUN=c(mean)) 
+Cmdata <- Cmdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
+
+Cmdata_l <- list(
+  (Cmdata %>% filter(Temp_C == "12", PulseSpace_s == 16)), 
+  (Cmdata %>% filter(Temp_C == "12", PulseSpace_s == 8)),
+  (Cmdata %>% filter(Temp_C == "12", PulseSpace_s == 4)),
+  (Cmdata %>% filter(Temp_C == "12", PulseSpace_s == 2)), 
+  (Cmdata %>% filter(Temp_C == "12", PulseSpace_s == 1)),
+  #(Cmdata %>% filter(Temp_C == "8", PulseSpace_s == 16)), #empty b/c both trials are wonky 
+  (Cmdata %>% filter(Temp_C == "8", PulseSpace_s == 8)),
+  (Cmdata %>% filter(Temp_C == "8", PulseSpace_s == 4)),
+  (Cmdata %>% filter(Temp_C == "8", PulseSpace_s == 2)), 
+  (Cmdata %>% filter(Temp_C == "8", PulseSpace_s == 1)),
+  (Cmdata %>% filter(Temp_C == "4", PulseSpace_s == 16)),
+  (Cmdata %>% filter(Temp_C == "4", PulseSpace_s == 8)),
+  (Cmdata %>% filter(Temp_C == "4", PulseSpace_s == 4)),
+  (Cmdata %>% filter(Temp_C == "4", PulseSpace_s == 2)), 
+  (Cmdata %>% filter(Temp_C == "4", PulseSpace_s == 1)))
+
+names(Cmdata_l) <- c("12c_16s", "12c_8s", "12c_4s","12c_2s", "12c_1s",
+                      #"8c_16s",
+                     "8c_8s", "8c_4s","8c_2s", "8c_1s",
+                      "4c_16s", "4c_8s", "4c_4s","4c_2s", "4c_1s")
+```
+
+```{r wavelet transformation Cm}
+Cm_wavelets <- lapply(Cmdata_l, wavelet)
+```
+
+```{r reconstruct wave Cm}
+Cm_reconstructed <- reconstructwave(Cm_wavelets)
+```
+
+
+```{r damping index Cm}
+Cm_damping <- damping(Cm_reconstructed)
+```
+
+
+### Cp 
+Possibly wonky: Chlamy/20230918_MaPo1001_12C_16s, Chlamy/20230919_MaPo1001_8C_16s
+
+```{r cleaning up Cp trials}
+SolFitsCp <- SolFitsCp %>%
+  filter(!Filename %in% c("Chlamy/20230918_MaPo1001_12C_16s", "Chlamy/20230919_MaPo1001_8C_16s", "Chlamy/20230919_MaPo1001_4C_16s")) #deal with later
+```
+
+```{r condense Cp trials}
+Cpdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCp, FUN=c(mean)) 
+Cpdata <- Cpdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
+
+Cpdata_l <- list(
+  (Cpdata %>% filter(Temp_C == "12", PulseSpace_s == 16)), 
+  (Cpdata %>% filter(Temp_C == "12", PulseSpace_s == 8)),
+  (Cpdata %>% filter(Temp_C == "12", PulseSpace_s == 4)),
+  (Cpdata %>% filter(Temp_C == "12", PulseSpace_s == 2)), 
+  (Cpdata %>% filter(Temp_C == "12", PulseSpace_s == 1)),
+  (Cpdata %>% filter(Temp_C == "8", PulseSpace_s == 16)),
+  (Cpdata %>% filter(Temp_C == "8", PulseSpace_s == 8)),
+  (Cpdata %>% filter(Temp_C == "8", PulseSpace_s == 4)),
+  (Cpdata %>% filter(Temp_C == "8", PulseSpace_s == 2)), 
+  (Cpdata %>% filter(Temp_C == "8", PulseSpace_s == 1)),
+  (Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 16)),
+  (Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 8)),
+  (Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 4)),
+  (Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 2)), 
+  (Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 1)))
+
+names(Cpdata_l) <- c("12c_16s", "12c_8s", "12c_4s","12c_2s", "12c_1s",
+                     "8c_16s", "8c_8s", "8c_4s","8c_2s", "8c_1s",
+                     "4c_16s", "4c_8s", "4c_4s","4c_2s", "4c_1s")
+```
+
+```{r wavelet transformation Cp}
+Cp_wavelets <- lapply(Cpdata_l, wavelet)
+```
+
+```{r reconstruct wave Cp}
+Cp_reconstructed <- reconstructwave(Cp_wavelets)
+```
+
+```{r damping index Cp}
+Cp_damping <- damping(Cp_reconstructed)
+```
+
+
+### Cr
+
+```{r condense Cr trials}
+Crdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCr, FUN=c(mean)) 
+Crdata <- Crdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
+
+Crdata_l <- list(
+  (Crdata %>% filter(Temp_C == "24", PulseSpace_s == 16)), 
+  (Crdata %>% filter(Temp_C == "24", PulseSpace_s == 8)),
+  (Crdata %>% filter(Temp_C == "24", PulseSpace_s == 4)),
+  (Crdata %>% filter(Temp_C == "24", PulseSpace_s == 2)), 
+  (Crdata %>% filter(Temp_C == "24", PulseSpace_s == 1)),
+  (Crdata %>% filter(Temp_C == "20", PulseSpace_s == 16)), 
+  (Crdata %>% filter(Temp_C == "20", PulseSpace_s == 8)),
+  (Crdata %>% filter(Temp_C == "20", PulseSpace_s == 4)),
+  (Crdata %>% filter(Temp_C == "20", PulseSpace_s == 2)), 
+  (Crdata %>% filter(Temp_C == "20", PulseSpace_s == 1)),
+  (Crdata %>% filter(Temp_C == "16", PulseSpace_s == 16)), 
+  (Crdata %>% filter(Temp_C == "16", PulseSpace_s == 8)),
+  (Crdata %>% filter(Temp_C == "16", PulseSpace_s == 4)),
+  (Crdata %>% filter(Temp_C == "16", PulseSpace_s == 2)), 
+  (Crdata %>% filter(Temp_C == "16", PulseSpace_s == 1)),
+  (Crdata %>% filter(Temp_C == "12", PulseSpace_s == 16)), 
+  (Crdata %>% filter(Temp_C == "12", PulseSpace_s == 8)),
+  (Crdata %>% filter(Temp_C == "12", PulseSpace_s == 4)),
+  (Crdata %>% filter(Temp_C == "12", PulseSpace_s == 2)), 
+  (Crdata %>% filter(Temp_C == "12", PulseSpace_s == 1)))
+
+names(Crdata_l) <- c("24c_16s", "24c_8s", "24c_4s","24c_2s", "24c_1s",
+                     "20c_16s", "20c_8s", "20c_4s","20c_2s", "20c_1s",
+                     "16c_16s", "16c_8s", "16c_4s","16c_2s", "16c_1s",
+                     "12c_16s", "12c_8s", "12c_4s","12c_2s", "12c_1s")
+```
+
+```{r wavelet transformation Cr}
+Cr_wavelets <- lapply(Crdata_l, wavelet)
+```
+
+```{r reconstruct wave Cr}
+Cr_reconstructed <- reconstructwave(Cr_wavelets)
+```
+
+```{r damping index Cr}
+Cr_damping <- damping(Cr_reconstructed)
+```
+
+
+# Merging Results 
+
+```{r add species column}
+Fc_damping <- Fc_damping %>% mutate(species = "Fragilariopsis_cylindrus") 
+Ci_damping <- Ci_damping %>% mutate(species = "Chlamydomonas_ICEMDV")
+Cm_damping <- Cm_damping %>% mutate(species = "Chlamydomonas_malina")
+Cp_damping <- Cp_damping %>% mutate(species = "Chlamydomonas_priscuii")
+Cr_damping <- Cr_damping %>% mutate(species = "Chlamydomonas_reinhardtii")
+```
+
+```{r merge}
+damping_l <- list(Fc_damping, Ci_damping, Cm_damping, Cp_damping, Cr_damping)
+
+sstate_damping <- damping_l %>% reduce(full_join)
+
+sstate_damping <- sstate_damping %>%
+  relocate(species, .before = condition)
+```
+
+
+# Previous Methods
+
+Method when breaking up the data by run and analyzing each with it's own wavelet
 ```{r WVT 16s 10C}
 Data_16S_10C <- list(
   (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(1:32)), 
@@ -122,385 +474,8 @@ reconstructwave(wavelet_16s_10C)
 ```
 
 
-```{r WVT 8s 10C}
-Data_8S_10C <- list(
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 8) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 8) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 8) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 8) %>% slice(97:128)))
-
-wavelet_8s_10C <- lapply(Data_8S_10C, wavelet)
-
-reconstructwave(wavelet_8s_10C)
-```
-
-
-```{r WVT 4s 10C}
-Data_4S_10C <- list(
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 4) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 4) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 4) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 4) %>% slice(97:128)))
-
-wavelet_4s_10C <- lapply(Data_4S_10C, wavelet)
-
-reconstructwave(wavelet_4s_10C)
-```
-
-
-```{r WVT 2s 10C}
-Data_2S_10C <- list(
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 2) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 2) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 2) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 2) %>% slice(97:128)))
-
-wavelet_2s_10C <- lapply(Data_2S_10C, wavelet)
-
-reconstructwave(wavelet_2s_10C)
-```
-
-
-```{r WVT 1s 10C}
-Data_1S_10C <- list(
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 1) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 1) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 1) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 1) %>% slice(97:128)))
-
-wavelet_1s_10C <- lapply(Data_1S_10C, wavelet)
-
-reconstructwave(wavelet_1s_10C)
-```
-
-
-# 6°C
-
-```{r WVT 16s 6C}
-Data_16S_6C <- list(
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(65:96)), # something odd 
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(97:128)),
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 16) %>% slice(129:160)))
-
-wavelet_16s_6C <- lapply(Data_16S_6C, wavelet)
-
-reconstructwave(wavelet_16s_6C)
-```
-
-
-```{r WVT 8s 16C}
-Data_8S_6C <- list(
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(1:32)), #funky
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(65:96)),  
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(97:128)),
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 8) %>% slice(129:160)))
-
-wavelet_8s_6C <- lapply(Data_8S_6C, wavelet)
-
-reconstructwave(wavelet_8s_6C)
-```
-
-
-```{r WVT 4s 6C}
-Data_4S_6C <- list(
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(1:32)), #funky
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(65:96)),  
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(97:128)),
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 4) %>% slice(129:160)))
-
-wavelet_4s_6C <- lapply(Data_4S_6C, wavelet)
-
-reconstructwave(wavelet_4s_6C)
-```
-
-
-```{r WVT 2s 6C}
-Data_2S_6C <- list(
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(1:32)), #funky
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(65:96)), #also funky 
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(97:128)),
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 2) %>% slice(129:160)))
-
-wavelet_2s_6C <- lapply(Data_2S_6C, wavelet)
-
-reconstructwave(wavelet_2s_6C)
-```
-
-
-```{r WVT 1s 6C}
-Data_1S_6C <- list(
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(1:32)), #funky
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(97:128)),
-  (SolFits %>% filter(Temp_C == "6", PulseSpace_s == 1) %>% slice(129:160)))
-
-wavelet_1s_6C <- lapply(Data_1S_6C, wavelet)
-
-reconstructwave(wavelet_1s_6C)
-```
-
-# 2°C
-
-```{r WVT 16s 2C}
-Data_16S_2C <- list(
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(65:96)), #funky
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(97:128)), #funky
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(129:160)), #funky
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(161:192)),
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 16) %>% slice(193:224)))
-
-wavelet_16s_2C <- lapply(Data_16S_2C, wavelet)
-
-reconstructwave(wavelet_16s_2C)
-```
-
-
-```{r WVT 8s 2C}
-Data_8S_2C <- list(
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(33:64)), #funky
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(97:128)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(129:160)),
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 8) %>% slice(161:192)))
-
-wavelet_8s_2C <- lapply(Data_8S_2C, wavelet)
-
-reconstructwave(wavelet_8s_2C)
-```
-
-
-```{r WVT 4s 2C}
-Data_4S_2C <- list(
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(33:64)), #funky
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(97:128)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(129:160)),
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 4) %>% slice(161:192)))
-
-wavelet_4s_2C <- lapply(Data_4S_2C, wavelet)
-
-reconstructwave(wavelet_4s_2C)
-```
-
-
-```{r WVT 2s 2C}
-Data_2S_2C <- list(
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(33:64)),
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(97:128)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(129:160)),
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 2) %>% slice(161:192)))
-
-wavelet_2s_2C <- lapply(Data_2S_2C, wavelet)
-
-reconstructwave(wavelet_2s_2C)
-```
-
-
-```{r WVT 1s 2C}
-Data_1S_2C <- list(
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(33:64)), #funky
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(97:128)), 
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(129:160)),
-  (SolFits %>% filter(Temp_C == "2", PulseSpace_s == 1) %>% slice(161:192)))
-
-wavelet_1s_2C <- lapply(Data_1S_2C, wavelet)
-
-reconstructwave(wavelet_1s_2C)
-```
-
-# 0°C
-
-```{r WVT 16s 0C}
-Data_16S_0C <- list(
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 16) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 16) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 16) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 16) %>% slice(97:128))) 
-
-wavelet_16s_0C <- lapply(Data_16S_0C, wavelet)
-
-reconstructwave(wavelet_16s_0C)
-```
-
-```{r WVT 8s 0C}
-Data_8S_0C <- list(
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 8) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 8) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 8) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 8) %>% slice(97:128))) 
-
-wavelet_8s_0C <- lapply(Data_8S_0C, wavelet)
-
-reconstructwave(wavelet_8s_0C)
-```
-
-```{r WVT 4s 0C}
-Data_4S_0C <- list(
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 4) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 4) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 4) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 4) %>% slice(97:128))) 
-
-wavelet_4s_0C <- lapply(Data_4S_0C, wavelet)
-
-reconstructwave(wavelet_4s_0C)
-```
-
-
-```{r WVT 2s 0C}
-Data_2S_0C <- list(
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 2) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 2) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 2) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 2) %>% slice(97:128))) 
-
-wavelet_2s_0C <- lapply(Data_2S_0C, wavelet)
-
-reconstructwave(wavelet_2s_0C)
-```
-
-
-```{r WVT 1s 0C}
-Data_1S_0C <- list(
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 1) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 1) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 1) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "0", PulseSpace_s == 1) %>% slice(97:128))) 
-
-wavelet_1s_0C <- lapply(Data_1S_0C, wavelet)
-
-reconstructwave(wavelet_1s_0C)
-```
-
-
-
-
-
-
-
-
-
-
-```{r Plot of wavelet power 16 s 10C}
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_Fragilariopsis_SolFits_8s_10C.png")
-wt.avg(WVT_16s_10C_a, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 16s, 10C, a") 
-#dev.off()
-
-wt.avg(WVT_16s_10C_b, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 16s, 10C, b") 
-
-wt.avg(WVT_16s_10C_c, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 16s, 10C, c") 
-
-wt.avg(WVT_16s_10C_d, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Fragilariopsis 16s, 10C, d")
-```
-
-
-```{r Image plot of wavelet power spectrum 16 s 10C}
-MP_DeSpBl_16s_10c_a <- max(WVT_16s_10C_a$Power)
-MP_DeSpBl_16s_10c_b <- max(WVT_16s_10C_b$Power)
-MP_DeSpBl_16s_10c_c <- max(WVT_16s_10C_c$Power)
-MP_DeSpBl_16s_10c_d <- max(WVT_16s_10C_d$Power)
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_Fragilariopsis_SolFits_8s_10C.png")
-wt.image(WVT_16s_10C_a, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_16s_10c_a,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 16s, 10C, a")
-#dev.off()
-
-wt.image(WVT_16s_10C_b, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_16s_10c_b,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 16s, 10C, b")
-
-wt.image(WVT_16s_10C_c, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_16s_10c_c,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 16s, 10C, c")
-
-wt.image(WVT_16s_10C_d, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl_16s_10c_d,
-#show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 16s, 10C, d")
-```
-
-
-
-```{r WVT Test 4 s 10C}
-
-LOW_SolFits_4s_10C <- LOW_SolFits %>%
-  filter(Temp_C == "10",
-         PulseSpace_s == 4)
-
-WVT_10C_4s <- analyze.wavelet(LOW_SolFits_4s_10C, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval=TRUE, n.sim = 100)
-
-MP_DeSpBl <- max(WVT_10C_4s$Power)
-
-png(filename = "../Output/AvPw_WT_LOW_Fragilariopsis_SolFits_4s_10C.png")
-wt.avg(WVT_10C_4s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
-periodlab = "Periodicity",
-main = "Fragilariopsis 10C, Pulse space 4 sec")
-dev.off()
-
-
-png(filename = "../Output/WT_LOW_Fragilariopsis_SolFits_4s_10C.png")
-wt.image(WVT_10C_4s, periodlab = "Periodicity",
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl,
-show.date = TRUE, date.format = "%F %T",
-main = "Fragilariopsis 10C, Pulse space 4 sec")
-dev.off()
-
-```
-
-```{r WVT Test 1 s 10C}
-
+Original method by Max: generates the wavelet power and heat map graphs
+```{r}
 LOW_SolFits_1s_10C <- LOW_SolFits %>%
   filter(Temp_C == "10",
          PulseSpace_s == 1)
@@ -515,14 +490,14 @@ WVT_10C_1s <- analyze.wavelet(LOW_SolFits_1s_10C, "FvFm",
 MP_DeSpBl <- max(WVT_10C_1s$Power)
 
 #sequential lines act like they are piped; need to run as a unit
-png(filename = "../Output/AvPw_WT_LOW_Fragilariopsis_SolFits_1s_10C.png")
+#png(filename = "../Output/AvPw_WT_LOW_Fragilariopsis_SolFits_1s_10C.png")
 wt.avg(WVT_10C_1s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
 periodlab = "Periodicity",
 main = "Fragilariopsis 10C, Pulse space 1 sec")
-dev.off()
+#dev.off()
 
 #y axis is log2 scale not linear
-png(filename = "../Output/WT_LOW_Fragilariopsis_SolFits_1s_10C.png")
+#png(filename = "../Output/WT_LOW_Fragilariopsis_SolFits_1s_10C.png")
 wt.image(WVT_10C_1s, periodlab = "Periodicity",
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
@@ -530,77 +505,25 @@ plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
 show.date = TRUE, date.format = "%F %S",
 main = "Fragilariopsis 10C, Pulse space 1 sec")
-dev.off()
+#dev.off()
 
 ```
 
-
-
-```{r WVT Test 8 sec 10C}
-
-LOW_SolFits_8s_10C <- LOW_SolFits %>%
-  filter(Temp_C == "10C",
-         PulseSpace_s == 8)
-
-WVT_10C_8s <- analyze.wavelet(LOW_SolFits_8s_10C, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-MP_DeSpBl <- max(WVT_10C_8s$Power)
-
-png(filename = "../Output/AvPw_WT_LOW_Takuvik_SolFits_8s_10C.png")
-wt.avg(WVT_10C_8s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
+Plots: 
+```{r Plot of wavelet power}
+wt.avg(relevant_wave, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
 periodlab = "Periodicity",
-main = "Takuvik 10C, Pulse space 8 sec")
-dev.off()
+main = "Title") 
 
-
-png(filename = "../Output/WT_LOW_Takuvik_SolFits_8s_10C.png")
-wt.image(WVT_10C_8s, periodlab = "Periodicity",
+MP_DeSpBl <- max(relevant_wave$Power)
+wt.image(relevant_wave, periodlab = "Periodicity",
+color.key= "i", 
 legend.params = list(lab = "wavelet power levels"),
 label.time.axis = TRUE,
 plot.legend = TRUE, plot.contour = TRUE,
 maximum.level = 1.001 * MP_DeSpBl,
-show.date = TRUE, date.format = "%F %T",
-main = "Takuvik 10C, Pulse space 8 sec")
-dev.off()
+#show.date = TRUE, date.format = "%F %S",
+main = "Title")
+
 
 ```
-
-
-```{r WVT Test 8 sec 18C}
-
-LOW_SolFits_8s_18C <- LOW_SolFits %>%
-  filter(Temp_C == "18C",
-         PulseSpace_s == 8)
-
-WVT_18C_8s <- analyze.wavelet(LOW_SolFits_8s_18C, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-MP_DeSpBl <- max(WVT_18C_8s$Power)
-
-png(filename = "../Output/AvPw_WT_LOW_Takuvik_SolFits_8s_18C.png")
-wt.avg(WVT_18C_8s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1, 
-periodlab = "Periodicity",
-main = "Takuvik 18C, Pulse space 8 sec")
-dev.off()
-
-
-png(filename = "../Output/WT_LOW_Takuvik_SolFits_8s_18C.png")
-wt.image(WVT_18C_8s, periodlab = "Periodicity",
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl,
-show.date = TRUE, date.format = "%F %T",
-main = "Takuvik 18C, Pulse space 8 sec")
-dev.off()
-```
-
