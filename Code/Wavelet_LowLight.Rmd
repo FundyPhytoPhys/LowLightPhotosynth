@@ -68,7 +68,7 @@ SolFits <- SolFits |>
 
 
 ```{r create functions}
-wavelet <- function(data){wavelet_result <- analyze.wavelet(data, "FvFm",
+wavelet <- function(data){wavelet_result <- analyze.wavelet(data, "FvFmrunnorm",
                                      method = "white.noise",
                                      loess.span = 0,
                                      dt = 1, dj = 1/250,
@@ -91,6 +91,24 @@ reconstructwave <- function(wavelet_list, siglvl = 0.05) {
 
 
 # 10°C
+
+```{r}
+test.data <- SolFits %>% 
+  filter(Temp_C == "10", PulseSpace_s == 16)v
+
+test.fit <- analyze.wavelet(test.data, "FvFmrunnorm",
+                                     method = "white.noise",
+                                     loess.span = 0,
+                                     dt = 1, dj = 1/250,
+                                     lowerPeriod = 1, upperPeriod = 32,
+                                     make.pval = TRUE, n.sim = 100)
+
+reconstruct(test.fit)
+
+
+```
+
+
 ```{r WVT 16s 10C}
 Data_16S_10C <- list(
   (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(1:32)), 
