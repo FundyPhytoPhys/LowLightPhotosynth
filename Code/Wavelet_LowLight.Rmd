@@ -20,18 +20,18 @@ editor_options:
 ```{r load libraries}
 library(tidyverse)
 library(doBy)
-library(readxl)
-library(stringr)
-library(broom)
+#library(readxl)
+#library(stringr)
+#library(broom)
 #library(knitr)
-library(minpack.lm)
+#library(minpack.lm)
 #library(OneR)
-library(lubridate)
-library(reshape2)
-library(changepoint)
-library(chngpt)
-library(broom)
-library(Rwave)
+#library(lubridate)
+#library(reshape2)
+#library(changepoint)
+#library(chngpt)
+#library(broom)
+#library(Rwave)
 library(WaveletComp)
 ```
 
@@ -248,14 +248,13 @@ SolFitsCr <- SolFitsCr |> #add column for nominal SState for PSII that 'advance'
 ```
 
 ### Ci 
-Possibly wonky: Chlamy/20230918_MaPo1002_8C_16s, Chlamy/20230919_MaPo1002_4C_16s, Chlamy/20230919_MaPo1002_8C_16s
-
 ```{r cleaning up Ci trials}
+#Removing files that seem to have an issue 
 SolFitsCi <- SolFitsCi %>%
-  filter(!Filename %in% c("Chlamy/20230918_MaPo1002_8C_16s", "Chlamy/20230919_MaPo1002_4C_16s"))
-                          #, "Chlamy/20230919_MaPo1002_8C_16s"))
+  filter(!Filename %in% c("Chlamy/20230918_MaPo1002_8C_16s", 
+                          "Chlamy/20230919_MaPo1002_4C_16s", 
+                          "Chlamy/20230919_MaPo1002_8C_16s"))
 ```
-
 
 ```{r condense Ci trials}
 Cidata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCi, FUN=c(mean)) 
@@ -267,7 +266,7 @@ Cidata_l <- list(
   (Cidata %>% filter(Temp_C == "12", PulseSpace_s == 4)),
   (Cidata %>% filter(Temp_C == "12", PulseSpace_s == 2)), 
   (Cidata %>% filter(Temp_C == "12", PulseSpace_s == 1)),
-  (Cidata %>% filter(Temp_C == "8", PulseSpace_s == 16)), #empty b/c both trials are wonky 
+  #(Cidata %>% filter(Temp_C == "8", PulseSpace_s == 16)), #empty b/c both trials are wonky 
   (Cidata %>% filter(Temp_C == "8", PulseSpace_s == 8)),
   (Cidata %>% filter(Temp_C == "8", PulseSpace_s == 4)),
   (Cidata %>% filter(Temp_C == "8", PulseSpace_s == 2)), 
@@ -279,8 +278,9 @@ Cidata_l <- list(
   (Cidata %>% filter(Temp_C == "4", PulseSpace_s == 1)))
 
 names(Cidata_l) <- c("12c_16s", "12c_8s", "12c_4s","12c_2s", "12c_1s",
-                      "8c_16s", "8c_8s", "8c_4s","8c_2s", "8c_1s",
-                      "4c_16s", "4c_8s", "4c_4s","4c_2s", "4c_1s")
+                      #"8c_16s", 
+                     "8c_8s", "8c_4s","8c_2s", "8c_1s",
+                     "4c_16s", "4c_8s", "4c_4s","4c_2s", "4c_1s")
 ```
 
 ```{r wavelet transformation Ci}
@@ -295,12 +295,14 @@ Ci_reconstructed <- reconstructwave(Ci_wavelets)
 Ci_damping <- damping(Ci_reconstructed)
 ```
 
-### Cm 
-Possibly wonky: Chlamy/20230919_MaPo1003_8C_16s, Chlamy/20230919_MaPo1003_4C_16s, Chlamy/20230918_MaPo1003_8C_16s
 
+### Cm 
 ```{r cleaning up Cm trials}
+#Removing files that seem to have an issue 
 SolFitsCm <- SolFitsCm %>%
-  filter(!Filename %in% c("Chlamy/20230919_MaPo1003_8C_16s", "Chlamy/20230919_MaPo1003_4C_16s", "Chlamy/20230918_MaPo1003_8C_16s"))
+  filter(!Filename %in% c("Chlamy/20230919_MaPo1003_8C_16s",
+                          "Chlamy/20230919_MaPo1003_4C_16s", 
+                          "Chlamy/20230918_MaPo1003_8C_16s"))
 ```
 
 ```{r condense Cm trials}
@@ -338,18 +340,18 @@ Cm_wavelets <- lapply(Cmdata_l, wavelet)
 Cm_reconstructed <- reconstructwave(Cm_wavelets)
 ```
 
-
 ```{r damping index Cm}
 Cm_damping <- damping(Cm_reconstructed)
 ```
 
 
 ### Cp 
-Possibly wonky: Chlamy/20230918_MaPo1001_12C_16s, Chlamy/20230919_MaPo1001_8C_16s
-
 ```{r cleaning up Cp trials}
 SolFitsCp <- SolFitsCp %>%
-  filter(!Filename %in% c("Chlamy/20230918_MaPo1001_12C_16s", "Chlamy/20230919_MaPo1001_8C_16s", "Chlamy/20230919_MaPo1001_4C_16s")) #deal with later
+  filter(!Filename %in% c("Chlamy/20230918_MaPo1001_12C_16s", 
+                          "Chlamy/20230919_MaPo1001_8C_16s", 
+                          "Chlamy/20230919_MaPo1001_4C_16s", 
+                          "Chlamy/20230919_MaPo1004_4C_16s")) 
 ```
 
 ```{r condense Cp trials}
@@ -367,7 +369,7 @@ Cpdata_l <- list(
   (Cpdata %>% filter(Temp_C == "8", PulseSpace_s == 4)),
   (Cpdata %>% filter(Temp_C == "8", PulseSpace_s == 2)), 
   (Cpdata %>% filter(Temp_C == "8", PulseSpace_s == 1)),
-  (Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 16)),
+  #(Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 16)), #empty bc both runs are off
   (Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 8)),
   (Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 4)),
   (Cpdata %>% filter(Temp_C == "4", PulseSpace_s == 2)), 
@@ -375,7 +377,8 @@ Cpdata_l <- list(
 
 names(Cpdata_l) <- c("12c_16s", "12c_8s", "12c_4s","12c_2s", "12c_1s",
                      "8c_16s", "8c_8s", "8c_4s","8c_2s", "8c_1s",
-                     "4c_16s", "4c_8s", "4c_4s","4c_2s", "4c_1s")
+                     #"4c_16s", 
+                     "4c_8s", "4c_4s","4c_2s", "4c_1s")
 ```
 
 ```{r wavelet transformation Cp}
@@ -392,6 +395,10 @@ Cp_damping <- damping(Cp_reconstructed)
 
 
 ### Cr
+```{r cleaning up Cr trials}
+SolFitsCr <- SolFitsCr %>%
+  filter(!Filename == "Chlamy/20230920_MaPo1005_24C_16s")
+```
 
 ```{r condense Cr trials}
 Crdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCr, FUN=c(mean)) 
@@ -437,24 +444,95 @@ Cr_reconstructed <- reconstructwave(Cr_wavelets)
 Cr_damping <- damping(Cr_reconstructed)
 ```
 
+# Sackville 
+
+### Import
+```{r set Sackville import variables}
+TargetGenus2 <- "Chlorella" #Henceforth Cv
+```
+
+```{r import clean Sackville data}
+FitFilesCv <- list.files(path = DataIn, pattern = paste(TargetGenus2,FileID, sep = "_"), full.names = TRUE) 
+
+unique(duplicated(FitFilesCv)) #test for duplicate file names
+
+SolFitsCv <- FitFilesCv %>%
+  map_df(~read.RDS(flnm = .))
+
+SolFitsCv <- SolFitsCv |> #add column for nominal SState for PSII that 'advance' with flash
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4))
+```
+
+
+#Cv
+```{r condense Cm trials}
+Cvdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=SolFitsCv, FUN=c(mean)) 
+Cvdata <- Cvdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
+
+Cvdata_l <- list(
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 16)), 
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 8)),
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 4)),
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 2)), 
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 1)),
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 16)), 
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 8)),
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 4)),
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 2)), 
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 1)),
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 16)), 
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 8)),
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 4)),
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 2)), 
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 1)),
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 16)), 
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 8)),
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 4)),
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 2)), 
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 1)))
+
+names(Cvdata_l) <- c("22c_16s", "22c_8s", "22c_4s","22c_2s", "22c_1s",
+                     "18c_16s", "18c_8s", "18c_4s","18c_2s", "18c_1s",
+                     "14c_16s", "14c_8s", "14c_4s","14c_2s", "14c_1s",
+                     "10c_16s", "10c_8s", "10c_4s","10c_2s", "10c_1s")
+```
+
+```{r wavelet transformation Cv}
+Cv_wavelets <- lapply(Cvdata_l, wavelet)
+```
+
+```{r reconstruct wave Cv}
+Cv_reconstructed <- reconstructwave(Cv_wavelets)
+```
+
+```{r damping index Cv}
+Cv_damping <- damping(Cv_reconstructed)
+```
+
 
 # Merging Results 
-
 ```{r add species column}
-Fc_damping <- Fc_damping %>% mutate(species = "Fragilariopsis_cylindrus") 
-Ci_damping <- Ci_damping %>% mutate(species = "Chlamydomonas_ICEMDV")
-Cm_damping <- Cm_damping %>% mutate(species = "Chlamydomonas_malina")
-Cp_damping <- Cp_damping %>% mutate(species = "Chlamydomonas_priscuii")
-Cr_damping <- Cr_damping %>% mutate(species = "Chlamydomonas_reinhardtii")
+Fc_damping <- Fc_damping %>% mutate(Species = "Fragilariopsis_cylindrus") 
+Ci_damping <- Ci_damping %>% mutate(Species = "Chlamydomonas_ICEMDV")
+Cm_damping <- Cm_damping %>% mutate(Species = "Chlamydomonas_malina")
+Cp_damping <- Cp_damping %>% mutate(Species = "Chlamydomonas_priscuii")
+Cr_damping <- Cr_damping %>% mutate(Species = "Chlamydomonas_reinhardtii")
+Cv_damping <- Cv_damping %>% mutate(Species = "Chlorella_vulgaris")
 ```
 
 ```{r merge}
-damping_l <- list(Fc_damping, Ci_damping, Cm_damping, Cp_damping, Cr_damping)
+sstate_damping <- list(Fc_damping, Ci_damping, Cm_damping, Cp_damping, Cr_damping, Cv_damping)
 
-sstate_damping <- damping_l %>% reduce(full_join)
-
-sstate_damping <- sstate_damping %>%
-  relocate(species, .before = condition)
+sstate_damping <- sstate_damping %>% 
+  reduce(full_join) %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = TRUE) %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "c")) %>%
+  rename(DampingIndex = damping.index)
 ```
 
 
