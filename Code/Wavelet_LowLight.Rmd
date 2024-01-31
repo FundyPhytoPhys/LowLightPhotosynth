@@ -449,6 +449,7 @@ Cr_damping <- damping(Cr_reconstructed)
 ### Import
 ```{r set Sackville import variables}
 TargetGenus2 <- "Chlorella" #Henceforth Cv
+TargetTaxa2 <- "Tpseudonana" #Henceforth Tp
 ```
 
 ```{r import clean Sackville data}
@@ -464,11 +465,25 @@ SolFitsCv <- SolFitsCv |> #add column for nominal SState for PSII that 'advance'
                     Flashnumber %% 4 == 2 ~ 2,
                     Flashnumber %% 4 == 3 ~ 3, 
                     Flashnumber %% 4 == 0 ~ 4))
+
+
+FitFilesTp <- list.files(path = DataIn, pattern = paste(TargetTaxa2,FileID, sep = "_"), full.names = TRUE) 
+
+unique(duplicated(FitFilesTp)) #test for duplicate file names
+
+SolFitsTp <- FitFilesTp %>%
+  map_df(~read.RDS(flnm = .))
+
+SolFitsTp <- SolFitsTp |> #add column for nominal SState for PSII that 'advance' with flash
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4))
 ```
 
 
-#Cv
-```{r condense Cm trials}
+###Cv
+```{r condense Cv trials}
 Cvdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=SolFitsCv, FUN=c(mean)) 
 Cvdata <- Cvdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
 
@@ -513,6 +528,51 @@ Cv_damping <- damping(Cv_reconstructed)
 ```
 
 
+### Tp
+```{r condense Tp trials}
+Tpdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=SolFitsTp, FUN=c(mean)) 
+Tpdata <- Tpdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
+
+Tpdata_l <- list(
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 16)), 
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 8)),
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 4)),
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 2)), 
+  (Cvdata %>% filter(Temp_C == "22C", PulseSpace_s == 1)),
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 16)), 
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 8)),
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 4)),
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 2)), 
+  (Cvdata %>% filter(Temp_C == "18C", PulseSpace_s == 1)),
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 16)), 
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 8)),
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 4)),
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 2)), 
+  (Cvdata %>% filter(Temp_C == "14C", PulseSpace_s == 1)),
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 16)), 
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 8)),
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 4)),
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 2)), 
+  (Cvdata %>% filter(Temp_C == "10C", PulseSpace_s == 1)))
+
+names(Tpdata_l) <- c("22c_16s", "22c_8s", "22c_4s","22c_2s", "22c_1s",
+                     "18c_16s", "18c_8s", "18c_4s","18c_2s", "18c_1s",
+                     "14c_16s", "14c_8s", "14c_4s","14c_2s", "14c_1s",
+                     "10c_16s", "10c_8s", "10c_4s","10c_2s", "10c_1s")
+```
+
+```{r wavelet transformation Tp}
+Tp_wavelets <- lapply(Tpdata_l, wavelet)
+```
+
+```{r reconstruct wave Tp}
+Tp_reconstructed <- reconstructwave(Tp_wavelets)
+```
+
+```{r damping index Cv}
+Tp_damping <- damping(Tp_reconstructed)
+```
+
 # Merging Results 
 ```{r add species column}
 Fc_damping <- Fc_damping %>% mutate(Species = "Fragilariopsis_cylindrus") 
@@ -533,6 +593,9 @@ sstate_damping <- sstate_damping %>%
   mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
   mutate(Temp_C = str_remove(Temp_C, "c")) %>%
   rename(DampingIndex = damping.index)
+```
+```{r}
+#write_csv(sstate_damping, "~/LowLightPhotosynth/Output/sstate_damping.csv")
 ```
 
 
