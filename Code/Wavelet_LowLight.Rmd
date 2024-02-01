@@ -17,6 +17,9 @@ editor_options:
   chunk_output_type: inline
 ---
 
+# Introduction
+xxxxx
+
 ```{r load libraries}
 library(tidyverse)
 library(doBy)
@@ -44,9 +47,10 @@ CalibData <- file.path("..","Data", "CalibData")
 FileID <- "SolFitsTrim"
 ```
 
+
 ```{r create functions}
 #function for wavelet transformation 
-wavelet <- function(data){wavelet_result <- analyze.wavelet(data, "FvFmrunnorm",
+wavelet <- function(data){wavelet_result <- WaveletComp::analyze.wavelet(data, "FvFmrunnorm",
                                      method = "white.noise",
                                      loess.span = 0,
                                      dt = 1, dj = 1/250,
@@ -58,11 +62,10 @@ return(wavelet_result)
 }
 
 
-
 #function for wavelet reconstruction 
 reconstructwave <- function(wavelet_list, siglvl = 0.05) {
   reconstructed_list <- lapply(wavelet_list, function(wave) {
-    reconstruct(wave, siglvl = siglvl)
+    WaveletComp::reconstruct(wave, siglvl = siglvl)
   })
    #recon_name <- paste(deparse(substitute(wavelet_list)), "_reconstructed")
   #assign(recon_name, reconstructed_list, envir = .GlobalEnv)
