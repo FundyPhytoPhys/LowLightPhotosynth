@@ -252,6 +252,14 @@ SolFitsTrimSeGu1005_2C_16s <- SolFitsTrim %>%
 SolFitsTrim2 <- rbind(SolFitsTrim_last32, SolFitsTrimSeGu1005_2C_16s)
 ```
 
+```{r}
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  mutate(SState = case_when(Flashnumber2 %% 4 == 1 ~ 1,
+                    Flashnumber2 %% 4 == 2 ~ 2,
+                    Flashnumber2 %% 4 == 3 ~ 3, 
+                    Flashnumber2 %% 4 == 0 ~ 4))
+```
+
 # Group by Taxon 
 
 ```{r}

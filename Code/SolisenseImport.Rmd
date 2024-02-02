@@ -180,6 +180,14 @@ SolFitsTrim <-SolFitsTrim %>%
   ungroup()
 
 head(SolFitsTrim)
+
+
+#add column for nominal SState for PSII that 'advance' with flash
+SolFitsTrim <- SolFitsTrim |>
+  mutate(SState = case_when(Flashnumber2 %% 4 == 1 ~ 1,
+                    Flashnumber2 %% 4 == 2 ~ 2,
+                    Flashnumber2 %% 4 == 3 ~ 3, 
+                    Flashnumber2 %% 4 == 0 ~ 4))
 ```
 
 
@@ -378,7 +386,7 @@ RLCFitsTrim |>
 
 
 ```{r save SolFitsTrim data}
-saveRDS(SolFitsTrim2, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+#saveRDS(SolFitsTrim, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 

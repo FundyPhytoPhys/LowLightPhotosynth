@@ -244,6 +244,13 @@ SolFitsTrim2  |>
   facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID, ObsDate)) +
   labs(title = TargetData) +
   theme_bw()
+
+#add column for nominal SState for PSII that 'advance' with flash
+SolFitsTrim2 <- SolFitsTrim2 |>
+  mutate(SState = case_when(Flashnumber2 %% 4 == 1 ~ 1,
+                    Flashnumber2 %% 4 == 2 ~ 2,
+                    Flashnumber2 %% 4 == 3 ~ 3, 
+                    Flashnumber2 %% 4 == 0 ~ 4))
 ```
 
 # Group by Taxon 
@@ -332,9 +339,8 @@ SolFitsTrim2 %>%
  # path = file.path("..", "Output")
 #)
 ```
-```
 
-```{r save Data}
+```{r save data}
 saveRDS(SolFitsICEMDV, file.path(DataOut, paste(Project, "Chlamydomonas", "ICEMDV", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 
 saveRDS(SolFitsMalina, file.path(DataOut, paste(Project, "Chlamydomonas", "malina", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
@@ -343,6 +349,8 @@ saveRDS(SolFitsPriscuii, file.path(DataOut, paste(Project, "Chlamydomonas", "pri
 
 saveRDS(SolFitsReinhardtii, file.path(DataOut, paste(Project, "Chlamydomonas", "reinhardtii", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
+
+
 
 
 
