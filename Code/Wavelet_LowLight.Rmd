@@ -17,6 +17,9 @@ editor_options:
   chunk_output_type: inline
 ---
 
+# Introduction
+xxxxx
+
 ```{r load libraries}
 library(tidyverse)
 library(doBy)
@@ -44,9 +47,10 @@ CalibData <- file.path("..","Data", "CalibData")
 FileID <- "SolFitsTrim"
 ```
 
+
 ```{r create functions}
 #function for wavelet transformation 
-wavelet <- function(data){wavelet_result <- analyze.wavelet(data, "FvFmrunnorm",
+wavelet <- function(data){wavelet_result <- WaveletComp::analyze.wavelet(data, "FvFmrunnorm",
                                      method = "white.noise",
                                      loess.span = 0,
                                      dt = 1, dj = 1/250,
@@ -58,11 +62,10 @@ return(wavelet_result)
 }
 
 
-
 #function for wavelet reconstruction 
 reconstructwave <- function(wavelet_list, siglvl = 0.05) {
   reconstructed_list <- lapply(wavelet_list, function(wave) {
-    reconstruct(wave, siglvl = siglvl)
+    WaveletComp::reconstruct(wave, siglvl = siglvl)
   })
    #recon_name <- paste(deparse(substitute(wavelet_list)), "_reconstructed")
   #assign(recon_name, reconstructed_list, envir = .GlobalEnv)
@@ -599,72 +602,97 @@ sstate_damping <- sstate_damping %>%
 ```
 
 
+```{r heat map}
+sstate_damping %>% 
+  filter(Species == "Chlamydomonas_malina") |>
+  filter(DampingIndex < 32) %>% 
+  ggplot() + 
+  geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
+  #scale_fill_viridis(option="magma") + 
+  facet_wrap(vars(Species)) +  
+  theme_linedraw()
+
+sstate_damping %>% 
+  filter(Species == "Chlamydomonas_malina") |>
+  filter(DampingIndex < 32) %>% 
+  filter(PulseSpace_s != 16) |>
+  ggplot() + 
+  geom_point(aes(x = PulseSpace_s, y = DampingIndex, colour = Temp_C)) +
+  #geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = Temp_C)) +
+  #geom_line(aes(x = Temp_C, y = DampingIndex)) 
+  #geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
+  #scale_fill_viridis(option="magma") + 
+  #facet_wrap(vars(Species)) +  
+  theme_linedraw()
+```
+
+
 # Previous Methods
 
 Method when breaking up the data by run and analyzing each with it's own wavelet
 ```{r WVT 16s 10C}
-Data_16S_10C <- list(
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(1:32)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(33:64)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(65:96)), 
-  (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(97:127)))
-  
-wavelet_16s_10C <- lapply(Data_16S_10C, wavelet)
-
-reconstructwave(wavelet_16s_10C)
+# Data_16S_10C <- list(
+#   (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(1:32)), 
+#   (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(33:64)), 
+#   (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(65:96)), 
+#   (SolFits %>% filter(Temp_C == "10", PulseSpace_s == 16) %>% slice(97:127)))
+#   
+# wavelet_16s_10C <- lapply(Data_16S_10C, wavelet)
+# 
+# reconstructwave(wavelet_16s_10C)
 ```
 
 
 Original method by Max: generates the wavelet power and heat map graphs
 ```{r}
-LOW_SolFits_1s_10C <- LOW_SolFits %>%
-  filter(Temp_C == "10",
-         PulseSpace_s == 1)
-
-WVT_10C_1s <- analyze.wavelet(LOW_SolFits_1s_10C, "FvFm",
-                        method = "white.noise",
-                        loess.span = 0, 
-                        dt = 1, dj = 1/500,
-                        lowerPeriod = 2, upperPeriod = 36,
-                        make.pval =TRUE, n.sim = 100)
-
-MP_DeSpBl <- max(WVT_10C_1s$Power)
-
-#sequential lines act like they are piped; need to run as a unit
-#png(filename = "../Output/AvPw_WT_LOW_Fragilariopsis_SolFits_1s_10C.png")
-wt.avg(WVT_10C_1s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
-periodlab = "Periodicity",
-main = "Fragilariopsis 10C, Pulse space 1 sec")
-#dev.off()
-
-#y axis is log2 scale not linear
-#png(filename = "../Output/WT_LOW_Fragilariopsis_SolFits_1s_10C.png")
-wt.image(WVT_10C_1s, periodlab = "Periodicity",
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl,
-show.date = TRUE, date.format = "%F %S",
-main = "Fragilariopsis 10C, Pulse space 1 sec")
-#dev.off()
+# LOW_SolFits_1s_10C <- LOW_SolFits %>%
+#   filter(Temp_C == "10",
+#          PulseSpace_s == 1)
+# 
+# WVT_10C_1s <- analyze.wavelet(LOW_SolFits_1s_10C, "FvFm",
+#                         method = "white.noise",
+#                         loess.span = 0, 
+#                         dt = 1, dj = 1/500,
+#                         lowerPeriod = 2, upperPeriod = 36,
+#                         make.pval =TRUE, n.sim = 100)
+# 
+# MP_DeSpBl <- max(WVT_10C_1s$Power)
+# 
+# #sequential lines act like they are piped; need to run as a unit
+# #png(filename = "../Output/AvPw_WT_LOW_Fragilariopsis_SolFits_1s_10C.png")
+# wt.avg(WVT_10C_1s, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   #set level to mark significance
+# periodlab = "Periodicity",
+# main = "Fragilariopsis 10C, Pulse space 1 sec")
+# #dev.off()
+# 
+# #y axis is log2 scale not linear
+# #png(filename = "../Output/WT_LOW_Fragilariopsis_SolFits_1s_10C.png")
+# wt.image(WVT_10C_1s, periodlab = "Periodicity",
+# legend.params = list(lab = "wavelet power levels"),
+# label.time.axis = TRUE,
+# plot.legend = TRUE, plot.contour = TRUE,
+# maximum.level = 1.001 * MP_DeSpBl,
+# show.date = TRUE, date.format = "%F %S",
+# main = "Fragilariopsis 10C, Pulse space 1 sec")
+# #dev.off()
 
 ```
 
 Plots: 
 ```{r Plot of wavelet power}
-wt.avg(relevant_wave, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
-periodlab = "Periodicity",
-main = "Title") 
-
-MP_DeSpBl <- max(relevant_wave$Power)
-wt.image(relevant_wave, periodlab = "Periodicity",
-color.key= "i", 
-legend.params = list(lab = "wavelet power levels"),
-label.time.axis = TRUE,
-plot.legend = TRUE, plot.contour = TRUE,
-maximum.level = 1.001 * MP_DeSpBl,
-#show.date = TRUE, date.format = "%F %S",
-main = "Title")
+# wt.avg(relevant_wave, show.siglvl = TRUE, siglvl =  0.05,maximum.level = 1,   
+# periodlab = "Periodicity",
+# main = "Title") 
+# 
+# MP_DeSpBl <- max(relevant_wave$Power)
+# wt.image(relevant_wave, periodlab = "Periodicity",
+# color.key= "i", 
+# legend.params = list(lab = "wavelet power levels"),
+# label.time.axis = TRUE,
+# plot.legend = TRUE, plot.contour = TRUE,
+# maximum.level = 1.001 * MP_DeSpBl,
+# #show.date = TRUE, date.format = "%F %S",
+# main = "Title")
 
 
 ```
