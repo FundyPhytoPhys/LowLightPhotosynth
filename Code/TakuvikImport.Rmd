@@ -294,11 +294,6 @@ SolFitsFragilariopsis %>%
   facet_grid(rows = vars(Temp_C), cols = vars(PulseSpace_s)) +
   labs(title = "Fragilariopsis_cylindrus", x = "Flash Number", y = "Maximum Quantum Yield of PSII") +
   theme_bw()
-
-
-#ggsave("FragilariopsisFlashCyclesDecay.png",
-  plot = last_plot(),
-  path = file.path("..", "Output"))
 ```
 
 ```{r}
@@ -323,6 +318,6 @@ RLCFitsTrim %>%
 ```{r save Data}
 saveRDS(SolFitsChaeotoceros, file.path(DataOut, paste(Project, TargetData, "Chaeotoceros", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 
-saveRDS(SolFitsFragilariopsis, file.path(DataOut, paste(Project, TargetData, "Fragilariopsis", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(SolFitsFragilariopsis, file.path(DataOut, paste(Project,"Fragilariopsis_cylindrus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 

@@ -1,5 +1,5 @@
 ---
-title: "SolisenseImport"
+title: "Sackville Import"
 author:
 - Natasha Ryan
 - Maximilian Berthold
@@ -37,6 +37,7 @@ knitr::opts_chunk$set(fig.path='Output/')
 # Set Project Variables
 ```{r set project variables}
 Project <- "LOW"
+Target_WI23 <- "Pilot/Protocol2"
 TargetTaxa <- "Tpseudonana"
 #TargetTaxa <- "Chlorella"
 DataOut <- file.path("..","Data", "CleanData")
@@ -111,11 +112,19 @@ Colours_nm
 SolisenseFiles <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
 SolisenseFiles
 
-#test for duplicate file names
-unique(duplicated(SolisenseFiles))
+unique(duplicated(SolisenseFiles)) #test for duplicate file names
 
 #RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
 #RLCFiles
+```
+
+```{r merging WI23 files}
+#adding the files from WI23 since the FA24 Tpseudonana data collection was limites
+DataIn_WI23 <- file.path("..","Data", "RawData", Target_WI23, fsep = .Platform$file.sep)
+SolisenseFiles_WI23 <- list.files(path = DataIn_WI23, pattern = FileID, full.names = TRUE)
+SolisenseFiles_WI23
+
+unique(duplicated(SolisenseFiles_WI23)) #test for duplicate file names
 
 ```
 
@@ -134,8 +143,12 @@ purrr::map to read all files
 SolFits <- SolisenseFiles %>%
   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 
-RLCFits <- RLCFiles %>%
+SolFits_WI23 <- SolisenseFiles_WI23 %>%
   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
+
+
+# RLCFits <- RLCFiles %>%
+#   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 
 ```
 
@@ -144,7 +157,7 @@ RLCFits <- RLCFiles %>%
 #for NoDecayDataset
 SolFitsTrim <- SolFits %>%
   filter(!grepl("----", DATE)) |> # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6"))  # remove superfluous columns
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6", "Tau1QA","Alp1QA","Alp1PQ","Tau1PQ"))  # remove superfluous columns
 
 SolFitsTrim <- SolFitsTrim %>%
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
@@ -181,7 +194,6 @@ SolFitsTrim <-SolFitsTrim %>%
 
 head(SolFitsTrim)
 
-
 #add column for nominal SState for PSII that 'advance' with flash
 SolFitsTrim <- SolFitsTrim |>
   mutate(SState = case_when(Flashnumber2 %% 4 == 1 ~ 1,
@@ -207,6 +219,57 @@ SolFitsTrim <- SolFitsTrim |>
 #Fixnames <- colnames(SolFits)[22:32]
 #rename columns 
 #colnames(SolFits2)[21:31] <- c(Fixnames)
+```
+
+
+```{r tidy SolFitsTrim WI23}
+#for NoDecayDataset from the winter 2023 semester 
+SolFitsTrim_WI23 <- SolFits_WI23 %>%
+  filter(!grepl("----", DATE)) |> # remove rows with "----" 
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6"))  # remove superfluous columns
+
+SolFitsTrim_WI23 <- SolFitsTrim_WI23 %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/Pilot/")) %>%
+  separate(Filename, into=c("Species","YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
+  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+          TIME = as.character(TIME)) %>%
+   rename(ObsDate = DATE,
+         ObsTime = TIME,
+         FvFm = "Fv.Fm") |>
+  mutate(Temp_C = str_remove(Temp_C, "C")) |>
+  mutate(Species = str_replace(Species, "Protocol2", "Tpseudonana")) %>%
+  type_convert() %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "S")) |>  #s vs S
+  filter(PulseSpace_s %in% c(1, 2, 4, 8)) |>  #remove rows with other PulseSpace_s
+  mutate(PulseSpace_s = as.numeric(PulseSpace_s)) %>%
+  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
+  relocate(ObsDateTime, .after = ObsTime) %>%
+  relocate(CultureID, .before = ObsDate) |>
+  type_convert()
+
+#normalize values to final stretch of 10 values from 'randomized' PSII pool
+SolFitsTrim_WI23 <-SolFitsTrim_WI23%>%
+  group_by(Filename) %>%
+  #arrange(ObsTime) |>
+  mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
+         Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
+         Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
+         FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) |>
+  mutate(Flashnumber = row_number()) %>%
+  mutate(Flashnumber2 = rank(ObsTime)) |>
+  relocate(Flashnumber, .before=p) %>%
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
+  ungroup()
+
+head(SolFitsTrim)
+
+#add column for nominal SState for PSII that 'advance' with flash
+SolFitsTrim_WI23 <- SolFitsTrim_WI23 |>
+  mutate(SState = case_when(Flashnumber2 %% 4 == 1 ~ 1,
+                    Flashnumber2 %% 4 == 2 ~ 2,
+                    Flashnumber2 %% 4 == 3 ~ 3, 
+                    Flashnumber2 %% 4 == 0 ~ 4))
 ```
 
 
@@ -325,6 +388,12 @@ SolFitsTrim20230911_NaOm1663_22C_4S <- SolFitsTrim %>%
 SolFitsTrim2 <- rbind(SolFitsTrim_first32, SolFitsTrim20230911_NaOm1663_22C_4S)
 ```
 
+# Merge Files 
+```{r}
+SolFitsTrim_Combined <- rbind(SolFitsTrim2, SolFitsTrim_WI23)
+```
+
+
 
 
 # Basic plots 
@@ -332,7 +401,7 @@ SolFitsTrim2 <- rbind(SolFitsTrim_first32, SolFitsTrim20230911_NaOm1663_22C_4S)
 Fm vs Flashnumber line; facet by temp 
 ```{r Fm vs Flashnumber(by T)}
 #facetbytemp
-SolFitsTrim2 %>%
+SolFitsTrim_Combined %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(CultureID))) +
   facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
@@ -386,7 +455,7 @@ RLCFitsTrim |>
 
 
 ```{r save SolFitsTrim data}
-#saveRDS(SolFitsTrim, file.path(DataOut, paste(Project,  TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+#saveRDS(SolFitsTrim_Combined, file.path(DataOut, paste(Project, TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 

@@ -44,6 +44,7 @@ library(WaveletComp)
 Project <- "LOW"
 DataIn <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
+DataOut <- file.path("..","Data", "ProcessedData")
 FileID <- "SolFitsTrim"
 Fc <- "Fragilariopsis_cylindrus"
 Ci <- "Chlamydomonas_ICEMDV"
@@ -72,7 +73,7 @@ return(wavelet_result)
 
 
 #function for wavelet reconstruction, applies reconstruct() function from WaveletComp to all wavelets in a list
-siglvl_reconstruct <- 0.05 #specifies significance level for reconstructed wave 
+siglvl_reconstruct <- 0.1 #specifies significance level for reconstructed wave 
 reconstructwave <- function(wavelet_list, siglvl = siglvl_reconstruct) {
   reconstructed_list <- lapply(wavelet_list, function(wave) {
     WaveletComp::reconstruct(wave, siglvl = siglvl_reconstruct)
@@ -107,34 +108,25 @@ damping <- function(reconstructed) {
 
 # Takuvik
 
-### Set-Up 
-```{r set takuvik import variables}
-TakuvikData <- "Takuvik"
-TakuvikTaxa <- "Fragilariopsis"
-```
-
 ### Fc
 ```{r import Fc data}
-FitFilesFc <- list.files(path = DataIn, pattern = paste(TakuvikData,TakuvikTaxa,FileID, sep = "_"), full.names = TRUE) #Fc henceforth refers to Fragilariopsis cylindrus
+FitFilesFc <- list.files(path = DataIn, pattern = paste(Fc,FileID, sep = "_"), full.names = TRUE) #Fc henceforth refers to Fragilariopsis cylindrus
 
 unique(duplicated(FitFilesFc)) #test for duplicate file names
 
 SolFitsFc <- FitFilesFc %>%
-  map_df(~read.RDS(flnm = .)) %>%
-  filter(!Filename %in% c("Takuvik/20230926_SeGu1008_6C_16s", "Takuvik/20230926_SeGu1001_6C_8s", "Takuvik/20230926_SeGu1001_6C_4s", "Takuvik/20230926_SeGu1001_6C_2s", "Takuvik/20230926_SeGu1008_6C_2s", "Takuvik/20230926_SeGu1001_6C_1s", "Takuvik/20230925_SeGu1003_2C_16s", "Takuvik/20230925_SeGu1006_2C_16s", "Takuvik/20230925_SeGu1003_2C_8s", "Takuvik/20230925_SeGu1003_2C_8s", "Takuvik/20230925_SeGu1003_2C_2s"))
+  map_df(~read.RDS(flnm = .)) 
 ```
 
 ```{r condense Fc trials}
-Fcdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsFc, FUN=c(mean)) 
-Fcdata <- Fcdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
-
-Fcdata_l <- Fcdata %>%
+Fcdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsFc, FUN=c(mean)) %>% 
+  rename(FvFmrunnorm = FvFmrunnorm.mean) %>%
   mutate(Condition=paste0(Temp_C,"C",PulseSpace_s,"s")) %>%
   split_by("Condition", drop=FALSE)
 ```
 
 ```{r wavelet transformation Fc}
-Fc_wavelets <- lapply(Fcdata_l, wavelet)
+Fc_wavelets <- lapply(Fcdata, wavelet)
 ```
 
 ```{r reconstruct waves Fc}
@@ -149,39 +141,25 @@ Fc_damping <- damping(Fc_reconstructed) %>%
 
 # Ottawa 
 
-### Set-Up  
-```{r set ottawa import variables}
-TargetGenus <- "Chlamydomonas"
-TargetSpecies1 <- "ICEMDV"        #henceforth Ci
-TargetSpecies2 <- "malina"        #henceforth Cm
-TargetSpecies3 <- "priscuii"      #henceforth Cp
-TargetSpecies4 <- "reinhardtii"   #henceforth Cr
-```
-
 ### Ci
 ```{r import Ci data }
-FitFilesCi <- list.files(path = DataIn, pattern = paste(TargetGenus,TargetSpecies1,FileID, sep = "_"), full.names = TRUE)
+FitFilesCi <- list.files(path = DataIn, pattern = paste(Ci,FileID, sep = "_"), full.names = TRUE)
 
 unique(duplicated(FitFilesCi)) #test for duplicate file names
 
 SolFitsCi <- FitFilesCi %>% 
-  map_df(~read.RDS(flnm = .)) %>%
-  filter(!Filename %in% c("Chlamy/20230918_MaPo1002_8C_16s", 
-                          "Chlamy/20230919_MaPo1002_4C_16s", 
-                          "Chlamy/20230919_MaPo1002_8C_16s"))
+  map_df(~read.RDS(flnm = .))
 ```
 
 ```{r condense Ci trials}
-Cidata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCi, FUN=c(mean)) 
-Cidata <- Cidata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
-
-Cidata_l <- Cidata %>%
+Cidata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCi, FUN=c(mean)) %>%
+  rename(FvFmrunnorm = FvFmrunnorm.mean) %>%
   mutate(Condition=paste0(Temp_C,"C",PulseSpace_s,"s")) %>%
   split_by("Condition", drop=FALSE)
 ```
 
 ```{r wavelet transformation Ci}
-Ci_wavelets <- lapply(Cidata_l, wavelet)
+Ci_wavelets <- lapply(Cidata, wavelet)
 ```
 
 ```{r reconstruct waves Ci}
@@ -196,28 +174,23 @@ Ci_damping <- damping(Ci_reconstructed) %>%
 
 ### Cm 
 ```{r import Cm data}
-FitFilesCm <- list.files(path = DataIn, pattern = paste(TargetGenus,TargetSpecies2,FileID, sep = "_"), full.names = TRUE)
+FitFilesCm <- list.files(path = DataIn, pattern = paste(Cm,FileID, sep = "_"), full.names = TRUE)
 
 unique(duplicated(FitFilesCm)) #test for duplicate file names
 
 SolFitsCm <- FitFilesCm %>% 
-  map_df(~read.RDS(flnm = .)) %>%
-  filter(!Filename %in% c("Chlamy/20230919_MaPo1003_8C_16s",
-                          "Chlamy/20230919_MaPo1003_4C_16s", 
-                          "Chlamy/20230918_MaPo1003_8C_16s"))
+  map_df(~read.RDS(flnm = .)) 
 ```
 
 ```{r condense Cm trials}
-Cmdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCm, FUN=c(mean)) 
-Cmdata <- Cmdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
-
-Cmdata_l <- Cmdata %>%
+Cmdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCm, FUN=c(mean)) %>% 
+  rename(FvFmrunnorm = FvFmrunnorm.mean) %>%
   mutate(Condition=paste0(Temp_C,"C",PulseSpace_s,"s")) %>%
   split_by("Condition", drop=FALSE)
 ```
 
 ```{r wavelet transformation Cm}
-Cm_wavelets <- lapply(Cmdata_l, wavelet)
+Cm_wavelets <- lapply(Cmdata, wavelet)
 ```
 
 ```{r reconstruct wave Cm}
@@ -232,29 +205,23 @@ Cm_damping <- damping(Cm_reconstructed) %>%
 
 ### Cp
 ```{r import Cp data}
-FitFilesCp <- list.files(path = DataIn, pattern = paste(TargetGenus,TargetSpecies3,FileID, sep = "_"), full.names = TRUE)
+FitFilesCp <- list.files(path = DataIn, pattern = paste(Cp,FileID, sep = "_"), full.names = TRUE)
 
 unique(duplicated(FitFilesCp)) #test for duplicate file names
 
 SolFitsCp <- FitFilesCp %>%
-  map_df(~read.RDS(flnm = .)) %>%
-  filter(!Filename %in% c("Chlamy/20230918_MaPo1001_12C_16s", 
-                          "Chlamy/20230919_MaPo1001_8C_16s", 
-                          "Chlamy/20230919_MaPo1001_4C_16s", 
-                          "Chlamy/20230919_MaPo1004_4C_16s")) 
+  map_df(~read.RDS(flnm = .))
 ```
 
 ```{r condense Cp trials}
-Cpdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCp, FUN=c(mean)) 
-Cpdata <- Cpdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
-
-Cpdata_l <- Cpdata %>%
+Cpdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCp, FUN=c(mean)) %>%
+  rename(FvFmrunnorm = FvFmrunnorm.mean) %>%
   mutate(Condition=paste0(Temp_C,"C",PulseSpace_s,"s")) %>%
   split_by("Condition", drop=FALSE)
 ```
 
 ```{r wavelet transformation Cp}
-Cp_wavelets <- lapply(Cpdata_l, wavelet)
+Cp_wavelets <- lapply(Cpdata, wavelet)
 ```
 
 ```{r reconstruct wave Cp}
@@ -269,26 +236,23 @@ Cp_damping <- damping(Cp_reconstructed) %>%
 
 ### Cr
 ```{r import Cr data}
-FitFilesCr <- list.files(path = DataIn, pattern = paste(TargetGenus,TargetSpecies4,FileID, sep = "_"), full.names = TRUE)
+FitFilesCr <- list.files(path = DataIn, pattern = paste(Cr,FileID, sep = "_"), full.names = TRUE)
 
 unique(duplicated(FitFilesCr)) #test for duplicate file names
 
 SolFitsCr <- FitFilesCr %>% 
-  map_df(~read.RDS(flnm = .)) %>%
-  filter(!Filename == "Chlamy/20230920_MaPo1005_24C_16s")
+  map_df(~read.RDS(flnm = .)) 
 ```
 
 ```{r condense Cr trials}
-Crdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCr, FUN=c(mean)) 
-Crdata <- Crdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
-
-Crdata_l <- Crdata %>%
+Crdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber2, data=SolFitsCr, FUN=c(mean)) %>% 
+  rename(FvFmrunnorm = FvFmrunnorm.mean) %>%
   mutate(Condition=paste0(Temp_C,"C",PulseSpace_s,"s")) %>%
   split_by("Condition", drop=FALSE)
 ```
 
 ```{r wavelet transformation Cr}
-Cr_wavelets <- lapply(Crdata_l, wavelet)
+Cr_wavelets <- lapply(Crdata, wavelet)
 ```
 
 ```{r reconstruct wave Cr}
@@ -303,16 +267,9 @@ Cr_damping <- damping(Cr_reconstructed) %>%
 
 # Sackville 
 
-### Set-Up
-```{r set Sackville import variables}
-TargetGenus2 <- "Chlorella" #Henceforth Cv
-TargetTaxa2 <- "Tpseudonana" #Henceforth Tp
-```
-
-
 ### Cv
 ```{r import clean  data}
-FitFilesCv <- list.files(path = DataIn, pattern = paste(TargetGenus2,FileID, sep = "_"), full.names = TRUE) 
+FitFilesCv <- list.files(path = DataIn, pattern = paste(Cv, FileID, sep = "_"), full.names = TRUE) 
 
 unique(duplicated(FitFilesCv)) #test for duplicate file names
 
@@ -321,16 +278,14 @@ SolFitsCv <- FitFilesCv %>%
 ```
 
 ```{r condense Cv trials}
-Cvdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=SolFitsCv, FUN=c(mean)) 
-Cvdata <- Cvdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
-
-Cvdata_l <- Cvdata %>%
+Cvdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=SolFitsCv, FUN=c(mean)) %>% 
+  rename(FvFmrunnorm = FvFmrunnorm.mean) %>%
   mutate(Condition=paste0(Temp_C,"C",PulseSpace_s,"s")) %>%
   split_by("Condition", drop=FALSE)
 ```
 
 ```{r wavelet transformation Cv}
-Cv_wavelets <- lapply(Cvdata_l, wavelet)
+Cv_wavelets <- lapply(Cvdata, wavelet)
 ```
 
 ```{r reconstruct wave Cv}
@@ -345,25 +300,23 @@ Cv_damping <- damping(Cv_reconstructed) %>%
 
 ### Tp
 ```{r import Tp data}
-FitFilesTp <- list.files(path = DataIn, pattern = paste(TargetTaxa2,FileID, sep = "_"), full.names = TRUE) 
+FitFilesTp <- list.files(path = DataIn, pattern = paste(Tp ,FileID, sep = "_"), full.names = TRUE) 
 
 unique(duplicated(FitFilesTp)) #test for duplicate file names
 
 SolFitsTp <- FitFilesTp %>%
-  map_df(~read.RDS(flnm = .))
+  map_df(~read.RDS(flnm = .)) 
 ```
 
 ```{r condense Tp trials}
-Tpdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=SolFitsTp, FUN=c(mean)) 
-Tpdata <- Tpdata  %>% rename(FvFmrunnorm = FvFmrunnorm.mean)
-
-Tpdata_l <- Tpdata %>%
+Tpdata <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=SolFitsTp, FUN=c(mean)) %>% 
+  rename(FvFmrunnorm = FvFmrunnorm.mean) %>%
   mutate(Condition=paste0(Temp_C,"C",PulseSpace_s,"s")) %>%
   split_by("Condition", drop=FALSE)
 ```
 
 ```{r wavelet transformation Tp}
-Tp_wavelets <- lapply(Tpdata_l, wavelet)
+Tp_wavelets <- lapply(Tpdata, wavelet)
 ```
 
 ```{r reconstruct wave Tp}
@@ -378,12 +331,16 @@ Tp_damping <- damping(Tp_reconstructed) %>%
 # Merging Results 
 
 ```{r merge}
-sstate_damping <- list(Fc_damping, Ci_damping, Cm_damping, Cp_damping, Cr_damping, Cv_damping) %>% 
-  reduce(full_join) %>%
+sstate_damping <- rbind(Fc_damping, Ci_damping, Cm_damping, Cp_damping, Cr_damping, Cv_damping, Tp_damping) %>%
   relocate(Species, .before = condition) %>%
   separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "C") %>%
   mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
   rename(DampingIndex = damping.index) 
+```
+
+```{r saving as RDS}
+#save as RDS to be able to work on figures without running all the lengthy wavelet transformation 
+saveRDS(sstate_damping, file.path(DataOut, paste(Project, "SState_Damping.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 
@@ -392,17 +349,18 @@ sstate_damping <- list(Fc_damping, Ci_damping, Cm_damping, Cp_damping, Cr_dampin
 sstate_damping$PulseSpace_s <- factor(sstate_damping$PulseSpace_s, levels = c("16","8","4","2","1"))
 sstate_damping$Temp_C <- factor(sstate_damping$Temp_C, levels = c("0","2","4","6","8","10","12","14","16","18","20","22","24"))
 
-species.labs <- c("Chlamydomonas ICEMDV", "Chlamydomonas malina", "Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris", "Fragilariopsis cylindrus")
-names(species.labs) <- c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris", "Fragilariopsis_cylindrus")
+species.labs <- c("Chlamydomonas ICEMDV", "Chlamydomonas malina", "Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris", "Fragilariopsis cylindrus", "Thalassiosira pseudonana")
+names(species.labs) <- c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris", "Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")
 ```
-
+ 
 
 ```{r heat map}
 sstate_damping %>% 
-  filter(DampingIndex < 32) %>% 
+  #filter(DampingIndex < 32) %>% 
+  #filter(PulseSpace_s %in% c("8","4","2","1")) %>%
   ggplot() + 
   geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
-  viridis::scale_fill_viridis(option="inferno") + 
+  viridis::scale_fill_viridis(option="turbo") + 
   facet_wrap(vars(Species), scales = "free", labeller = labeller(Species=species.labs)) +  
   theme_linedraw() +
   theme(strip.text = element_text(face = "italic"))
@@ -412,7 +370,7 @@ sstate_damping %>%
 sstate_damping %>% 
   filter(DampingIndex < 32) %>% 
   ggplot() + 
-  geom_point(aes(x = PulseSpace_s, y = DampingIndex, colour = Temp_C, size = Temp_C)) +
+  geom_point(aes(x = PulseSpace_s, y = DampingIndex, colour = Temp_C)) +
   geom_line(aes(x = as.numeric(PulseSpace_s), y = DampingIndex, colour = Temp_C)) +
   viridis::scale_color_viridis(option="mako", discrete=TRUE) + 
   facet_wrap(vars(Species), scales = "free", labeller = labeller(Species=species.labs)) +  
