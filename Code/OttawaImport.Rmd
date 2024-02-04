@@ -34,7 +34,7 @@ knitr::opts_chunk$set(fig.path='Output/')
 # Set Project Variables 
 ```{r set project variables}
 Project <- "LOW"
-TargetData <- "Chlamy"
+TargetData <- "UOttawa"
 DataOut <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
 
@@ -74,6 +74,8 @@ ActPARCrossCal <- ActPARCrossCal |>
 
 # Metadata Import
 ```{r import metadata}
+googlesheets4::gs4_deauth()
+
 OttawaMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1m8Pjwj4DL10AwdsQo2G3boymSWG1Oq-gJDzjU0csRKs/edit?usp=sharing")
 ```
 
@@ -106,14 +108,14 @@ RLCFits <- RLCFiles %>%
 
 ```
 
-
+# Tidy 
 ```{r tidy dataset}
 SolFitsTrim <- SolFits %>%
   filter(!grepl("----", DATE)) %>%
   select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6")) %>%
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
   mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
-  separate(Filename, into=c("Species", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
+  separate(Filename, into=c("Location", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) %>%
    rename(ObsDate = DATE,
@@ -121,8 +123,8 @@ SolFitsTrim <- SolFits %>%
          FvFm = "Fv.Fm") %>%
   mutate(Temp_C = str_remove(Temp_C, "C")) %>%
   type_convert() %>%
-  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%  #s vs S
-  filter(PulseSpace_s %in% c(1, 2, 4, 8, 16)) %>%  
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "S")) %>%
   mutate(PulseSpace_s = as.numeric(PulseSpace_s)) %>%
   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
   relocate(ObsDateTime, .after = ObsTime) %>%
@@ -132,10 +134,6 @@ SolFitsTrim <- SolFits %>%
 SolFitsTrim <-SolFitsTrim %>%
   group_by(Filename) %>%
   arrange(ObsTime) |>
-  mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
-         Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
-         Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
-         FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) |>
   mutate(Flashnumber = row_number()) %>%
   mutate(Flashnumber2 = rank(ObsTime)) |>
   relocate(Flashnumber, .before=p) %>%
@@ -184,66 +182,60 @@ RLCFitsTrim <- RLCFitsTrim |>
 ```
 
 # Chlamy File Issues
-2023-09-18
-MaPo1001
-PulseSpace_s 1, 4C (double)  (keep 2nd run)
-PulseSpace_s 16, 12C (triple)  (keep last run? difficult to tell?)
-PulseSpace 16_s, 4C (missing)  (try to figure out order of measurements)?
 
-MaPo1002
-PulseSpace_s 16, 8C, (extra points at end)
+```{r}
+#to check spacing to find correct runs 
+# SolFitsTest <- SolFitsTrim %>%
+#   filter(Filename == "Problem File") %>%
+#   mutate(TimeDiff = c(NA, diff(Etime_s)))
+```
 
-MaPo1003
-PulseSpace_s 8, 8C (missing) (try to figure out order of measurements)?
+20230919_MaPo1001_4C_16s (48 flashes, keep last 32)
+20230918_MaPo1002_4C_16S (1 extra, keep last 32)
+20230918_MaPo1002_4C_16s (1 extra, keep last 32)
+20230919_MaPo1002_12C_8s (1 extra, keep last 32)
+20230919_MaPo1004_4C_8s (1 extra, keep last 32)
+20230920_MaPo1005_12C_16s (37 flashes, keep last 32)
+20230918_MaPo1002_8C_16s (36 flashes keep last 32)
+20230919_MaPo1004_8C_16s (4 extra, keep last 32)
+20230918_MaPo1001_12C_16s (triple, contains 3 runs, 1-32 is 8s, 33-64 is 2s, and 65-96 is 16s)
 
-2023-09-19
-MaPo1001
-PulseSpace_16, 4C (extra points at end)
-
-MaPo1004
-PulseSpace_16, 8C (extra points at end)
-
-2023-09-20
-MaPo1005
-PulseSpace_16, 22C (extra points at end of run)
+20230920_MaPo1005_24C_16s (1 extra, keep last 31)
+20230918_MaPo1001_4C_1s (double, keep first run)
 
 
 ```{r manually trim data}
-SolFitsTrim20230918_MaPo1001 <- SolFitsTrim |>
-   filter(ObsDate == "2023-09-18",
-          CultureID == "MaPo1001") |>
-  group_by(Temp_C, PulseSpace_s) |>
-  slice_max(order_by = Flashnumber2, n = 32) |>
-  arrange(Flashnumber2) |>
-  mutate(Flashnumber2 = row_number()) |>
+SolFitsTrim_last32 <- SolFitsTrim %>%
+  filter(!Filename %in% c('UOttawa/20230920_MaPo1005_24C_16s', 'UOttawa/20230918_MaPo1001_4C_1s')) %>%
+  group_by(Filename) %>%
+  slice(tail(row_number(),32)) %>% 
+  mutate(Flashnumber2 = row_number()) %>%
   ungroup()
 
-SolFitsTrim20230918_MaPo1002 <- SolFitsTrim |>
-   filter(ObsDate == "2023-09-18",
-          CultureID == "MaPo1002",
-          Flashnumber2 <= 32)
+SolFitsTrim_MaPo1005_24C_16s <- SolFitsTrim %>%
+  filter(Filename == 'UOttawa/20230920_MaPo1005_24C_16s') %>%
+  slice(tail(row_number(),31)) %>% 
+  mutate(Flashnumber2 = row_number()) %>%
+  ungroup()
 
-SolFitsTrim20230918_MaPo1003 <- SolFitsTrim |>
-   filter(ObsDate == "2023-09-18",
-          CultureID == "MaPo1003",
-          Flashnumber2 <= 32)
+SolFitsTrim_MaPo1001_4C_1s <- SolFitsTrim %>%
+  filter(Filename== "UOttawa/20230918_MaPo1001_4C_1s") %>%
+  filter(Flashnumber <= 32)
 
-SolFitsTrim20230919 <- SolFitsTrim |>
-  filter(ObsDate == "2023-09-19",
-         Flashnumber2 <= 32)
+SolFitsTrim2 <- rbind(SolFitsTrim_last32, SolFitsTrim_MaPo1001_4C_1s, SolFitsTrim_MaPo1005_24C_16s)
+```
 
-SolFitsTrim20230920 <- SolFitsTrim |>
-  filter(ObsDate == "2023-09-20",
-         Flashnumber2 <= 32)
-
-SolFitsTrim2 <- rbind(SolFitsTrim20230918_MaPo1001, SolFitsTrim20230918_MaPo1002, SolFitsTrim20230918_MaPo1003, SolFitsTrim20230919, SolFitsTrim20230920)
-
-SolFitsTrim2  |>
-  ggplot()+
-  geom_line(aes(x=Flashnumber2, y=FvFm, colour = as.factor(PulseSpace_s))) +
-  facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID, ObsDate)) +
-  labs(title = TargetData) +
-  theme_bw()
+# Normalizing 
+```{r}
+# Moved this here so the fixed files would be normalized with the correct values 
+SolFitsTrim2 <-SolFitsTrim2 %>%
+  group_by(Filename) %>%
+  arrange(ObsTime) |>
+  mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
+         Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
+         Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
+         FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) |>
+  ungroup()
 
 #add column for nominal SState for PSII that 'advance' with flash
 SolFitsTrim2 <- SolFitsTrim2 |>
@@ -252,6 +244,27 @@ SolFitsTrim2 <- SolFitsTrim2 |>
                     Flashnumber2 %% 4 == 3 ~ 3, 
                     Flashnumber2 %% 4 == 0 ~ 4))
 ```
+
+
+```{r}
+#filter bad runs 
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  filter(!Filename %in% c("UOttawa/20230920_MaPo1006_24C_16s", "UOttawa/20230918_MaPo1001_12C_16s", "UOttawa/20230919_MaPo1001_8C_16s", "UOttawa/20230919_MaPo1002_4C_16s", "UOttawa/20230919_MaPo1002_8C_16s"))
+```
+
+```{r}
+SolFitsTrim2  |>
+  filter(CultureID == "MaPo1001") %>%
+  filter(PulseSpace_s == 16) %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber2, y=FvFmrunnorm, colour = as.factor(PulseSpace_s))) +
+  facet_wrap(vars(Filename)) +
+  #facet_grid(rows= vars(Temp_C), cols = vars(PulseSpace_s)) +
+  #facet_grid(rows = vars(PulseSpace_s, Temp_C), cols = vars(CultureID, ObsDate)) +
+  theme_bw()
+```
+
+
 
 # Group by Taxon 
 
@@ -282,13 +295,16 @@ Overall:
 
 # Test Plots
 ```{r}
-SolFitsPriscuii %>%
+SolFitsMalina %>%
+  filter(PulseSpace_s == 16) %>%
   ggplot() +
-  geom_line(aes(x=Flashnumber2, y=FvFm, colour = as.factor(CultureID))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
-  labs(title = "Chlamydomonas_priscuii") +
+  geom_line(aes(x=Flashnumber2, y=FvFmrunnorm, colour = as.factor(CultureID))) +
+  facet_wrap(vars(Filename)) +
   theme_bw()
+```
 
+
+```{r}
 SolFitsICEMDV %>%
   ggplot() +
   geom_line(aes(x=Flashnumber2, y=FvFm)) +

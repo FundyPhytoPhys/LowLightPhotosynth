@@ -356,11 +356,11 @@ names(species.labs) <- c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamy
 
 ```{r heat map}
 sstate_damping %>% 
-  #filter(DampingIndex < 32) %>% 
-  #filter(PulseSpace_s %in% c("8","4","2","1")) %>%
+  #filter(DampingIndex < 30) %>% 
+  filter(PulseSpace_s %in% c("8","4","2","1")) %>%
   ggplot() + 
   geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
-  viridis::scale_fill_viridis(option="turbo") + 
+  viridis::scale_fill_viridis(option="mako") + 
   facet_wrap(vars(Species), scales = "free", labeller = labeller(Species=species.labs)) +  
   theme_linedraw() +
   theme(strip.text = element_text(face = "italic"))

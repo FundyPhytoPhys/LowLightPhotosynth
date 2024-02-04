@@ -37,6 +37,7 @@ knitr::opts_chunk$set(fig.path='Output/')
 # Set Project Variables
 ```{r set project variables}
 Project <- "LOW"
+TargetData <- "Sackville"
 Target_WI23 <- "Pilot/Protocol2"
 TargetTaxa <- "Tpseudonana"
 #TargetTaxa <- "Chlorella"
@@ -48,7 +49,7 @@ CalibData <- file.path("..","Data", "CalibData")
 #Temporary RunDate during auditing
 #RunDate <- "Refit"
 
-DataIn <- file.path("..","Data", "RawData", TargetTaxa, fsep = .Platform$file.sep)
+DataIn <- file.path("..","Data", "RawData", TargetData, TargetTaxa, fsep = .Platform$file.sep)
 DataRefDecay <- file.path("..","Data", "RawData",TargetTaxa, "DecayRef", fsep = .Platform$file.sep)
 DataRLC <- file.path("..","Data", "RawData",TargetTaxa, "RLC", fsep = .Platform$file.sep)
 
@@ -120,7 +121,7 @@ unique(duplicated(SolisenseFiles)) #test for duplicate file names
 
 ```{r merging WI23 files}
 #adding the files from WI23 since the FA24 Tpseudonana data collection was limites
-DataIn_WI23 <- file.path("..","Data", "RawData", Target_WI23, fsep = .Platform$file.sep)
+DataIn_WI23 <- file.path("..","Data", "RawData", TargetData, Target_WI23, fsep = .Platform$file.sep)
 SolisenseFiles_WI23 <- list.files(path = DataIn_WI23, pattern = FileID, full.names = TRUE)
 SolisenseFiles_WI23
 
@@ -157,11 +158,9 @@ SolFits_WI23 <- SolisenseFiles_WI23 %>%
 #for NoDecayDataset
 SolFitsTrim <- SolFits %>%
   filter(!grepl("----", DATE)) |> # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6", "Tau1QA","Alp1QA","Alp1PQ","Tau1PQ"))  # remove superfluous columns
-
-SolFitsTrim <- SolFitsTrim %>%
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6", "Tau1QA","Alp1QA","Alp1PQ","Tau1PQ")) %>% # remove superfluous columns
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/Sackville/")) %>%
   separate(Filename, into=c("Species", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) %>%
@@ -230,7 +229,7 @@ SolFitsTrim_WI23 <- SolFits_WI23 %>%
 
 SolFitsTrim_WI23 <- SolFitsTrim_WI23 %>%
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/Pilot/")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/Sackville/Pilot/")) %>%
   separate(Filename, into=c("Species","YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) %>%
@@ -360,6 +359,12 @@ SolFitsTrim %>%
   filter(Flashnumber > 32)
 ```
 
+```{r}
+#to check spacing to find correct runs 
+ SolFitsTest <- SolFitsTrim %>%
+   filter(Filename == "Tpseudonana/20230912_NaOm1663_18C_8S") %>%
+   mutate(TimeDiff = c(NA, diff(Etime_s)))
+```
 
 Tpseudonana/20230911_NaOm1663_22C_8S  23 flashes
 Tpseudonana/20230911_NaOm1663_22C_1S  31 flashes
@@ -386,6 +391,9 @@ SolFitsTrim20230911_NaOm1663_22C_4S <- SolFitsTrim %>%
   mutate(Flashnumber2 = row_number())
 
 SolFitsTrim2 <- rbind(SolFitsTrim_first32, SolFitsTrim20230911_NaOm1663_22C_4S)
+
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  filter(!Filename == "Tpseudonana/20230911_NaOm1663_22C_8S")
 ```
 
 # Merge Files 
@@ -402,10 +410,12 @@ Fm vs Flashnumber line; facet by temp
 ```{r Fm vs Flashnumber(by T)}
 #facetbytemp
 SolFitsTrim_Combined %>%
+  filter(PulseSpace_s == 8) %>%
+  filter(Temp_C == "22") %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=FvFm, colour = as.factor(CultureID))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
-  labs(title = TargetTaxa) +
+  facet_wrap(vars(Filename)) +
+  #facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
   theme_bw()
 ```
 
@@ -455,7 +465,7 @@ RLCFitsTrim |>
 
 
 ```{r save SolFitsTrim data}
-#saveRDS(SolFitsTrim_Combined, file.path(DataOut, paste(Project, TargetTaxa, "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(SolFitsTrim_Combined, file.path(DataOut, paste(Project, "Thalassiosira_pseudonana", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 
