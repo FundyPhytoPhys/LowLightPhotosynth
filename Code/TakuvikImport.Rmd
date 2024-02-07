@@ -20,6 +20,11 @@ editor_options:
 
 *Some of the code used to create this R Notebook was refurbished from "PlateAbImport.Rmd" written by Maximilian Berthold, Douglas A. Campbell, Melissa L. Rioux, Sarah J Gore, and Alyson MacCormack.*
 
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Output/')
+```
+
 ```{r load libraries}
 library(tidyverse)
 library(lubridate)
@@ -27,12 +32,9 @@ library(googlesheets4)
 library(googledrive)
 ```
 
-```{r setup, include = FALSE}
-knitr::opts_chunk$set(echo = TRUE, message = FALSE)
-knitr::opts_chunk$set(fig.path='Output/')
-```
+#Setup
 
-# Set Project Variables 
+### Set Project Variables 
 ```{r set project variables}
 Project <- "LOW"
 TargetData <- "Takuvik"
@@ -73,97 +75,195 @@ A2_m2 = 1E20
 #          Slope_SE = `std.error_LIFT_Gen_Developer.cal`)
 ```
 
-# Metadata Import
+### Metadata Import
 ```{r import metadata}
 googlesheets4::gs4_deauth()
 
 TakuvikMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1OC22KJy-VdQU9r1-PYvQaJO42_ugdFcHmRHWbMYOHUc/edit?usp=sharing")
 ```
 
-# File Import
-```{r list PSI files for file import}
-SolisenseFiles <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
-SolisenseFiles
-
-#test for duplicate file names
-unique(duplicated(SolisenseFiles))
-
-RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
-RLCFiles
-
-```
-
-# Create Data Frame 
-
+### Create Functions 
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(Filename = flnm)
 }
 ```
 
-purrr::map to read all files
-```{r read Solisense files}
-SolFits <- SolisenseFiles %>%
-  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 
-RLCFits <- RLCFiles %>%
-  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
+# No Decay Data
 
+### Import 
+```{r list PSI files for file import}
+SolisenseFiles <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
+SolisenseFiles
+
+unique(duplicated(SolisenseFiles)) #test for duplicate file names
 ```
 
-# Tidy
+```{r read Solisense files}
+SolFits <- SolisenseFiles %>%
+  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows)) #purrr::map to read all files
+```
 
+### Tidy
 ```{r correct prefaces}
-SolFitsTrim <- SolFits #create tidy df 
-
 #correct errors in file prefaces 
 ProblemFiles <- c("20230926_SeGu1008_0C", "20230926_SeGu1008_10C", "20230927_SeGu1008_10C", "20230927_SeGu1008_6C","20230927_SeGu1008_2C","20230927_SeGu1008_0C")
 
-SolFitsBadNames <- SolFitsTrim %>%
+SolFitsBadNames <- SolFits %>%
   filter(grepl(paste(ProblemFiles, collapse="|"), Filename)) %>%
   mutate(Filename = str_replace(Filename, "1008", "1006")) #isolate and correct incorrect files 
 
-SolFitsGoodNames <- SolFitsTrim %>%
+SolFitsGoodNames <- SolFits %>%
   filter(!grepl(paste(ProblemFiles, collapse="|"), Filename)) #isolate unaffected files 
 
-SolFitsTrim <- rbind(SolFitsBadNames, SolFitsGoodNames) #merge
+SolFits <- rbind(SolFitsBadNames, SolFitsGoodNames) #merge
 ```
-
 
 ```{r tidy data}
 #for NoDecay Data
-SolFitsTrim <- SolFitsTrim %>%
+SolFitsTrim <- SolFits %>%
   filter(!grepl("----", DATE)) %>% # remove rows with "----" 
   select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6")) %>% #remove extra columns
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
-  separate(Filename, into=c("Location", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/Takuvik/")) %>%
+  separate(Filename, into=c("YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) %>%
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD)) %>%
   rename("ObsDate" = "DATE", "ObsTime" = "TIME", "FvFm" = "Fv.Fm") %>%
-  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%  
   type_convert() %>%
-  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%  #s vs S
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
   mutate(PulseSpace_s = as.numeric(PulseSpace_s)) %>%
   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
   relocate(ObsDateTime, .after = ObsTime) %>%
   relocate(CultureID, .before = ObsDate) %>%
-  type_convert()
+  type_convert() 
 
-#normalize values to final stretch of 10 values from 'randomized' PSII pool
 SolFitsTrim <- SolFitsTrim %>%
   group_by(Filename) %>%
-  #arrange(ObsTime)%>%
+  mutate(Flashnumber = row_number()) %>% #add flashnumber column 
+  mutate(Flashnumber2 = rank(ObsTime)) %>%
+  relocate(Flashnumber, .before=p) %>%
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>% #add col for time elapsed 
+  ungroup()
+```
+
+```{r correct file issues}
+ProblemFiles <- unique(SolFitsTrim$Filename[SolFitsTrim$Flashnumber >32])
+
+ProblemList <- SolFitsTrim %>% 
+  filter(Filename %in% c(ProblemFiles)) %>% 
+  mutate(TimeDiff = c(NA, diff(ObsTime))) %>% #shows actual spacing between flashes
+  doBy::split_by("Filename") #creates list of problem files
+```
+
+From ProblemList, use spacing between flashes to decipher runs:
+Keep last 32 flashes in:
+  20230925_SeGu1003_2C_16s        - 49 flashes
+  20230925_SeGu1004_2C_16s        - 37 flashes
+  20230926_SeGu1006_10C_16s       - 34 flashes 
+  20230927_SeGu1006_0C_16s        - 33 flashes 
+  20230927_SeGu1006_6C_16s        - 38 flashes
+  20230925_SeGu1002_2C_16s        - 33 flashes
+  20230925_SeGu1006_2C_16s        - 34 flashes 
+  20230925_SeGu1008_2C_16s        - 34 flashes
+  20230926_SeGu1001_0C_16s        - 34 flashes 
+  20230926_SeGu1001_10C_8s        - 33 flashes
+  20230926_SeGu1003_6C_16s        - 70 flashes
+  20230926_SeGu1006_6C_16s        - 40 flashes
+  20230926_SeGu1008_6C_16s        - 39 flashes
+  20230927_SeGu1001_0C_16s        - 33 flashes
+  20230927_SeGu1001_10C_16s       - 34 flashes 
+
+Other adjustments: 
+  20230927_SeGu1006_2C_16s        - 65 flashes, keep 2-33
+  20230925_SeGu1005_2C_16s        - 120 flashes, use 58-59
+  20230926_SeGu1001_6C_16s        - remove, incorrect spacing (19s)
+  20230925_SeGu1005_2C_8s         - remove, file error 
+
+
+```{r manual trim}
+last32 <- SolFitsTrim %>%
+  filter(!Filename %in% c('20230927_SeGu1006_2C_16s', '20230925_SeGu1005_2C_16s', '20230926_SeGu1001_6C_16s', '20230925_SeGu1005_2C_8s')) %>%
+  group_by(Filename) %>%
+  slice(tail(row_number(),32)) %>% 
+  mutate(Flashnumber2 = row_number()) %>%
+  ungroup()
+
+SeGu1005_2C_16s <- SolFitsTrim %>%
+  filter(Filename == '20230925_SeGu1005_2C_16s') %>%
+  filter(Flashnumber %in% c(58:89)) %>%
+  mutate(Flashnumber2 = row_number())
+
+SeGu1006_2C_16s <- SolFitsTrim %>%
+  filter(Filename == '20230927_SeGu1006_2C_16s') %>%
+  filter(Flashnumber %in% c(2:33)) %>%
+  mutate(Flashnumber2 = row_number())
+  
+SolFitsTrim2 <- rbind(last32,SeGu1005_2C_16s, SeGu1006_2C_16s)
+  SolFitsTrim2
+```
+
+Now that the files are clean: 
+
+```{r tidy clean data}
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  select(-Flashnumber) %>% # removing extra flashnumber column to eliminate confusion 
+  rename("Flashnumber" = "Flashnumber2") %>%
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4)) #add column for sstate
+
+#normalize values to final stretch of 10 values from 'randomized' PSII pool, done after cleaning to ensure the last 10 values are correct 
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  group_by(Filename) %>%
   mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
          Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
          Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
          FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
-  mutate(Flashnumber = row_number()) %>%
-  mutate(Flashnumber2 = rank(ObsTime)) %>%
-  relocate(Flashnumber, .before=p) %>%
-  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
 ```
 
 
+### Group by Taxon 
+```{r}
+SolFitsChaeotoceros <- SolFitsTrim2 %>%
+  filter(CultureID %in% c("SeGu1002", "SeGu1007", "SeGu1004", "SeGu1005"))
+
+SolFitsFragilariopsis <- SolFitsTrim2 %>%
+  filter(CultureID %in% c("SeGu1001","SeGu1006"))
+#Note SeGu1003 and 1008 were excluded due to culture issues 
+```
+
+### Test Plots
+```{r}
+SolFitsFragilariopsis %>%
+  ggplot() +
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(PulseSpace_s)) +
+  theme_bw()
+```
+
+```{r save Data}
+saveRDS(SolFitsChaeotoceros, file.path(DataOut, paste(Project,"Chaeotoceros_gelidus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(SolFitsFragilariopsis, file.path(DataOut, paste(Project,"Fragilariopsis_cylindrus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+```
+
+
+# RLC Data
+### Import
+```{r list RLC files for import}
+RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
+RLCFiles
+```
+
+```{r create df }
+RLCFits <- RLCFiles %>%
+  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
+```
+
+### Tidy
 ```{r tidy RLC Fits}
 #for NoDecayDataset
 RLCFitsTrim <- RLCFits |>
@@ -213,95 +313,6 @@ RLCFitsTrim <- RLCFitsTrim |>
 ```
 
 
-# Takuvik File Issues 
-```{r}
-SolFitsTrim %>% 
-  filter(Flashnumber > 32) 
-```
-
-
-20230926_SeGu1001_6C_16s  - last 32 are a run, but spacing is 19s? bad run, computer should have replacement 
-
-**To fix**
-20230925_SeGu1005_2C_16s  - keep flashes 58-89
-
-code all of those to keep the last 32 
-20230925_SeGu1002_2C_16s  - remove first flash 
-20230926_SeGu1001_10C_8s  - remove first flash 
-20230927_SeGu1001_0C_16s  - remove first flash
-20230927_SeGu1006_0C_16s  - remove first flash
-20230925_SeGu1003_2C_16   - keep last 32
-20230925_SeGu1004_2C_16s  - keep last 32
-20230925_SeGu1006_2C_16s  - keep last 32
-20230926_SeGu1001_0C_16s  - keep last 32
-20230926_SeGu1006_10C_16s - keep last 32
-20230927_SeGu1001_10C_16s - keep last 32
-20230926_SeGu1008_6C_16s  - keep last 32
-20230927_SeGu1006_6C_16s  - keep last 32
-20230925_SeGu1005_2C_8s   - 2 full runs, keep second 
-20230927_SeGu1006_2C_16s  - contains 2 full runs, keep second 
-
-```{r manual trim}
-SolFitsTrim_last32 <- SolFitsTrim %>%
-  filter(!Filename %in% c('Takuvik/20230925_SeGu1005_2C_16s', 'Takuvik/20230926_SeGu1001_6C_16s')) %>%
-  group_by(Filename) %>%
-  slice(tail(row_number(),32)) %>% 
-  mutate(Flashnumber2 = row_number()) %>%
-  ungroup()
-
-SolFitsTrimSeGu1005_2C_16s <- SolFitsTrim %>%
-  filter(Filename == 'Takuvik/20230925_SeGu1005_2C_16s') %>%
-  filter(Flashnumber %in% c(58:89)) %>%
-  mutate(Flashnumber2 = row_number())
-  
-SolFitsTrim2 <- rbind(SolFitsTrim_last32, SolFitsTrimSeGu1005_2C_16s)
-```
-
-```{r}
-SolFitsTrim2 <- SolFitsTrim2 %>%
-  mutate(SState = case_when(Flashnumber2 %% 4 == 1 ~ 1,
-                    Flashnumber2 %% 4 == 2 ~ 2,
-                    Flashnumber2 %% 4 == 3 ~ 3, 
-                    Flashnumber2 %% 4 == 0 ~ 4))
-```
-
-# Group by Taxon 
-
-```{r}
-SolFitsChaeotoceros <- SolFitsTrim2 %>%
-  filter(CultureID %in% c("SeGu1002", "SeGu1007", "SeGu1004", "SeGu1005"))
-
-SolFitsFragilariopsis <- SolFitsTrim2 %>%
-  filter(CultureID %in% c("SeGu1001","SeGu1006"))
-#Note SeGu1003 and 1008 were excluded due to culture issues 
-```
-
-
-# Test Plot
-
-```{r}
-SolFitsFragilariopsis %>%
-  #filter(Temp_C == "2") %>%
-  #filter(PulseSpace_s == "2") %>%
-  #filter(ObsDate == "2023-09-26") |>
-  filter(CultureID == "SeGu1001") %>%
-  ggplot() +
-  geom_line(aes(x=Flashnumber2, y=FvFmrunnorm)) +
-  #facet_wrap(vars(CultureID)) +
-  facet_grid(rows = vars(Temp_C), cols = vars(PulseSpace_s)) +
-  theme_bw()
-```
-
-
-```{r}
-SolFitsChaeotoceros %>%
-  ggplot() +
-  geom_line(aes(x=Flashnumber2, y=FvFm, colour = as.factor(CultureID))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
-  labs(title = "Chaeotoceros_gelidus") +
-  theme_bw()
-```
-
 ```{r}
 RLCFitsTrim %>%
   ggplot()+
@@ -309,12 +320,5 @@ RLCFitsTrim %>%
   facet_grid(rows = vars(Temp_C), cols = vars(CultureID)) +
   labs(title = TargetData) +
   theme_bw()
-```
-
-
-```{r save Data}
-saveRDS(SolFitsChaeotoceros, file.path(DataOut, paste(Project,"Chaeotoceros_gelidus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
-
-saveRDS(SolFitsFragilariopsis, file.path(DataOut, paste(Project,"Fragilariopsis_cylindrus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
