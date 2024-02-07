@@ -40,7 +40,6 @@ Project <- "LOW"
 TargetData <- "Sackville"
 Target_WI23 <- "Pilot/Protocol2"
 TargetTaxa <- "Tpseudonana"
-#TargetTaxa <- "Chlorella"
 DataOut <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
 
@@ -58,29 +57,8 @@ Delimiter <- ","
 HeaderRows <- 0
 ```
 
-```{r conversions}
-us_s = 1000000
-photons_umol = 6.022E17
-A2_m2 = 1E20
-```
-
-```{r read ActPAR calibration files}
-# #ActPARCal <- readRDS("~/Dropbox/CampbellLabProtocols/ChlorophyllFluorescence/SolisenseInformation/SolisenseInformation_DCCalibParam.Rds")
-# 
-# ActPARCrossCal <- list.files(path = CalibData, full.names = TRUE) %>%
-#      map_df(~readRDS(file  = .))
-# 
-# #intercept set to 0 in lm in SolisenseInformation.Rproj/SolisenseCalibCompare.Rmd
-# ActPARCrossCal <- ActPARCrossCal |>
-#   rename(#Intercept = `estimate_(Intercept)`,
-#          Slope = `estimate_LIFT_Gen_Developer.cal`,
-#          #Intercept_SE = `std.error_(Intercept)`,
-#          Slope_SE = `std.error_LIFT_Gen_Developer.cal`)
-```
 
 ```{r data read adds filename and cdate, warning=FALSE, message=FALSE, echo=FALSE}
-#design choice 2 file reading functions or add a filetype variable to a single function
-#stringsAsFactors =FALSE somewhere? 
 read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(Filename = flnm)
 }
 ```
@@ -141,7 +119,6 @@ SolFitsTrim <- SolFits %>%
 SolFitsTrim <-SolFitsTrim %>%
   group_by(Filename) %>%
   mutate(Flashnumber = row_number()) %>%
-  mutate(Flashnumber2 = rank(ObsTime)) |>
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
@@ -152,7 +129,9 @@ ProblemFiles <- unique(SolFitsTrim$Filename[SolFitsTrim$Flashnumber >32])
 
 ProblemList <- SolFitsTrim %>% 
   filter(Filename %in% c(ProblemFiles)) %>% 
+  group_by(Filename) %>%
   mutate(TimeDiff = c(NA, diff(ObsTime))) %>% #shows actual spacing between flashes
+  ungroup() %>%
   doBy::split_by("Filename") #creates list of problem files
 ```
 
@@ -161,19 +140,20 @@ From ProblemList, use spacing between flashes to decipher runs:
   20230911_NaOm1663_22C_4S        - 34 flashes, only first 29 are good
   
   20230912_NaOm1663_18C_ 8S, 4S, 2S, & 1S     - 96 flashes, saved exact same run 3x; odd spikes
+  
 
 ```{r manual trim}
 first32 <- SolFitsTrim %>%
   filter(!Filename %in% c("20230911_NaOm1663_22C_4S", '20230911_NaOm1663_22C_2S'))  %>%
   group_by(Filename) %>%
   filter(Flashnumber %in% c(1:32)) %>%
-  mutate(Flashnumber2 = row_number()) %>%
+  mutate(Flashnumber = row_number()) %>%
   ungroup()
 
 NaOm1663_22C_4S <- SolFitsTrim %>%
   filter(Filename == '20230911_NaOm1663_22C_4S') %>%
   filter(Flashnumber %in% c(1:29)) %>%
-  mutate(Flashnumber2 = row_number())
+  mutate(Flashnumber = row_number())
 
 SolFitsTrim2 <- rbind(first32, NaOm1663_22C_4S)
 ```
@@ -181,8 +161,6 @@ SolFitsTrim2 <- rbind(first32, NaOm1663_22C_4S)
 
 ```{r tidy clean data}
 SolFitsTrim2 <- SolFitsTrim2 %>%
-  select(-Flashnumber) %>% # removing extra flashnumber column to eliminate confusion 
-  rename("Flashnumber" = "Flashnumber2") %>%
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
                     Flashnumber %% 4 == 2 ~ 2,
                     Flashnumber %% 4 == 3 ~ 3, 
@@ -225,7 +203,6 @@ SolFitsTrim_WI23 <- SolFits_WI23 %>%
 SolFitsTrim_WI23 <-SolFitsTrim_WI23 %>%
   group_by(Filename) %>%
   mutate(Flashnumber = row_number()) %>%
-  mutate(Flashnumber2 = rank(ObsTime)) |>
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
@@ -239,8 +216,6 @@ ProblemFiles_WI23 #no problem files so can continue
 
 ```{r tidy clean data WI23}
 SolFitsTrim_WI23 <- SolFitsTrim_WI23 %>%
-  select(-Flashnumber) %>% # removing extra flashnumber column to eliminate confusion 
-  rename("Flashnumber" = "Flashnumber2") %>%
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
                     Flashnumber %% 4 == 2 ~ 2,
                     Flashnumber %% 4 == 3 ~ 3, 
@@ -320,10 +295,9 @@ ChlorellaFitsTrim <- ChlorellaFits %>%
   relocate(CultureID, .before = ObsDate) |>
   type_convert()
 
-ChlorellaFitsTrim <-ChlorellaFitsTrim %>%
+ChlorellaFitsTrim <- ChlorellaFitsTrim %>%
   group_by(Filename) %>%
   mutate(Flashnumber = row_number()) %>%
-  mutate(Flashnumber2 = rank(ObsTime)) |>
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
@@ -336,8 +310,6 @@ ChlorellaProblemFiles #no issues so I can proceed
 
 ```{r tidy clean chlorella data}
 ChlorellaFitsTrim <-ChlorellaFitsTrim %>%
-  select(-Flashnumber) %>% # removing extra flashnumber column to eliminate confusion 
-  rename("Flashnumber" = "Flashnumber2") %>%
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
                     Flashnumber %% 4 == 2 ~ 2,
                     Flashnumber %% 4 == 3 ~ 3, 
@@ -369,6 +341,20 @@ saveRDS(ChlorellaFitsTrim, file.path(DataOut, paste(Project, "Chlorella_vulgaris
 
 
 # Other Code 
+```{r read ActPAR calibration files}
+# #ActPARCal <- readRDS("~/Dropbox/CampbellLabProtocols/ChlorophyllFluorescence/SolisenseInformation/SolisenseInformation_DCCalibParam.Rds")
+# 
+# ActPARCrossCal <- list.files(path = CalibData, full.names = TRUE) %>%
+#      map_df(~readRDS(file  = .))
+# 
+# #intercept set to 0 in lm in SolisenseInformation.Rproj/SolisenseCalibCompare.Rmd
+# ActPARCrossCal <- ActPARCrossCal |>
+#   rename(#Intercept = `estimate_(Intercept)`,
+#          Slope = `estimate_LIFT_Gen_Developer.cal`,
+#          #Intercept_SE = `std.error_(Intercept)`,
+#          Slope_SE = `std.error_LIFT_Gen_Developer.cal`)
+```
+
 Odd issue in WithDecay files, with ChiSq appearing a second time after QARredMax column, offsetting column headers from proper data columns
 ```{r fix column names}
 #only use this chunk if analyzing data from Data-RawData-Pilot-WithDecay-Fit

@@ -52,12 +52,11 @@ FileEncode <- "UTF-8" #guess_encoding says 'ASCII"
 Delimiter <- ","
 
 HeaderRows <- 0
-```
 
-```{r conversions}
-us_s = 1000000
-photons_umol = 6.022E17
-A2_m2 = 1E20
+#conversions
+# us_s = 1000000
+# photons_umol = 6.022E17
+# A2_m2 = 1E20
 ```
 
 ```{r read ActPAR calibration files}
@@ -128,9 +127,7 @@ SolFitsTrim <- SolFits %>%
 
 SolFitsTrim <-SolFitsTrim %>%
   group_by(Filename) %>%
-  arrange(ObsTime) |>
   mutate(Flashnumber = row_number()) %>%
-  mutate(Flashnumber2 = rank(ObsTime)) |>
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
   ungroup()
@@ -142,7 +139,9 @@ ProblemFiles <- unique(SolFitsTrim$Filename[SolFitsTrim$Flashnumber >32])
 
 ProblemList <- SolFitsTrim %>% 
   filter(Filename %in% c(ProblemFiles)) %>% 
+  group_by(Filename) %>%
   mutate(TimeDiff = c(NA, diff(ObsTime))) %>% #shows actual spacing between flashes
+  ungroup() %>%
   doBy::split_by("Filename") #creates list of problem files
 ```
 
@@ -153,36 +152,39 @@ Keep last 32 flashes in:
   20230918_MaPo1002_8C_16s        - 36 flashes 
   20230919_MaPo1004_8C_16s        - 36 flashes 
   20230919_MaPo1001_4C_16s        - 48 flashes
+  20230918_MaPo1002_4C_16s        - 33 flashes
+  20230920_MaPo1005_12C_16s       - 37 flashes
+  20230919_MaPo1002_12C_8s        - 33 flashes
+  20230918_MaPo1001_12C_16s       - triple, contains 3 runs, 1-32 = 8s, 33-64 = 2s, and 65-96 = 16s
   
-
 Other adjustments: 
   20230918_MaPo1001_4C_1s         - double, keep first run
-  20230918_MaPo1002_4C_16s        - remove, incorrect spacing
-  20230919_MaPo1002_12C_8s        - remove, incorrect spacing
-  20230920_MaPo1005_12C_16s       - remove, incorrect spacing 
-  20230920_MaPo1005_24C_16s       - remove, incorrect spacing 
-  20230918_MaPo1001_12C_16s       - triple, contains 3 runs, 1-32 = 8s, 33-64 = 2s, and 65-96 = 16s
+  20230920_MaPo1005_24C_16s       - keep 3-33
+
 
 ```{r manually trim data}
 last32 <- SolFitsTrim %>%
-  filter(!Filename %in% c("20230918_MaPo1002_4C_16s","20230918_MaPo1001_4C_1s", "20230919_MaPo1002_12C_8s", "20230920_MaPo1005_12C_16s", "20230920_MaPo1005_24C_16s", " 20230918_MaPo1001_12C_16s")) %>%
+  filter(!Filename %in% c("20230918_MaPo1001_4C_1s", "20230920_MaPo1005_24C_16s")) %>%
   group_by(Filename) %>%
   slice(tail(row_number(),32)) %>% 
-  mutate(Flashnumber2 = row_number()) %>%
+  mutate(Flashnumber = row_number()) %>%
   ungroup()
 
 MaPo1001_4C_1s <- SolFitsTrim %>%
   filter(Filename== "20230918_MaPo1001_4C_1s") %>%
   filter(Flashnumber <= 32)
 
-SolFitsTrim2 <- rbind(last32, MaPo1001_4C_1s)
+MaPo1005_24C_16s <- SolFitsTrim %>%
+  filter(Filename== "20230920_MaPo1005_24C_16s") %>%
+  filter(Flashnumber %in% c(3:33)) %>%
+  mutate(Flashnumber = row_number())
+
+SolFitsTrim2 <- rbind(last32, MaPo1001_4C_1s, MaPo1005_24C_16s)
 ```
 
 Now that the files are clean: 
 ```{r}
 SolFitsTrim2 <- SolFitsTrim2 %>%
-  select(-Flashnumber) %>% # removing extra flashnumber column to eliminate confusion 
-  rename("Flashnumber" = "Flashnumber2") %>%
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
                     Flashnumber %% 4 == 2 ~ 2,
                     Flashnumber %% 4 == 3 ~ 3, 

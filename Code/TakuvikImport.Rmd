@@ -53,13 +53,13 @@ FileEncode <- "UTF-8" #guess_encoding says 'ASCII"
 Delimiter <- ","
 
 HeaderRows <- 0
+
+#conversions 
+#us_s = 1000000
+#photons_umol = 6.022E17
+#A2_m2 = 1E20
 ```
 
-```{r conversions}
-us_s = 1000000
-photons_umol = 6.022E17
-A2_m2 = 1E20
-```
 
 ```{r read ActPAR calibration files}
 # #ActPARCal <- readRDS("~/Dropbox/CampbellLabProtocols/ChlorophyllFluorescence/SolisenseInformation/SolisenseInformation_DCCalibParam.Rds")
@@ -141,7 +141,7 @@ SolFitsTrim <- SolFits %>%
 SolFitsTrim <- SolFitsTrim %>%
   group_by(Filename) %>%
   mutate(Flashnumber = row_number()) %>% #add flashnumber column 
-  mutate(Flashnumber2 = rank(ObsTime)) %>%
+  #mutate(Flashnumber2 = rank(ObsTime)) %>%
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>% #add col for time elapsed 
   ungroup()
@@ -152,7 +152,9 @@ ProblemFiles <- unique(SolFitsTrim$Filename[SolFitsTrim$Flashnumber >32])
 
 ProblemList <- SolFitsTrim %>% 
   filter(Filename %in% c(ProblemFiles)) %>% 
+  group_by(Filename) %>%
   mutate(TimeDiff = c(NA, diff(ObsTime))) %>% #shows actual spacing between flashes
+  ungroup() %>%
   doBy::split_by("Filename") #creates list of problem files
 ```
 
@@ -176,9 +178,10 @@ Keep last 32 flashes in:
 
 Other adjustments: 
   20230927_SeGu1006_2C_16s        - 65 flashes, keep 2-33
-  20230925_SeGu1005_2C_16s        - 120 flashes, use 58-59
-  20230926_SeGu1001_6C_16s        - remove, incorrect spacing (19s)
+  20230925_SeGu1005_2C_16s        - 120 flashes, use 58-89
+  20230926_SeGu1001_6C_16s        - remove, incorrect spacing
   20230925_SeGu1005_2C_8s         - remove, file error 
+
 
 
 ```{r manual trim}
@@ -186,29 +189,27 @@ last32 <- SolFitsTrim %>%
   filter(!Filename %in% c('20230927_SeGu1006_2C_16s', '20230925_SeGu1005_2C_16s', '20230926_SeGu1001_6C_16s', '20230925_SeGu1005_2C_8s')) %>%
   group_by(Filename) %>%
   slice(tail(row_number(),32)) %>% 
-  mutate(Flashnumber2 = row_number()) %>%
+  mutate(Flashnumber = row_number()) %>%
   ungroup()
 
 SeGu1005_2C_16s <- SolFitsTrim %>%
   filter(Filename == '20230925_SeGu1005_2C_16s') %>%
   filter(Flashnumber %in% c(58:89)) %>%
-  mutate(Flashnumber2 = row_number())
+  mutate(Flashnumber = row_number())
 
 SeGu1006_2C_16s <- SolFitsTrim %>%
   filter(Filename == '20230927_SeGu1006_2C_16s') %>%
   filter(Flashnumber %in% c(2:33)) %>%
-  mutate(Flashnumber2 = row_number())
+  mutate(Flashnumber = row_number())
   
 SolFitsTrim2 <- rbind(last32,SeGu1005_2C_16s, SeGu1006_2C_16s)
-  SolFitsTrim2
 ```
 
+### Normalize
 Now that the files are clean: 
 
 ```{r tidy clean data}
 SolFitsTrim2 <- SolFitsTrim2 %>%
-  select(-Flashnumber) %>% # removing extra flashnumber column to eliminate confusion 
-  rename("Flashnumber" = "Flashnumber2") %>%
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
                     Flashnumber %% 4 == 2 ~ 2,
                     Flashnumber %% 4 == 3 ~ 3, 
@@ -320,5 +321,21 @@ RLCFitsTrim %>%
   facet_grid(rows = vars(Temp_C), cols = vars(CultureID)) +
   labs(title = TargetData) +
   theme_bw()
+```
+
+# Other Code 
+Joining Chl and species from metadata with SolFits to normalize for chl
+```{r}
+# ChlData <- TakuvikMetadata %>%
+#   select(c("ExpDate","ID","Strain", "Chl_ugmL")) %>%
+#   drop_na() %>%
+#   rename("YYYYMMDD"= "ExpDate", "Species"="Strain") %>%
+#   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD)) %>%
+#   unite("StrainCode", c("YYYYMMDD","ID"))
+# 
+# SolFitsTrim3 <- SolFitsTrim2 %>%
+#   unite("StrainCode", c("YYYYMMDD","CultureID"), remove = FALSE)
+# 
+# JoinedwithChl <- left_join(SolFitsTrim3, ChlData)
 ```
 
