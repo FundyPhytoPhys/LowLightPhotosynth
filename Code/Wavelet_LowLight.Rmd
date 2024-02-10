@@ -1,5 +1,5 @@
 ---
-title: "Wavelet transformation"
+title: "Wavelet Transformation"
 author:
 - Natasha Ryan
 - Maximilian Berthold
@@ -18,7 +18,7 @@ editor_options:
 ---
 
 # Introduction
-This RMD computes a wave transformation and extracts the duration of fluorescence oscillations for the cleaned data generated from the OttawaImport, TakuvikImport, and SackvilleImport RMDs. 
+This RMD computes a wave transformation and extracts the duration of fluorescence oscillations for the cleaned data generated from OttawaImport, TakuvikImport, and SackvilleImport. 
 
 ```{r load libraries}
 library(tidyverse)
@@ -34,7 +34,7 @@ DataIn <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
 DataOut <- file.path("..","Data", "ProcessedData")
 FileID <- "SolFitsTrim"
-siglvl_reconstruct <- 0.05 #specifies statistical significance level
+siglvl <- 0.05 #specifies statistical significance level
 Fc <- "Fragilariopsis_cylindrus"
 Ci <- "Chlamydomonas_ICEMDV"
 Cm <- "Chlamydomonas_malina"
@@ -62,7 +62,7 @@ return(wavelet_list)
 #function for wavelet reconstruction, applies reconstruct() function from WaveletComp to all wavelets in a list
 reconstructwave <- function(wavelet_list) {
   reconstructed_list <- lapply(wavelet_list, function(wave) {
-    WaveletComp::reconstruct(wave, siglvl = siglvl_reconstruct, 
+    WaveletComp::reconstruct(wave, siglvl = siglvl, 
                              #plot.waves = TRUE, 
                              plot.rec = FALSE,
                              verbose = FALSE)
@@ -92,13 +92,13 @@ damping <- function(reconstructed) {
   return(result_df)
 }
 
-#plot of wavelet power averages across time
+#plot of wavelet power averages across time, indicates which conditions show a significant periodicity of 4
 plot.wt.avg <- function(wavelet_list) {
   
   for (condition in names(wavelet_list)) {
     extract <- wavelet_list[[condition]] 
     
-    WaveletComp::wt.avg(extract, siglvl = siglvl_reconstruct,
+    WaveletComp::wt.avg(extract, siglvl = siglvl,
       sigcol = "#71CF61", 
       maximum.level = 1,
       averagelab = "Average Wavelet Power",
@@ -115,7 +115,7 @@ plot.wt.image <- function(wavelet_list) {
     
     WaveletComp::wt.image(extract,
          plot.coi = FALSE,
-         siglvl = 0.05,
+         siglvl = siglvl,
          color.key = "i",
          color.palette = "rainbow(n.levels, start = 0, end = .7)",
          timelab = "Flash Number",
@@ -143,6 +143,10 @@ Fc_wavelets <- wavelet(Fc_data)
 ```
 
 ```{r evaluate significance Tp}
+#par(mar=c(3,3,3,3))
+#layout(mat = matrix(c(1,6,2,7,3,8,4,9,5, 10), 
+#                        nrow = 2, 
+#                        ncol = 5))
 plot.wt.avg(Fc_wavelets) #no 4-period significance at 2C_16s & 10C_16s, borderline at 6C_16s
 ```
 
@@ -393,6 +397,32 @@ sstate_damping %>%
   theme(strip.text = element_text(face = "italic"))
 ```
 
+```{r ggplot alternative to layer wt.avg}
+#in progress 
+WT <- Fc_wavelets[["0C_1s"]]
+Power.avg = WT$Power.avg
+Power.avg.pval = WT$Power.avg.pval
+Period = WT$Period
+df <- data.frame(Power.avg, Power.avg.pval, Period) %>%
+  mutate(Power.avg.pval = ifelse(Power.avg.pval > siglvl , NA, Power.avg.pval)) %>%
+  mutate(Power.avg.pval = ifelse(Power.avg.pval <= siglvl , 1, Power.avg.pval)) %>%
+  mutate(condition= "0C_1s")
+
+WT2 <- Fc_wavelets[["0C_2s"]]
+Power.avg2 = WT2$Power.avg
+Power.avg.pval2 = WT2$Power.avg.pval
+Period2 = WT2$Period
+df2 <- data.frame(Power.avg2, Power.avg.pval2, Period2) %>%
+  mutate(Power.avg.pval2 = ifelse(Power.avg.pval2 > siglvl , NA, Power.avg.pval2)) %>%
+  mutate(Power.avg.pval2 = ifelse(Power.avg.pval2 <= siglvl , 1, Power.avg.pval2)) %>%
+  mutate(condition = "0C_2s")
+
+ggplot(NULL)+
+  geom_point(data=df, aes(x=Power.avg, y= Period, col=Power.avg.pval)) +
+  geom_point(data=df2, aes(x=Power.avg2, y= Period2, col=Power.avg.pval2)) +
+  xlim(0, 1) + 
+  theme_bw() 
+```
 
 # Previous Methods
 
