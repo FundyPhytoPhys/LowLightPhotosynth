@@ -379,10 +379,6 @@ sstate_damping %>%
   theme_linedraw() +
   theme(strip.text = element_text(face = "italic")) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-
-#ggsave("heatmap20240209.png", width = 7.63, height = 4.89, dpi = 900,
-#      plot=last_plot(),
-#      path="~/Downloads")
 ```
 
 
@@ -399,6 +395,16 @@ sstate_damping %>%
 
 ```{r ggplot alternative to layer wt.avg}
 #in progress 
+
+#function idea: 
+  #lapply(wavelet_list, function {that extracts power.avg, power.avg.pval, period & puts into a df}
+  #generates a new list with those dfs 
+  #then add column in each df corresponding to condition 
+  #seperate condition into temp & pulsespace)
+  #then bind all elements of list into one df 
+  #then ggplot with facet_grid(rows=vars(temp), cols=vars(spacing))
+
+
 WT <- Fc_wavelets[["0C_1s"]]
 Power.avg = WT$Power.avg
 Power.avg.pval = WT$Power.avg.pval
