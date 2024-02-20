@@ -92,6 +92,29 @@ damping <- function(reconstructed) {
   return(result_df)
 }
 
+# Returns conditions with significant periodicity at 4 
+wt.significance <- function(wavelets) {
+  result_list <- lapply(names(wavelets), function(condition_name) {
+    condition <- wavelets[[condition_name]]
+    Power.avg <- condition$Power.avg
+    Power.avg.pval <- condition$Power.avg.pval
+    Period <- condition$Period
+    Condition <- rep(condition_name, length(Power.avg))  
+    df <- data.frame(Power.avg, Power.avg.pval, Period, Condition)
+    
+    return(df)
+  })
+
+  result_df <- bind_rows(result_list) %>%
+    filter(Power.avg.pval <= siglvl) %>%
+    filter(between(Period, 3.9, 4.1))
+  
+    significantconditions <- unique(result_df$Condition)
+  
+  return(significantconditions)
+}
+
+
 #plot of wavelet power averages across time, indicates which conditions show a significant periodicity of 4
 plot.wt.avg <- function(wavelet_list) {
   
@@ -142,12 +165,9 @@ Fc_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=Fc_
 Fc_wavelets <- wavelet(Fc_data)
 ```
 
-```{r evaluate significance Tp}
-#par(mar=c(3,3,3,3))
-#layout(mat = matrix(c(1,6,2,7,3,8,4,9,5, 10), 
-#                        nrow = 2, 
-#                        ncol = 5))
-plot.wt.avg(Fc_wavelets) #no 4-period significance at 2C_16s & 10C_16s, borderline at 6C_16s
+```{r evaluate significance Fc}
+Fc_significant <- wt.significance(Fc_wavelets)
+plot.wt.avg(Fc_wavelets)
 ```
 
 ```{r reconstruct waves Fc}
@@ -157,7 +177,7 @@ Fc_reconstruction <- reconstructwave(Fc_wavelets)
 ```{r damping index Fc}
 Fc_damping <- damping(Fc_reconstruction) %>% 
   mutate(Species = Fc) %>%
-  mutate(damping.index = ifelse(condition %in% c("2C_16s", "6C_16s", "10C_16s"), 0, damping.index)) 
+  mutate(damping.index = ifelse(!condition %in% Fc_significant, 0, damping.index)) 
 ```
 
 
@@ -178,7 +198,8 @@ Ci_wavelets <- wavelet(Ci_data)
 ```
 
 ```{r evaluate significance Ci}
-plot.wt.avg(Ci_wavelets) #no 4-period significance at 4C_16s, 8C_8s, 8C_16s, 12C_8s, 12C_16s 
+Ci_significant <- wt.significance(Ci_wavelets)
+plot.wt.avg(Ci_wavelets)
 ```
 
 ```{r reconstruct waves Ci}
@@ -188,7 +209,7 @@ Ci_reconstruction <- reconstructwave(Ci_wavelets)
 ```{r damping index Ci}
 Ci_damping <- damping(Ci_reconstruction) %>% 
   mutate(Species = Ci) %>%
-  mutate(damping.index = ifelse(condition %in% c("4C_16s", "8C_8s", "8C_16s", "12C_8s", "12C_16s"), 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Ci_significant, 0, damping.index))
 ```
 
 
@@ -207,7 +228,8 @@ Cm_wavelets <- wavelet(Cm_data)
 ```
 
 ```{r evaluate significance Cm}
-plot.wt.avg(Cm_wavelets) #no 4-period significance at 4C_16s, 8C_8s, 8C_16s, 12C_16s
+Cm_significant <- wt.significance(Cm_wavelets)
+plot.wt.avg(Cm_wavelets) 
 ```
 
 ```{r reconstruct wave Cm}
@@ -217,7 +239,7 @@ Cm_reconstruction <- reconstructwave(Cm_wavelets)
 ```{r damping index Cm}
 Cm_damping <- damping(Cm_reconstruction) %>%
   mutate(Species = Cm) %>%
-  mutate(damping.index = ifelse(condition %in% c("4C_16s", "8C_8s", "8C_16s", "12C_16s"), 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Cm_significant, 0, damping.index))
 ```
 
 
@@ -236,7 +258,8 @@ Cp_wavelets <- wavelet(Cp_data)
 ```
 
 ```{r evaluate significance Cp}
-plot.wt.avg(Cp_wavelets) #no 4-period significance at 4C_16s, 8C_8s, 8C_16s, 12C_8s, 12C_16s
+Cp_significant <- wt.significance(Cp_wavelets)
+plot.wt.avg(Cp_wavelets) 
 ```
 
 ```{r reconstruct wave Cp}
@@ -246,7 +269,7 @@ Cp_reconstruction <- reconstructwave(Cp_wavelets)
 ```{r damping index Cp}
 Cp_damping <- damping(Cp_reconstruction) %>%
   mutate(Species = Cp) %>%
-  mutate(damping.index = ifelse(condition %in% c("4C_16s", "8C_8s", "8C_16s", "12C_8s", "12C_16s"), 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Cp_significant, 0, damping.index))
 ```
 
 
@@ -265,7 +288,8 @@ Cr_wavelets <- wavelet(Cr_data)
 ```
 
 ```{r evaluate significance Cr}
-plot.wt.avg(Cr_wavelets) #no 4-period significance at 16C_2,4,8,16 or 18s & 20/24C (all spacings)
+Cr_significant <- wt.significance(Cr_wavelets)
+plot.wt.avg(Cr_wavelets) 
 ```
 
 ```{r reconstruct wave Cr}
@@ -275,7 +299,7 @@ Cr_reconstruction <- reconstructwave(Cr_wavelets)
 ```{r damping index Cr}
 Cr_damping <- damping(Cr_reconstruction) %>%
   mutate(Species = Cr) %>%
-  mutate(damping.index = ifelse(condition %in% c("16C_4s", "16C_8s", "16C_16s","20C_1s", "20C_2s", "20C_4s", "20C_8s", "20C_16s","24C_1s", "24C_2s", "24C_4s", "24C_8s", "24C_16s"), 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Cr_significant, 0, damping.index))
 ```
 
 
@@ -296,7 +320,8 @@ Cv_wavelets <- wavelet(Cv_data)
 ```
 
 ```{r evaluate significance Cv}
-plot.wt.avg(Cv_wavelets) #no 4-period significance at 10C_8s, 10C_16s, 14C_8s, 14C_16s, 18C_2,4,8,16s, 22C_allspacings
+Cv_significant <- wt.significance(Cv_wavelets)
+plot.wt.avg(Cv_wavelets) 
 ```
 
 ```{r reconstruct wave Cv}
@@ -306,7 +331,7 @@ Cv_reconstruction <- reconstructwave(Cv_wavelets)
 ```{r damping index Cv}
 Cv_damping <- damping(Cv_reconstruction) %>%
   mutate(Species = Cv) %>%
-  mutate(damping.index = ifelse(condition %in% c("10C_8s", "10C_16s", "14C_8s", "14C_16s", "18C_2s","18C_4s", "18C_8s", "18C_16s", "22C_1s", "22C_2s", "22C_4s", "22C_8s", "22C_16s"), 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Cv_significant, 0, damping.index))
 ```
 
 
@@ -325,7 +350,8 @@ Tp_wavelets <- wavelet(Tp_data)
 ```
 
 ```{r evaluate significance Tp}
-plot.wt.avg(Tp_wavelets) #no 4-period significance at 10C_8s, 14C_8s, 18C_allspacings, 22C_2s, 22C_8s
+Tp_significant <- wt.significance(Tp_wavelets)
+plot.wt.avg(Tp_wavelets) 
 ```
 
 ```{r reconstruct wave Tp}
@@ -335,7 +361,7 @@ Tp_reconstruction <- reconstructwave(Tp_wavelets)
 ```{r damping index Cv}
 Tp_damping <- damping(Tp_reconstruction) %>%
   mutate(Species = Tp) %>%
-  mutate(damping.index = ifelse(condition %in% c("10C_8s", "14C_8s", "18C_1s", "18C_2s","18C_4s", "18C_8s", "22C_2s", "22C_8s"), 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Tp_significant, 0, damping.index))
 ```
 
 # Merging Results 
@@ -354,15 +380,31 @@ sstate_damping <- rbind(Fc_damping, Ci_damping, Cm_damping, Cp_damping, Cr_dampi
 saveRDS(sstate_damping, file.path(DataOut, paste(Project, "SState_Damping.RDS", sep = "_"), fsep = .Platform$file.sep))
 ```
 
+# Saving Wavelets for Results Section
+```{r}
+saveRDS(Fc_wavelets, file.path(DataOut, paste(Project, "FcWavelets.RDS", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(Ci_wavelets, file.path(DataOut, paste(Project, "CiWavelets.RDS", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(Cm_wavelets, file.path(DataOut, paste(Project, "CmWavelets.RDS", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(Cp_wavelets, file.path(DataOut, paste(Project, "CpWavelets.RDS", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(Cr_wavelets, file.path(DataOut, paste(Project, "CrWavelets.RDS", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(Cv_wavelets, file.path(DataOut, paste(Project, "CvWavelets.RDS", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(Tp_wavelets, file.path(DataOut, paste(Project, "TpWavelets.RDS", sep = "_"), fsep = .Platform$file.sep))
+```
+
 
 # Figures 
 ```{r import RDS}
 #sstate_damping <- readRDS("../Data/ProcessedData/LOW_SState_Damping.Rds")
 ```
 
-"1", "2", "4", "8", "16"
 ```{r figure setup}
-sstate_damping$PulseSpace_s <- factor(sstate_damping$PulseSpace_s, levels = c("16","8","4","2","1"))
+sstate_damping$PulseSpace_s <- factor(sstate_damping$PulseSpace_s, levels = c("1", "2", "4", "8", "16"))
 sstate_damping$Temp_C <- factor(sstate_damping$Temp_C, levels = c("0","2","4","6","8","10","12","14","16","18","20","22","24"))
 
 species.labs <- c("Chlamydomonas ICEMDV", "Chlamydomonas malina", "Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris", "Fragilariopsis cylindrus", "Thalassiosira pseudonana")
@@ -393,42 +435,45 @@ sstate_damping %>%
   theme(strip.text = element_text(face = "italic"))
 ```
 
-```{r ggplot alternative to layer wt.avg}
-#in progress 
 
-#function idea: 
-  #lapply(wavelet_list, function {that extracts power.avg, power.avg.pval, period & puts into a df}
-  #generates a new list with those dfs 
-  #then add column in each df corresponding to condition 
-  #seperate condition into temp & pulsespace)
-  #then bind all elements of list into one df 
-  #then ggplot with facet_grid(rows=vars(temp), cols=vars(spacing))
+```{r}
+#Returns conditions with significant periodicity at 4 
+wt.significance <- function(wavelets) {
+  result_list <- lapply(names(wavelets), function(condition_name) {
+    condition <- wavelets[[condition_name]]
+    Power.avg <- condition$Power.avg
+    Power.avg.pval <- condition$Power.avg.pval
+    Period <- condition$Period
+    Condition <- rep(condition_name, length(Power.avg))  
+    df <- data.frame(Power.avg, Power.avg.pval, Period, Condition)
+    
+    return(df)
+  })
 
+  result_df <- bind_rows(result_list) %>%
+    filter(Power.avg.pval <= siglvl) %>%
+    filter(between(Period, 3.9, 4.1))
+  
+    significantconditions <- unique(result_df$Condition)
+  
+  return(significantconditions)
+}
 
-WT <- Fc_wavelets[["0C_1s"]]
-Power.avg = WT$Power.avg
-Power.avg.pval = WT$Power.avg.pval
-Period = WT$Period
-df <- data.frame(Power.avg, Power.avg.pval, Period) %>%
-  mutate(Power.avg.pval = ifelse(Power.avg.pval > siglvl , NA, Power.avg.pval)) %>%
-  mutate(Power.avg.pval = ifelse(Power.avg.pval <= siglvl , 1, Power.avg.pval)) %>%
-  mutate(condition= "0C_1s")
-
-WT2 <- Fc_wavelets[["0C_2s"]]
-Power.avg2 = WT2$Power.avg
-Power.avg.pval2 = WT2$Power.avg.pval
-Period2 = WT2$Period
-df2 <- data.frame(Power.avg2, Power.avg.pval2, Period2) %>%
-  mutate(Power.avg.pval2 = ifelse(Power.avg.pval2 > siglvl , NA, Power.avg.pval2)) %>%
-  mutate(Power.avg.pval2 = ifelse(Power.avg.pval2 <= siglvl , 1, Power.avg.pval2)) %>%
-  mutate(condition = "0C_2s")
-
-ggplot(NULL)+
-  geom_point(data=df, aes(x=Power.avg, y= Period, col=Power.avg.pval)) +
-  geom_point(data=df2, aes(x=Power.avg2, y= Period2, col=Power.avg.pval2)) +
-  xlim(0, 1) + 
-  theme_bw() 
 ```
+
+```{r}
+wt.significance(Tp_wavelets)
+```
+
+
+
+
+
+
+
+
+
+
 
 # Previous Methods
 
