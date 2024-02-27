@@ -16,7 +16,7 @@ main_fontfamily: 'Palatino'
 main_textcol: "#FFFFFF" 
 main_textsize: '105px'
 main_findings:
-  - "**Latitude & Light**"
+  - "**Latitude, Ice & Light**"
   - "Photosynthetic Adaptations of Polar Phytoplankton to Extreme Light Limitation"
 authorextra_textsize: '40px'
 caption_textsize: '35px'
@@ -44,39 +44,35 @@ options(knitr.table.format = "html")
 
 # Introduction
 
-Polar phytoplankton are **vital** to global aquatic ecosystems [@pierellakarlusich2020; @ardyna2020]
+Polar phytoplankton are **vital** to polar ecosystems [@pierellakarlusich2020; @ardyna2020]. As photolithotrophs, phytoplankton rely on photons for energy input, nominally restricting their to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, typically extending down to 1% of surface irradiance [@ravenPutOutLight2000; @kirk2011]
 
-As photolithotrophs, phytoplankton rely on photons for energy input, restricting their growth to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, typically extending down to 1% of surface irradiance [@ravenPutOutLight2000; @kirk2011]
+Despite severe light constraints, certain polar phytoplankton exhibit slow but significant growth under the ice during winter, indicating possible photosynthetic adaptations to light limitation [@randelhoff2020; @hancke2018; @leu2015]. To drive photosynthesis, Photosystem II (PSII) needs four sequential photons, with risk of loss through futile charge recombination, if the photon arrivals are too widely spaced.
 
-Despite severe light constraints in polar regions, certain psychrophile phytoplankton exhibit remarkable adaptability through slow but significant growth under the ice during winter indicating possible photosynthetic adaptations to light limitation [@randelhoff2020; @hancke2018; @leu2015]
-
-We hypothesized that maintaining photosynthesis under extremely low light involves **suppressing energetically wasteful charge recombinations** in Photosystem II
+We hypothesized that maintaining photosynthesis under extremely low light and low temperatures involves **suppressing energetically wasteful charge recombinations** in PSII.
 
 ![Figure 1: Recombination Pathways of PSII *note: this figure will be simplified into a view of electron transport pathways in the thylakoid membrane with recombination pathways highlighted before the final presentation*](figure_recombination.png)
 
 # Methods
 
-**Single turnover variable chlorophyll fluorescence** can be used to evaluate recombination [@schubackSingleTurnoverVariableChlorophyll2021; @zaharievaEnergeticsKineticsSState2019]
 
-Recombination reactions cause individual PSIIs to lose charge separation and slip back in the four-step cycle of oxygen evolution, desynchronizing the S-state cycle across the population [@gates2020] 
+Recombination causes a slippage in the four step cycle for a PSII, and thus cause desynchronization of the steps, across the population of Photosystem II [@gates2020].  For each PSII the yield of fluorescence varies across the four steps, and if PSII are synchronized, the cells show four-step cycling of chlorophyll fluorescence. Therefore, **variable chlorophyll fluorescence** can be used to evaluate the synchronization of the PSII.  By inference, prolonged synchronization implies low recombination, and vice versa [@schubackSingleTurnoverVariableChlorophyll2021; @zaharievaEnergeticsKineticsSState2019].  
 
-![Figure 2: Single-turnover variable chlorophyll fluorescence approach for monitoring S-state cycling of phytoplankton photosynthesis](StChlF.png)
+![Figure 2: Single-turnover variable chlorophyll fluorescence approach for monitoring PSII cycling of phytoplankton photosynthesis](StChlF.png)
 
-Conducting a comparative analysis of S-state cycling of polar and temperate diatoms and green algae under a range of light and temperature conditions, we can determine if polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions 
+We used Fast Fourier Transforms to analyze the persistence of PSII chlorophyll fluorescence cycling across polar and temperate diatoms or green algae,  under a range of light and temperatures, todetermine if polar taxa have evolved to increase photosynthetic energy conversion efficiency, by minimizing inefficient recombination reaction. 
 
 # Results
 
 
-![Figure 3: Duration of significant S-State cycling of PSII in polar and temperate diatoms and green algae under a range of light and temperature conditions](heatmap.png)
+![Figure 3: Duration of significant cycling PSII chlorophyll fluorescence cycling in polar and temperate diatoms or green algae, under a range of light and temperature conditions](heatmap.png)
 
 We observe **3** key patterns between and within taxa
 
-* Within taxa, higher frequencies of photon delivery and colder temperatures result in less recombination and, therefore, less energy waste 
-* Polar taxa exhibit significant s-state cycling across a broader range of conditions than their temperate counterparts 
-* Polar taxa maintain synchronicity in S-state cycling for longer durations than temperate taxa under comparable conditions
+* Within taxa, shorter spacing of photon delivery, and colder temperatures,  result in stronger cycling of PSII chlorophyll fluorescence, and by inference, less wasteful recombination.
+* Polar taxa exhibit significant PSII cycling across a broader range of conditions, at wider spacing of photons, equivalent to lower light, than do their temperate counterparts 
 
 # Conclusions
-Together, our findings indicate that diverse polar phytoplankton have evolved capacities to sustain efficient photosynthesis under extreme low light
+Our findings indicate that diverse polar phytoplankton have evolved capacities to sustain efficient photosynthesis under extreme low light and low temperatures, by suppressing wasteful recombinations at PSII.
 
 This research challenges the conventional understanding of the limits on photosynthesis under light limitation, helping unravel polar ecosystem dynamics and predict ecosystem responses to climate change
 
