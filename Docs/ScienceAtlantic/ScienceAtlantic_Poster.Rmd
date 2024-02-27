@@ -20,14 +20,14 @@ main_findings:
   - "Photosynthetic Adaptations of Polar Phytoplankton to Extreme Light Limitation"
 authorextra_textsize: '40px'
 caption_textsize: '35px'
-reference_textsize: '37px'
+reference_textsize: '35px'
 output: 
   posterdown::posterdown_betterport:
     self_contained: false
     pandoc_args: --mathjax
     number_sections: false
 csl: nature.csl
-bibliography: Low_Natasha.bib
+bibliography: LowLightPhotosynthesis.bib
 link-citations: true
 ---
 
@@ -42,46 +42,43 @@ options(knitr.table.format = "html")
 ```
 
 
-# Background
+# Introduction
 
-The accepted lower limit of the photic zone is 1% of surface irradiance, equivalent to 1 photon reaching a PSII every ~0.03 seconds @ravenPutOutLight2000. Some arctic diatoms achieve net C uptake with 1 photon only reaching a PSII every 0.6-60 seconds @randelhoff2020.           
+Polar phytoplankton are **vital** to global aquatic ecosystems [@pierellakarlusich2020; @ardyna2020]
 
-  Comparing the persistence of S-state synchronicity in temperate and arctic diatoms may help explain how arctic diatoms exploit extremely low light, by limiting wasteful slippage.      
+As photolithotrophs, phytoplankton rely on photons for energy input, restricting their growth to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, typically extending down to 1% of surface irradiance [@ravenPutOutLight2000; @kirk2011]
 
-**Energy Distribution**  
-Light energy absorbed by the photosynthetic pigments of PSII (primarily chl-a) is distributed variably among three pathways @schubackSingleTurnoverVariableChlorophyll2021:  
+Despite severe light constraints in polar regions, certain psychrophile phytoplankton exhibit remarkable adaptability through slow but significant growth under the ice during winter indicating possible photosynthetic adaptations to light limitation [@randelhoff2020; @hancke2018; @leu2015]
 
-  * Photochemistry (photochemical quenching of ChlF)    
-  * Dissipation as heat (non-photochemical quenching of ChlF)   
-  * Re-emission at longer wavelengths as fluorescence (ChlF)  
-  
-**S-State Cycle**   
-A complete water oxidation cycle during oxygenic photosynthesis requires the absorption of four photons and the successive accumulation of four oxidizing equivalents  @gatesRealtimeKineticsLight2020@zaharievaEnergeticsKineticsSState2019@dauTimeresolvedXraySpectroscopy2007:  
+We hypothesized that maintaining photosynthesis under extremely low light involves **suppressing energetically wasteful charge recombinations** in Photosystem II
 
-![Figure 1: Pathway of S-state cycling and the electron transfer chain in PSII. Successive PSII charge separations extract electrons from the Mn cluster of the water-oxidizing/oxygen-evolving complex, inducing four increasingly oxidized states. Following the accumulation of four oxidizing equivalents, 2 H~2~O are oxidized to 1 O~2~.](figure_sstate.png)
-
-ChlF varies between S-states since the free energy of the water-oxidizing complex depends on the number of electrons removed @dewijnSstateDependenceMiss2002. A loss of charge separation through recombination desynchronizes the S-state cycle, dampening the periodic changes in ChlF, and causing wasteful slippage. 
-
-
-# Objective   
-Use a single-turnover variable chlorophyll fluorescence (ST-ChlF) approach to evaluate the loss of synchronization of the S-state cycle at different frequencies of photon delivery and temperatures.     
-
+![Figure 1: Recombination Pathways of PSII *note: this figure will be simplified into a view of electron transport pathways in the thylakoid membrane with recombination pathways highlighted before the final presentation*](figure_recombination.png)
 
 # Methods
 
-Use Solisense apparatus and Lift software to deliver short, highly intense pulses of light to diatoms (*Thalassiosira pseudonana*) in a temperature-controlled cuvette @schubackSingleTurnoverVariableChlorophyll2021.   
+**Single turnover variable chlorophyll fluorescence** can be used to evaluate recombination [@schubackSingleTurnoverVariableChlorophyll2021; @zaharievaEnergeticsKineticsSState2019]
 
-![Figure 2: Single-turnover variable chlorophyll fluorescence approach for evaluating phytoplankton photosynthesis](figure_methods.png)
+Recombination reactions cause individual PSIIs to lose charge separation and slip back in the four-step cycle of oxygen evolution, desynchronizing the S-state cycle across the population [@gates2020] 
 
+![Figure 2: Single-turnover variable chlorophyll fluorescence approach for monitoring S-state cycling of phytoplankton photosynthesis](StChlF.png)
+
+Conducting a comparative analysis of S-state cycling of polar and temperate diatoms and green algae under a range of light and temperature conditions, we can determine if polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions 
 
 # Results
 
-![Figure 3: Maximum quantum yield (Fv/Fm) of PSII in temperate diatoms exposed to single-turnover flashes spaced at 0.5, 1, 2, 4, and 8 seconds at 10 and 18 degrees Celsius.](FvFm_vs_Flashnumber.png)
 
-As flash spacing increases, we observe fewer synchronous S-state cycles before the periodicity is dampened. This indicates that longer periods of time between flashes increase the incidence of recombination and wasteful slippage.
+![Figure 3: Duration of significant S-State cycling of PSII in polar and temperate diatoms and green algae under a range of light and temperature conditions](heatmap.png)
 
-We hypothesized that recombination would decrease with temperature since recombination processes are temperature sensitive. Initial Fast Fourier Transform analysis (M. Berthold) indeed indicates that the diatoms at 10°C maintain a synchronous S-state cycle for longer, and therefore may maintain productive electron transport under lower light levels.
+We observe **3** key patterns between and within taxa
 
+* Within taxa, higher frequencies of photon delivery and colder temperatures result in less recombination and, therefore, less energy waste 
+* Polar taxa exhibit significant s-state cycling across a broader range of conditions than their temperate counterparts 
+* Polar taxa maintain synchronicity in S-state cycling for longer durations than temperate taxa under comparable conditions
+
+# Conclusions
+Together, our findings indicate that diverse polar phytoplankton have evolved capacities to sustain efficient photosynthesis under extreme low light
+
+This research challenges the conventional understanding of the limits on photosynthesis under light limitation, helping unravel polar ecosystem dynamics and predict ecosystem responses to climate change
 
 # References
 

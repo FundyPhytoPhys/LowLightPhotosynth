@@ -418,7 +418,7 @@ sstate_damping$Temp_C <- factor(sstate_damping$Temp_C, levels= c("0","2","4","6"
 sstate_damping$Species <- factor(sstate_damping$Species, levels= c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Fragilariopsis_cylindrus", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris","Thalassiosira_pseudonana"))
 
 
-species.labs <- c("Fragilariopsis cylindrus", "Thalassiosira pseudonana", "Chlamydomonas ICEMDV", "Chlamydomonas malina", "Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris")
+species.labs <- c("Fragilariopsis cylindrus", "Thalassiosira pseudonana","︎Chlamydomonas ICEMDV", "Chlamydomonas malina", "︎Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris")
 names(species.labs) <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana", "Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris")
 ```
  
@@ -428,15 +428,16 @@ sstate_damping %>%
   ggplot() + 
   geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
   viridis::scale_fill_viridis(option="mako", na.value="white") + 
-  facet_wrap(vars(Species), ncol=4, scales = "free", labeller = labeller(Species=species.labs)) +  
+  facet_wrap(vars(Species), ncol=3, scales = "free", labeller = labeller(Species=species.labs)) + 
+  labs(x= "Temperature (°C)", y= "Frequency of Photon Delivery (s)", fill= "Damping Index") +
   theme_linedraw() +
+  theme(text = element_text(family = "Palatino")) +
   theme(strip.text = element_text(face = "italic")) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
 
-  ggsave("heatmap.png", width = 12.22, height = 5.51, dpi = 900,
-         plot=last_plot(),
-        path="~/Downloads")
-
+   ggsave("heatmap.png", width = 12.22, height = 7.51, dpi = 400,
+          plot=last_plot(),
+         path="~/LowLightPhotosynth/Docs/ScienceAtlantic")
 ```
 
 

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+
+<title>ScienceAtlantic_Poster.knit</title>
+
+
+
+
+
+
+
+<!--
+Font-awesome icons ie github or twitter
+-->
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/brands.css" integrity="sha384-n9+6/aSqa9lBidZMRCQHTHKJscPq6NW4pCQBiMmHdUCvPN8ZOg2zJJTkC7WIezWv" crossorigin="anonymous">
+
+<!--
+Google fonts api stuff
+-->
+<link href='https://fonts.googleapis.com/css?family=Palatino' rel='stylesheet'>
+<link href='https://fonts.googleapis.com/css?family=Palatino' rel='stylesheet'>
+
+<!--
+Here are the required style attributes for css to make this poster work :)
+-->
+<style>
+@page {
+size: 48in 36in;
+margin: 0;
+padding: 0;
+}
+body {
+margin: 0px;
+padding: 0px;
+width: 48in;
+height: 36in;
+text-align: justify;
+font-size: 45px;
+line-height: 1.05;
+}
+/* RMarkdown Class Styles */
+/* center align leaflet map,
+from https://stackoverflow.com/questions/52112119/center-leaflet-in-a-rmarkdown-document */
+.html-widget {
+margin: auto;
+position: sticky;
+margin-top: 2cm;
+margin-bottom: 2cm;
+}
+.leaflet.html-widget.html-widget-static-bound.leaflet-container.leaflet-touch.leaflet-fade-anim.leaflet-grab.leaflet-touch-drag.leaflet-touch-zoom {
+position: sticky;
+width: 100%;
+}
+pre.sourceCode.r {
+background-color: #dddddd40;
+border-radius: 4mm;
+padding: 4mm;
+width: 75%;
+margin: auto;
+margin-top: 1em;
+margin-bottom: 1em;
+/* align-items: center; */
+}
+code.sourceCode.r{
+background-color: transparent;
+font-size: 20pt;
+border-radius: 2mm;
+}
+code {
+font-size: 25pt;
+font-family: monospace;
+background-color: #284c4224;
+color: #284c42;
+padding: 1.2mm;
+line-height: 1;
+border-radius: 2mm;
+}
+caption {
+margin-bottom: 10px;
+font-size: 35px;
+font-style: italic;
+}
+
+tbody tr:nth-child(odd) {
+    background-color: #284c4220;
+}
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td{
+  border-spacing: 0;
+  font-size: 40%;
+  border-style: none;
+  padding-top: 15px;
+  padding-bottom: 15px;
+  padding-right: 1em;
+  padding-left: 1em;
+  line-height: 1em;
+}
+table {
+  margin: auto;
+}
+th {
+  padding-left: 5mm;
+  padding-right: 5mm;
+}
+.caption {
+font-size: 35px;
+font-style: italic;
+padding-top: 0;
+}
+.references {
+font-size: 35px;
+line-height: 90%;
+}
+/* Create three unequal columns that floats next to each other */
+.column {
+float: left;
+padding: 0px;
+}
+.outer {
+width: 48in;
+height: calc(36in *  (1 - 0.15 - 0 - 0.01) );
+-webkit-column-count: 3; /* Chrome, Safari, Opera */
+-moz-column-count: 3; /* Firefox */
+column-count: 3;
+-webkit-column-fill: auto;
+-moz-column-fill: auto;
+column-fill: auto;
+column-gap: 0;
+padding-left: 0cm;
+padding-right: 0cm;
+/* -webkit-column-rule-width: 50%;
+-moz-column-rule-width: 50%;
+column-rule-width: 50%; */
+-webkit-column-rule-style: none;
+-moz-column-rule-style: none;
+column-rule-style: none;
+-webkit-column-rule-color: black;
+-moz-column-rule-color: black;
+column-rule-color: black;
+background-color: #ffffff;
+font-family: Palatino;
+margin-top: calc(36in *  0.15 );
+padding-top: 1em;
+padding-bottom: 1em;
+}
+span.citation {
+  color: #284c42;
+  font-weight: bold;
+}
+a {
+text-decoration: none;
+color: #284c42;
+}
+#title {
+font-size: 125pt;
+text-align: left;
+margin: 0;
+line-height: 98%;
+border-bottom: 0;
+font-weight: normal;
+background: 0;
+}
+#author {
+color: #284c42;
+margin: 0;
+line-height: 85%;
+font-size: 1.17em;
+}
+#affiliation {
+padding-top: 0.1em;
+color: ;
+font-style: italic;
+font-size: 25px;
+margin: 0;
+}
+sup {
+color: #cc0000;
+}
+.affiliation sup {
+font-size: 20px;
+}
+.author {
+text-align: left;
+}
+.author sup {
+font-size: 30px;
+}
+.author_extra {
+color: #284c42;
+margin: 0;
+line-height: 85%;
+font-size: 40px;
+text-align: left;
+}
+.outer h1, h2, h3, h4, h5, h6 {
+text-align: center;
+margin: 0;
+font-weight: bold;
+}
+.section h1 {
+  text-align:center;
+  padding-bottom:5px;
+  background:
+    linear-gradient(
+      to left,
+      #ffffff 1%,
+      #ffffff 20%,
+      #284c4275 33%,
+      #284c42 50%,
+      #284c4275 66%,
+      #ffffff 80%,
+      #ffffff 99%
+    )
+    left
+    bottom
+    #ffffff
+    no-repeat;
+  background-size:100% 5px ;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+.outer h2 {
+text-align: center;
+}
+.outer p, .level2 {
+color: #000000;
+}
+.outer ol {
+padding-left: 8%;
+padding-right: 8%;
+text-align: left;
+}
+.main {
+width: 48in;
+height: calc(36in * 0.15);
+position: absolute;
+background-color: #284c42;
+color: #FFFFFF90;
+font-family: Palatino;
+background-image: linear-gradient(#284c42 50%,#284c42);
+}
+.main strong {
+color: #FFFFFF;
+}
+.main strong > sup {
+color: #FFFFFF;
+}
+.main sup {
+color: #FFFFFF90;
+}
+#main-img-left {
+width: 10%;
+left: 0.5in;
+bottom: 0.2in;
+position: absolute;
+}
+#main-img-center {
+width: 10%;
+left: calc(48in * 0.45);
+bottom: 0.5in;
+position: absolute;
+}
+#main-img-right {
+width: 10%;
+right: 0.5in;
+bottom: 0.2in;
+position: absolute;
+}
+.main p {
+font-size: 105px;
+font-family: Palatino;
+text-align: center;
+margin: 0;
+position: absolute;
+top: 50%;
+-ms-transform: translateY(-50%);
+transform: translateY(-50%);
+margin-left: 1em;
+}
+.fab {
+color: #00000030;
+font-size: 25px;
+}
+.twitter, i {
+color: #00000030;
+font-size: 35px;
+text-decoration: none;
+}
+a.email {
+text-decoration: none;
+color: #00000030;
+font-size: 35px;
+}
+.envelope {
+color: #00000030;
+font-size: 5px;
+text-decoration: none;
+}
+.poster_wrap {
+width: 48in;
+height: 36in;
+padding: 0cm;
+}
+.main_bottom {
+width: 48in;
+height: calc(36in * 0);
+margin-top: calc(36in * (1 - 0));
+position: absolute;
+background-color: #284c42;
+background-image: linear-gradient(#284c42 10%, #284c42);
+}
+.section {
+  padding-left: 10mm;
+  padding-right: 10mm;
+}
+span > #tab:mytable {
+  font-weight: bold;
+}
+.orcid img {
+  width: 3%;
+}
+.emphasis {
+  background-color: #008080;
+  color: #ffffff;
+  border: solid #0b2045 3mm;
+  margin: 1em;
+  padding-left: 0;
+  padding-right: 0;
+}
+.emphasis h1 {
+  font-weight: bold;
+  background: none;
+  background-color: #0b2045;
+  padding-bottom: 5mm;
+  padding-top: 1mm;
+  margin-top: -1mm;
+  margin-right: -1mm;
+  margin-left: -1mm;
+}
+.emphasis blockquote {
+  border: 0;
+}
+.emphasis ol {
+  padding: 0;
+  padding-left: 8%;
+  font-size: 100%;
+  font-weight: bold;
+}
+.emphasis p {
+  color: #ffffff;
+}
+</style>
+</head>
+<body>
+
+
+<div class="poster_wrap">
+
+<div class="column outer">
+<div class="section">
+
+<h3 id="author" class="author">
+
+Natasha M. Ryan<sup> </sup><br>
+
+ Douglas A. Campbell<sup> </sup><br>
+
+ </h3>
+
+<h5 id="author_extra", class="author_extra">
+  Mount Allison University Biology Department<sup></sup>
+</h5>
+
+
+</div>
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Polar phytoplankton are <strong>vital</strong> to global aquatic ecosystems<span class="citation"><sup><a href="#ref-pierellakarlusich2020">1</a>,<a href="#ref-ardyna2020">2</a></sup></span></p>
+<p>As photolithotrophs, phytoplankton rely on photons for energy input, restricting their growth to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, typically extending down to 1% of surface irradiance<span class="citation"><sup><a href="#ref-ravenPutOutLight2000">3</a>,<a href="#ref-kirk2011">4</a></sup></span></p>
+<p>Despite severe light constraints in polar regions, certain psychrophile phytoplankton exhibit remarkable adaptability through slow but significant growth under the ice during winter indicating possible photosynthetic adaptations to light limitation<span class="citation"><sup><a href="#ref-randelhoff2020">5</a>–<a href="#ref-leu2015">7</a></sup></span></p>
+<p>We hypothesized that maintaining photosynthesis under extremely low light involves <strong>suppressing energetically wasteful charge recombinations</strong> in Photosystem II</p>
+<div class="float">
+<img src="figure_recombination.png" alt="Figure 1: Recombination Pathways of PSII note: this figure will be simplified into a view of electron transport pathways in the thylakoid membrane with recombination pathways highlighted before the final presentation" />
+<div class="figcaption">Figure 1: Recombination Pathways of PSII <em>note: this figure will be simplified into a view of electron transport pathways in the thylakoid membrane with recombination pathways highlighted before the final presentation</em></div>
+</div>
+</div>
+<div id="methods" class="section level1">
+<h1>Methods</h1>
+<p><strong>Single turnover variable chlorophyll fluorescence</strong> can be used to evaluate recombination<span class="citation"><sup><a href="#ref-schubackSingleTurnoverVariableChlorophyll2021">8</a>,<a href="#ref-zaharievaEnergeticsKineticsSState2019">9</a></sup></span></p>
+<p>Recombination reactions cause individual PSIIs to lose charge separation and slip back in the four-step cycle of oxygen evolution, desynchronizing the S-state cycle across the population<span class="citation"><sup><a href="#ref-gates2020">10</a></sup></span></p>
+<div class="float">
+<img src="StChlF.png" alt="Figure 2: Single-turnover variable chlorophyll fluorescence approach for monitoring S-state cycling of phytoplankton photosynthesis" />
+<div class="figcaption">Figure 2: Single-turnover variable chlorophyll fluorescence approach for monitoring S-state cycling of phytoplankton photosynthesis</div>
+</div>
+<p>Conducting a comparative analysis of S-state cycling of polar and temperate diatoms and green algae under a range of light and temperature conditions, we can determine if polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions</p>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<div class="float">
+<img src="heatmap.png" alt="Figure 3: Duration of significant S-State cycling of PSII in polar and temperate diatoms and green algae under a range of light and temperature conditions" />
+<div class="figcaption">Figure 3: Duration of significant S-State cycling of PSII in polar and temperate diatoms and green algae under a range of light and temperature conditions</div>
+</div>
+<p>We observe <strong>3</strong> key patterns between and within taxa</p>
+<ul>
+<li>Within taxa, higher frequencies of photon delivery and colder temperatures result in less recombination and, therefore, less energy waste</li>
+<li>Polar taxa exhibit significant s-state cycling across a broader range of conditions than their temperate counterparts</li>
+<li>Polar taxa maintain synchronicity in S-state cycling for longer durations than temperate taxa under comparable conditions</li>
+</ul>
+</div>
+<div id="conclusions" class="section level1">
+<h1>Conclusions</h1>
+<p>Together, our findings indicate that diverse polar phytoplankton have evolved capacities to sustain efficient photosynthesis under extreme low light</p>
+<p>This research challenges the conventional understanding of the limits on photosynthesis under light limitation, helping unravel polar ecosystem dynamics and predict ecosystem responses to climate change</p>
+</div>
+<div id="references" class="section level1 unnumbered">
+<h1>References</h1>
+<div id="refs" class="references csl-bib-body" line-spacing="2">
+<div id="ref-pierellakarlusich2020" class="csl-entry">
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Pierella Karlusich, J. J., Ibarbalz, F. M. &amp; Bowler, C. <a href="https://doi.org/10.1146/annurev-marine-010419-010706">Phytoplankton in the <span>Tara Ocean</span></a>. <em>Annual Review of Marine Science</em> <strong>12</strong>, 233–265 (2020).</div>
+</div>
+<div id="ref-ardyna2020" class="csl-entry">
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">Ardyna, M. &amp; Arrigo, K. R. <a href="https://doi.org/10.1038/s41558-020-0905-y">Phytoplankton dynamics in a changing <span>Arctic Ocean</span></a>. <em>Nature Climate Change</em> <strong>10</strong>, 892–903 (2020).</div>
+</div>
+<div id="ref-ravenPutOutLight2000" class="csl-entry">
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">Raven, J. A., Kübler, J. E. &amp; Beardall, J. <a href="https://doi.org/10.1017/S0025315499001526">Put out the light, and then put out the light</a>. <em>Journal of the Marine Biological Association of the United Kingdom</em> <strong>80</strong>, 1–25 (2000).</div>
+</div>
+<div id="ref-kirk2011" class="csl-entry">
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">Kirk, J. T. O. <em>Light and <span>Photosynthesis</span> in <span>Aquatic Ecosystems</span></em>. (<span>Cambridge University Press</span>, 2011).</div>
+</div>
+<div id="ref-randelhoff2020" class="csl-entry">
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">Randelhoff, A. <em>et al.</em> <a href="https://doi.org/10.1126/sciadv.abc2678">Arctic mid-winter phytoplankton growth revealed by autonomous profilers</a>. <em>Science Advances</em> <strong>6</strong>, eabc2678 (2020).</div>
+</div>
+<div id="ref-hancke2018" class="csl-entry">
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">Hancke, K. <em>et al.</em> <a href="https://doi.org/10.1002/2017JC013263">Extreme <span>Low Light Requirement</span> for <span>Algae Growth Underneath Sea Ice</span>: <span>A Case Study From Station Nord</span>, <span>NE Greenland</span></a>. <em>Journal of Geophysical Research: Oceans</em> <strong>123</strong>, 985–1000 (2018).</div>
+</div>
+<div id="ref-leu2015" class="csl-entry">
+<div class="csl-left-margin">7. </div><div class="csl-right-inline">Leu, E. <em>et al.</em> <a href="https://doi.org/10.1016/j.pocean.2015.07.012">Arctic spring awakening – <span>Steering</span> principles behind the phenology of vernal ice algal blooms</a>. <em>Progress in Oceanography</em> <strong>139</strong>, 151–170 (2015).</div>
+</div>
+<div id="ref-schubackSingleTurnoverVariableChlorophyll2021" class="csl-entry">
+<div class="csl-left-margin">8. </div><div class="csl-right-inline">Schuback, N. <em>et al.</em> Single-<span>Turnover Variable Chlorophyll Fluorescence</span> as a <span>Tool</span> for <span>Assessing Phytoplankton Photosynthesis</span> and <span>Primary Productivity</span>: <span>Opportunities</span>, <span>Caveats</span> and <span>Recommendations</span>. <em>Frontiers in Marine Science</em> <strong>8</strong>, (2021).</div>
+</div>
+<div id="ref-zaharievaEnergeticsKineticsSState2019" class="csl-entry">
+<div class="csl-left-margin">9. </div><div class="csl-right-inline">Zaharieva, I. &amp; Dau, H. Energetics and <span>Kinetics</span> of <span>S-State Transitions Monitored</span> by <span>Delayed Chlorophyll Fluorescence</span>. <em>Frontiers in Plant Science</em> <strong>10</strong>, (2019).</div>
+</div>
+<div id="ref-gates2020" class="csl-entry">
+<div class="csl-left-margin">10. </div><div class="csl-right-inline">Gates, C., Ananyev, G. &amp; Dismukes, G. C. <a href="https://doi.org/10.1016/j.bbabio.2020.148212">Realtime kinetics of the light driven steps of photosynthetic water oxidation in living organisms by <span>‘stroboscopic’</span> fluorometry</a>. <em>Biochimica et Biophysica Acta (BBA) - Bioenergetics</em> <strong>1861</strong>, 148212 (2020).</div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="main">
+<p><strong>Latitude &amp; Light</strong><br><br> Photosynthetic Adaptations of Polar Phytoplankton to Extreme Light Limitation</p>
+</div>
+<div class="main_bottom">
+<img id="main-img-left" src=>
+<img id="main-img-center" src=>
+<img id="main-img-right" src=>
+</div>
+</div>
+
+
+
+</body>
+</html>
