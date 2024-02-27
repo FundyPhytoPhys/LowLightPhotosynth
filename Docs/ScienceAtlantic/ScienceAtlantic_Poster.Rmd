@@ -1,6 +1,6 @@
 ---
 main_topsize: 0.15
-main_bottomsize: 0.0
+main_bottomsize: 0.05
 poster_height: "36in"
 poster_width: "48in"
 font_family: 'Palatino'
@@ -26,7 +26,7 @@ output:
     self_contained: false
     pandoc_args: --mathjax
     number_sections: false
-csl: nature.csl
+csl: plos-one.csl
 bibliography: LowLightPhotosynthesis.bib
 link-citations: true
 ---

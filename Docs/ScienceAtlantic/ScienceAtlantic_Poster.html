@@ -125,7 +125,7 @@ padding: 0px;
 }
 .outer {
 width: 48in;
-height: calc(36in *  (1 - 0.15 - 0 - 0.01) );
+height: calc(36in *  (1 - 0.15 - 5.0e-2 - 0.01) );
 -webkit-column-count: 3; /* Chrome, Safari, Opera */
 -moz-column-count: 3; /* Firefox */
 column-count: 3;
@@ -310,8 +310,8 @@ padding: 0cm;
 }
 .main_bottom {
 width: 48in;
-height: calc(36in * 0);
-margin-top: calc(36in * (1 - 0));
+height: calc(36in * 5.0e-2);
+margin-top: calc(36in * (1 - 5.0e-2));
 position: absolute;
 background-color: #284c42;
 background-image: linear-gradient(#284c42 10%, #284c42);
@@ -383,8 +383,8 @@ Natasha M. Ryan<sup> </sup><br>
 
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
-<p>Polar phytoplankton are <strong>vital</strong> to polar ecosystems<span class="citation"><sup><a href="#ref-pierellakarlusich2020">1</a>,<a href="#ref-ardyna2020">2</a></sup></span>. As photolithotrophs, phytoplankton rely on photons for energy input, nominally restricting their to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, typically extending down to 1% of surface irradiance<span class="citation"><sup><a href="#ref-ravenPutOutLight2000">3</a>,<a href="#ref-kirk2011">4</a></sup></span></p>
-<p>Despite severe light constraints, certain polar phytoplankton exhibit slow but significant growth under the ice during winter, indicating possible photosynthetic adaptations to light limitation<span class="citation"><sup><a href="#ref-randelhoff2020">5</a>–<a href="#ref-leu2015">7</a></sup></span>. To drive photosynthesis, Photosystem II (PSII) needs four sequential photons, with risk of loss through futile charge recombination, if the photon arrivals are too widely spaced.</p>
+<p>Polar phytoplankton are <strong>vital</strong> to polar ecosystems <span class="citation">[<a href="#ref-pierellakarlusich2020">1</a>,<a href="#ref-ardyna2020">2</a>]</span>. As photolithotrophs, phytoplankton rely on photons for energy input, nominally restricting their to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, typically extending down to 1% of surface irradiance <span class="citation">[<a href="#ref-ravenPutOutLight2000">3</a>,<a href="#ref-kirk2011">4</a>]</span></p>
+<p>Despite severe light constraints, certain polar phytoplankton exhibit slow but significant growth under the ice during winter, indicating possible photosynthetic adaptations to light limitation <span class="citation">[<a href="#ref-randelhoff2020">5</a>–<a href="#ref-leu2015">7</a>]</span>. To drive photosynthesis, Photosystem II (PSII) needs four sequential photons, with risk of loss through futile charge recombination, if the photon arrivals are too widely spaced.</p>
 <p>We hypothesized that maintaining photosynthesis under extremely low light and low temperatures involves <strong>suppressing energetically wasteful charge recombinations</strong> in PSII.</p>
 <div class="float">
 <img src="figure_recombination.png" alt="Figure 1: Recombination Pathways of PSII note: this figure will be simplified into a view of electron transport pathways in the thylakoid membrane with recombination pathways highlighted before the final presentation" />
@@ -393,7 +393,7 @@ Natasha M. Ryan<sup> </sup><br>
 </div>
 <div id="methods" class="section level1">
 <h1>Methods</h1>
-<p>Recombination causes a slippage in the four step cycle for a PSII, and thus cause desynchronization of the steps, across the population of Photosystem II<span class="citation"><sup><a href="#ref-gates2020">8</a></sup></span>. For each PSII the yield of fluorescence varies across the four steps, and if PSII are synchronized, the cells show four-step cycling of chlorophyll fluorescence. Therefore, <strong>variable chlorophyll fluorescence</strong> can be used to evaluate the synchronization of the PSII. By inference, prolonged synchronization implies low recombination, and vice versa<span class="citation"><sup><a href="#ref-schubackSingleTurnoverVariableChlorophyll2021">9</a>,<a href="#ref-zaharievaEnergeticsKineticsSState2019">10</a></sup></span>.</p>
+<p>Recombination causes a slippage in the four step cycle for a PSII, and thus cause desynchronization of the steps, across the population of Photosystem II <span class="citation">[<a href="#ref-gates2020">8</a>]</span>. For each PSII the yield of fluorescence varies across the four steps, and if PSII are synchronized, the cells show four-step cycling of chlorophyll fluorescence. Therefore, <strong>variable chlorophyll fluorescence</strong> can be used to evaluate the synchronization of the PSII. By inference, prolonged synchronization implies low recombination, and vice versa <span class="citation">[<a href="#ref-schubackSingleTurnoverVariableChlorophyll2021">9</a>,<a href="#ref-zaharievaEnergeticsKineticsSState2019">10</a>]</span>.</p>
 <div class="float">
 <img src="StChlF.png" alt="Figure 2: Single-turnover variable chlorophyll fluorescence approach for monitoring PSII cycling of phytoplankton photosynthesis" />
 <div class="figcaption">Figure 2: Single-turnover variable chlorophyll fluorescence approach for monitoring PSII cycling of phytoplankton photosynthesis</div>
@@ -419,36 +419,36 @@ Natasha M. Ryan<sup> </sup><br>
 </div>
 <div id="references" class="section level1 unnumbered">
 <h1>References</h1>
-<div id="refs" class="references csl-bib-body" line-spacing="2">
+<div id="refs" class="references csl-bib-body">
 <div id="ref-pierellakarlusich2020" class="csl-entry">
-<div class="csl-left-margin">1. </div><div class="csl-right-inline">Pierella Karlusich, J. J., Ibarbalz, F. M. &amp; Bowler, C. <a href="https://doi.org/10.1146/annurev-marine-010419-010706">Phytoplankton in the <span>Tara Ocean</span></a>. <em>Annual Review of Marine Science</em> <strong>12</strong>, 233–265 (2020).</div>
+<div class="csl-left-margin">1. </div><div class="csl-right-inline">Pierella Karlusich JJ, Ibarbalz FM, Bowler C. Phytoplankton in the <span>Tara Ocean</span>. Annual Review of Marine Science. 2020;12: 233–265. doi:<a href="https://doi.org/10.1146/annurev-marine-010419-010706">10.1146/annurev-marine-010419-010706</a></div>
 </div>
 <div id="ref-ardyna2020" class="csl-entry">
-<div class="csl-left-margin">2. </div><div class="csl-right-inline">Ardyna, M. &amp; Arrigo, K. R. <a href="https://doi.org/10.1038/s41558-020-0905-y">Phytoplankton dynamics in a changing <span>Arctic Ocean</span></a>. <em>Nature Climate Change</em> <strong>10</strong>, 892–903 (2020).</div>
+<div class="csl-left-margin">2. </div><div class="csl-right-inline">Ardyna M, Arrigo KR. Phytoplankton dynamics in a changing <span>Arctic Ocean</span>. Nature Climate Change. 2020;10: 892–903. doi:<a href="https://doi.org/10.1038/s41558-020-0905-y">10.1038/s41558-020-0905-y</a></div>
 </div>
 <div id="ref-ravenPutOutLight2000" class="csl-entry">
-<div class="csl-left-margin">3. </div><div class="csl-right-inline">Raven, J. A., Kübler, J. E. &amp; Beardall, J. <a href="https://doi.org/10.1017/S0025315499001526">Put out the light, and then put out the light</a>. <em>Journal of the Marine Biological Association of the United Kingdom</em> <strong>80</strong>, 1–25 (2000).</div>
+<div class="csl-left-margin">3. </div><div class="csl-right-inline">Raven JA, Kübler JE, Beardall J. Put out the light, and then put out the light. Journal of the Marine Biological Association of the United Kingdom. 2000;80: 1–25. doi:<a href="https://doi.org/10.1017/S0025315499001526">10.1017/S0025315499001526</a></div>
 </div>
 <div id="ref-kirk2011" class="csl-entry">
-<div class="csl-left-margin">4. </div><div class="csl-right-inline">Kirk, J. T. O. <em>Light and <span>Photosynthesis</span> in <span>Aquatic Ecosystems</span></em>. (<span>Cambridge University Press</span>, 2011).</div>
+<div class="csl-left-margin">4. </div><div class="csl-right-inline">Kirk JTO. Light and <span>Photosynthesis</span> in <span>Aquatic Ecosystems</span>. 3rd ed. <span>Cambridge, UK ;</span> <span>Cambridge University Press</span>; 2011. </div>
 </div>
 <div id="ref-randelhoff2020" class="csl-entry">
-<div class="csl-left-margin">5. </div><div class="csl-right-inline">Randelhoff, A. <em>et al.</em> <a href="https://doi.org/10.1126/sciadv.abc2678">Arctic mid-winter phytoplankton growth revealed by autonomous profilers</a>. <em>Science Advances</em> <strong>6</strong>, eabc2678 (2020).</div>
+<div class="csl-left-margin">5. </div><div class="csl-right-inline">Randelhoff A, Lacour L, Marec C, Leymarie E, Lagunas J, Xing X, et al. Arctic mid-winter phytoplankton growth revealed by autonomous profilers. Science Advances. 2020;6: eabc2678. doi:<a href="https://doi.org/10.1126/sciadv.abc2678">10.1126/sciadv.abc2678</a></div>
 </div>
 <div id="ref-hancke2018" class="csl-entry">
-<div class="csl-left-margin">6. </div><div class="csl-right-inline">Hancke, K. <em>et al.</em> <a href="https://doi.org/10.1002/2017JC013263">Extreme <span>Low Light Requirement</span> for <span>Algae Growth Underneath Sea Ice</span>: <span>A Case Study From Station Nord</span>, <span>NE Greenland</span></a>. <em>Journal of Geophysical Research: Oceans</em> <strong>123</strong>, 985–1000 (2018).</div>
+<div class="csl-left-margin">6. </div><div class="csl-right-inline">Hancke K, Lund-Hansen LC, Lamare ML, Højlund Pedersen S, King MD, Andersen P, et al. Extreme <span>Low Light Requirement</span> for <span>Algae Growth Underneath Sea Ice</span>: <span>A Case Study From Station Nord</span>, <span>NE Greenland</span>. Journal of Geophysical Research: Oceans. 2018;123: 985–1000. doi:<a href="https://doi.org/10.1002/2017JC013263">10.1002/2017JC013263</a></div>
 </div>
 <div id="ref-leu2015" class="csl-entry">
-<div class="csl-left-margin">7. </div><div class="csl-right-inline">Leu, E. <em>et al.</em> <a href="https://doi.org/10.1016/j.pocean.2015.07.012">Arctic spring awakening – <span>Steering</span> principles behind the phenology of vernal ice algal blooms</a>. <em>Progress in Oceanography</em> <strong>139</strong>, 151–170 (2015).</div>
+<div class="csl-left-margin">7. </div><div class="csl-right-inline">Leu E, Mundy CJ, Assmy P, Campbell K, Gabrielsen TM, Gosselin M, et al. Arctic spring awakening – <span>Steering</span> principles behind the phenology of vernal ice algal blooms. Progress in Oceanography. 2015;139: 151–170. doi:<a href="https://doi.org/10.1016/j.pocean.2015.07.012">10.1016/j.pocean.2015.07.012</a></div>
 </div>
 <div id="ref-gates2020" class="csl-entry">
-<div class="csl-left-margin">8. </div><div class="csl-right-inline">Gates, C., Ananyev, G. &amp; Dismukes, G. C. <a href="https://doi.org/10.1016/j.bbabio.2020.148212">Realtime kinetics of the light driven steps of photosynthetic water oxidation in living organisms by <span>‘stroboscopic’</span> fluorometry</a>. <em>Biochimica et Biophysica Acta (BBA) - Bioenergetics</em> <strong>1861</strong>, 148212 (2020).</div>
+<div class="csl-left-margin">8. </div><div class="csl-right-inline">Gates C, Ananyev G, Dismukes GC. Realtime kinetics of the light driven steps of photosynthetic water oxidation in living organisms by <span>“stroboscopic”</span> fluorometry. Biochimica et Biophysica Acta (BBA) - Bioenergetics. 2020;1861: 148212. doi:<a href="https://doi.org/10.1016/j.bbabio.2020.148212">10.1016/j.bbabio.2020.148212</a></div>
 </div>
 <div id="ref-schubackSingleTurnoverVariableChlorophyll2021" class="csl-entry">
-<div class="csl-left-margin">9. </div><div class="csl-right-inline">Schuback, N. <em>et al.</em> Single-<span>Turnover Variable Chlorophyll Fluorescence</span> as a <span>Tool</span> for <span>Assessing Phytoplankton Photosynthesis</span> and <span>Primary Productivity</span>: <span>Opportunities</span>, <span>Caveats</span> and <span>Recommendations</span>. <em>Frontiers in Marine Science</em> <strong>8</strong>, (2021).</div>
+<div class="csl-left-margin">9. </div><div class="csl-right-inline">Schuback N, Tortell PD, Berman-Frank I, Campbell DA, Ciotti A, Courtecuisse E, et al. Single-<span>Turnover Variable Chlorophyll Fluorescence</span> as a <span>Tool</span> for <span>Assessing Phytoplankton Photosynthesis</span> and <span>Primary Productivity</span>: <span>Opportunities</span>, <span>Caveats</span> and <span>Recommendations</span>. Frontiers in Marine Science. 2021;8. </div>
 </div>
 <div id="ref-zaharievaEnergeticsKineticsSState2019" class="csl-entry">
-<div class="csl-left-margin">10. </div><div class="csl-right-inline">Zaharieva, I. &amp; Dau, H. Energetics and <span>Kinetics</span> of <span>S-State Transitions Monitored</span> by <span>Delayed Chlorophyll Fluorescence</span>. <em>Frontiers in Plant Science</em> <strong>10</strong>, (2019).</div>
+<div class="csl-left-margin">10. </div><div class="csl-right-inline">Zaharieva I, Dau H. Energetics and <span>Kinetics</span> of <span>S-State Transitions Monitored</span> by <span>Delayed Chlorophyll Fluorescence</span>. Frontiers in Plant Science. 2019;10. </div>
 </div>
 </div>
 </div>
