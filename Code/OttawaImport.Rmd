@@ -201,6 +201,14 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
   ungroup()
 ```
 
+
+```{r add deviation from growth temp}
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  mutate(GrowthTemp_C = ifelse(CultureID %in% c("MaPo1001", "MaPo1002", "MaPo1003", "MaPo1004"), 4, ifelse(CultureID %in% c("MaPo1005", "MaPo1006"), 24, NA))) %>%
+  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
+```
+
+
 ### Group by Taxon 
 ```{r}
 SolFitsPriscuii <- SolFitsTrim2 %>%
@@ -215,6 +223,7 @@ SolFitsMalina <- SolFitsTrim2 %>%
 SolFitsReinhardtii <- SolFitsTrim2 %>%
   filter(CultureID %in% c("MaPo1005", "MaPo1006"))
 ```
+
 
 
 ### Test Plots

@@ -236,13 +236,29 @@ SolFitsFragilariopsis <- SolFitsTrim2 %>%
 #Note SeGu1003 and 1008 were excluded due to culture issues 
 ```
 
+```{r add deviation from growth temp}
+SolFitsFragilariopsis <- SolFitsFragilariopsis %>%
+  mutate(GrowthTemp_C = ifelse(CultureID == "SeGu1001", 0, ifelse(CultureID == "SeGu1006", 6, NA)))%>%
+  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
+```
+
 ### Test Plots
 ```{r}
+s.col <- c("#003D50","#385D97","#3397A6","#9FD4C1")
+
 SolFitsFragilariopsis %>%
+  filter(Filename == "20230926_SeGu1001_0C_1s") %>%
   ggplot() +
-  geom_line(aes(x=Flashnumber, y=FvFmrunnorm)) +
-  facet_grid(rows = vars(Temp_C), cols = vars(PulseSpace_s)) +
-  theme_bw()
+  geom_point(aes(x=Flashnumber, y=FvFmrunnorm, col=as.factor(SState))) +
+  scale_color_manual(values = s.col) +
+  scale_y_continuous(limits=c(0.9, 1.1)) +
+  labs(x= "Flash Number", y= "Normalized Chlorophyll Fluorescence") +
+  theme_bw() +
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
+
+# ggsave("points.png", width = 7, height = 4.32, dpi = 900,
+#        plot=last_plot(),
+#       path="~/Downloads")
 ```
 
 ```{r save Data}

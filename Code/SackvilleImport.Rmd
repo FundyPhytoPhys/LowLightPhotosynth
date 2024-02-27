@@ -236,6 +236,13 @@ SolFitsTrim_WI23 <- SolFitsTrim_WI23 %>%
 SolFitsTrim_Combined <- rbind(SolFitsTrim2, SolFitsTrim_WI23)
 ```
 
+```{r add deviation from growth temp}
+SolFitsTrim_Combined <- SolFitsTrim_Combined %>%
+  mutate(GrowthTemp_C = 18) %>%
+  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
+```
+
+
 ```{r save SolFitsTrim data}
 saveRDS(SolFitsTrim_Combined, file.path(DataOut, paste(Project, "Thalassiosira_pseudonana", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
@@ -323,6 +330,12 @@ ChlorellaFitsTrim <-ChlorellaFitsTrim %>%
          Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
          FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
   ungroup()
+```
+
+```{r add deviation from growth temp}
+ChlorellaFitsTrim <-ChlorellaFitsTrim %>%
+  mutate(GrowthTemp_C = 18) %>%
+  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
 ```
 
 

@@ -26,6 +26,9 @@ CvWavelets <- readRDS("../Data/ProcessedData/LOW_CvWavelets.Rds")
 TpWavelets <- readRDS("../Data/ProcessedData/LOW_TpWavelets.Rds")
 ```
 
+Example:
+
+
 
 ### 3.3 Periodicity of Fluorescence Emission
 
@@ -64,7 +67,7 @@ Fc.wt.avg %>%
   labs(x= "Average Wavelet Power", colour= "P-Value") +
   facet_grid(rows=vars(Temp_C), cols = vars(PulseSpace_s)) +
   theme_linedraw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
 
@@ -164,11 +167,6 @@ Tp.wt.avg %>%
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
 ```
 
-```{r}
-Tp.wt.avg %>%
-  filter(Period == 4) %>%
-  filter(Power.avg.pval == 1)
-```
 ### 3.4 Damping Indices Across Taxa 
 
 ```{r}
@@ -188,8 +186,8 @@ names(species.labs) <- c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamy
 ```{r heat map}
 sstate_damping %>% 
   ggplot() + 
-  geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
-  viridis::scale_fill_viridis(option="mako") + 
+  geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +
+  viridis::scale_fill_viridis(option="mako", na.value="white") + 
   labs(x= "Temperature (°C)", y= "Flash Spacing (s)", fill= "Damping Index") + 
   facet_wrap(vars(Species), scales = "free", labeller = labeller(Species=species.labs)) +  
   theme_linedraw() +
