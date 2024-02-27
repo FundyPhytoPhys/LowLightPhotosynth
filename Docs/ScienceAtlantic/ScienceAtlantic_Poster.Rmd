@@ -23,7 +23,7 @@ caption_textsize: '35px'
 reference_textsize: '35px'
 output: 
   posterdown::posterdown_betterport:
-    self_contained: false
+    self_contained: true
     pandoc_args: --mathjax
     number_sections: false
 csl: plos-one.csl
