@@ -1,22 +1,33 @@
 ---
+title: "Latitude, Ice & Light"
 main_topsize: 0.15
 main_bottomsize: 0.05
 poster_height: "36in"
 poster_width: "48in"
 font_family: 'Palatino'
 author:
-  - name: 'Natasha M. Ryan'
+  - name: Natasha M. Ryan
+    affil: 1
     main: true
-  - name: 'Douglas A. Campbell'
+    email: nmryan@mta.ca
+  - name: Arthur Plassart
+    affil: 2
     main: true
-  - name: 'Mount Allison University Biology Department'
+  - name: Douglas A. Campbell
+    affil: 1
+    main: true
+affiliation:
+  - num 1:
+    address: Department of Biology, Mount Allison University, 63B York St., Sackville NB, Canada, E4L 1G7.
+  - num 2:
+    address: Takuvik International Research Laboratory, Université Laval (Canada) & CNRS (France), Departement de Biologie and Québec-Océan,Université Laval, Québec, QC, G1V 0A6, Canada
+
 primary_colour: "#284c42" 
 secondary_colour: "#284c42" 
 main_fontfamily: 'Palatino'
 main_textcol: "#FFFFFF" 
 main_textsize: '105px'
 main_findings:
-  - "**Latitude, Ice & Light**"
   - "Photosynthetic Adaptations of Polar Phytoplankton to Extreme Light Limitation"
 authorextra_textsize: '40px'
 caption_textsize: '35px'
