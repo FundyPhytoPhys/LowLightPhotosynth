@@ -1,5 +1,4 @@
 ---
-title: "Latitude, Ice & Light"
 main_topsize: 0.15
 main_bottomsize: 0.05
 poster_height: "36in"
@@ -28,13 +27,14 @@ main_fontfamily: 'Palatino'
 main_textcol: "#FFFFFF" 
 main_textsize: '105px'
 main_findings:
+  - "**Latitude, Ice & Light**"
   - "Photosynthetic Adaptations of Polar Phytoplankton to Extreme Light Limitation"
 authorextra_textsize: '40px'
 caption_textsize: '35px'
 reference_textsize: '35px'
 output: 
   posterdown::posterdown_betterport:
-    self_contained: true
+    self_contained: false
     pandoc_args: --mathjax
     number_sections: false
 csl: plos-one.csl
