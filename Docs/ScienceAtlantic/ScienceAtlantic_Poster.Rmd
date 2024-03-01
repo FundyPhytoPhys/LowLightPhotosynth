@@ -1,5 +1,5 @@
 ---
-main_topsize: 0.15
+main_topsize: 0.12
 main_bottomsize: 0.05
 poster_height: "36in"
 poster_width: "48in"
@@ -17,27 +17,28 @@ author:
     main: true
 affiliation:
   - num 1:
-    address: Department of Biology, Mount Allison University, 63B York St., Sackville NB, Canada, E4L 1G7.
+    address: Department of Biology, Mount Allison University, 63B York St., Sackville NB, Canada, E4L 1G7 
   - num 2:
     address: Takuvik International Research Laboratory, Université Laval (Canada) & CNRS (France), Departement de Biologie and Québec-Océan,Université Laval, Québec, QC, G1V 0A6, Canada
-
 primary_colour: "#284c42" 
 secondary_colour: "#284c42" 
+accent_colour: "#284c42" 
 main_fontfamily: 'Palatino'
 main_textcol: "#FFFFFF" 
-main_textsize: '105px'
+main_textsize: '110px'
 main_findings:
-  - "**Latitude, Ice & Light**"
+  - "**Latitude, Ice, & Light**"
   - "Photosynthetic Adaptations of Polar Phytoplankton to Extreme Light Limitation"
+body_textsize: '45px'
 authorextra_textsize: '40px'
-caption_textsize: '35px'
-reference_textsize: '35px'
+caption_textsize: '45px'
+reference_textsize: '25px'
 output: 
   posterdown::posterdown_betterport:
-    self_contained: false
+    self_contained: true
     pandoc_args: --mathjax
     number_sections: false
-csl: plos-one.csl
+csl: plos-biology.csl
 bibliography: LowLightPhotosynthesis.bib
 link-citations: true
 ---
@@ -55,7 +56,7 @@ options(knitr.table.format = "html")
 
 # Introduction
 
-Polar phytoplankton are **vital** to polar ecosystems [@pierellakarlusich2020; @ardyna2020]. As photolithotrophs, phytoplankton rely on photons for energy input, nominally restricting their growth to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, traditionally extending down to 1% of surface irradiance [@ravenPutOutLight2000; @kirk2011]
+Polar phytoplankton are **vital** to polar ecosystems [@ardyna2020]. As photolithotrophs, phytoplankton rely on photons for energy input, nominally restricting their growth to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, traditionally extending down to 1% of surface irradiance [@ravenPutOutLight2000; @kirk2011]
 
 Despite severe light constraints, certain polar phytoplankton exhibit slow but significant productivity under the ice during winter, indicating possible adaptations to maintain photosynthesis under light limitation [@randelhoff2020; @hancke2018].
 
@@ -66,21 +67,23 @@ During photosynthesis, a complete water oxidation cycle requires the absorption 
 
 # Methods
 
-Recombination causes an individual PSII to slip in its four-step cycle of oxygen evolution, causing desynchronization across the population of PSIIs [@gates2020]. As the energy partitioned to fluorescence varies across the four steps, a population of synchronized PSIIs will exhibit a four-step cycling pattern of chlorophyll fluorescence. Therefore, **variable chlorophyll fluorescence** can be used to evaluate the synchronization of the PSII. By inference, prolonged synchronization implies low recombination and vice-versa [@schubackSingleTurnoverVariableChlorophyll2021; @zaharievaEnergeticsKineticsSState2019].
+Recombination causes an individual PSII to slip in its four-step cycle of oxygen evolution, causing desynchronization across the population of PSIIs [@gates2020]. As the energy partitioned to fluorescence varies across the four steps, a population of synchronized PSIIs will exhibit a four-step cycling pattern of chlorophyll fluorescence. 
 
-![Figure 2: Repeated single-turnover excitation of maximum variable chlorophyll fluorescence (F~M~) for monitoring the four-step cycle of oxygen evolution in PSII during photosynthesis](StChlF.png)
+Therefore, **variable chlorophyll fluorescence** can be used to evaluate the synchronization of the PSII. By inference, prolonged synchronization implies low recombination and vice-versa [@schubackSingleTurnoverVariableChlorophyll2021; @zaharievaEnergeticsKineticsSState2019].
 
-We used Fast Fourier Transforms to analyze the persistence of PSII chlorophyll fluorescence cycling across polar and temperate taxa of diatoms and green algae under a range of light and temperatures. This analysis helped determine whether polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions. 
+![Figure 2: Repeated single-turnover excitation of maximum variable chlorophyll fluorescence (F~m~) for monitoring the four-step cycle of oxygen evolution in PSII during photosynthesis](figure_stchlf.png)
+
+We used **Wavelet Transforms** to analyze the persistence of PSII chlorophyll fluorescence cycling across polar and temperate taxa of diatoms and green algae under a range of light and temperatures. This analysis helped determine whether polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions. 
 
 # Results
 
+We observe **2 key patterns** within and between taxa:
 
-![Figure 3: Duration of significant four-step cycling of PSII maximum chlorophyll fluorescence in polar and temperate diatoms or green algae, under a range of low light and temperature conditions. Wider spacing of photon delivery (y axis) is equivalent to lower ambient light. ](heatmap.png)
+* Within taxa, shorter spacing of photon delivery, and colder temperatures, results in stronger four-step cycling of PSII maximum chlorophyll fluorescence, and by inference, less wasteful recombination.
 
-We observe **2** key patterns within, and between, taxa
-
-* Within taxa, shorter spacing of photon delivery, and colder temperatures,  results in stronger four-step cycling of PSII maximum chlorophyll fluorescence, and by inference, less wasteful recombination.
 * Polar taxa maintain significant four-step PSII cycling across a broader range of conditions, at wider spacings of photons, equivalent to lower ambient light, than do their temperate counterparts. 
+
+![Figure 3: Duration of significant four-step cycling of PSII chlorophyll fluorescence in polar (left) and temperate (right) taxa of diatoms and green algae under a range of low light and temperature conditions. Wider spacing of photon delivery (y axis) is analagous to lower ambient light. ](figure_heatmap.png)
 
 # Conclusions
 Our findings indicate that diverse polar phytoplankton have capacity to suppress wasteful recombinations at PSII, to sustain efficient photosynthesis under extreme low light and low temperatures.
@@ -88,4 +91,5 @@ Our findings indicate that diverse polar phytoplankton have capacity to suppress
 This research challenges the conventional understanding of the limits on photosynthesis under light limitation, helping unravel polar ecosystem dynamics and predict ecosystem responses to climate change
 
 # References
+
 

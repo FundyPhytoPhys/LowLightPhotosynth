@@ -52,7 +52,8 @@ wavelet <- function(data_list){
     WaveletComp::analyze.wavelet(data, "FvFmrunnorm",
                                  method = "white.noise",
                                  loess.span = 0.75, 
-                                 dt = 1, dj=1/500, 
+                                 dt = 1, dj=1/250, 
+                                 n.sim = 300, 
                                  verbose = FALSE)
   })
 return(wavelet_list)
@@ -366,7 +367,8 @@ Tp_reconstruction <- reconstructwave(Tp_wavelets)
 
 
 ```{r damping index Cv}
-Tp_damping <- damping(Tp_reconstruction)  %>%
+Tp_damping <- damping(Tp_reconstruction)  
+Tp_damping <- rbind(Tp_damping, test) %>%
   mutate(Species = Tp) %>%
   mutate(damping.index = ifelse(!condition %in% Tp_significant, 0, damping.index)) 
 ```
@@ -384,7 +386,7 @@ sstate_damping <- rbind(Fc_damping, Ci_damping, Cm_damping, Cp_damping, Cr_dampi
 
 ```{r saving as RDS}
 #save as RDS to be able to work on figures without running wavelet transformations
-saveRDS(sstate_damping, file.path(DataOut, paste(Project, "SState_Damping(Diff.RDS", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(sstate_damping, file.path(DataOut, paste(Project, "SState_Damping.RDS", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 # Saving Wavelets for Results Section
@@ -415,10 +417,9 @@ sstate_damping$PulseSpace_s <- factor(sstate_damping$PulseSpace_s, levels = c("1
 sstate_damping$Temp_C <- factor(sstate_damping$Temp_C, levels= c("0","2","4","6","8","10","12","14","16","18","20","22","24"))
 #c("-12","-8","-4","0","2","4","6","8","10"))
 
-sstate_damping$Species <- factor(sstate_damping$Species, levels= c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Fragilariopsis_cylindrus", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris","Thalassiosira_pseudonana"))
-
-
-species.labs <- c("Fragilariopsis cylindrus", "Thalassiosira pseudonana","︎Chlamydomonas ICEMDV", "Chlamydomonas malina", "︎Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris")
+sstate_damping$Species <- factor(sstate_damping$Species, levels= c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana","Chlamydomonas_ICEMDV", "Chlamydomonas_reinhardtii", "Chlamydomonas_malina", "Chlorella_vulgaris", "Chlamydomonas_priscuii"))
+                                                                   
+species.labs <- c("Fragilariopsis cylindrus", "Thalassiosira pseudonana", "Chlamydomonas ICEMDV", "Chlamydomonas malina", "Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris")
 names(species.labs) <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana", "Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris")
 ```
  
@@ -428,16 +429,19 @@ sstate_damping %>%
   ggplot() + 
   geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
   viridis::scale_fill_viridis(option="mako", na.value="white") + 
-  facet_wrap(vars(Species), ncol=3, scales = "free", labeller = labeller(Species=species.labs)) + 
-  labs(x= "Temperature (°C)", y= "Frequency of Photon Delivery (s)", fill= "Damping Index") +
+  facet_wrap(vars(Species), ncol=2, scales = "free", labeller = labeller(Species=species.labs)) + 
+  labs(x= "Measurement Temperature (°C)", y= "Spacing of Photon Delivery (s)", fill= "Duration of PSII Cycling") +
   theme_linedraw() +
   theme(text = element_text(family = "Palatino")) +
-  theme(strip.text = element_text(face = "italic")) +
+  theme(strip.background =element_rect(fill="white"))+
+  theme(strip.text = element_text(colour= "black",face = "italic", size = 11)) +
+  theme(axis.text=element_text(size=11)) +
+  theme(legend.position = c(0.75, 0.125)) +
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
 
-   ggsave("heatmap.png", width = 12.22, height = 7.51, dpi = 400,
-          plot=last_plot(),
-         path="~/LowLightPhotosynth/Docs/ScienceAtlantic")
+  ggsave("heatmap.png", width = 8, height = 7.6, dpi = 165,
+        plot=last_plot(),
+        path="~/LowLightPhotosynth/Docs/ScienceAtlantic")
 ```
 
 
