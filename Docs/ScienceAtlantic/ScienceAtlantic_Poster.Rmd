@@ -55,22 +55,22 @@ options(knitr.table.format = "html")
 
 # Introduction
 
-Polar phytoplankton are **vital** to polar ecosystems [@pierellakarlusich2020; @ardyna2020]. As photolithotrophs, phytoplankton rely on photons for energy input, nominally restricting their growth to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, typically extending down to 1% of surface irradiance [@ravenPutOutLight2000; @kirk2011]
+Polar phytoplankton are **vital** to polar ecosystems [@pierellakarlusich2020; @ardyna2020]. As photolithotrophs, phytoplankton rely on photons for energy input, nominally restricting their growth to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, traditionally extending down to 1% of surface irradiance [@ravenPutOutLight2000; @kirk2011]
 
-Despite severe light constraints, certain polar phytoplankton exhibit slow but significant growth under the ice during winter [@randelhoff2020; @hancke2018; @leu2015], suggesting photosynthetic adaptations to light limitation. To drive photosynthesis, Photosystem II (PSII) needs four sequential photons, with risk of losses through futile charge recombinations, if the photon arrivals are too widely spaced.
+Despite severe light constraints, certain polar phytoplankton exhibit slow but significant productivity under the ice during winter, indicating possible adaptations to maintain photosynthesis under light limitation [@randelhoff2020; @hancke2018].
 
-We hypothesized that maintaining photosynthesis under extremely low light and low temperatures involves **suppressing energetically wasteful charge recombinations** in PSII.
+During photosynthesis, a complete water oxidation cycle requires the absorption of four photons. When photon arrivals are widely spaced, as occurs in low light, photosynthetic efficiency may decline due to futile charge recombinations[@keren1997]. We hypothesized that maintaining photosynthesis under extremely low light and low temperatures involves **suppressing energetically wasteful charge recombinations** in Photosystem II (PSII).
 
-![Figure 1: Recombination Pathways of PSII *note: this figure will be simplified into a view of electron transport pathways in the thylakoid membrane with recombination pathways highlighted before the final presentation*](figure_recombination.png)
+![Figure 1: Energetic Pathways of PSII; A) Pathway of electron flow through the photosystem II protein complex within the thylakoid membrane B) Principal charge recombination pathways of photosystem II](figure_photosynthesis.png)
+
 
 # Methods
 
+Recombination causes an individual PSII to slip in its four-step cycle of oxygen evolution, causing desynchronization across the population of PSIIs [@gates2020]. As the energy partitioned to fluorescence varies across the four steps, a population of synchronized PSIIs will exhibit a four-step cycling pattern of chlorophyll fluorescence. Therefore, **variable chlorophyll fluorescence** can be used to evaluate the synchronization of the PSII. By inference, prolonged synchronization implies low recombination and vice-versa [@schubackSingleTurnoverVariableChlorophyll2021; @zaharievaEnergeticsKineticsSState2019].
 
-Recombination causes a slippage in the four step cycle for a PSII, and thus causes desynchronization of the steps, across the population of Photosystem II [@gates2020].  For each PSII the yield of fluorescence varies across the four steps, and if PSII remain synchronized, the cells show four-step cycling of chlorophyll fluorescence. Therefore, **variable chlorophyll fluorescence** can be used to evaluate the synchronization of the PSII.  By inference, prolonged synchronization implies low recombination, and vice versa [@schubackSingleTurnoverVariableChlorophyll2021; @zaharievaEnergeticsKineticsSState2019].  
+![Figure 2: Repeated single-turnover excitation of maximum variable chlorophyll fluorescence (F~M~) for monitoring the four-step cycle of oxygen evolution in PSII during photosynthesis](StChlF.png)
 
-![Figure 2: Repeated single-turnover excitation of maximum variable chlorophyll fluorescence (F~M~) for monitoring PSII cycling of phytoplankton photosynthesis](StChlF.png)
-
-We used Fast Fourier Transforms to analyze the persistence of PSII chlorophyll fluorescence four-step cycling across polar and temperate diatoms or green algae,  under a range of very low light and temperatures, to determine if polar taxa have evolved to increase photosynthetic energy conversion efficiency, by minimizing inefficient recombination reaction. 
+We used Fast Fourier Transforms to analyze the persistence of PSII chlorophyll fluorescence cycling across polar and temperate taxa of diatoms and green algae under a range of light and temperatures. This analysis helped determine whether polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions. 
 
 # Results
 
