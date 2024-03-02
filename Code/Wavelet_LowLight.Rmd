@@ -409,7 +409,7 @@ saveRDS(sstate_damping, file.path(DataOut, paste(Project, "SState_Damping.RDS", 
 
 # Figures 
 ```{r import RDS}
-#sstate_damping <- readRDS("../Data/ProcessedData/LOW_SState_Damping.Rds")
+sstate_damping <- readRDS("../Data/ProcessedData/LOW_SState_Damping.Rds")
 ```
 
 ```{r figure setup}
@@ -431,15 +431,17 @@ sstate_damping %>%
   viridis::scale_fill_viridis(option="mako", na.value="white") + 
   facet_wrap(vars(Species), ncol=2, scales = "free", labeller = labeller(Species=species.labs)) + 
   labs(x= "Measurement Temperature (°C)", y= "Spacing of Photon Delivery (s)", fill= "Duration of PSII Cycling") +
+  ggtitle("                                     Polar                                                                                    Temperate") +
   theme_linedraw() +
-  theme(text = element_text(family = "Palatino")) +
-  theme(strip.background =element_rect(fill="white"))+
-  theme(strip.text = element_text(colour= "black",face = "italic", size = 11)) +
-  theme(axis.text=element_text(size=11)) +
-  theme(legend.position = c(0.75, 0.125)) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
+  theme(text = element_text(family = "Palatino"), 
+        strip.background =element_rect(fill="white"), 
+        strip.text = element_text(colour= "black",face = "italic", size = 13),
+        axis.text=element_text(size=13), axis.title=element_text(size=14),
+        legend.text=element_text(size=13), legend.title=element_text(size=14), 
+        legend.position = c(0.75, 0.1), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
 
-  ggsave("heatmap.png", width = 8, height = 7.6, dpi = 165,
+ggsave("heatmap.png", width = 9.0, height = 7.4, dpi = 900,
         plot=last_plot(),
         path="~/LowLightPhotosynth/Docs/ScienceAtlantic")
 ```

@@ -35,7 +35,7 @@ caption_textsize: '45px'
 reference_textsize: '25px'
 output: 
   posterdown::posterdown_betterport:
-    self_contained: true
+    self_contained: false
     pandoc_args: --mathjax
     number_sections: false
 csl: plos-biology.csl
@@ -71,9 +71,9 @@ Recombination causes an individual PSII to slip in its four-step cycle of oxygen
 
 Therefore, **variable chlorophyll fluorescence** can be used to evaluate the synchronization of the PSII. By inference, prolonged synchronization implies low recombination and vice-versa [@schubackSingleTurnoverVariableChlorophyll2021; @zaharievaEnergeticsKineticsSState2019].
 
-![Figure 2: Repeated single-turnover excitation of maximum variable chlorophyll fluorescence (F~m~) for monitoring the four-step cycle of oxygen evolution in PSII during photosynthesis](figure_stchlf.png)
+![Figure 2: Repeated single-turnover excitation of maximum variable chlorophyll fluorescence (F~m~) for monitoring the four-step cycle of oxygen evolution in PSII during photosynthesis](stchlf.png)
 
-We used **Wavelet Transforms** to analyze the persistence of PSII chlorophyll fluorescence cycling across polar and temperate taxa of diatoms and green algae under a range of light and temperatures. This analysis helped determine whether polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions. 
+We used **Wavelet Transforms** to analyze the persistence of PSII chlorophyll fluorescence cycling across polar and temperate taxa of diatoms and green algae under a range of light and temperatures[@theis2010]. This analysis helped determine whether polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions. 
 
 # Results
 
@@ -83,7 +83,7 @@ We observe **2 key patterns** within and between taxa:
 
 * Polar taxa maintain significant four-step PSII cycling across a broader range of conditions, at wider spacings of photons, equivalent to lower ambient light, than do their temperate counterparts. 
 
-![Figure 3: Duration of significant four-step cycling of PSII chlorophyll fluorescence in polar (left) and temperate (right) taxa of diatoms and green algae under a range of low light and temperature conditions. Wider spacing of photon delivery (y axis) is analagous to lower ambient light. ](figure_heatmap.png)
+![Figure 3: Duration of significant four-step cycling of PSII chlorophyll fluorescence in polar (left) and temperate (right) taxa of diatoms and green algae under a range of low light and temperature conditions. Wider spacing of photon delivery (y axis) is analagous to lower ambient light. ](heatmap.png)
 
 # Conclusions
 Our findings indicate that diverse polar phytoplankton have capacity to suppress wasteful recombinations at PSII, to sustain efficient photosynthesis under extreme low light and low temperatures.
