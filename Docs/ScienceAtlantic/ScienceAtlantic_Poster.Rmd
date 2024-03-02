@@ -1,6 +1,6 @@
 ---
 main_topsize: 0.12
-main_bottomsize: 0.05
+main_bottomsize: 0.08
 poster_height: "36in"
 poster_width: "48in"
 font_family: 'Palatino'
@@ -29,6 +29,8 @@ main_textsize: '110px'
 main_findings:
   - "**Latitude, Ice, & Light**"
   - "Photosynthetic Adaptations of Polar Phytoplankton to Extreme Light Limitation"
+logoleft_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
+logoright_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
 body_textsize: '45px'
 authorextra_textsize: '40px'
 caption_textsize: '45px'
@@ -58,11 +60,11 @@ options(knitr.table.format = "html")
 
 Polar phytoplankton are **vital** to polar ecosystems [@ardyna2020]. As photolithotrophs, phytoplankton rely on photons for energy input, nominally restricting their growth to the photic zone, defined as the region where sufficient light for photosynthesis penetrates, traditionally extending down to 1% of surface irradiance [@ravenPutOutLight2000; @kirk2011]
 
-Despite severe light constraints, certain polar phytoplankton exhibit slow but significant productivity under the ice during winter, indicating possible adaptations to maintain photosynthesis under light limitation [@randelhoff2020; @hancke2018].
+Despite severe light constraints, certain polar phytoplankton exhibit slow but significant productivity under the ice during winter, suggesting adaptations to maintain photosynthesis under light limitation [@randelhoff2020; @hancke2018].
 
 During photosynthesis, a complete water oxidation cycle requires the absorption of four photons. When photon arrivals are widely spaced, as occurs in low light, photosynthetic efficiency may decline due to futile charge recombinations[@keren1997]. We hypothesized that maintaining photosynthesis under extremely low light and low temperatures involves **suppressing energetically wasteful charge recombinations** in Photosystem II (PSII).
 
-![Figure 1: Energetic Pathways of PSII; A) Pathway of electron flow through the photosystem II protein complex within the thylakoid membrane B) Principal charge recombination pathways of photosystem II](figure_photosynthesis.png)
+![Figure 1: Energetic Pathways of PSII; A) Electron flow through the photosystem II protein complex within the thylakoid membrane B) Principal charge recombination pathways of photosystem II](figure_photosynthesis.png)
 
 
 # Methods
