@@ -252,16 +252,18 @@ SolFitsFragilariopsis %>%
   ggplot() +
   geom_point(aes(x=Flashnumber, y=FvFmrunnorm, col=as.factor(SState))) +
   scale_color_manual(values = s.col) +
-  scale_y_continuous(limits=c(0.5, 1.1)) +
+  #scale_y_continuous(limits=c(0.5, 1.1)) +
   scale_x_continuous(breaks=c(4,8,12))+
   labs(x= "Flash Number", y= "Normalized Chlorophyll Fluorescence") +
   theme_bw() +
   theme(legend.position = "none", text = element_text(family = "Palatino"), 
-        axis.text=element_text(size=13), axis.title=element_text(size=12),
+        axis.text=element_text(size=16), axis.title=element_text(size=14.8),
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
 
 
- ggsave("points.png", width = 3, height = 4, dpi = 900,
+```{r}
+ggsave("points.png", width = 3, height = 4, dpi = 900,
         plot=last_plot(),
        path="~/Downloads")
 ```
