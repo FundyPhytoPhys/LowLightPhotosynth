@@ -1,25 +1,25 @@
 ---
-main_topsize: 0.12
-main_bottomsize: 0.08
+main_topsize: 0.17
+main_bottomsize: 0.00
 poster_height: "36in"
 poster_width: "48in"
 font_family: 'Palatino'
 author:
-  - name: Natasha M. Ryan
+  - name: Natasha Ryan
     affil: 1
     main: true
     email: nmryan@mta.ca
   - name: Arthur Plassart
     affil: 2
     main: true
-  - name: Douglas A. Campbell
+  - name: Douglas Campbell
     affil: 1
     main: true
 affiliation:
   - num 1:
-    address: Department of Biology, Mount Allison University, 63B York St., Sackville NB, Canada, E4L 1G7 
+    address: Department of Biology, Mount Allison University
   - num 2:
-    address: Takuvik International Research Laboratory, Université Laval (Canada) & CNRS (France), Departement de Biologie and Québec-Océan,Université Laval, Québec, QC, G1V 0A6, Canada
+    address: Takuvik International Research Laboratory, Université Laval & CNRS (France), Departement de Biologie and Québec-Océan, Université Laval 
 primary_colour: "#284c42" 
 secondary_colour: "#284c42" 
 accent_colour: "#284c42" 
@@ -29,19 +29,18 @@ main_textsize: '110px'
 main_findings:
   - "**Latitude, Ice, & Light**"
   - "Photosynthetic Adaptations of Polar Phytoplankton to Extreme Light Limitation"
-logoleft_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
-logoright_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
 body_textsize: '45px'
-authorextra_textsize: '40px'
+affiliation_textcol: "#000000"
 caption_textsize: '45px'
-reference_textsize: '25px'
+reference_textsize: '24px'
 output: 
   posterdown::posterdown_betterport:
-    self_contained: false
+    self_contained: true
     pandoc_args: --mathjax
     number_sections: false
-csl: plos-biology.csl
+knit: pagedown::chrome_print
 bibliography: LowLightPhotosynthesis.bib
+csl: plos.csl
 link-citations: true
 ---
 
@@ -64,7 +63,7 @@ Despite severe light constraints, certain polar phytoplankton exhibit slow but s
 
 During photosynthesis, a complete water oxidation cycle requires the absorption of four photons. When photon arrivals are widely spaced, as occurs in low light, photosynthetic efficiency may decline due to futile charge recombinations[@keren1997]. We hypothesized that maintaining photosynthesis under extremely low light and low temperatures involves **suppressing energetically wasteful charge recombinations** in Photosystem II (PSII).
 
-![Figure 1: Energetic Pathways of PSII; A) Electron flow through the photosystem II protein complex within the thylakoid membrane B) Principal charge recombination pathways of photosystem II](figure_photosynthesis.png)
+![Figure 1: Energetic Pathways of PSII; A) Electron flow through the photosystem II protein complex within the thylakoid membrane B) Principal charge recombination pathways of photosystem II](photosynthesis.png)
 
 
 # Methods
@@ -92,6 +91,8 @@ Our findings indicate that diverse polar phytoplankton have capacity to suppress
 
 This research challenges the conventional understanding of the limits on photosynthesis under light limitation, helping unravel polar ecosystem dynamics and predict ecosystem responses to climate change
 
-# References
+## Acknowledgements & References
+<span style="font-size: 34px;">Marina Cvetkovska & Mackenzie Poirier, *Department of Biology, University of Ottawa* </span>               
+<span style="font-size: 34px;">Marcel Babin & Sébastien Guérin, *Takuvik International Research Laboratory*</span>
 
 
