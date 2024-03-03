@@ -74,7 +74,7 @@ Therefore, **variable chlorophyll fluorescence** can be used to evaluate the syn
 
 ![Figure 2: Repeated single-turnover excitation of maximum variable chlorophyll fluorescence (F~m~) for monitoring the four-step cycle of oxygen evolution in PSII during photosynthesis](methods.png)
 
-We used **Wavelet Transforms** to analyze the persistence of PSII chlorophyll fluorescence cycling across polar and temperate taxa of diatoms and green algae under a range of light and temperatures [@theis2010]. This analysis helped determine whether polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions. 
+We used **Wavelet Transforms** [@theis2010] to analyze the persistence of PSII chlorophyll fluorescence cycling across polar and temperate taxa of diatoms and green algae under a range of light and temperatures. This analysis helped determine whether polar taxa have evolved to increase photosynthetic energy conversion efficiency by minimizing inefficient recombination reactions. 
 
 # Results
 
