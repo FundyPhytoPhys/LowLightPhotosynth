@@ -93,6 +93,7 @@ This research challenges the conventional understanding of the limits on photosy
 
 ## Acknowledgements & References
 <span style="font-size: 34px;">Marina Cvetkovska & Mackenzie Poirier, *Department of Biology, University of Ottawa* </span>               
-<span style="font-size: 34px;">Marcel Babin & Sébastien Guérin, *Takuvik International Research Laboratory*</span>
+<span style="font-size: 34px;">Marcel Babin & Sébastien Guérin, *Takuvik International Research Laboratory*</span>                        
+<span style="font-size: 34px;">W. Brent Thorne (2019). posterdown: An R Package.</span>
 
 
