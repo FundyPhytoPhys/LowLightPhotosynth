@@ -107,8 +107,9 @@ SolFitsTrim <- SolFits %>%
          ObsTime = TIME,
          FvFm = "Fv.Fm") |>
   mutate(Temp_C = str_remove(Temp_C, "C")) |>
-  type_convert() |>
-  mutate(PulseSpace_s = str_remove(PulseSpace_s, "S")) |>  #s vs S
+  type_convert() %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "S")) %>%  #s vs S
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>% 
   filter(PulseSpace_s %in% c(1, 2, 4, 8, 16)) |>  #remove rows with other PulseSpace_s
   mutate(PulseSpace_s = as.numeric(PulseSpace_s)) %>%
   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
@@ -252,8 +253,9 @@ saveRDS(SolFitsTrim_Combined, file.path(DataOut, paste(Project, "Thalassiosira_p
 
 ```{r Fm vs Flashnumber(by T)}
 SolFitsTrim_Combined %>%
+  filter(CultureID=="NaOm2988") %>%
   ggplot()+
-  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(CultureID))) +
+  geom_line(aes(x=Flashnumber, y=Fmrunnorm, colour = as.factor(CultureID))) +
   facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
   theme_bw()
 ```
