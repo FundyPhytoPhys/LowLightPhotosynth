@@ -367,8 +367,7 @@ Tp_reconstruction <- reconstructwave(Tp_wavelets)
 
 
 ```{r damping index Cv}
-Tp_damping <- damping(Tp_reconstruction)  
-Tp_damping <- rbind(Tp_damping, test) %>%
+Tp_damping <- damping(Tp_reconstruction)  %>%
   mutate(Species = Tp) %>%
   mutate(damping.index = ifelse(!condition %in% Tp_significant, 0, damping.index)) 
 ```
@@ -423,6 +422,27 @@ species.labs <- c("Fragilariopsis cylindrus", "Thalassiosira pseudonana", "Chlam
 names(species.labs) <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana", "Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris")
 ```
  
+```{r}
+Tp_damping <- Tp_damping %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  rename(DampingIndex = damping.index) 
+
+Tp_damping$PulseSpace_s <- factor(Tp_damping$PulseSpace_s, levels = c("1", "2", "4", "8", "16"))
+Tp_damping$Temp_C <- factor(Tp_damping$Temp_C, levels= c("10","14","18","20", "22", "24","28"))
+```
+
+```{r}
+Tp_damping %>%
+  filter(!Temp_C == "22") %>%
+  ggplot() +
+  geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
+  viridis::scale_fill_viridis(option="mako", na.value="white") +
+  theme_linedraw()
+```
+
 
 ```{r heat map}
 sstate_damping %>% 
@@ -431,7 +451,6 @@ sstate_damping %>%
   viridis::scale_fill_viridis(option="mako", na.value="white") + 
   facet_wrap(vars(Species), ncol=2, scales = "free", labeller = labeller(Species=species.labs)) + 
   labs(x= "Measurement Temperature (°C)", y= "Spacing of Photon Delivery (s)", fill= "Duration of PSII Cycling") +
-  ggtitle("                                     Polar                                                                                    Temperate") +
   theme_linedraw() +
   theme(text = element_text(family = "Palatino"), 
         strip.background =element_rect(fill="white"), 
