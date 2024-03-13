@@ -240,23 +240,29 @@ SolFitsTrim_Combined <- rbind(SolFitsTrim2, SolFitsTrim_WI23)
 ```{r add deviation from growth temp}
 SolFitsTrim_Combined <- SolFitsTrim_Combined %>%
   mutate(GrowthTemp_C = 18) %>%
-  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
+  mutate(TempDiff_C = Temp_C - GrowthTemp_C) 
+```
+
+```{r}
+#Remove trials with overinduction 
+SolFitsTrim_Combined2 <- SolFitsTrim_Combined %>% 
+  filter(!YYYYMMDD == "2024-03-11") %>%
+  
 ```
 
 
 ```{r save SolFitsTrim data}
-saveRDS(SolFitsTrim_Combined, file.path(DataOut, paste(Project, "Thalassiosira_pseudonana", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(SolFitsTrim_Combined2, file.path(DataOut, paste(Project, "Thalassiosira_pseudonana", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 
 ### Test Plots 
 
 ```{r Fm vs Flashnumber(by T)}
-SolFitsTrim_Combined %>%
-  filter(CultureID=="NaOm2988") %>%
+SolFitsTrim_Combined2 %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=Fmrunnorm, colour = as.factor(CultureID))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
   theme_bw()
 ```
 
@@ -345,9 +351,10 @@ ChlorellaFitsTrim <-ChlorellaFitsTrim %>%
 ```{r Fm vs Flashnumber(by T)}
 ChlorellaFitsTrim %>%
   ggplot()+
-  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(CultureID))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
-  theme_bw()
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
 ```
 
 ```{r save Chlorella data}

@@ -242,6 +242,16 @@ SolFitsFragilariopsis <- SolFitsFragilariopsis %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
 ```
 
+```{r}
+SolFitsFragilariopsis %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=Fmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+
 ### Test Plots
 ```{r}
 s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
@@ -262,11 +272,6 @@ SolFitsFragilariopsis %>%
 ```
 
 
-```{r}
-ggsave("points.png", width = 3, height = 4, dpi = 900,
-        plot=last_plot(),
-       path="~/Downloads")
-```
 
 ```{r save Data}
 saveRDS(SolFitsChaeotoceros, file.path(DataOut, paste(Project,"Chaeotoceros_gelidus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
