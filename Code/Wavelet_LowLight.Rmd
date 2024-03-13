@@ -423,20 +423,19 @@ names(species.labs) <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana",
 ```
  
 ```{r}
-Tp_damping <- Tp_damping %>%
+Cv_damping <- Cv_damping %>%
   relocate(Species, .before = condition) %>%
   separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
   mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
   mutate(Temp_C = str_remove(Temp_C, "C")) %>%
   rename(DampingIndex = damping.index) 
 
-Tp_damping$PulseSpace_s <- factor(Tp_damping$PulseSpace_s, levels = c("1", "2", "4", "8", "16"))
-Tp_damping$Temp_C <- factor(Tp_damping$Temp_C, levels= c("10","14","18","20", "22", "24","28"))
+Cv_damping$PulseSpace_s <- factor(Cv_damping$PulseSpace_s, levels = c("1", "2", "4", "8", "16"))
+Cv_damping$Temp_C <- factor(Cv_damping$Temp_C, levels= c("10","14","18", "22", "26"))
 ```
 
 ```{r}
-Tp_damping %>%
-  filter(!Temp_C == "22") %>%
+Cv_damping %>%
   ggplot() +
   geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
   viridis::scale_fill_viridis(option="mako", na.value="white") +
