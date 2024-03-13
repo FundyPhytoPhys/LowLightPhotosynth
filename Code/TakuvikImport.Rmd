@@ -242,6 +242,14 @@ SolFitsFragilariopsis <- SolFitsFragilariopsis %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
 ```
 
+```{r split by growth temp}
+SolFitsFragilariopsisG0 <- SolFitsFragilariopsis %>%
+  filter(GrowthTemp_C == 0)
+
+SolFitsFragilariopsisG6 <- SolFitsFragilariopsis %>%
+  filter(GrowthTemp_C == 6)
+```
+
 ```{r}
 SolFitsFragilariopsis %>%
   ggplot()+
@@ -276,7 +284,9 @@ SolFitsFragilariopsis %>%
 ```{r save Data}
 saveRDS(SolFitsChaeotoceros, file.path(DataOut, paste(Project,"Chaeotoceros_gelidus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 
-saveRDS(SolFitsFragilariopsis, file.path(DataOut, paste(Project,"Fragilariopsis_cylindrus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(SolFitsFragilariopsisG0, file.path(DataOut, paste(Project,"Fragilariopsis_cylindrus","G0", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(SolFitsFragilariopsisG6, file.path(DataOut, paste(Project,"Fragilariopsis_cylindrus","G6", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 

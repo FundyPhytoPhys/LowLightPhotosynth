@@ -224,6 +224,14 @@ SolFitsReinhardtii <- SolFitsTrim2 %>%
   filter(CultureID %in% c("MaPo1005", "MaPo1006"))
 ```
 
+```{r}
+SolFitsMalina %>%
+ ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
 
 
 ### Test Plots
