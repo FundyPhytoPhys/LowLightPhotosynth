@@ -246,14 +246,14 @@ SolFitsTrim_Combined <- SolFitsTrim_Combined %>%
 ```{r}
 #Remove trials with overinduction 
 SolFitsTrim_Combined2 <- SolFitsTrim_Combined %>% 
-  filter(!YYYYMMDD == "2024-03-11") %>%
-  
+  filter(!YYYYMMDD == "2024-03-11") 
 ```
 
 
 ```{r save SolFitsTrim data}
 saveRDS(SolFitsTrim_Combined2, file.path(DataOut, paste(Project, "Thalassiosira_pseudonana", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
+
 
 
 ### Test Plots 

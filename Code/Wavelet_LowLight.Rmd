@@ -162,8 +162,8 @@ plot.wt.image <- function(wavelet_list) {
 FcG0_data <- list.files(path = DataIn, pattern = paste(Fc,"G0", FileID, sep = "_"), full.names = TRUE) %>%
   readRDS()
 
-FcG0_data <- summaryBy(FvFmrunnorm ~ TempDiff_C + PulseSpace_s + Flashnumber, data=FcG0_data, FUN=mean, keep.names = TRUE) %>%
-  mutate(Condition = paste0(TempDiff_C,"C","_",PulseSpace_s,"s")) %>%
+FcG0_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=FcG0_data, FUN=mean, keep.names = TRUE) %>%
+  mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
   split_by("Condition")
 ```
 
@@ -173,7 +173,7 @@ FcG0_wavelets <- wavelet(FcG0_data)
 
 ```{r evaluate significance Fc G0}
 FcG0_significant <- wt.significance(FcG0_wavelets)
-plot.wt.avg(FcG0_wavelets)
+#plot.wt.avg(FcG0_wavelets)
 ```
 
 ```{r reconstruct waves Fc G0}
@@ -183,16 +183,23 @@ FcG0_reconstruction <- reconstructwave(FcG0_wavelets)
 ```{r damping index Fc G0}
 FcG0_damping <- damping(FcG0_reconstruction) %>% 
   mutate(Species = Fc) %>%
-  mutate(damping.index = ifelse(!condition %in% FcG0_significant, 0, damping.index)) 
+  mutate(damping.index = ifelse(!condition %in% FcG0_significant, 0, damping.index)) %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  rename(DampingIndex = damping.index) %>%
+  mutate(TempDiff_C = Temp_C)
 ```
 
+mutate(TempDiff_C = Temp_C - 0)
 ### Fc grown at 6C
 ```{r import Fc G6 data}
 FcG6_data <- list.files(path = DataIn, pattern = paste(Fc,"G6", FileID, sep = "_"), full.names = TRUE) %>%
   readRDS()
 
-FcG6_data <- summaryBy(FvFmrunnorm ~ TempDiff_C + PulseSpace_s + Flashnumber, data=FcG6_data, FUN=mean, keep.names = TRUE) %>%
-  mutate(Condition = paste0(TempDiff_C,"C","_",PulseSpace_s,"s")) %>%
+FcG6_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=FcG6_data, FUN=mean, keep.names = TRUE) %>%
+  mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
   split_by("Condition")
 ```
 
@@ -202,7 +209,7 @@ FcG6_wavelets <- wavelet(FcG6_data)
 
 ```{r evaluate significance Fc G6}
 FcG6_significant <- wt.significance(FcG6_wavelets)
-plot.wt.avg(FcG6_wavelets)
+#plot.wt.avg(FcG6_wavelets)
 ```
 
 ```{r reconstruct waves Fc G6}
@@ -212,7 +219,13 @@ FcG6_reconstruction <- reconstructwave(FcG6_wavelets)
 ```{r damping index Fc G6}
 FcG6_damping <- damping(FcG6_reconstruction) %>% 
   mutate(Species = Fc) %>%
-  mutate(damping.index = ifelse(!condition %in% FcG6_significant, 0, damping.index)) 
+  mutate(damping.index = ifelse(!condition %in% FcG6_significant, 0, damping.index)) %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  rename(DampingIndex = damping.index) %>%
+  mutate(TempDiff_C = as.numeric(Temp_C) - 6)
 ```
 
 
@@ -224,8 +237,8 @@ FcG6_damping <- damping(FcG6_reconstruction) %>%
 Ci_data <- list.files(path = DataIn, pattern = paste(Ci,FileID, sep = "_"), full.names = TRUE) %>%
    readRDS() 
 
-Ci_data <- summaryBy(FvFmrunnorm ~ TempDiff_C + PulseSpace_s + Flashnumber, data=Ci_data, FUN=c(mean), keep.names = TRUE) %>%
-  mutate(Condition = paste0(TempDiff_C,"C","_",PulseSpace_s,"s")) %>%
+Ci_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=Ci_data, FUN=c(mean), keep.names = TRUE) %>%
+  mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
   split_by("Condition")
 ```
 
@@ -235,7 +248,7 @@ Ci_wavelets <- wavelet(Ci_data)
 
 ```{r evaluate significance Ci}
 Ci_significant <- wt.significance(Ci_wavelets)
-plot.wt.avg(Ci_wavelets)
+#plot.wt.avg(Ci_wavelets)
 ```
 
 ```{r reconstruct waves Ci}
@@ -245,7 +258,13 @@ Ci_reconstruction <- reconstructwave(Ci_wavelets)
 ```{r damping index Ci}
 Ci_damping <- damping(Ci_reconstruction) %>% 
   mutate(Species = Ci) %>%
-  mutate(damping.index = ifelse(!condition %in% Ci_significant, 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Ci_significant, 0, damping.index)) %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  rename(DampingIndex = damping.index) %>%
+  mutate(TempDiff_C = as.numeric(Temp_C) - 4)
 ```
 
 
@@ -254,8 +273,8 @@ Ci_damping <- damping(Ci_reconstruction) %>%
 Cm_data <- list.files(path = DataIn, pattern = paste(Cm, FileID, sep = "_"), full.names = TRUE) %>% 
   readRDS()
 
-Cm_data <- summaryBy(FvFmrunnorm ~ TempDiff_C + PulseSpace_s + Flashnumber, data=Cm_data, FUN=c(mean), keep.names = TRUE) %>% 
-  mutate(Condition = paste0(TempDiff_C,"C","_",PulseSpace_s,"s")) %>%
+Cm_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=Cm_data, FUN=c(mean), keep.names = TRUE) %>% 
+  mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
   split_by("Condition")
 ```
 
@@ -265,7 +284,7 @@ Cm_wavelets <- wavelet(Cm_data)
 
 ```{r evaluate significance Cm}
 Cm_significant <- wt.significance(Cm_wavelets)
-plot.wt.avg(Cm_wavelets) 
+#plot.wt.avg(Cm_wavelets) 
 ```
 
 ```{r reconstruct wave Cm}
@@ -275,7 +294,13 @@ Cm_reconstruction <- reconstructwave(Cm_wavelets)
 ```{r damping index Cm}
 Cm_damping <- damping(Cm_reconstruction) %>%
   mutate(Species = Cm) %>%
-  mutate(damping.index = ifelse(!condition %in% Cm_significant, 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Cm_significant, 0, damping.index)) %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  rename(DampingIndex = damping.index) %>%
+  mutate(TempDiff_C = as.numeric(Temp_C) - 4)
 ```
 
 
@@ -284,8 +309,8 @@ Cm_damping <- damping(Cm_reconstruction) %>%
 Cp_data <- list.files(path = DataIn, pattern = paste(Cp,FileID, sep = "_"), full.names = TRUE) %>%
    readRDS()
 
-Cp_data <- summaryBy(FvFmrunnorm ~ TempDiff_C + PulseSpace_s + Flashnumber, data=Cp_data, FUN=c(mean), keep.names = TRUE) %>%
-  mutate(Condition = paste0(TempDiff_C,"C","_",PulseSpace_s,"s")) %>%
+Cp_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=Cp_data, FUN=c(mean), keep.names = TRUE) %>%
+  mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
   split_by("Condition")
 ```
 
@@ -295,7 +320,7 @@ Cp_wavelets <- wavelet(Cp_data)
 
 ```{r evaluate significance Cp}
 Cp_significant <- wt.significance(Cp_wavelets)
-plot.wt.avg(Cp_wavelets) 
+#plot.wt.avg(Cp_wavelets) 
 ```
 
 ```{r reconstruct wave Cp}
@@ -305,7 +330,13 @@ Cp_reconstruction <- reconstructwave(Cp_wavelets)
 ```{r damping index Cp}
 Cp_damping <- damping(Cp_reconstruction) %>%
   mutate(Species = Cp) %>%
-  mutate(damping.index = ifelse(!condition %in% Cp_significant, 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Cp_significant, 0, damping.index)) %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  rename(DampingIndex = damping.index) %>%
+  mutate(TempDiff_C = as.numeric(Temp_C) - 4)
 ```
 
 
@@ -314,8 +345,8 @@ Cp_damping <- damping(Cp_reconstruction) %>%
 Cr_data <- list.files(path = DataIn, pattern = paste(Cr,FileID, sep = "_"), full.names = TRUE) %>% 
   readRDS()
 
-Cr_data <- summaryBy(FvFmrunnorm ~ TempDiff_C + PulseSpace_s + Flashnumber, data=Cr_data, FUN=c(mean), keep.names = TRUE) %>% 
-  mutate(Condition = paste0(TempDiff_C,"C","_",PulseSpace_s,"s")) %>%
+Cr_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=Cr_data, FUN=c(mean), keep.names = TRUE) %>% 
+  mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
   split_by("Condition")
 ```
 
@@ -325,7 +356,7 @@ Cr_wavelets <- wavelet(Cr_data)
 
 ```{r evaluate significance Cr}
 Cr_significant <- wt.significance(Cr_wavelets)
-plot.wt.avg(Cr_wavelets) 
+#plot.wt.avg(Cr_wavelets) 
 ```
 
 ```{r reconstruct wave Cr}
@@ -335,7 +366,13 @@ Cr_reconstruction <- reconstructwave(Cr_wavelets)
 ```{r damping index Cr}
 Cr_damping <- damping(Cr_reconstruction) %>%
   mutate(Species = Cr) %>%
-  mutate(damping.index = ifelse(!condition %in% Cr_significant, 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Cr_significant, 0, damping.index)) %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  rename(DampingIndex = damping.index) %>%
+  mutate(TempDiff_C = as.numeric(Temp_C) - 24)
 ```
 
 
@@ -346,8 +383,8 @@ Cr_damping <- damping(Cr_reconstruction) %>%
 Cv_data <- list.files(path = DataIn, pattern = paste(Cv, FileID, sep = "_"), full.names = TRUE) %>%
    readRDS()
 
-Cv_data <- summaryBy(FvFmrunnorm ~ TempDiff_C + PulseSpace_s + Flashnumber, data=Cv_data, FUN=c(mean), keep.names = TRUE) %>% 
-  mutate(Condition = paste0(TempDiff_C,"C","_",PulseSpace_s,"s")) %>%
+Cv_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=Cv_data, FUN=c(mean), keep.names = TRUE) %>% 
+  mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
   split_by("Condition")
 ```
 
@@ -357,7 +394,7 @@ Cv_wavelets <- wavelet(Cv_data)
 
 ```{r evaluate significance Cv}
 Cv_significant <- wt.significance(Cv_wavelets)
-plot.wt.avg(Cv_wavelets) 
+#plot.wt.avg(Cv_wavelets) 
 ```
 
 ```{r reconstruct wave Cv}
@@ -367,7 +404,13 @@ Cv_reconstruction <- reconstructwave(Cv_wavelets)
 ```{r damping index Cv}
 Cv_damping <- damping(Cv_reconstruction) %>%
   mutate(Species = Cv) %>%
-  mutate(damping.index = ifelse(!condition %in% Cv_significant, 0, damping.index))
+  mutate(damping.index = ifelse(!condition %in% Cv_significant, 0, damping.index)) %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  rename(DampingIndex = damping.index) %>%
+  mutate(TempDiff_C = as.numeric(Temp_C) - 18)
 ```
 
 
@@ -376,8 +419,8 @@ Cv_damping <- damping(Cv_reconstruction) %>%
 Tp_data <- list.files(path = DataIn, pattern = paste(Tp ,FileID, sep = "_"), full.names = TRUE)  %>%
   readRDS()
 
-Tp_data <- summaryBy(FvFmrunnorm ~ TempDiff_C + PulseSpace_s + Flashnumber, data=Tp_data, FUN=c(mean), keep.names = TRUE) %>% 
-  mutate(Condition = paste0(TempDiff_C,"C","_",PulseSpace_s,"s")) %>%
+Tp_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=Tp_data, FUN=c(mean), keep.names = TRUE) %>% 
+  mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
   split_by("Condition")
 ```
 
@@ -387,7 +430,7 @@ Tp_wavelets <- wavelet(Tp_data)
 
 ```{r evaluate significance Tp}
 Tp_significant <- wt.significance(Tp_wavelets)
-plot.wt.avg(Tp_wavelets) 
+#plot.wt.avg(Tp_wavelets) 
 ```
 
 ```{r reconstruct wave Tp}
@@ -398,19 +441,21 @@ Tp_reconstruction <- reconstructwave(Tp_wavelets)
 ```{r damping index Cv}
 Tp_damping <- damping(Tp_reconstruction)  %>%
   mutate(Species = Tp) %>%
-  mutate(damping.index = ifelse(!condition %in% Tp_significant, 0, damping.index)) 
+  mutate(damping.index = ifelse(!condition %in% Tp_significant, 0, damping.index)) %>%
+  relocate(Species, .before = condition) %>%
+  separate(condition, into=c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  rename(DampingIndex = damping.index) %>%
+  mutate(TempDiff_C = as.numeric(Temp_C) - 18)
 ```
 
 # Merging Results 
 
 ```{r merge}
-sstate_damping <- rbind(FcG0_damping, FcG6_damping, Ci_damping, Cm_damping, Cp_damping, Cr_damping, Cv_damping, Tp_damping) %>%
-  relocate(Species, .before = condition) %>%
-  separate(condition, into=c("TempDiff_C", "PulseSpace_s"), sep = "_") %>%
-  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
-  mutate(TempDiff_C = str_remove(TempDiff_C, "C")) %>%
-  rename(DampingIndex = damping.index) 
+sstate_damping <- rbind(FcG0_damping, FcG6_damping, Ci_damping, Cm_damping, Cp_damping, Cr_damping, Cv_damping, Tp_damping) 
 ```
+
 
 ```{r saving as RDS}
 #save as RDS to be able to work on figures without running wavelet transformations
@@ -457,7 +502,7 @@ sstate_damping %>%
 sstate_damping %>% 
   filter(Species %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")) %>%
   ggplot() + 
-  geom_tile(aes(x = TempDiff_C, y = PulseSpace_s, fill = DampingIndex)) +  
+  geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
   viridis::scale_fill_viridis(option="mako", na.value="white") + 
   facet_wrap(vars(Species), labeller = labeller(Species=species.labs)) +  
   theme_linedraw() +
@@ -467,7 +512,7 @@ sstate_damping %>%
 sstate_damping %>% 
   filter(!Species %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")) %>%
   ggplot() + 
-  geom_tile(aes(x = TempDiff_C, y = PulseSpace_s, fill = DampingIndex)) +  
+  geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +  
   viridis::scale_fill_viridis(option="mako", na.value="white") + 
   facet_wrap(vars(Species), labeller = labeller(Species=species.labs)) +  
   theme_linedraw() +
@@ -475,31 +520,6 @@ sstate_damping %>%
   theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
 ```
 
-```{r}
-library(mgcv)
-gam.polar.algae <- gam(DampingIndex ~ s(TempDiff_C,k=3) + s(PulseSpace_s, k=4), 
-                data = subset(sstate_damping, Species %in% c("Chlamydomonas_malina", 
-                                                             "Chlamydomonas_priscuii",
-                                                             "Chlamydomonas_ICEMDV")))
-
-gam.temperate.algae <- gam(DampingIndex ~ TempDiff_C + PulseSpace_s, 
-                data = subset(sstate_damping, Species %in% c("Chlamydomonas_reinhardtii", 
-                                                             "Chlorella_vulgaris")))
-
-
-```
-
-```{r}
-vis.gam(gam.polar.algae, plot.type = "contour")
-vis.gam(gam.temperate.algae, plot.type = "contour")
-
-```
-
-
-```{r}
-sstate_damping$PulseSpace_s <- as.numeric(sstate_damping$PulseSpace_s)
-sstate_damping$TempDiff_C <- as.numeric(sstate_damping$TempDiff_C)
-```
 
 
 
@@ -509,7 +529,7 @@ sstate_damping$TempDiff_C <- as.numeric(sstate_damping$TempDiff_C)
 Original method by Max
 ```{r}
 # LOW_SolFits_1s_10C <- LOW_SolFits %>%
-#   filter(TempDiff_C == "10",
+#   filter(Temp_C == "10",
 #          PulseSpace_s == 1)
 # 
 # WVT_10C_1s <- analyze.wavelet(LOW_SolFits_1s_10C, "FvFm",
