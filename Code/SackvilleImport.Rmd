@@ -343,7 +343,8 @@ ChlorellaFitsTrim <-ChlorellaFitsTrim %>%
 ```{r add deviation from growth temp}
 ChlorellaFitsTrim <-ChlorellaFitsTrim %>%
   mutate(GrowthTemp_C = 18) %>%
-  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
+  mutate(TempDiff_C = Temp_C - GrowthTemp_C) %>%
+  filter(!Filename == "20240312_NaOm2987_26C_1S")
 ```
 
 

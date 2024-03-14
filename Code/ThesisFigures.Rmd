@@ -217,36 +217,178 @@ Tp.TempDiff_C.avg %>%
 ```{r}
 sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Damping.Rds")
 
-frag <- sstate_damping %>%
-  filter(Species == "Fragilariopsis_cylindrus")
-
-frag$PulseSpace_s <- as.numeric(frag$PulseSpace_s)
-frag$TempDiff_C <- as.numeric(frag$TempDiff_C)
+sstate_damping$PulseSpace_s <- as.numeric(sstate_damping$PulseSpace_s)
+sstate_damping$TempDiff_C <- as.numeric(sstate_damping$TempDiff_C)
 ```
 
 ```{r}
 library(plotly)
 library(reshape2)
-data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = sstate_damping, subset= Species == "Fragilariopsis_cylindrus")
-xgrid <-  seq(0, max(frag$TempDiff_C), 0.3)
-ygrid <-  seq(min(frag$PulseSpace_s), max(frag$PulseSpace_s), 0.3)
-data.fit <-  expand.grid(TempDiff_C = xgrid, PulseSpace_s = ygrid)
-mtrx3d <-  predict(data.loess, newdata = data.fit)
+frag <- sstate_damping %>%
+  filter(Species == "Fragilariopsis_cylindrus")
 
-mtrx.melt <- melt(mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
-names(mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
+
+frag.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = frag)
+frag.xgrid <-  seq(-6, 10, 0.3)
+frag.ygrid <-  seq(1, 16, 0.3)
+frag.data.fit <-  expand.grid(TempDiff_C = frag.xgrid, PulseSpace_s = frag.ygrid)
+frag.mtrx3d <-  predict(frag.data.loess, newdata = frag.data.fit)
+
+frag.mtrx.melt <- melt(frag.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
+names(frag.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
 
 # Return data to numeric form
-mtrx.melt$TempDiff_C <- as.numeric(str_sub(mtrx.melt$TempDiff_C, str_locate(mtrx.melt$TempDiff_C, '=')[1,1] + 1))
-mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(mtrx.melt$PulseSpace_s, str_locate(mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
+frag.mtrx.melt$TempDiff_C <- as.numeric(str_sub(frag.mtrx.melt$TempDiff_C, str_locate(frag.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
+frag.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(frag.mtrx.melt$PulseSpace_s, str_locate(frag.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
 
-fig <- plot_ly(mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
+frag.fig <- plot_ly(frag.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
              width = 600, height = 500)
 
-fig
-
+frag.fig
 ```
 
+
+```{r}
+tpseu <- sstate_damping %>%
+  filter(Species == "Thalassiosira_pseudonana")
+
+
+tpseu.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = tpseu)
+tpseu.xgrid <-  seq(-6, 10, 0.3)
+tpseu.ygrid <-  seq(1, 16, 0.3)
+tpseu.data.fit <-  expand.grid(TempDiff_C = tpseu.xgrid, PulseSpace_s = tpseu.ygrid)
+tpseu.mtrx3d <-  predict(tpseu.data.loess, newdata = tpseu.data.fit)
+
+tpseu.mtrx.melt <- melt(tpseu.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
+names(tpseu.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
+
+# Return data to numeric form
+tpseu.mtrx.melt$TempDiff_C <- as.numeric(str_sub(tpseu.mtrx.melt$TempDiff_C, str_locate(tpseu.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
+tpseu.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(tpseu.mtrx.melt$PulseSpace_s, str_locate(tpseu.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
+
+tpseu.fig <- plot_ly(tpseu.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
+             width = 600, height = 500)
+
+tpseu.fig
+```
+
+
+```{r}
+ice <- sstate_damping %>%
+  filter(Species == "Chlamydomonas_ICEMDV")
+
+ice.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = ice)
+ice.xgrid <-  seq(0, 8, 0.2)
+ice.ygrid <-  seq(1, 16, 0.2)
+ice.data.fit <-  expand.grid(TempDiff_C = ice.xgrid, PulseSpace_s = ice.ygrid)
+ice.mtrx3d <-  predict(ice.data.loess, newdata = ice.data.fit)
+
+ice.mtrx.melt <- melt(ice.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
+names(ice.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
+
+# Return data to numeric form
+ice.mtrx.melt$TempDiff_C <- as.numeric(str_sub(ice.mtrx.melt$TempDiff_C, str_locate(ice.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
+ice.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(ice.mtrx.melt$PulseSpace_s, str_locate(ice.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
+
+ice.fig <- plot_ly(ice.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
+             width = 600, height = 500)
+
+ice.fig
+```
+
+```{r}
+mal <- sstate_damping %>%
+  filter(Species == "Chlamydomonas_malina")
+
+mal.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = mal)
+mal.xgrid <-  seq(0, 8, 0.2)
+mal.ygrid <-  seq(1, 16, 0.2)
+mal.data.fit <-  expand.grid(TempDiff_C = mal.xgrid, PulseSpace_s = mal.ygrid)
+mal.mtrx3d <-  predict(mal.data.loess, newdata = mal.data.fit)
+
+mal.mtrx.melt <- melt(mal.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
+names(mal.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
+
+# Return data to numeric form
+mal.mtrx.melt$TempDiff_C <- as.numeric(str_sub(mal.mtrx.melt$TempDiff_C, str_locate(mal.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
+mal.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(mal.mtrx.melt$PulseSpace_s, str_locate(mal.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
+
+mal.fig <- plot_ly(mal.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
+             width = 600, height = 500)
+
+mal.fig
+```
+
+```{r}
+pris <- sstate_damping %>%
+  filter(Species == "Chlamydomonas_priscuii")
+
+pris.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = pris)
+pris.xgrid <-  seq(0, 8, 0.2)
+pris.ygrid <-  seq(1, 16, 0.2)
+pris.data.fit <-  expand.grid(TempDiff_C = pris.xgrid, PulseSpace_s = pris.ygrid)
+pris.mtrx3d <-  predict(pris.data.loess, newdata = pris.data.fit)
+
+pris.mtrx.melt <- melt(pris.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
+names(pris.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
+
+# Return data to numeric form
+pris.mtrx.melt$TempDiff_C <- as.numeric(str_sub(pris.mtrx.melt$TempDiff_C, str_locate(pris.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
+pris.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(pris.mtrx.melt$PulseSpace_s, str_locate(pris.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
+
+pris.fig <- plot_ly(pris.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
+             width = 600, height = 500)
+
+pris.fig
+```
+
+
+```{r}
+rein <- sstate_damping %>%
+  filter(Species == "Chlamydomonas_reinhardtii")
+
+rein.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = rein)
+rein.xgrid <-  seq(-12, 0, 0.2)
+rein.ygrid <-  seq(1, 16, 0.2)
+rein.data.fit <-  expand.grid(TempDiff_C = rein.xgrid, PulseSpace_s = rein.ygrid)
+rein.mtrx3d <-  predict(rein.data.loess, newdata = rein.data.fit)
+
+rein.mtrx.melt <- melt(rein.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
+names(rein.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
+
+# Return data to numeric form
+rein.mtrx.melt$TempDiff_C <- as.numeric(str_sub(rein.mtrx.melt$TempDiff_C, str_locate(rein.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
+rein.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(rein.mtrx.melt$PulseSpace_s, str_locate(rein.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
+
+rein.fig <- plot_ly(rein.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
+             width = 600, height = 500)
+
+rein.fig
+```
+
+
+```{r}
+vulg <- sstate_damping %>%
+  filter(Species == "Chlorella_vulgaris")
+
+vulg.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = vulg)
+vulg.xgrid <-  seq(-12, 0, 0.2)
+vulg.ygrid <-  seq(1, 16, 0.2)
+vulg.data.fit <-  expand.grid(TempDiff_C = vulg.xgrid, PulseSpace_s = vulg.ygrid)
+vulg.mtrx3d <-  predict(vulg.data.loess, newdata = vulg.data.fit)
+
+vulg.mtrx.melt <- melt(vulg.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
+names(vulg.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
+
+# Return data to numeric form
+vulg.mtrx.melt$TempDiff_C <- as.numeric(str_sub(vulg.mtrx.melt$TempDiff_C, str_locate(vulg.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
+vulg.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(vulg.mtrx.melt$PulseSpace_s, str_locate(vulg.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
+
+vulg.fig <- plot_ly(vulg.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
+             width = 600, height = 500)
+
+vulg.fig
+```
 
 
 ```{r}

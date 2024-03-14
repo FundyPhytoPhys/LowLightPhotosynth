@@ -380,8 +380,8 @@ Cr_damping <- damping(Cr_reconstruction) %>%
 
 ### Cv
 ```{r import clean  data}
-Cv_data <- list.files(path = DataIn, pattern = paste(Cv, FileID, sep = "_"), full.names = TRUE) %>%
-   readRDS()
+Cv_data <- #list.files(path = DataIn, pattern = paste(Cv, FileID, sep = "_"), full.names = TRUE) %>%
+   readRDS("../Data/CleanData/LOW_Chlorella_vulgaris_SolFitsTrim.Rds")
 
 Cv_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=Cv_data, FUN=c(mean), keep.names = TRUE) %>% 
   mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
@@ -416,8 +416,8 @@ Cv_damping <- damping(Cv_reconstruction) %>%
 
 ### Tp
 ```{r import Tp data}
-Tp_data <- list.files(path = DataIn, pattern = paste(Tp ,FileID, sep = "_"), full.names = TRUE)  %>%
-  readRDS()
+Tp_data <- #list.files(path = DataIn, pattern = paste(Tp ,FileID, sep = "_"), full.names = TRUE)  %>%
+  readRDS("../Data/CleanData/LOW_Thalassiosira_pseudonana_SolFitsTrim.Rds")
 
 Tp_data <- summaryBy(FvFmrunnorm ~ Temp_C + PulseSpace_s + Flashnumber, data=Tp_data, FUN=c(mean), keep.names = TRUE) %>% 
   mutate(Condition = paste0(Temp_C,"C","_",PulseSpace_s,"s")) %>%
