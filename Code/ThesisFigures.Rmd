@@ -77,8 +77,9 @@ Fc_data %>%
 
 ### Wavelet Power
 
+
 ```{r function}
-plot.grid.data <- function(wavelets) {
+plot.wt.grid <- function(wavelets) {
   result_list <- lapply(names(wavelets), function(condition_name) {
     condition <- wavelets[[condition_name]]
     Power.avg <- condition$Power.avg
@@ -86,131 +87,54 @@ plot.grid.data <- function(wavelets) {
     Period <- condition$Period
     Condition <- rep(condition_name, length(Power.avg))  # Repeat condition name for each row
     df <- data.frame(Power.avg, Power.avg.pval, Period, Condition) %>%
-      separate(Condition, into = c("Temp_C", "PulseSpace_s"), sep = "_") 
+      separate(Condition, into = c("Temp_C", "PulseSpace_s"), sep = "_") %>%
+      mutate(PulseSpace_s = str_remove(PulseSpace_s, "s"),
+             PulseSpace_s = factor(PulseSpace_s, levels = c("1","2","4","8","16"))) %>%
+      mutate(Temp_C = str_remove(Temp_C, "C"),
+             Temp_C = factor(Temp_C, levels = 
+                               c("0","2","4","6","8","10","12","14","16","18","20","22","24"))) %>%
+      mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
     
-    df$PulseSpace_s <- factor(df$PulseSpace_s, levels = c("1s","2s","4s","8s","16s"))
-    
-    return(df)
+     return(df)
   })
 
   result_df <- bind_rows(result_list)  # Combine all data frames and add a column for element names
-  return(result_df)
+  
+  plot <- result_df %>%
+    ggplot()+ 
+    geom_path(aes(x= Power.avg, y= Period, col=Power.avg.pval), linewidth=0.8) +
+    scale_color_gradient(low="#4AC0AD", high="black", breaks= c(0.05, 1), 
+                         labels= c("≤ 0.05", "> 0.05"), guide="legend") +
+    labs(x= "Average Wavelet Power", colour= "P-Value") +
+    facet_grid(rows=vars(PulseSpace_s), cols = vars(Temp_C)) +
+    scale_y_continuous(sec.axis=sec_axis(~ . , name = sym("Flash Spacing (s)"),
+                                         breaks = NULL,labels = NULL)) +
+    scale_x_continuous(limits= c(0:1), breaks=c(0, 0.5, 1), 
+        sec.axis=sec_axis(~ . , name = sym("Measurement Temperature (°C)"), breaks = NULL, labels = NULL)) +
+    theme_bw() +
+    theme(text = element_text(family = "Times New Roman"), 
+        axis.text=element_text(size=11), axis.title=element_text(size=13),
+        legend.text=element_text(size=11), legend.title=element_text(size=13),
+        strip.background = element_rect(colour="black", fill=NA),
+        strip.text = element_text(size=11), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+    
+  return(plot)
 }
 ```
 
 
-```{r Fc Periodicity Test}
-Fc.TempDiff_C.avg <- plot.grid.data(FcWavelets) %>% 
-  mutate(Temp_C = factor(Temp_C, levels = c("10C","6C","2C","0C"))) %>%
-  mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
-
-Fc.TempDiff_C.avg %>%
-  ggplot()+ 
-  geom_path(aes(x= Power.avg, y= Period, col=Power.avg.pval), linewidth=0.8) +
-  xlim(0, 1) + 
-  scale_color_gradient(low="#4AC0AD", high="black", breaks= c(0.05, 1), labels= c("≤ 0.05", "> 0.05"), guide="legend") +
-  labs(x= "Average Wavelet Power", colour= "P-Value") +
-  facet_grid(rows=vars(Temp_C), cols = vars(PulseSpace_s)) +
-  theme_linedraw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```{r Periodicity Test, warning=FALSE}
+plot.wt.grid(FcG0_wavelets)
+plot.wt.grid(FcG6_wavelets)
+plot.wt.grid(Ci_wavelets)
+plot.wt.grid(Cm_wavelets)
+plot.wt.grid(Cp_wavelets)
+plot.wt.grid(Cr_wavelets)
+plot.wt.grid(Cv_wavelets)
+plot.wt.grid(Tp_wavelets)
 ```
 
-
-```{r}
-Ci.TempDiff_C.avg <- plot.grid.data(CiWavelets) %>%
-  mutate(Temp_C = factor(Temp_C, levels = c("12C","8C","4C"))) %>%
-  mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
-
-Ci.TempDiff_C.avg %>%
-  ggplot()+ 
-  geom_path(aes(x= Power.avg, y= Period, col=Power.avg.pval), linewidth=0.8) +
-  xlim(0, 1) + 
-  scale_color_gradient(low="#4AC0AD", high="black", breaks= c(0.05, 1), labels= c("≤ 0.05", "> 0.05"), guide="legend") +
-  labs(x= "Average Wavelet Power", colour= "P-Value") +
-  facet_grid(rows=vars(Temp_C), cols = vars(PulseSpace_s)) +
-  theme_linedraw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-```
-
-```{r}
-Cm.TempDiff_C.avg <- plot.grid.data(CmWavelets) %>%
-  mutate(Temp_C = factor(Temp_C, levels = c("12C","8C","4C"))) %>%
-  mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
-
-Cm.TempDiff_C.avg %>%
-  ggplot()+ 
-  geom_path(aes(x= Power.avg, y= Period, col=Power.avg.pval), linewidth=0.8) +
-  xlim(0, 1) + 
-  scale_color_gradient(low="#4AC0AD", high="black", breaks= c(0.05, 1), labels= c("≤ 0.05", "> 0.05"), guide="legend") +
-  labs(x= "Average Wavelet Power", colour= "P-Value") +
-  facet_grid(rows=vars(Temp_C), cols = vars(PulseSpace_s)) +
-  theme_linedraw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-```
-
-```{r}
-Cp.TempDiff_C.avg <- plot.grid.data(CpWavelets) %>%
-  mutate(Temp_C = factor(Temp_C, levels = c("12C","8C","4C"))) %>%
-  mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
-
-Cp.TempDiff_C.avg %>%
-  ggplot()+ 
-  geom_path(aes(x= Power.avg, y= Period, col=Power.avg.pval), linewidth=0.8) +
-  xlim(0, 1) + 
-  scale_color_gradient(low="#4AC0AD", high="black", breaks= c(0.05, 1), labels= c("≤ 0.05", "> 0.05"), guide="legend") +
-  labs(x= "Average Wavelet Power", colour= "P-Value") +
-  facet_grid(rows=vars(Temp_C), cols = vars(PulseSpace_s)) +
-  theme_linedraw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-```
-
-```{r}
-Cr.TempDiff_C.avg <- plot.grid.data(CrWavelets) %>%
-  mutate(Temp_C = factor(Temp_C, levels = c("24C","20C","16C", "12C"))) %>%
-  mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
-
-Cr.TempDiff_C.avg %>%
-  ggplot()+ 
-  geom_path(aes(x= Power.avg, y= Period, col=Power.avg.pval), linewidth=0.8) +
-  xlim(0, 1) + 
-  scale_color_gradient(low="#4AC0AD", high="black", breaks= c(0.05, 1), labels= c("≤ 0.05", "> 0.05"), guide="legend") +
-  labs(x= "Average Wavelet Power", colour= "P-Value") +
-  facet_grid(rows=vars(Temp_C), cols = vars(PulseSpace_s)) +
-  theme_linedraw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-```
-
-```{r}
-Cv.TempDiff_C.avg <- plot.grid.data(CvWavelets) %>%
-  mutate(Temp_C = factor(Temp_C, levels = c("22C","18C","14C", "10C"))) %>%
-  mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
-
-Cv.TempDiff_C.avg %>%
-  ggplot()+ 
-  geom_path(aes(x= Power.avg, y= Period, col=Power.avg.pval), linewidth=0.8) +
-  xlim(0, 1) + 
-  scale_color_gradient(low="#4AC0AD", high="black", breaks= c(0.05, 1), labels= c("≤ 0.05", "> 0.05"), guide="legend") +
-  labs(x= "Average Wavelet Power", colour= "P-Value") +
-  facet_grid(rows=vars(Temp_C), cols = vars(PulseSpace_s)) +
-  theme_linedraw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-```
-
-```{r}
-Tp.TempDiff_C.avg <- plot.grid.data(TpWavelets) %>%
-  mutate(Temp_C = factor(Temp_C, levels = c("22C","18C","14C", "10C"))) %>%
-  mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
-
-Tp.TempDiff_C.avg %>%
-  ggplot()+ 
-  geom_path(aes(x= Power.avg, y= Period, col=Power.avg.pval), linewidth=0.8) +
-  xlim(0, 1) + 
-  scale_color_gradient(low="#4AC0AD", high="black", breaks= c(0.05, 1), labels= c("≤ 0.05", "> 0.05"), guide="legend") +
-  labs(x= "Average Wavelet Power", colour= "P-Value") +
-  facet_grid(rows=vars(Temp_C), cols = vars(PulseSpace_s)) +
-  theme_linedraw() +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-```
 
 ### Damping Across Taxa
 
@@ -221,31 +145,36 @@ sstate_damping$PulseSpace_s <- as.numeric(sstate_damping$PulseSpace_s)
 sstate_damping$TempDiff_C <- as.numeric(sstate_damping$TempDiff_C)
 ```
 
+
 ```{r}
 library(plotly)
 library(reshape2)
-frag <- sstate_damping %>%
-  filter(Species == "Fragilariopsis_cylindrus")
+library(tidyverse)
+frag <- FcG0_damping
+frag$TempDiff_C <- as.numeric(frag$TempDiff_C)
+frag$Light_Level <- as.numeric(frag$Light_Level)
 
 
-frag.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = frag)
-frag.xgrid <-  seq(-6, 10, 0.3)
-frag.ygrid <-  seq(1, 16, 0.3)
-frag.data.fit <-  expand.grid(TempDiff_C = frag.xgrid, PulseSpace_s = frag.ygrid)
+frag.data.loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, data = frag)
+frag.xgrid <-  seq(0, 10, 0.3)
+frag.ygrid <-  seq(min(frag$Light_Level), max(frag$Light_Level), 0.03)
+frag.data.fit <-  expand.grid(TempDiff_C = frag.xgrid, Light_Level = frag.ygrid)
 frag.mtrx3d <-  predict(frag.data.loess, newdata = frag.data.fit)
 
-frag.mtrx.melt <- melt(frag.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
-names(frag.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
+frag.mtrx.melt <- melt(frag.mtrx3d, id.vars = c('TempDiff_C', 'Light_Level'), measure.vars = 'DampingIndex')
+names(frag.mtrx.melt) <- c('TempDiff_C', 'Light_Level', 'DampingIndex')
 
 # Return data to numeric form
 frag.mtrx.melt$TempDiff_C <- as.numeric(str_sub(frag.mtrx.melt$TempDiff_C, str_locate(frag.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
-frag.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(frag.mtrx.melt$PulseSpace_s, str_locate(frag.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
+frag.mtrx.melt$Light_Level <-  as.numeric(str_sub(frag.mtrx.melt$Light_Level, str_locate(frag.mtrx.melt$Light_Level, '=')[1,1] + 1))
 
-frag.fig <- plot_ly(frag.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
+frag.fig <- plot_ly(frag.mtrx.melt, x = ~TempDiff_C, y = ~Light_Level, z = ~DampingIndex, type = "contour",
+                    contours = list(coloring = 'heatmap'),
              width = 600, height = 500)
 
 frag.fig
 ```
+
 
 
 ```{r}

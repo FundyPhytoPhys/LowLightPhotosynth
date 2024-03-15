@@ -56,24 +56,10 @@ HeaderRows <- 0
 
 #conversions 
 #us_s = 1000000
-#photons_umol = 6.022E17
-#A2_m2 = 1E20
+photons_umol = 6.022E17
+A2_m2 = 1E20
 ```
 
-
-```{r read ActPAR calibration files}
-# #ActPARCal <- readRDS("~/Dropbox/CampbellLabProtocols/ChlorophyllFluorescence/SolisenseInformation/SolisenseInformation_DCCalibParam.Rds")
-# 
-# ActPARCrossCal <- list.files(path = CalibData, full.names = TRUE) %>%
-#      map_df(~readRDS(file  = .))
-# 
-# #intercept set to 0 in lm in SolisenseInformation.Rproj/SolisenseCalibCompare.Rmd
-# ActPARCrossCal <- ActPARCrossCal |>
-#   rename(#Intercept = `estimate_(Intercept)`,
-#          Slope = `estimate_LIFT_Gen_Developer.cal`,
-#          #Intercept_SE = `std.error_(Intercept)`,
-#          Slope_SE = `std.error_LIFT_Gen_Developer.cal`)
-```
 
 ### Metadata Import
 ```{r import metadata}
@@ -141,7 +127,6 @@ SolFitsTrim <- SolFits %>%
 SolFitsTrim <- SolFitsTrim %>%
   group_by(Filename) %>%
   mutate(Flashnumber = row_number()) %>% #add flashnumber column 
-  #mutate(Flashnumber2 = rank(ObsTime)) %>%
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>% #add col for time elapsed 
   ungroup()
@@ -226,6 +211,8 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
 ```
 
 
+Sig differs by culture, date, and temperature; not flash spacing 
+
 ### Group by Taxon 
 ```{r}
 SolFitsChaeotoceros <- SolFitsTrim2 %>%
@@ -242,6 +229,21 @@ SolFitsFragilariopsis <- SolFitsFragilariopsis %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
 ```
 
+```{r add column for light level}
+conversion <- function(data){
+  data %>%
+    group_by(Filename) %>%
+    mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
+    mutate(Light_Level = round(Light_Level, 3)) %>%
+    ungroup()
+}
+```
+
+```{r}
+SolFitsFragilariopsis <- conversion(SolFitsFragilariopsis) 
+```
+
+
 ```{r split by growth temp}
 SolFitsFragilariopsisG0 <- SolFitsFragilariopsis %>%
   filter(GrowthTemp_C == 0)
@@ -249,6 +251,11 @@ SolFitsFragilariopsisG0 <- SolFitsFragilariopsis %>%
 SolFitsFragilariopsisG6 <- SolFitsFragilariopsis %>%
   filter(GrowthTemp_C == 6)
 ```
+
+
+
+
+
 
 ```{r}
 SolFitsFragilariopsis %>%
@@ -269,90 +276,70 @@ saveRDS(SolFitsFragilariopsisG6, file.path(DataOut, paste(Project,"Fragilariopsi
 ```
 
 
-# RLC Data
-### Import
+# RLC 
+
 ```{r list RLC files for import}
-RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
-RLCFiles
+# RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
+# RLCFiles
+# 
+# RLCFits <- RLCFiles %>%
+#   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
 
-```{r create df }
-RLCFits <- RLCFiles %>%
-  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
-```
-
-### Tidy
 ```{r tidy RLC Fits}
-#for NoDecayDataset
-RLCFitsTrim <- RLCFits |>
-  filter(!grepl("----", DATE)) |> # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X"))  # remove superfluous columns
-
-RLCFitsBadNames <- RLCFitsTrim %>%
-  filter(grepl(paste(PrefacesToFix, collapse="|"), Filename)) %>%
-  mutate(across("Filename", str_replace, "1008","1006"))
-
-RLCFitsGoodNames <- RLCFitsTrim %>%
-  filter(!grepl(paste(PrefacesToFix, collapse="|"), Filename))
-
-RLCFitsTrim <- rbind(RLCFitsBadNames, RLCFitsGoodNames)
-
-RLCFitsTrim <- RLCFitsTrim |>
-  mutate(Filename = str_remove(string = Filename, pattern = "_RLC_fit.csv")) |>
-    mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
-  separate(Filename, into=c("Location", "Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) %>%
-  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
-          TIME = as.character(TIME)) %>%
-   rename(ObsDate = DATE,
-         ObsTime = TIME,
-         FvFm = "Fv.Fm") |>
-  mutate(Temp_C = str_remove(Temp_C, "C")) |>
-  type_convert() |>
-  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
-  relocate(ObsDateTime, .after = ObsTime) %>%
-  relocate(CultureID, .before = ObsDate) |>
-  type_convert()
-
-
-RLCFitsTrim <- RLCFitsTrim |>
-  group_by(Filename) |>
-  arrange(ObsTime) |>
-  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000) %>%
-  ungroup()
-
-RLCFitsTrim <- RLCFitsTrim |>
-  rowwise() |>
-  mutate(PAR_ue = sum(Light_1, Light_2, Light_3, Light_4, Light_5, Light_6)) |>
-  group_by(Filename) |>
-  mutate(Dark1s = case_when(row_number() == 1 ~ 0,
-                            row_number() %% 2 == 0 & row_number() > 1 ~ 0,
-                            row_number() %% 2 == 1 & row_number() > 1 ~ 1)) |>
-  ungroup()
+# #for NoDecayDataset
+# RLCFitsTrim <- RLCFits |>
+#   filter(!grepl("----", DATE)) |> # remove rows with "----" 
+#   select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X"))  # remove superfluous columns
+# 
+# RLCFitsBadNames <- RLCFitsTrim %>%
+#   filter(grepl(paste(PrefacesToFix, collapse="|"), Filename)) %>%
+#   mutate(across("Filename", str_replace, "1008","1006"))
+# 
+# RLCFitsGoodNames <- RLCFitsTrim %>%
+#   filter(!grepl(paste(PrefacesToFix, collapse="|"), Filename))
+# 
+# RLCFitsTrim <- rbind(RLCFitsBadNames, RLCFitsGoodNames)
+# 
+# RLCFitsTrim <- RLCFitsTrim |>
+#   mutate(Filename = str_remove(string = Filename, pattern = "_RLC_fit.csv")) |>
+#     mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
+#   separate(Filename, into=c("Location", "Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) %>%
+#   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+#           TIME = as.character(TIME)) %>%
+#    rename(ObsDate = DATE,
+#          ObsTime = TIME,
+#          FvFm = "Fv.Fm") |>
+#   mutate(Temp_C = str_remove(Temp_C, "C")) |>
+#   type_convert() |>
+#   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
+#   relocate(ObsDateTime, .after = ObsTime) %>%
+#   relocate(CultureID, .before = ObsDate) |>
+#   type_convert()
+# 
+# 
+# RLCFitsTrim <- RLCFitsTrim |>
+#   group_by(Filename) |>
+#   arrange(ObsTime) |>
+#   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000) %>%
+#   ungroup()
+# 
+# RLCFitsTrim <- RLCFitsTrim |>
+#   rowwise() |>
+#   mutate(PAR_ue = sum(Light_1, Light_2, Light_3, Light_4, Light_5, Light_6)) |>
+#   group_by(Filename) |>
+#   mutate(Dark1s = case_when(row_number() == 1 ~ 0,
+#                             row_number() %% 2 == 0 & row_number() > 1 ~ 0,
+#                             row_number() %% 2 == 1 & row_number() > 1 ~ 1)) |>
+#   ungroup()
 ```
 
 
 ```{r}
-RLCFitsTrim %>%
-  ggplot()+
-  geom_line(aes(x = PAR_ue, y = FvFm)) +
-  facet_grid(rows = vars(Temp_C), cols = vars(CultureID)) +
-  labs(title = TargetData) +
-  theme_bw()
+# RLCFitsTrim %>%
+#   ggplot()+
+#   geom_line(aes(x = PAR_ue, y = FvFm)) +
+#   facet_grid(rows = vars(Temp_C), cols = vars(CultureID)) +
+#   labs(title = TargetData) +
+#   theme_bw()
 ```
-
-# Other Code 
-Joining Chl and species from metadata with SolFits to normalize for chl
-```{r}
-# ChlData <- TakuvikMetadata %>%
-#   select(c("ExpDate","ID","Strain", "Chl_ugmL")) %>%
-#   drop_na() %>%
-#   rename("YYYYMMDD"= "ExpDate", "Species"="Strain") %>%
-#   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD)) %>%
-#   unite("StrainCode", c("YYYYMMDD","ID"))
-# 
-# SolFitsTrim3 <- SolFitsTrim2 %>%
-#   unite("StrainCode", c("YYYYMMDD","CultureID"), remove = FALSE)
-# 
-# JoinedwithChl <- left_join(SolFitsTrim3, ChlData)
-```
-

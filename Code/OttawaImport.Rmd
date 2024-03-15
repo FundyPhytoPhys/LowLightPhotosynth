@@ -55,8 +55,8 @@ HeaderRows <- 0
 
 #conversions
 # us_s = 1000000
-# photons_umol = 6.022E17
-# A2_m2 = 1E20
+photons_umol = 6.022E17
+A2_m2 = 1E20
 ```
 
 ```{r read ActPAR calibration files}
@@ -201,26 +201,39 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
   ungroup()
 ```
 
+```{r add column for light level}
+conversion <- function(data){
+  data %>%
+    group_by(Filename) %>%
+    mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
+    ungroup()
+}
+```
+
+```{r}
+SolFitsTrim3 <- conversion(SolFitsTrim2)
+```
 
 ```{r add deviation from growth temp}
-SolFitsTrim2 <- SolFitsTrim2 %>%
+SolFitsTrim3 <- SolFitsTrim3 %>%
   mutate(GrowthTemp_C = ifelse(CultureID %in% c("MaPo1001", "MaPo1002", "MaPo1003", "MaPo1004"), 4, ifelse(CultureID %in% c("MaPo1005", "MaPo1006"), 24, NA))) %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
 ```
 
 
+
 ### Group by Taxon 
 ```{r}
-SolFitsPriscuii <- SolFitsTrim2 %>%
+SolFitsPriscuii <- SolFitsTrim3 %>%
   filter(CultureID %in% c("MaPo1001", "MaPo1004"))
 
-SolFitsICEMDV <- SolFitsTrim2 %>%
+SolFitsICEMDV <- SolFitsTrim3 %>%
   filter(CultureID %in% "MaPo1002")
 
-SolFitsMalina <- SolFitsTrim2 %>%
+SolFitsMalina <- SolFitsTrim3 %>%
   filter(CultureID %in% "MaPo1003")
 
-SolFitsReinhardtii <- SolFitsTrim2 %>%
+SolFitsReinhardtii <- SolFitsTrim3 %>%
   filter(CultureID %in% c("MaPo1005", "MaPo1006"))
 ```
 
