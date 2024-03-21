@@ -72,6 +72,14 @@ TakuvikMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1OC22KJy-V
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(Filename = flnm)
 }
+
+conversion <- function(data){
+  data %>%
+    group_by(Filename) %>%
+    mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
+    mutate(Light_Level = round(Light_Level, 3)) %>%
+    ungroup()
+}
 ```
 
 
@@ -132,6 +140,7 @@ SolFitsTrim <- SolFitsTrim %>%
   ungroup()
 ```
 
+
 ```{r correct file issues}
 ProblemFiles <- unique(SolFitsTrim$Filename[SolFitsTrim$Flashnumber >32])
 
@@ -167,8 +176,6 @@ Other adjustments:
   20230926_SeGu1001_6C_16s        - remove, incorrect spacing
   20230925_SeGu1005_2C_8s         - remove, file error 
 
-
-
 ```{r manual trim}
 last32 <- SolFitsTrim %>%
   filter(!Filename %in% c('20230927_SeGu1006_2C_16s', '20230925_SeGu1005_2C_16s', '20230926_SeGu1001_6C_16s', '20230925_SeGu1005_2C_8s')) %>%
@@ -190,8 +197,7 @@ SeGu1006_2C_16s <- SolFitsTrim %>%
 SolFitsTrim2 <- rbind(last32,SeGu1005_2C_16s, SeGu1006_2C_16s)
 ```
 
-### Normalize
-Now that the files are clean: 
+### Normalize Fluorescence & Add Light Level and Temperature Differential Columns 
 
 ```{r tidy clean data}
 SolFitsTrim2 <- SolFitsTrim2 %>%
@@ -208,10 +214,19 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
          Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
          FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
   ungroup()
+
+# Add columns for growth temperature and difference between measurement & growth temps
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  mutate(GrowthTemp_C = 
+           ifelse(CultureID %in% c("SeGu1001", "SeGu1002", "SeGu1003", "SeGu1004"), 0,
+           ifelse(CultureID %in% c("SeGu1005", "SeGu1006", "SeGu1007", "SeGu1008"), 6,
+                  NA))) %>%
+  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
+
+SolFitsTrim2 <- conversion(SolFitsTrim2) # add column for light level (µmol photons/m2/s)
 ```
 
 
-Sig differs by culture, date, and temperature; not flash spacing 
 
 ### Group by Taxon 
 ```{r}
@@ -223,45 +238,14 @@ SolFitsFragilariopsis <- SolFitsTrim2 %>%
 #Note SeGu1003 and 1008 were excluded due to culture issues 
 ```
 
-```{r add deviation from growth temp}
-SolFitsFragilariopsis <- SolFitsFragilariopsis %>%
-  mutate(GrowthTemp_C = ifelse(CultureID == "SeGu1001", 0, ifelse(CultureID == "SeGu1006", 6, NA)))%>%
-  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
-```
-
-```{r add column for light level}
-conversion <- function(data){
-  data %>%
-    group_by(Filename) %>%
-    mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
-    mutate(Light_Level = round(Light_Level, 3)) %>%
-    ungroup()
-}
-```
-
-```{r}
-SolFitsFragilariopsis <- conversion(SolFitsFragilariopsis) 
-```
 
 
-```{r split by growth temp}
-SolFitsFragilariopsisG0 <- SolFitsFragilariopsis %>%
-  filter(GrowthTemp_C == 0)
-
-SolFitsFragilariopsisG6 <- SolFitsFragilariopsis %>%
-  filter(GrowthTemp_C == 6)
-```
-
-
-
-
-
-
+### Test Plots
 ```{r}
 SolFitsFragilariopsis %>%
   ggplot()+
-  geom_line(aes(x=Flashnumber, y=Fmrunnorm, colour = as.factor(Filename))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
   theme_bw() +
   theme(legend.position = "none")
 ```
@@ -270,9 +254,7 @@ SolFitsFragilariopsis %>%
 ```{r save Data}
 saveRDS(SolFitsChaeotoceros, file.path(DataOut, paste(Project,"Chaeotoceros_gelidus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 
-saveRDS(SolFitsFragilariopsisG0, file.path(DataOut, paste(Project,"Fragilariopsis_cylindrus","G0", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
-
-saveRDS(SolFitsFragilariopsisG6, file.path(DataOut, paste(Project,"Fragilariopsis_cylindrus","G6", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(SolFitsFragilariopsis, file.path(DataOut, paste(Project,"Fragilariopsis_cylindrus", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 

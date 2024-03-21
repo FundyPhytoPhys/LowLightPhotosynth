@@ -59,19 +59,6 @@ photons_umol = 6.022E17
 A2_m2 = 1E20
 ```
 
-```{r read ActPAR calibration files}
-# #ActPARCal <- readRDS("~/Dropbox/CampbellLabProtocols/ChlorophyllFluorescence/SolisenseInformation/SolisenseInformation_DCCalibParam.Rds")
-# 
-# ActPARCrossCal <- list.files(path = CalibData, full.names = TRUE) %>%
-#      map_df(~readRDS(file  = .))
-# 
-# #intercept set to 0 in lm in SolisenseInformation.Rproj/SolisenseCalibCompare.Rmd
-# ActPARCrossCal <- ActPARCrossCal |>
-#   rename(#Intercept = `estimate_(Intercept)`,
-#          Slope = `estimate_LIFT_Gen_Developer.cal`,
-#          #Intercept_SE = `std.error_(Intercept)`,
-#          Slope_SE = `std.error_LIFT_Gen_Developer.cal`)
-```
 
 ### Metadata Import
 ```{r import metadata}
@@ -84,6 +71,14 @@ OttawaMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1m8Pjwj4DL1
 ### Create Functions
 ```{r warning=FALSE, message=FALSE, echo=FALSE}
 read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(Filename = flnm)
+}
+
+conversion <- function(data){
+  data %>%
+    group_by(Filename) %>%
+    mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
+    mutate(Light_Level = round(Light_Level, 3)) %>%
+    ungroup()
 }
 ```
 
@@ -182,7 +177,9 @@ MaPo1005_24C_16s <- SolFitsTrim %>%
 SolFitsTrim2 <- rbind(last32, MaPo1001_4C_1s, MaPo1005_24C_16s)
 ```
 
-Now that the files are clean: 
+
+### Normalize Fluorescence & Add Light Level and Temperature Differential Columns 
+
 ```{r}
 SolFitsTrim2 <- SolFitsTrim2 %>%
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
@@ -199,77 +196,69 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
          Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
          FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
   ungroup()
-```
 
-```{r add column for light level}
-conversion <- function(data){
-  data %>%
-    group_by(Filename) %>%
-    mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
-    ungroup()
-}
-```
 
-```{r}
-SolFitsTrim3 <- conversion(SolFitsTrim2)
-```
-
-```{r add deviation from growth temp}
-SolFitsTrim3 <- SolFitsTrim3 %>%
-  mutate(GrowthTemp_C = ifelse(CultureID %in% c("MaPo1001", "MaPo1002", "MaPo1003", "MaPo1004"), 4, ifelse(CultureID %in% c("MaPo1005", "MaPo1006"), 24, NA))) %>%
+# Add columns for growth temperature and difference between measurement & growth temps
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  mutate(GrowthTemp_C = 
+           ifelse(CultureID %in% c("MaPo1001", "MaPo1002", "MaPo1003", "MaPo1004"), 4,
+           ifelse(CultureID %in% c("MaPo1005", "MaPo1006"), 24,
+                  NA))) %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
-```
 
+SolFitsTrim2 <- conversion(SolFitsTrim2) # add column for light level (µmol photons/m2/s)
+```
 
 
 ### Group by Taxon 
+
 ```{r}
-SolFitsPriscuii <- SolFitsTrim3 %>%
+SolFitsPriscuii <- SolFitsTrim2 %>%
   filter(CultureID %in% c("MaPo1001", "MaPo1004"))
 
-SolFitsICEMDV <- SolFitsTrim3 %>%
+SolFitsICEMDV <- SolFitsTrim2 %>%
   filter(CultureID %in% "MaPo1002")
 
-SolFitsMalina <- SolFitsTrim3 %>%
+SolFitsMalina <- SolFitsTrim2 %>%
   filter(CultureID %in% "MaPo1003")
 
-SolFitsReinhardtii <- SolFitsTrim3 %>%
+SolFitsReinhardtii <- SolFitsTrim2 %>%
   filter(CultureID %in% c("MaPo1005", "MaPo1006"))
 ```
 
+
+### Test Plots
+
 ```{r}
+SolFitsICEMDV %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
+
 SolFitsMalina %>%
- ggplot()+
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+SolFitsPriscuii %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+SolFitsReinhardtii %>%
+  ggplot()+
   geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
   facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
   theme_bw() +
   theme(legend.position = "none")
 ```
 
-
-### Test Plots
-```{r}
-SolFitsICEMDV %>%
-  ggplot() +
-  geom_line(aes(x=Flashnumber2, y=FvFm)) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
-  labs(title = "Chlamydomonas_ICEMDV") +
-  theme_bw()
-
-SolFitsMalina %>%
-  ggplot() +
-  geom_line(aes(x=Flashnumber2, y=FvFm)) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
-  labs(title = "Chlamydomonas_malina") +
-  theme_bw()
-
-SolFitsReinhardtii %>%
-  ggplot() +
-  geom_line(aes(x=Flashnumber2, y=FvFm, colour = as.factor(CultureID))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(Temp_C)) +
-  labs(title = "Chlamydomonas_reinhardtii") +
-  theme_bw()
-```
 
 ```{r save data}
 saveRDS(SolFitsICEMDV, file.path(DataOut, paste(Project, "Chlamydomonas", "ICEMDV", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
@@ -284,55 +273,55 @@ saveRDS(SolFitsReinhardtii, file.path(DataOut, paste(Project, "Chlamydomonas", "
 # RLC Data
 ### Import
 ```{r list RLC files}
-RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
-RLCFiles
-
-unique(duplicated(RLCFiles))
+# RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
+# RLCFiles
+# 
+# unique(duplicated(RLCFiles))
 ```
 
 ```{r create RLC df}
-RLCFits <- RLCFiles %>%
-  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
+# RLCFits <- RLCFiles %>%
+#   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
 
 ### Tidy
 ```{r tidy RLC fits}
-#for NoDecayDataset
-RLCFitsTrim <- RLCFits |>
-  filter(!grepl("----", DATE)) |> # remove rows with "----" 
-  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X"))  # remove superfluous columns
-
-RLCFitsTrim <- RLCFitsTrim |>
-  mutate(Filename = str_remove(string = Filename, pattern = "_RLC_fit.csv")) |>
-    mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
-  separate(Filename, into=c("Location", "Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) %>%
-  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
-          TIME = as.character(TIME)) %>%
-   rename(ObsDate = DATE,
-         ObsTime = TIME,
-         FvFm = "Fv.Fm") |>
-  mutate(Temp_C = str_remove(Temp_C, "C")) |>
-  type_convert() |>
-  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
-  relocate(ObsDateTime, .after = ObsTime) %>%
-  relocate(CultureID, .before = ObsDate) |>
-  type_convert()
-
-
-RLCFitsTrim <- RLCFitsTrim |>
-  group_by(Filename) |>
-  arrange(ObsTime) |>
-  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000) %>%
-  ungroup()
-
-RLCFitsTrim <- RLCFitsTrim |>
-  rowwise() |>
-  mutate(PAR_ue = sum(Light_1, Light_2, Light_3, Light_4, Light_5, Light_6)) |>
-  group_by(Filename) |>
-  mutate(Dark1s = case_when(row_number() == 1 ~ 0,
-                            row_number() %% 2 == 0 & row_number() > 1 ~ 0,
-                            row_number() %% 2 == 1 & row_number() > 1 ~ 1)) |>
-  ungroup()
+# #for NoDecayDataset
+# RLCFitsTrim <- RLCFits |>
+#   filter(!grepl("----", DATE)) |> # remove rows with "----" 
+#   select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X"))  # remove superfluous columns
+# 
+# RLCFitsTrim <- RLCFitsTrim |>
+#   mutate(Filename = str_remove(string = Filename, pattern = "_RLC_fit.csv")) |>
+#     mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
+#   separate(Filename, into=c("Location", "Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) %>%
+#   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+#           TIME = as.character(TIME)) %>%
+#    rename(ObsDate = DATE,
+#          ObsTime = TIME,
+#          FvFm = "Fv.Fm") |>
+#   mutate(Temp_C = str_remove(Temp_C, "C")) |>
+#   type_convert() |>
+#   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
+#   relocate(ObsDateTime, .after = ObsTime) %>%
+#   relocate(CultureID, .before = ObsDate) |>
+#   type_convert()
+# 
+# 
+# RLCFitsTrim <- RLCFitsTrim |>
+#   group_by(Filename) |>
+#   arrange(ObsTime) |>
+#   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000) %>%
+#   ungroup()
+# 
+# RLCFitsTrim <- RLCFitsTrim |>
+#   rowwise() |>
+#   mutate(PAR_ue = sum(Light_1, Light_2, Light_3, Light_4, Light_5, Light_6)) |>
+#   group_by(Filename) |>
+#   mutate(Dark1s = case_when(row_number() == 1 ~ 0,
+#                             row_number() %% 2 == 0 & row_number() > 1 ~ 0,
+#                             row_number() %% 2 == 1 & row_number() > 1 ~ 1)) |>
+#   ungroup()
 ```
 
 
