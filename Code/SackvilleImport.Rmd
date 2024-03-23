@@ -77,9 +77,9 @@ read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.deli
 
 conversion <- function(data){
   data %>%
-    group_by(Filename) %>%
+    group_by(PulseSpace_s, Temp_C) %>%
     mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
-    mutate(Light_Level = round(Light_Level, 3)) %>%
+    mutate(Light_Level = round(Light_Level, 5)) %>%
     ungroup()
 }
 ```
@@ -172,7 +172,7 @@ SolFitsTrim2 <- rbind(first32, NaOm1663_22C_4S)
 ```
 
 
-### Normalize Fluorescence & Add Light Level and Temperature Differential Columns 
+### Normalize Fluorescence & Add Temperature Differential Column
 
 ```{r tidy clean data}
 SolFitsTrim2 <- SolFitsTrim2 %>%
@@ -194,8 +194,6 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
 SolFitsTrim2 <- SolFitsTrim2 %>%
   mutate(GrowthTemp_C = 22) %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
-
-SolFitsTrim2 <- conversion(SolFitsTrim2) # add column for light level (µmol photons/m2/s)
 ```
 
 ### Group by Taxon 
@@ -210,6 +208,13 @@ SolFitsWeissflogii <- SolFitsTrim2 %>%
   filter(CultureID == "NaOm1293")
 ```
 
+### Calculate Light Levels
+```{r}
+# add column for light level (µmol photons/m2/s)
+SolFitsChlorella <- conversion(SolFitsChlorella)
+SolFitsPseudonana <- conversion(SolFitsPseudonana) 
+SolFitsWeissflogii <- conversion(SolFitsWeissflogii) 
+```
 
 ### Test Plots
 ```{r}

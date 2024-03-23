@@ -75,9 +75,9 @@ read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.deli
 
 conversion <- function(data){
   data %>%
-    group_by(Filename) %>%
+    group_by(PulseSpace_s, Temp_C) %>%
     mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
-    mutate(Light_Level = round(Light_Level, 3)) %>%
+    mutate(Light_Level = round(Light_Level, 5)) %>%
     ungroup()
 }
 ```
@@ -178,7 +178,7 @@ SolFitsTrim2 <- rbind(last32, MaPo1001_4C_1s, MaPo1005_24C_16s)
 ```
 
 
-### Normalize Fluorescence & Add Light Level and Temperature Differential Columns 
+### Normalize Fluorescence & Add Temperature Differential Column 
 
 ```{r}
 SolFitsTrim2 <- SolFitsTrim2 %>%
@@ -205,13 +205,10 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
            ifelse(CultureID %in% c("MaPo1005", "MaPo1006"), 24,
                   NA))) %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
-
-SolFitsTrim2 <- conversion(SolFitsTrim2) # add column for light level (µmol photons/m2/s)
 ```
 
 
 ### Group by Taxon 
-
 ```{r}
 SolFitsPriscuii <- SolFitsTrim2 %>%
   filter(CultureID %in% c("MaPo1001", "MaPo1004"))
@@ -224,6 +221,16 @@ SolFitsMalina <- SolFitsTrim2 %>%
 
 SolFitsReinhardtii <- SolFitsTrim2 %>%
   filter(CultureID %in% c("MaPo1005", "MaPo1006"))
+```
+
+
+### Calculate Light Levels
+```{r}
+# add column for light level (µmol photons/m2/s)
+SolFitsPriscuii <- conversion(SolFitsPriscuii) 
+SolFitsICEMDV <- conversion(SolFitsICEMDV) 
+SolFitsMalina <- conversion(SolFitsMalina) 
+SolFitsReinhardtii <- conversion(SolFitsReinhardtii) 
 ```
 
 

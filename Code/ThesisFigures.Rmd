@@ -18,7 +18,8 @@ library(tidyverse)
 # Methods 
 
 ```{r }
-Fc_data <- readRDS("../Data/CleanData/LOW_Fragilariopsis_cylindrus_G0_SolFitsTrim.Rds")
+Fc_data <- readRDS("../Data/CleanData/LOW_Fragilariopsis_cylindrus_SolFitsTrim.Rds") %>%
+  mutate(SState = ifelse(SState == 4, 0, SState))
 
 s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
 
@@ -44,13 +45,14 @@ Fc_data %>%
 
 ```{r warning=FALSE}
 Fc_data %>%
-  filter(YYYYMMDD == "2023-09-27") %>%
-  filter(Temp_C %in% c(0,10)) %>%
-  filter(PulseSpace_s %in% c(1,4,16)) %>%
+  filter(CultureID == "SeGu1001", 
+         Temp_C %in% c(0,10), 
+         ObsDate == "2023-09-27",
+         PulseSpace_s %in% c(1,4,16)) %>%
   ggplot() +
   geom_point(aes(x=Flashnumber, y=FvFmrunnorm, col=as.factor(SState))) +
   scale_color_manual(values = s.col) +
-  labs(x= "Flash Number", y= "Normalized Chlorophyll Fluorescence", col= "S-State") +
+  labs(x= "Flash Number", y= "Normalized Chlorophyll Fluorescence", col= "Majority S-State") +
   facet_grid(rows=vars(PulseSpace_s), cols=vars(Temp_C)) +
   scale_y_continuous(sec.axis=sec_axis(~ . , name = sym("Flash Spacing (s)"),breaks = NULL,labels = NULL)) +
   scale_x_continuous(breaks=c(4,8,12,16,20,24,28,32),
@@ -63,9 +65,9 @@ Fc_data %>%
         strip.text = element_text(size=11), 
         panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 
-# ggsave("representativeoscillations.png", width = 8, height = 5, dpi = 900,
-#       plot=last_plot(),
-#       path="../Output")
+ # ggsave("representativeoscillations.png", width = 8, height = 5, dpi = 900,
+ #       plot=last_plot(),
+ #       path="../Output")
 ```
 
 
@@ -77,6 +79,12 @@ Fc_data %>%
 
 ### Wavelet Power
 
+```{r}
+wavelets <- readRDS("../Data/ProcessedData/LOW_Wavelets.Rds") 
+specieslists <- split(wavelets, sub("_.*", "_wavelets", names(wavelets)))
+list2env(specieslists, envir = .GlobalEnv)
+```
+
 
 ```{r function}
 plot.wt.grid <- function(wavelets) {
@@ -87,12 +95,10 @@ plot.wt.grid <- function(wavelets) {
     Period <- condition$Period
     Condition <- rep(condition_name, length(Power.avg))  # Repeat condition name for each row
     df <- data.frame(Power.avg, Power.avg.pval, Period, Condition) %>%
-      separate(Condition, into = c("Temp_C", "PulseSpace_s"), sep = "_") %>%
-      mutate(PulseSpace_s = str_remove(PulseSpace_s, "s"),
-             PulseSpace_s = factor(PulseSpace_s, levels = c("1","2","4","8","16"))) %>%
-      mutate(Temp_C = str_remove(Temp_C, "C"),
+      separate(Condition, into = c("Strain", "PulseSpace_s", "Temp_C", "LightLevel"), sep = "_") %>%
+      mutate(PulseSpace_s = factor(PulseSpace_s, levels = c("1","2","4","8","16")),
              Temp_C = factor(Temp_C, levels = 
-                               c("0","2","4","6","8","10","12","14","16","18","20","22","24"))) %>%
+                               c("0","2","4","6","8","10","12","14","16","18","20","22","24","26","28"))) %>%
       mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
     
      return(df)
@@ -124,9 +130,10 @@ plot.wt.grid <- function(wavelets) {
 ```
 
 
+
+
+
 ```{r Periodicity Test, warning=FALSE}
-plot.wt.grid(FcG0_wavelets)
-plot.wt.grid(FcG6_wavelets)
 plot.wt.grid(Ci_wavelets)
 plot.wt.grid(Cm_wavelets)
 plot.wt.grid(Cp_wavelets)
@@ -139,225 +146,110 @@ plot.wt.grid(Tp_wavelets)
 ### Damping Across Taxa
 
 ```{r}
-sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Damping.Rds")
+library(plotly)
+library(reshape2)
 
-sstate_damping$PulseSpace_s <- as.numeric(sstate_damping$PulseSpace_s)
-sstate_damping$TempDiff_C <- as.numeric(sstate_damping$TempDiff_C)
+sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Damping.Rds") %>%
+  mutate(Strain = factor(Strain))
+
+split.sstate <- split(sstate_damping, sstate_damping$Strain)
+names(split.sstate) <- c("Ci.damping", "Cm.damping", "Cp.damping", "Cr.damping", 
+                         "Cv.damping", "Fc.damping", "Tp.damping")
+list2env(split.sstate, envir = .GlobalEnv)
 ```
+
+
 
 
 ```{r}
 library(plotly)
-library(reshape2)
-library(tidyverse)
-frag <- FcG0_damping
-frag$TempDiff_C <- as.numeric(frag$TempDiff_C)
-frag$Light_Level <- as.numeric(frag$Light_Level)
 
-
-frag.data.loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, data = frag)
-frag.xgrid <-  seq(0, 10, 0.3)
-frag.ygrid <-  seq(min(frag$Light_Level), max(frag$Light_Level), 0.03)
-frag.data.fit <-  expand.grid(TempDiff_C = frag.xgrid, Light_Level = frag.ygrid)
-frag.mtrx3d <-  predict(frag.data.loess, newdata = frag.data.fit)
-
-frag.mtrx.melt <- melt(frag.mtrx3d, id.vars = c('TempDiff_C', 'Light_Level'), measure.vars = 'DampingIndex')
-names(frag.mtrx.melt) <- c('TempDiff_C', 'Light_Level', 'DampingIndex')
-
-# Return data to numeric form
-frag.mtrx.melt$TempDiff_C <- as.numeric(str_sub(frag.mtrx.melt$TempDiff_C, str_locate(frag.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
-frag.mtrx.melt$Light_Level <-  as.numeric(str_sub(frag.mtrx.melt$Light_Level, str_locate(frag.mtrx.melt$Light_Level, '=')[1,1] + 1))
-
-frag.fig <- plot_ly(frag.mtrx.melt, x = ~TempDiff_C, y = ~Light_Level, z = ~DampingIndex, type = "contour",
-                    contours = list(coloring = 'heatmap'),
-             width = 600, height = 500)
-
-frag.fig
-```
-
-
-
-```{r}
-tpseu <- sstate_damping %>%
-  filter(Species == "Thalassiosira_pseudonana")
-
-
-tpseu.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = tpseu)
-tpseu.xgrid <-  seq(-6, 10, 0.3)
-tpseu.ygrid <-  seq(1, 16, 0.3)
-tpseu.data.fit <-  expand.grid(TempDiff_C = tpseu.xgrid, PulseSpace_s = tpseu.ygrid)
-tpseu.mtrx3d <-  predict(tpseu.data.loess, newdata = tpseu.data.fit)
-
-tpseu.mtrx.melt <- melt(tpseu.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
-names(tpseu.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
-
-# Return data to numeric form
-tpseu.mtrx.melt$TempDiff_C <- as.numeric(str_sub(tpseu.mtrx.melt$TempDiff_C, str_locate(tpseu.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
-tpseu.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(tpseu.mtrx.melt$PulseSpace_s, str_locate(tpseu.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
-
-tpseu.fig <- plot_ly(tpseu.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
-             width = 600, height = 500)
-
-tpseu.fig
+plot.heatmap <- function(damping) {
+  
+  x.scale <- as.numeric(unique(damping$TempDiff_C))
+  
+  loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, data = damping)
+  
+  data <- with(damping, expand.grid(
+    Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
+    TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.1)
+  ))
+  
+  predict <- predict(loess, newdata = data)
+  
+  melt <- reshape2::melt(predict, id.vars = c('TempDiff_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
+    mutate(TempDiff_C = as.numeric(str_sub(TempDiff_C, str_locate(TempDiff_C, '=')[1,1] + 1)),
+           Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
+    dplyr::rename("DampingIndex" = "value") %>%
+    mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex))
+  
+  plot <- plot_ly(melt, x = ~TempDiff_C, y = ~Light_Level, z = ~DampingIndex, type = "contour",
+                  autocontour = TRUE, contours = list(coloring = 'heatmap', showlabels= TRUE),
+                     line = list(smoothing = 0.9)) %>%
+    colorbar(title = "Damping Index", size = 12) %>%
+    config(staticPlot = TRUE) %>%
+    layout(
+      font = list(family = "Times New Roman", size = 13),
+      xaxis = list(title = "Deviation from Growth Temperature (°C)", 
+                   tickvals=c(x.scale),  fixedrange = TRUE),
+      yaxis = list(title = "Light Level (µmol photons m<sup>-2</sup> s<sup>-1</sup>)",
+                   fixedrange = TRUE)) %>%
+    config(responsive =FALSE)
+  
+  return(plot)
+}
 ```
 
 
 ```{r}
-ice <- sstate_damping %>%
-  filter(Species == "Chlamydomonas_ICEMDV")
+plot.heatmap(Cv.damping)
 
-ice.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = ice)
-ice.xgrid <-  seq(0, 8, 0.2)
-ice.ygrid <-  seq(1, 16, 0.2)
-ice.data.fit <-  expand.grid(TempDiff_C = ice.xgrid, PulseSpace_s = ice.ygrid)
-ice.mtrx3d <-  predict(ice.data.loess, newdata = ice.data.fit)
 
-ice.mtrx.melt <- melt(ice.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
-names(ice.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
-
-# Return data to numeric form
-ice.mtrx.melt$TempDiff_C <- as.numeric(str_sub(ice.mtrx.melt$TempDiff_C, str_locate(ice.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
-ice.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(ice.mtrx.melt$PulseSpace_s, str_locate(ice.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
-
-ice.fig <- plot_ly(ice.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
-             width = 600, height = 500)
-
-ice.fig
-```
-
-```{r}
-mal <- sstate_damping %>%
-  filter(Species == "Chlamydomonas_malina")
-
-mal.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = mal)
-mal.xgrid <-  seq(0, 8, 0.2)
-mal.ygrid <-  seq(1, 16, 0.2)
-mal.data.fit <-  expand.grid(TempDiff_C = mal.xgrid, PulseSpace_s = mal.ygrid)
-mal.mtrx3d <-  predict(mal.data.loess, newdata = mal.data.fit)
-
-mal.mtrx.melt <- melt(mal.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
-names(mal.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
-
-# Return data to numeric form
-mal.mtrx.melt$TempDiff_C <- as.numeric(str_sub(mal.mtrx.melt$TempDiff_C, str_locate(mal.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
-mal.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(mal.mtrx.melt$PulseSpace_s, str_locate(mal.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
-
-mal.fig <- plot_ly(mal.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
-             width = 600, height = 500)
-
-mal.fig
-```
-
-```{r}
-pris <- sstate_damping %>%
-  filter(Species == "Chlamydomonas_priscuii")
-
-pris.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = pris)
-pris.xgrid <-  seq(0, 8, 0.2)
-pris.ygrid <-  seq(1, 16, 0.2)
-pris.data.fit <-  expand.grid(TempDiff_C = pris.xgrid, PulseSpace_s = pris.ygrid)
-pris.mtrx3d <-  predict(pris.data.loess, newdata = pris.data.fit)
-
-pris.mtrx.melt <- melt(pris.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
-names(pris.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
-
-# Return data to numeric form
-pris.mtrx.melt$TempDiff_C <- as.numeric(str_sub(pris.mtrx.melt$TempDiff_C, str_locate(pris.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
-pris.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(pris.mtrx.melt$PulseSpace_s, str_locate(pris.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
-
-pris.fig <- plot_ly(pris.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
-             width = 600, height = 500)
-
-pris.fig
+plot.heatmap(Cr.damping)
+plot.heatmap(Cp.damping)
+plot.heatmap(Cm.damping)
+plot.heatmap(Ci.damping)
+plot.heatmap(Tp.damping)
+plot.heatmap(Fc.damping)
 ```
 
 
 ```{r}
-rein <- sstate_damping %>%
-  filter(Species == "Chlamydomonas_reinhardtii")
+x.scale <- as.numeric(unique(Cv.damping$TempDiff_C))
 
-rein.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = rein)
-rein.xgrid <-  seq(-12, 0, 0.2)
-rein.ygrid <-  seq(1, 16, 0.2)
-rein.data.fit <-  expand.grid(TempDiff_C = rein.xgrid, PulseSpace_s = rein.ygrid)
-rein.mtrx3d <-  predict(rein.data.loess, newdata = rein.data.fit)
+Cv.loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, data = Cv.damping)
 
-rein.mtrx.melt <- melt(rein.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
-names(rein.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
+Cv.data <- with(Cv.damping, expand.grid(
+  Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
+  TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.1)
+))
 
-# Return data to numeric form
-rein.mtrx.melt$TempDiff_C <- as.numeric(str_sub(rein.mtrx.melt$TempDiff_C, str_locate(rein.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
-rein.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(rein.mtrx.melt$PulseSpace_s, str_locate(rein.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
+Cv_mtrx3d <- predict(Cv.loess, newdata = Cv.data)
 
-rein.fig <- plot_ly(rein.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
-             width = 600, height = 500)
+Cv_mtrx_melt <- reshape2::melt(Cv_mtrx3d, id.vars = c('TempDiff_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
+  mutate(TempDiff_C = as.numeric(str_sub(TempDiff_C, str_locate(TempDiff_C, '=')[1,1] + 1)),
+         Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
+  dplyr::rename("DampingIndex" = "value") %>%
+  mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex))
+         
+  
+Cv.plot <- plot_ly(Cv_mtrx_melt, x = ~TempDiff_C, y = ~Light_Level, z = ~DampingIndex, type = "contour",
+                   autocontour = TRUE, contours = list(coloring = 'heatmap', showlabels= TRUE), 
+                   line = list(smoothing = 0.9)) %>%
+  colorbar(title = "Damping Index", size = 12) %>%
+  config(staticPlot = TRUE) %>%
+  layout(
+     font = list(family = "Times New Roman", size = 13),
+     xaxis = list(title = "Deviation from Growth Temperature (°C)", 
+                  tickvals = c(x.scale), fixedrange = TRUE),
+     yaxis = list(title = "Light Level (µmol photons m<sup>-2</sup> s<sup>-1</sup>)",
+                  fixedrange = TRUE))
+Cv.plot
 
-rein.fig
 ```
-
 
 ```{r}
-vulg <- sstate_damping %>%
-  filter(Species == "Chlorella_vulgaris")
-
-vulg.data.loess <- loess(DampingIndex ~ TempDiff_C * PulseSpace_s, data = vulg)
-vulg.xgrid <-  seq(-12, 0, 0.2)
-vulg.ygrid <-  seq(1, 16, 0.2)
-vulg.data.fit <-  expand.grid(TempDiff_C = vulg.xgrid, PulseSpace_s = vulg.ygrid)
-vulg.mtrx3d <-  predict(vulg.data.loess, newdata = vulg.data.fit)
-
-vulg.mtrx.melt <- melt(vulg.mtrx3d, id.vars = c('TempDiff_C', 'PulseSpace_s'), measure.vars = 'DampingIndex')
-names(vulg.mtrx.melt) <- c('TempDiff_C', 'PulseSpace_s', 'DampingIndex')
-
-# Return data to numeric form
-vulg.mtrx.melt$TempDiff_C <- as.numeric(str_sub(vulg.mtrx.melt$TempDiff_C, str_locate(vulg.mtrx.melt$TempDiff_C, '=')[1,1] + 1))
-vulg.mtrx.melt$PulseSpace_s <-  as.numeric(str_sub(vulg.mtrx.melt$PulseSpace_s, str_locate(vulg.mtrx.melt$PulseSpace_s, '=')[1,1] + 1))
-
-vulg.fig <- plot_ly(vulg.mtrx.melt, x = ~TempDiff_C, y = ~PulseSpace_s, z = ~DampingIndex, type = "contour",
-             width = 600, height = 500)
-
-vulg.fig
+Cv.plot
 ```
-
-
-```{r}
-sstate_damping %>% 
-  filter(Species %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")) %>%
-  ggplot() + 
-  geom_tile(aes(x = TempDiff_C, y = PulseSpace_s, fill = DampingIndex)) +  
-  viridis::scale_fill_viridis(option="mako", na.value="white") + 
-  facet_wrap(vars(Species))+ #, labeller = labeller(Species=species.labs)) +  
-  theme_linedraw() +
-  theme(strip.text = element_text(face = "italic")) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-```
-
-
-
-```{r}
-sstate_damping$PulseSpace_s <- factor(sstate_damping$PulseSpace_s, levels = c("1","2","4","8","16"))
-sstate_damping$Temp_C <- factor(sstate_damping$Temp_C, levels = c("0","2","4","6","8","10","12","14","16","18","20","22","24"))
-
-species.labs <- c("Chlamydomonas ICEMDV", "Chlamydomonas malina", "Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris", "Fragilariopsis cylindrus", "Thalassiosira pseudonana")
-names(species.labs) <- c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris", "Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")
-
-# sstate_damping <- sstate_damping %>%
-#   mutate(DampingIndex = ifelse(DampingIndex == 0, NA, DampingIndex))
-```
-
-
-```{r heat map}
-sstate_damping %>% 
-  ggplot() + 
-  geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +
-  viridis::scale_fill_viridis(option="mako", na.value="white") + 
-  labs(x= "Temperature (°C)", y= "Flash Spacing (s)", fill= "Damping Index") + 
-  facet_wrap(vars(Species), scales = "free", labeller = labeller(Species=species.labs)) +  
-  theme_linedraw() +
-  theme(strip.text = element_text(face = "italic")) +
-  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank()) 
-```
-
-
 
 

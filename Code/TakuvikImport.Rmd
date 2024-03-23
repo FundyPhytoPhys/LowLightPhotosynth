@@ -73,11 +73,12 @@ TakuvikMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1OC22KJy-V
 read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(Filename = flnm)
 }
 
+# NOTE: this function is different for Takuvik because grouping by Temp_C creates downstream issues due to the two different growth temperatures of Fragilariopsis cylindrus 
 conversion <- function(data){
   data %>%
-    group_by(Filename) %>%
+    group_by(PulseSpace_s, TempDiff_C) %>% 
     mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
-    mutate(Light_Level = round(Light_Level, 3)) %>%
+    mutate(Light_Level = round(Light_Level, 5)) %>%
     ungroup()
 }
 ```
@@ -194,10 +195,11 @@ SeGu1006_2C_16s <- SolFitsTrim %>%
   filter(Flashnumber %in% c(2:33)) %>%
   mutate(Flashnumber = row_number())
   
+
 SolFitsTrim2 <- rbind(last32,SeGu1005_2C_16s, SeGu1006_2C_16s)
 ```
 
-### Normalize Fluorescence & Add Light Level and Temperature Differential Columns 
+### Normalize Fluorescence & Add Temperature Differential Column 
 
 ```{r tidy clean data}
 SolFitsTrim2 <- SolFitsTrim2 %>%
@@ -222,11 +224,7 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
            ifelse(CultureID %in% c("SeGu1005", "SeGu1006", "SeGu1007", "SeGu1008"), 6,
                   NA))) %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
-
-SolFitsTrim2 <- conversion(SolFitsTrim2) # add column for light level (µmol photons/m2/s)
 ```
-
-
 
 ### Group by Taxon 
 ```{r}
@@ -238,6 +236,12 @@ SolFitsFragilariopsis <- SolFitsTrim2 %>%
 #Note SeGu1003 and 1008 were excluded due to culture issues 
 ```
 
+
+### Calculate Light Levels
+```{r}
+SolFitsChaeotoceros <- conversion(SolFitsChaeotoceros)
+SolFitsFragilariopsis <- conversion(SolFitsFragilariopsis)
+```
 
 
 ### Test Plots
