@@ -23,19 +23,19 @@ Fc_data <- readRDS("../Data/CleanData/LOW_Fragilariopsis_cylindrus_SolFitsTrim.R
 
 s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
 
-Fc_data %>%
-  filter(Filename == "20230926_SeGu1001_0C_1s") %>%
-  filter(Flashnumber <= 13) %>%
-  ggplot() +
-  geom_point(aes(x=Flashnumber, y=FvFmrunnorm, col=as.factor(SState))) +
-  scale_color_manual(values = s.col) +
-  #scale_y_continuous(limits=c(0.5, 1.1)) +
-  scale_x_continuous(breaks=c(4,8,12))+
-  labs(x= "Flash Number", y= "Normalized Chlorophyll Fluorescence") +
-  theme_bw() +
-  theme(legend.position = "none", text = element_text(family = "Palatino"), 
-        axis.text=element_text(size=16), axis.title=element_text(size=14.8),
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+# Fc_data %>%
+#   filter(Filename == "20230926_SeGu1001_0C_1s") %>%
+#   filter(Flashnumber <= 13) %>%
+#   ggplot() +
+#   geom_point(aes(x=Flashnumber, y=FvFmrunnorm, col=as.factor(SState))) +
+#   scale_color_manual(values = s.col) +
+#   #scale_y_continuous(limits=c(0.5, 1.1)) +
+#   scale_x_continuous(breaks=c(4,8,12))+
+#   labs(x= "Flash Number", y= "Normalized Chlorophyll Fluorescence") +
+#   theme_bw() +
+#   theme(legend.position = "none", text = element_text(family = "Palatino"), 
+#         axis.text=element_text(size=16), axis.title=element_text(size=14.8),
+#         panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
 
 
@@ -131,8 +131,6 @@ plot.wt.grid <- function(wavelets) {
 
 
 
-
-
 ```{r Periodicity Test, warning=FALSE}
 plot.wt.grid(Ci_wavelets)
 plot.wt.grid(Cm_wavelets)
@@ -146,8 +144,6 @@ plot.wt.grid(Tp_wavelets)
 ### Damping Across Taxa
 
 ```{r}
-library(plotly)
-library(reshape2)
 
 sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Damping.Rds") %>%
   mutate(Strain = factor(Strain))
@@ -159,16 +155,43 @@ list2env(split.sstate, envir = .GlobalEnv)
 ```
 
 
+```{r}
+library(mgcv)
+Ci <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Ci.damping)
+Cm <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Cm.damping)
+Cp <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Cp.damping)
+Cr <- gam(DampingIndex ~ s(TempDiff_C, k=4) + s(Light_Level), data=Cr.damping)
+Cv <- gam(DampingIndex ~ s(TempDiff_C, k=5) + s(Light_Level), data=Cv.damping)
+Tp <- gam(DampingIndex ~ s(TempDiff_C, k=7) + s(Light_Level), data=Tp.damping)
+Fc <- gam(DampingIndex ~ s(TempDiff_C, k=7) + s(Light_Level), data=Fc.damping)
 
+vis.gam(Ci, plot.type = "contour")
+vis.gam(Cm, plot.type = "contour")
+vis.gam(Cp, plot.type = "contour")
+vis.gam(Cr, plot.type = "contour")
+vis.gam(Cv, plot.type = "contour")
+vis.gam(Tp, plot.type = "contour")
+vis.gam(Fc, plot.type = "contour")
+```
 
 ```{r}
-library(plotly)
+diatoms <- sstate_damping %>%
+  filter(Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana"))
 
-plot.heatmap <- function(damping) {
+dlmin <- min(diatoms$Light_Level)
+dlmax <- max(diatoms$Light_Level)
+
+dtmin <- -6
+dtmax <- 6
+```
+
+```{r}
+library(metR)
+library(viridis)
+
+plot.heatmap.loess <- function(damping) {
   
-  x.scale <- as.numeric(unique(damping$TempDiff_C))
-  
-  loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, data = damping)
+  loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, span=0.8, data = damping)
   
   data <- with(damping, expand.grid(
     Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
@@ -183,73 +206,116 @@ plot.heatmap <- function(damping) {
     dplyr::rename("DampingIndex" = "value") %>%
     mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex))
   
-  plot <- plot_ly(melt, x = ~TempDiff_C, y = ~Light_Level, z = ~DampingIndex, type = "contour",
-                  autocontour = TRUE, contours = list(coloring = 'heatmap', showlabels= TRUE),
-                     line = list(smoothing = 0.9)) %>%
-    colorbar(title = "Damping Index", size = 12) %>%
-    config(staticPlot = TRUE) %>%
-    layout(
-      font = list(family = "Times New Roman", size = 13),
-      xaxis = list(title = "Deviation from Growth Temperature (°C)", 
-                   tickvals=c(x.scale),  fixedrange = TRUE),
-      yaxis = list(title = "Light Level (µmol photons m<sup>-2</sup> s<sup>-1</sup>)",
-                   fixedrange = TRUE)) %>%
-    config(responsive =FALSE)
+  plot <- melt %>%
+    ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
+    geom_contour_fill() + 
+    geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
+    geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
+    labs(x= "Deviation from Growth Temperature (°C)",
+         y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+         fill= "Damping Index"
+         ) +
+    scale_fill_continuous(type= "viridis", limits = c(0, 12)) +
+    scale_x_continuous(limits=c(-6,6), expand=c(0,0)) +
+    scale_y_continuous(limits=c(0.02,0.54),expand=c(0,0)) +
+    theme_linedraw() +
+    theme(text = element_text(family = "Times New Roman"), 
+        panel.border = element_blank(),
+        axis.text=element_text(size=11), axis.title=element_text(size=13),
+        legend.text=element_text(size=11), legend.title=element_text(size=10),
+        strip.background = element_rect(colour="black", fill=NA),
+        strip.text = element_text(size=11), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
   
   return(plot)
 }
 ```
 
 
-```{r}
-plot.heatmap(Cv.damping)
-
-
-plot.heatmap(Cr.damping)
-plot.heatmap(Cp.damping)
-plot.heatmap(Cm.damping)
-plot.heatmap(Ci.damping)
-plot.heatmap(Tp.damping)
-plot.heatmap(Fc.damping)
-```
-
 
 ```{r}
-x.scale <- as.numeric(unique(Cv.damping$TempDiff_C))
-
-Cv.loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, data = Cv.damping)
-
-Cv.data <- with(Cv.damping, expand.grid(
-  Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
-  TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.1)
-))
-
-Cv_mtrx3d <- predict(Cv.loess, newdata = Cv.data)
-
-Cv_mtrx_melt <- reshape2::melt(Cv_mtrx3d, id.vars = c('TempDiff_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
-  mutate(TempDiff_C = as.numeric(str_sub(TempDiff_C, str_locate(TempDiff_C, '=')[1,1] + 1)),
-         Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
-  dplyr::rename("DampingIndex" = "value") %>%
-  mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex))
-         
+predict.data.loess <- function(damping) {
   
-Cv.plot <- plot_ly(Cv_mtrx_melt, x = ~TempDiff_C, y = ~Light_Level, z = ~DampingIndex, type = "contour",
-                   autocontour = TRUE, contours = list(coloring = 'heatmap', showlabels= TRUE), 
-                   line = list(smoothing = 0.9)) %>%
-  colorbar(title = "Damping Index", size = 12) %>%
-  config(staticPlot = TRUE) %>%
-  layout(
-     font = list(family = "Times New Roman", size = 13),
-     xaxis = list(title = "Deviation from Growth Temperature (°C)", 
-                  tickvals = c(x.scale), fixedrange = TRUE),
-     yaxis = list(title = "Light Level (µmol photons m<sup>-2</sup> s<sup>-1</sup>)",
-                  fixedrange = TRUE))
-Cv.plot
+  Strain <- unique(damping$Strain)
+  
+  loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, span=0.8, data = damping)
+  
+  data <- with(damping, expand.grid(
+    Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
+    TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.1)
+  ))
+  
+  predict <- predict(loess, newdata = data)
+  
+  melt <- reshape2::melt(predict, id.vars = c('TempDiff_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
+    mutate(TempDiff_C = as.numeric(str_sub(TempDiff_C, str_locate(TempDiff_C, '=')[1,1] + 1)),
+           Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
+    dplyr::rename("DampingIndex" = "value") %>%
+    mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
+    mutate(Strain = Strain)
+  
+  return(melt)
+}
+```
 
+
+```{r}
+predicted <- lapply(split.sstate, predict.data.loess)
+predicted.df <- bind_rows(predicted) 
+
+predicted.df <- predicted.df %>%
+  mutate(ThermalTolerance =
+           ifelse(Strain %in% c("Fragilariopsis_cylindrus", "Chlamydomonas_ICEMDV",
+                           "Chlamydomonas_malina", "Chlamydomonas_priscuii"), "Polar", 
+            ifelse(Strain %in% c("Thalassiosira_pseudonana","Chlorella_vulgaris",
+                                "Chlamydomonas_reinhardtii"), "Temperate", NA))) %>%
+  mutate(Type =
+           ifelse(Strain %in% c("Fragilariopsis_cylindrus","Thalassiosira_pseudonana"), "Diatom", 
+                  ifelse(Strain %in% c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina",
+                                       "Chlamydomonas_priscuii", "Chlorella_vulgaris",
+                                        "Chlamydomonas_reinhardtii"), "Green Algae", NA)))
+                              
+
+predicted.df$Strain <- factor(predicted.df$Strain, levels= c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana","Chlamydomonas_ICEMDV", "Chlamydomonas_reinhardtii",  "Chlamydomonas_priscuii", "Chlorella_vulgaris", "Chlamydomonas_malina"))
+
+strain.labs <- c("Fragilariopsis cylindrus", "Thalassiosira pseudonana", "Chlamydomonas ICEMDV", "Chlamydomonas malina", "Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris")
+names(strain.labs) <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana", "Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris")
 ```
 
 ```{r}
-Cv.plot
+x.breaks <- seq(min(sstate_damping$TempDiff_C), max(sstate_damping$TempDiff_C),4)
+y.breaks <- seq(0, 0.9, 0.2)
+
+
+predicted.df %>%
+  ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
+  geom_contour_fill() + 
+  geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
+  geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
+  labs(x= "Deviation from Growth Temperature (°C)",
+       y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+       fill= "Damping Index"
+         ) +
+  scale_fill_viridis(option="mako",
+                     breaks = seq(0, 12, by = 3)) +
+  scale_x_continuous(breaks= c(x.breaks), expand=c(0,0)) +
+  scale_y_continuous(breaks= c(y.breaks), expand=c(0,0)) +
+  facet_wrap(vars(Strain), ncol=2, scales= "free", labeller = labeller(Strain=strain.labs)) + 
+  theme_bw() +
+    theme(text = element_text(family = "Times New Roman"), 
+        axis.text=element_text(size=11), axis.title=element_text(size=13),
+        legend.text=element_text(size=11), legend.title=element_text(size=13),
+        strip.background = element_rect(colour="black", fill=NA),
+        strip.text = element_text(size=11, face="italic"), 
+        legend.position = c(1, 0), legend.justification = c(1, 0), 
+        #legend.position = c(0.75, 0.1), 
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+
+
+ ggsave("sstate_heatmap.png", width = 8 , height = 9, dpi = 900,
+       plot=last_plot(),
+       path="../Output")
 ```
+
 
 
