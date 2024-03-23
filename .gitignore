@@ -34,3 +34,4 @@ vignettes/*.pdf
 
 # .DS_Store
 .DS_Store
+Data/ProcessedData/LOW_Wavelets.RDS
