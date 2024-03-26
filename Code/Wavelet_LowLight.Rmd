@@ -51,8 +51,8 @@ wavelet <- function(data_list){
     WaveletComp::analyze.wavelet(data, "FvFmrunnorm",
                                  method = "white.noise",
                                  loess.span = 0.75, 
-                                 dt = 1, dj=1/250, 
-                                 n.sim = 300, 
+                                 dt = 1, dj=1/200, 
+                                 n.sim = 200, 
                                  verbose = FALSE)
   })
 return(wavelet_list)
@@ -161,8 +161,8 @@ plot.wt.image <- function(wavelet_list) {
 Fc_fits <- list.files(path = DataIn, pattern = paste(Fc, FileID, sep = "_"), full.names = TRUE) %>%
   readRDS()
 
-Fc_data <- summaryBy(FvFmrunnorm ~ PulseSpace_s + Temp_C + Flashnumber + Light_Level + TempDiff_C, data=Fc_fits, FUN=mean, keep.names = TRUE) %>%
-  splitBy(formula = ~ PulseSpace_s + Temp_C + Light_Level + TempDiff_C) %>%
+Fc_data <- summaryBy(FvFmrunnorm ~ PulseSpace_s + Temp_C + Flashnumber + Light_Level + GrowthTemp_C, data=Fc_fits, FUN=mean, keep.names = TRUE) %>%
+  splitBy(formula = ~ PulseSpace_s + Temp_C + Light_Level + GrowthTemp_C) %>%
   setNames(., paste0("Fc_", gsub("\\|", "_", names(.))))
 ```
 
@@ -183,9 +183,13 @@ Fc_reconstruction <- reconstructwave(Fc_wavelets)
 Fc_damping <- damping(Fc_reconstruction)  %>%
   mutate(damping.index = ifelse(!condition %in% Fc_significant, 0, damping.index)) %>%
   rename(DampingIndex = damping.index) %>%
-  separate(condition,into= c("Strain", "PulseSpace_s", "Temp_C", "Light_Level", "TempDiff_C"), sep="_") %>%
+  separate(condition,into= c("Strain", "PulseSpace_s", "Temp_C", 
+                             "Light_Level", "GrowthTemp_C"), sep="_") %>%
   mutate(Strain = Fc) %>%
-  relocate(DampingIndex, .before = TempDiff_C)
+  mutate(TempDiff_C = ifelse(GrowthTemp_C == 0, Temp_C, 
+                             ifelse(GrowthTemp_C == 6, as.numeric(Temp_C) - 6, NA))) %>%
+  #relocate(DampingIndex, .before = )
+  select(-"GrowthTemp_C")
 ```
 
 
@@ -390,9 +394,8 @@ Tp_damping <- damping(Tp_reconstruction)  %>%
 sstate_damping <- rbind(Fc_damping, Ci_damping, Cm_damping, 
                         Cp_damping, Cr_damping, Cv_damping, Tp_damping) %>%
     type_convert() 
-```
 
-```{r saving as RDS}
+
 saveRDS(sstate_damping, file.path(DataOut, paste(Project, "SState_Damping.RDS", sep = "_"), fsep = .Platform$file.sep))
 ```
 
@@ -400,6 +403,12 @@ saveRDS(sstate_damping, file.path(DataOut, paste(Project, "SState_Damping.RDS", 
 wavelets <- c(Fc_wavelets, Ci_wavelets, Cm_wavelets, Cp_wavelets, Cr_wavelets, Cv_wavelets, Tp_wavelets)
 
 saveRDS(wavelets, file.path(DataOut, paste(Project, "Wavelets.RDS", sep = "_"), fsep = .Platform$file.sep))
+```
+
+```{r}
+reconstructions <- c(Fc_reconstruction, Ci_reconstruction, Cm_reconstruction, Cp_reconstruction, Cr_reconstruction, Cv_reconstruction, Tp_reconstruction)
+
+saveRDS(reconstructions, file.path(DataOut, paste(Project, "Reconstructions.RDS", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 # Figures 

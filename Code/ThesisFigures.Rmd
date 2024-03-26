@@ -10,8 +10,28 @@ editor_options:
 
 This RMD imports data to generate figures for Natasha Ryan's undergraduate honours thesis at Mount Allison University. 
 
-```{r}
+
+# Setup
+```{r load libraries}
 library(tidyverse)
+library(metR)
+library(viridis)
+```
+
+```{r create ggplot theme}
+theme_thesis <- function() {
+  theme_bw() +
+  theme(text = element_text(family = "Times New Roman"), 
+        axis.text=element_text(size=11), axis.title=element_text(size=13),
+        legend.text=element_text(size=11), legend.title=element_text(size=13),
+        strip.background = element_rect(colour="black", fill=NA),
+        strip.text = element_text(size=11), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()
+  )
+}
+
+s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
 ```
 
 
@@ -21,7 +41,6 @@ library(tidyverse)
 Fc_data <- readRDS("../Data/CleanData/LOW_Fragilariopsis_cylindrus_SolFitsTrim.Rds") %>%
   mutate(SState = ifelse(SState == 4, 0, SState))
 
-s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
 
 # Fc_data %>%
 #   filter(Filename == "20230926_SeGu1001_0C_1s") %>%
@@ -33,7 +52,7 @@ s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
 #   scale_x_continuous(breaks=c(4,8,12))+
 #   labs(x= "Flash Number", y= "Normalized Chlorophyll Fluorescence") +
 #   theme_bw() +
-#   theme(legend.position = "none", text = element_text(family = "Palatino"), 
+#   theme(legend.position = "none", text = element_text(family = "Palatino"),
 #         axis.text=element_text(size=16), axis.title=element_text(size=14.8),
 #         panel.grid.major = element_blank(), panel.grid.minor = element_blank())
 ```
@@ -44,28 +63,38 @@ s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
 ### Representative Fluorescence Oscillations
 
 ```{r warning=FALSE}
-Fc_data %>%
-  filter(CultureID == "SeGu1001", 
-         Temp_C %in% c(0,10), 
-         ObsDate == "2023-09-27",
-         PulseSpace_s %in% c(1,4,16)) %>%
+Cp_data <- readRDS("../Data/CleanData/LOW_Chlamydomonas_priscuii_SolFitsTrim.Rds") %>%
+  mutate(SState = ifelse(SState == 4, 0, SState)) %>%
+  ungroup()
+
+Cp_data <- Cp_data %>%
+    group_by(PulseSpace_s) %>%
+    mutate(Approx_Light_Level = mean(as.numeric(Light_Level))) %>%
+    mutate(Approx_Light_Level = round(Approx_Light_Level, 3)) %>%
+    ungroup()
+
+Cp_data %>%
+  filter(CultureID == "MaPo1001", 
+         ObsDate == "2023-09-18", 
+         Temp_C %in% c(4,12), 
+         PulseSpace_s %in% c(1,4,8)) %>%
   ggplot() +
   geom_point(aes(x=Flashnumber, y=FvFmrunnorm, col=as.factor(SState))) +
   scale_color_manual(values = s.col) +
-  labs(x= "Flash Number", y= "Normalized Chlorophyll Fluorescence", col= "Majority S-State") +
-  facet_grid(rows=vars(PulseSpace_s), cols=vars(Temp_C)) +
-  scale_y_continuous(sec.axis=sec_axis(~ . , name = sym("Flash Spacing (s)"),breaks = NULL,labels = NULL)) +
+  labs(x= "Flash Number", 
+       y=expression("Normalized Chlorophyll Fluorescence (F"[v]*" / F"[m]*")"),
+       col= "Majority S-State") +
+  ggh4x::facet_nested(rows=vars(PulseSpace_s, Approx_Light_Level), cols=vars(Temp_C)) +
+  scale_y_continuous(sec.axis=sec_axis(~ . , 
+                     name = bquote(Steady ~ State ~ Light ~ (µmol ~ photons ~ m^-2 ~ s^-1)), 
+                     breaks = NULL,labels = NULL)) +
   scale_x_continuous(breaks=c(4,8,12,16,20,24,28,32),
-       sec.axis=sec_axis(~ . , name = sym("Measurement Temperature (°C)"), breaks = NULL, labels = NULL)) +
-  theme_bw() +
-  theme(text = element_text(family = "Times New Roman"), 
-        axis.text=element_text(size=11), axis.title=element_text(size=13),
-        legend.text=element_text(size=11), legend.title=element_text(size=13),
-        strip.background = element_rect(colour="black", fill=NA),
-        strip.text = element_text(size=11), 
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+                     sec.axis=sec_axis(~ . , 
+                                       name = sym("Measurement Temperature (°C)"), 
+                                       breaks = NULL, labels = NULL)) +
+  theme_thesis()
 
- # ggsave("representativeoscillations.png", width = 8, height = 5, dpi = 900,
+ # ggsave("representativeoscillations.png", width = 9, height = 6, dpi = 900,
  #       plot=last_plot(),
  #       path="../Output")
 ```
@@ -73,20 +102,52 @@ Fc_data %>%
 
 
 ### FFT
+```{r}
+Cp_data %>%
+  filter(CultureID == "MaPo1001", 
+         ObsDate == "2023-09-18", 
+         Temp_C == 4, 
+         PulseSpace_s == 1) %>%
+  ggplot() +
+  geom_point(aes(x=Flashnumber, y=FvFmrunnorm, col=as.factor(SState))) +
+  scale_color_manual(values = s.col) +
+  labs(x= "Flash Number", 
+       y=expression("Normalized Chlorophyll Fluorescence (F"[v]*" / F"[m]*")"),
+       col= "Majority S-State") +
+  scale_x_continuous(breaks=c(4,8,12,16,20,24,28,32)) +
+  theme_thesis() +
+  theme(legend.position = "none")
 
 
+ggsave("wavelet_before.png", width = 4, height = 4, dpi = 900,
+       plot=last_plot(),
+       path="../Output")
+```
+
+```{r}
+wave_data <- Cp_wavelets[["Cp_1_4_0.77084"]]
 
 
-### Wavelet Power
+WaveletComp::reconstruct(wave_data, only.sig=FALSE,
+            plot.waves = TRUE, plot.rec = FALSE,
+            spec.time.axis = list(at = c(0,4,8,12,16,20,24,28,32)),
+            timelab = "Flash Number",
+            verbose = FALSE)
+```
+
+
+### Wavelet Periodicity 
 
 ```{r}
 wavelets <- readRDS("../Data/ProcessedData/LOW_Wavelets.Rds") 
 specieslists <- split(wavelets, sub("_.*", "_wavelets", names(wavelets)))
 list2env(specieslists, envir = .GlobalEnv)
+
+FcG0_wavelets <- Fc_wavelets[grepl(paste("_0$", collapse = "|"), names(Fc_wavelets))]
+FcG6_wavelets <- Fc_wavelets[grepl(paste("_6$", collapse = "|"), names(Fc_wavelets))]
 ```
 
-
-```{r function}
+```{r periodicity function}
 plot.wt.grid <- function(wavelets) {
   result_list <- lapply(names(wavelets), function(condition_name) {
     condition <- wavelets[[condition_name]]
@@ -96,15 +157,19 @@ plot.wt.grid <- function(wavelets) {
     Condition <- rep(condition_name, length(Power.avg))  # Repeat condition name for each row
     df <- data.frame(Power.avg, Power.avg.pval, Period, Condition) %>%
       separate(Condition, into = c("Strain", "PulseSpace_s", "Temp_C", "LightLevel"), sep = "_") %>%
-      mutate(PulseSpace_s = factor(PulseSpace_s, levels = c("1","2","4","8","16")),
+      mutate(PulseSpace_s = factor(PulseSpace_s, levels = c("1", "2","4","8","16")),
              Temp_C = factor(Temp_C, levels = 
-                               c("0","2","4","6","8","10","12","14","16","18","20","22","24","26","28"))) %>%
-      mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))
+                           c("0","2","4","6","8","10","12","14","16","18","20","22","24","26","28"))) %>%
+      mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1))  %>%
     
      return(df)
   })
 
-  result_df <- bind_rows(result_list)  # Combine all data frames and add a column for element names
+  result_df <- bind_rows(result_list) %>%
+    group_by(PulseSpace_s) %>%
+    mutate(Light_Level = mean(as.numeric(LightLevel))) %>%
+    mutate(Light_Level = round(Light_Level, 3)) %>%
+    ungroup()
   
   plot <- result_df %>%
     ggplot()+ 
@@ -112,23 +177,19 @@ plot.wt.grid <- function(wavelets) {
     scale_color_gradient(low="#4AC0AD", high="black", breaks= c(0.05, 1), 
                          labels= c("≤ 0.05", "> 0.05"), guide="legend") +
     labs(x= "Average Wavelet Power", colour= "P-Value") +
-    facet_grid(rows=vars(PulseSpace_s), cols = vars(Temp_C)) +
-    scale_y_continuous(sec.axis=sec_axis(~ . , name = sym("Flash Spacing (s)"),
-                                         breaks = NULL,labels = NULL)) +
-    scale_x_continuous(limits= c(0:1), breaks=c(0, 0.5, 1), 
-        sec.axis=sec_axis(~ . , name = sym("Measurement Temperature (°C)"), breaks = NULL, labels = NULL)) +
-    theme_bw() +
-    theme(text = element_text(family = "Times New Roman"), 
-        axis.text=element_text(size=11), axis.title=element_text(size=13),
-        legend.text=element_text(size=11), legend.title=element_text(size=13),
-        strip.background = element_rect(colour="black", fill=NA),
-        strip.text = element_text(size=11), 
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
-    
+    ggh4x::facet_nested(rows=vars(PulseSpace_s, Light_Level), cols = vars(Temp_C)) +
+    scale_y_continuous(limits= c(0,10),
+                       breaks= c(0,4,8), 
+                 sec.axis=sec_axis(~ . , 
+                                   name = bquote(Steady ~ State ~ Light ~ (µmol ~ photons ~ m^-2 ~ s^-1)), 
+                                   breaks = NULL,labels = NULL)) +
+    scale_x_continuous(limits= c(0,1), 
+                       breaks=c(0, 0.4, 0.8),
+      sec.axis=sec_axis(~ . , name = sym("Measurement Temperature (°C)"), breaks = NULL, labels = NULL)) +
+    theme_thesis()
   return(plot)
 }
 ```
-
 
 
 ```{r Periodicity Test, warning=FALSE}
@@ -138,103 +199,103 @@ plot.wt.grid(Cp_wavelets)
 plot.wt.grid(Cr_wavelets)
 plot.wt.grid(Cv_wavelets)
 plot.wt.grid(Tp_wavelets)
+plot.wt.grid(FcG6_wavelets)
+plot.wt.grid(FcG0_wavelets)
+
+
+plot.wt.grid(Cp_wavelets)
+ # ggsave("representative_wtavg.png", width = 9.5, height = 6, dpi = 900,
+ #      plot=last_plot(),
+ #      path="../Output")
+```
+
+### Reconstruction 
+
+```{r}
+reconstructions <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_Reconstructions.Rds") 
+reconstruction.list <- split(reconstructions, sub("_.*", "_reconstruction", names(reconstructions)))
+list2env(reconstruction.list, envir = .GlobalEnv)
+
+FcG0_reconstruction <- Fc_reconstruction[grepl(paste("_0$", collapse = "|"), names(Fc_reconstruction))]
+FcG6_reconstruction <- Fc_reconstruction[grepl(paste("_6$", collapse = "|"), names(Fc_reconstruction))]
 ```
 
 
-### Damping Across Taxa
-
 ```{r}
-
-sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Damping.Rds") %>%
-  mutate(Strain = factor(Strain))
-
-split.sstate <- split(sstate_damping, sstate_damping$Strain)
-names(split.sstate) <- c("Ci.damping", "Cm.damping", "Cp.damping", "Cr.damping", 
-                         "Cv.damping", "Fc.damping", "Tp.damping")
-list2env(split.sstate, envir = .GlobalEnv)
-```
-
-
-```{r}
-library(mgcv)
-Ci <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Ci.damping)
-Cm <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Cm.damping)
-Cp <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Cp.damping)
-Cr <- gam(DampingIndex ~ s(TempDiff_C, k=4) + s(Light_Level), data=Cr.damping)
-Cv <- gam(DampingIndex ~ s(TempDiff_C, k=5) + s(Light_Level), data=Cv.damping)
-Tp <- gam(DampingIndex ~ s(TempDiff_C, k=7) + s(Light_Level), data=Tp.damping)
-Fc <- gam(DampingIndex ~ s(TempDiff_C, k=7) + s(Light_Level), data=Fc.damping)
-
-vis.gam(Ci, plot.type = "contour")
-vis.gam(Cm, plot.type = "contour")
-vis.gam(Cp, plot.type = "contour")
-vis.gam(Cr, plot.type = "contour")
-vis.gam(Cv, plot.type = "contour")
-vis.gam(Tp, plot.type = "contour")
-vis.gam(Fc, plot.type = "contour")
-```
-
-```{r}
-diatoms <- sstate_damping %>%
-  filter(Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana"))
-
-dlmin <- min(diatoms$Light_Level)
-dlmax <- max(diatoms$Light_Level)
-
-dtmin <- -6
-dtmax <- 6
-```
-
-```{r}
-library(metR)
-library(viridis)
-
-plot.heatmap.loess <- function(damping) {
+plot.reconstruction <- function(reconstructed) {
+  result_list <- Map(function(condition_name, condition_data) {
+    series <- as.data.frame(condition_data$series)
+    series <- mutate(series, Condition = condition_name) %>%
+      mutate(Flashnumber = row_number())  %>%
+      separate(Condition, into = c("Strain", "PulseSpace_s", "Temp_C", "LightLevel"),
+                sep = "([\\/\\_])") %>%
+       mutate(PulseSpace_s = factor(PulseSpace_s, levels = c("1","2","4","8","16")),
+             Temp_C = factor(Temp_C, levels = 
+                               c("0","2","4","6","8","10","12","14","16","18","20","22","24","26","28")))
+    return(series)
+  }, names(reconstructed), reconstructed)
   
-  loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, span=0.8, data = damping)
+  result_df <- bind_rows(result_list) %>%
+    group_by(PulseSpace_s) %>%
+    mutate(Light_Level = mean(as.numeric(LightLevel))) %>%
+    mutate(Light_Level = round(Light_Level, 3)) %>%
+    ungroup()
   
-  data <- with(damping, expand.grid(
-    Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
-    TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.1)
-  ))
-  
-  predict <- predict(loess, newdata = data)
-  
-  melt <- reshape2::melt(predict, id.vars = c('TempDiff_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
-    mutate(TempDiff_C = as.numeric(str_sub(TempDiff_C, str_locate(TempDiff_C, '=')[1,1] + 1)),
-           Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
-    dplyr::rename("DampingIndex" = "value") %>%
-    mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex))
-  
-  plot <- melt %>%
-    ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
-    geom_contour_fill() + 
-    geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
-    geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
-    labs(x= "Deviation from Growth Temperature (°C)",
-         y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
-         fill= "Damping Index"
-         ) +
-    scale_fill_continuous(type= "viridis", limits = c(0, 12)) +
-    scale_x_continuous(limits=c(-6,6), expand=c(0,0)) +
-    scale_y_continuous(limits=c(0.02,0.54),expand=c(0,0)) +
-    theme_linedraw() +
-    theme(text = element_text(family = "Times New Roman"), 
-        panel.border = element_blank(),
-        axis.text=element_text(size=11), axis.title=element_text(size=13),
-        legend.text=element_text(size=11), legend.title=element_text(size=10),
-        strip.background = element_rect(colour="black", fill=NA),
-        strip.text = element_text(size=11), 
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  plot <- result_df %>%
+    ggplot()+
+    geom_line(aes(x=Flashnumber, y=FvFmrunnorm, col = "Original")) +
+    geom_line(aes(x=Flashnumber, y=FvFmrunnorm.r, col= "Reconstructed"))  +
+    scale_colour_manual(values=c("black", "deepskyblue3"), 
+                        labels = c("Original", expression(paste("Reconstucted (", alpha, " = 0.05)")))) +
+    labs(x= "Flash Number", 
+         y=expression("Normalized Chlorophyll Fluorescence (F"[v]*" / F"[m]*")"),
+         col= "Wave Function") +
+    ggh4x::facet_nested(rows=vars(PulseSpace_s, Light_Level), cols=vars(Temp_C)) +
+    scale_y_continuous(sec.axis=sec_axis(~ . , 
+                           name = bquote(Steady ~ State ~ Light ~ (µmol ~ photons ~ m^-2 ~ s^-1)), 
+                                         breaks = NULL,labels = NULL)) +
+    scale_x_continuous(sec.axis=sec_axis(~ . , name = sym("Measurement Temperature (°C)"), 
+                                         breaks = NULL, labels = NULL)) +
+    theme_thesis()
   
   return(plot)
 }
 ```
 
 
+```{r warning=FALSE}
+plot.reconstruction(Ci_reconstruction)
+plot.reconstruction(Cm_reconstruction)
+plot.reconstruction(Cr_reconstruction)
+plot.reconstruction(Cv_reconstruction)
+plot.reconstruction(Tp_reconstruction)
+plot.reconstruction(FcG0_reconstruction)
+plot.reconstruction(FcG6_reconstruction)
+
+plot.reconstruction(Cp_reconstruction)
+
+ # ggsave("representative_reconstruction.png", width = 10, height = 6, dpi = 900,
+ #      plot=last_plot(),
+ #      path="../Output")
+```
+
+
+### Damping Across Taxa
 
 ```{r}
-predict.data.loess <- function(damping) {
+sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Damping.Rds") %>%
+  mutate(Strain = factor(Strain))
+
+split.sstate <- split(sstate_damping, sstate_damping$Strain)
+names(split.sstate) <- c("Ci.damping", "Cm.damping", "Cp.damping", "Cr.damping", 
+                         "Cv.damping", "Fc.damping", "Tp.damping")
+#list2env(split.sstate, envir = .GlobalEnv)
+```
+
+
+##### By Deviation from Growth Temp 
+```{r}
+predict.data.tempdiff <- function(damping) {
   
   Strain <- unique(damping$Strain)
   
@@ -260,23 +321,10 @@ predict.data.loess <- function(damping) {
 
 
 ```{r}
-predicted <- lapply(split.sstate, predict.data.loess)
-predicted.df <- bind_rows(predicted) 
+predicted.td <- lapply(split.sstate, predict.data.tempdiff)
+predicted.td <- bind_rows(predicted.td) 
 
-predicted.df <- predicted.df %>%
-  mutate(ThermalTolerance =
-           ifelse(Strain %in% c("Fragilariopsis_cylindrus", "Chlamydomonas_ICEMDV",
-                           "Chlamydomonas_malina", "Chlamydomonas_priscuii"), "Polar", 
-            ifelse(Strain %in% c("Thalassiosira_pseudonana","Chlorella_vulgaris",
-                                "Chlamydomonas_reinhardtii"), "Temperate", NA))) %>%
-  mutate(Type =
-           ifelse(Strain %in% c("Fragilariopsis_cylindrus","Thalassiosira_pseudonana"), "Diatom", 
-                  ifelse(Strain %in% c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina",
-                                       "Chlamydomonas_priscuii", "Chlorella_vulgaris",
-                                        "Chlamydomonas_reinhardtii"), "Green Algae", NA)))
-                              
-
-predicted.df$Strain <- factor(predicted.df$Strain, levels= c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana","Chlamydomonas_ICEMDV", "Chlamydomonas_reinhardtii",  "Chlamydomonas_priscuii", "Chlorella_vulgaris", "Chlamydomonas_malina"))
+predicted.td$Strain <- factor(predicted.td$Strain,  levels= c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana","Chlamydomonas_ICEMDV", "Chlorella_vulgaris", "Chlamydomonas_priscuii","Chlamydomonas_reinhardtii" ,"Chlamydomonas_malina"))
 
 strain.labs <- c("Fragilariopsis cylindrus", "Thalassiosira pseudonana", "Chlamydomonas ICEMDV", "Chlamydomonas malina", "Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris")
 names(strain.labs) <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana", "Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris")
@@ -286,8 +334,9 @@ names(strain.labs) <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana", 
 x.breaks <- seq(min(sstate_damping$TempDiff_C), max(sstate_damping$TempDiff_C),4)
 y.breaks <- seq(0, 0.9, 0.2)
 
-
-predicted.df %>%
+#diatoms
+predicted.td %>%
+  filter(Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
   ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
   geom_contour_fill() + 
   geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
@@ -298,24 +347,172 @@ predicted.df %>%
          ) +
   scale_fill_viridis(option="mako",
                      breaks = seq(0, 12, by = 3)) +
+  coord_cartesian(ylim = c(0.03, 0.53)) +
+  scale_x_continuous(limits= c(-6,6),breaks= c(x.breaks), expand=c(0,0)) +
+  scale_y_continuous(breaks= c(0.1,0.2,0.3,0.4,0.5), expand=c(0,0)) +
+  facet_wrap(vars(Strain), ncol=2, labeller = labeller(Strain=strain.labs)) + 
+  theme_thesis() +
+  theme(strip.text = element_text(face="italic"))
+
+# ggsave("diatoms_diff.png", width = 8 , height = 4, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output")
+```
+
+```{r}
+#algae
+predicted.td %>%
+  filter(!Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
+  ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
+  geom_contour_fill() + 
+  geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
+  geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
+  geom_vline(xintercept = 0, col="white") +
+  labs(x= "Deviation from Growth Temperature (°C)",
+       y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+       fill= "Damping Index"
+         ) +
+  scale_fill_viridis(option="mako",
+                     breaks = seq(0, 12, by = 3)) +
+  coord_cartesian(ylim = c(0.03, 0.66)) +
   scale_x_continuous(breaks= c(x.breaks), expand=c(0,0)) +
   scale_y_continuous(breaks= c(y.breaks), expand=c(0,0)) +
-  facet_wrap(vars(Strain), ncol=2, scales= "free", labeller = labeller(Strain=strain.labs)) + 
-  theme_bw() +
-    theme(text = element_text(family = "Times New Roman"), 
-        axis.text=element_text(size=11), axis.title=element_text(size=13),
-        legend.text=element_text(size=11), legend.title=element_text(size=13),
-        strip.background = element_rect(colour="black", fill=NA),
-        strip.text = element_text(size=11, face="italic"), 
-        legend.position = c(1, 0), legend.justification = c(1, 0), 
-        #legend.position = c(0.75, 0.1), 
-        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+  facet_wrap(vars(Strain), ncol=2, scales="free_x", labeller = labeller(Strain=strain.labs)) + 
+  theme_thesis() +
+  theme(strip.text = element_text(face="italic"),
+        legend.position = c(1,0), legend.justification = c(1, 0),
+        panel.spacing.x = unit(6, "mm"), panel.spacing.y = unit(6, "mm"))
 
-
- ggsave("sstate_heatmap.png", width = 8 , height = 9, dpi = 900,
-       plot=last_plot(),
-       path="../Output")
+# ggsave("algae_diff.png", width = 7 , height = 6, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output")
 ```
 
 
 
+
+##### By Measurement Temperature
+```{r}
+predict.data.temp <- function(damping) {
+  
+  Strain <- unique(damping$Strain)
+  
+  loess <- loess(DampingIndex ~ Temp_C * Light_Level, span=0.8, data = damping)
+  
+  data <- with(damping, expand.grid(
+    Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
+    Temp_C = seq(min(Temp_C), max(Temp_C), 0.1)
+  ))
+  
+  predict <- predict(loess, newdata = data)
+  
+  melt <- reshape2::melt(predict, id.vars = c('Temp_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
+    mutate(Temp_C = as.numeric(str_sub(Temp_C, str_locate(Temp_C, '=')[1,1] + 1)),
+           Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
+    dplyr::rename("DampingIndex" = "value") %>%
+    mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
+    mutate(Strain = Strain)
+  
+  return(melt)
+}
+```
+
+
+```{r}
+predicted.t <- lapply(split.sstate, predict.data.temp)
+predicted.t <- bind_rows(predicted.t) 
+
+
+Strain <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana","Chlamydomonas_ICEMDV", "Chlorella_vulgaris", "Chlamydomonas_priscuii","Chlamydomonas_reinhardtii" ,"Chlamydomonas_malina")
+GrowthTemp_C <- c(6,22,4,22,4,24,4)
+
+v.lines <- data.frame(Strain, GrowthTemp_C)
+
+predicted.t$Strain <- factor(predicted.t$Strain, levels= c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana","Chlamydomonas_ICEMDV", "Chlorella_vulgaris", "Chlamydomonas_priscuii","Chlamydomonas_reinhardtii" ,"Chlamydomonas_malina"))
+```
+
+```{r}
+x.breaks.t <- seq(min(sstate_damping$Temp_C), max(sstate_damping$Temp_C),4)
+y.breaks <- seq(0, 0.9, 0.2)
+
+#diatoms
+predicted.t %>%
+  filter(Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
+  ggplot(aes(x=Temp_C, y=Light_Level, z= DampingIndex)) +
+  geom_contour_fill() + 
+  geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
+  geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
+  geom_vline(data=subset(v.lines, 
+                         Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")),
+             aes(xintercept=GrowthTemp_C), col= "white", linetype = "longdash") +
+  labs(x= "Measurement Temperature (°C)",
+       y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+       fill= "Damping Index"
+         ) +
+  scale_fill_viridis(option="mako",
+                     breaks = seq(0, 12, by = 3)) +
+  coord_cartesian(ylim = c(0.03, 0.53)) +
+  scale_x_continuous(breaks= c(x.breaks.t), expand=c(0,0)) +
+  scale_y_continuous(breaks= c(0.1,0.2,0.3,0.4,0.5), expand=c(0,0)) +
+  facet_wrap(vars(Strain), ncol=2, scales= "free", labeller = labeller(Strain=strain.labs)) + 
+  theme_thesis() +
+  theme(strip.text = element_text(face="italic"))
+# 
+# ggsave("diatoms_temp.png", width = 8 , height = 4, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output")
+```
+
+
+```{r}
+#algae
+predicted.t%>%
+  filter(!Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
+  ggplot(aes(x=Temp_C, y=Light_Level, z= DampingIndex)) +
+  geom_contour_fill() + 
+  geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
+  geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
+  labs(x= "Measurement Temperature (°C)",
+       y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+       fill= "Damping Index"
+         ) +
+   geom_vline(data=subset(v.lines, 
+                         !Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")),
+             aes(xintercept=GrowthTemp_C), col= "white", linetype = "longdash") +
+  scale_fill_viridis(option="mako",
+                     breaks = seq(0, 12, by = 3)) +
+  coord_cartesian(ylim = c(0.03, 0.66)) +
+  scale_x_continuous(breaks= c(x.breaks.t), expand=c(0,0)) +
+  scale_y_continuous(breaks= c(y.breaks), expand=c(0,0)) +
+  facet_wrap(vars(Strain), ncol=2, scales="free_x", labeller = labeller(Strain=strain.labs)) + 
+  theme_thesis() +
+  theme(strip.text = element_text(face="italic"), 
+        legend.position = c(1,0), legend.justification = c(1, 0),
+        panel.spacing.x = unit(6, "mm"), panel.spacing.y = unit(6, "mm"))
+
+# ggsave("algae_temp.png", width = 8 , height = 6.5, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output")
+```
+
+# Other Stuff
+
+```{r}
+#GAMs were not the best model for the data 
+# library(mgcv)
+# Ci <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Ci.damping)
+# Cm <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Cm.damping)
+# Cp <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Cp.damping)
+# Cr <- gam(DampingIndex ~ s(TempDiff_C, k=4) + s(Light_Level), data=Cr.damping)
+# Cv <- gam(DampingIndex ~ s(TempDiff_C, k=5) + s(Light_Level), data=Cv.damping)
+# Tp <- gam(DampingIndex ~ s(TempDiff_C, k=7) + s(Light_Level), data=Tp.damping)
+# Fc <- gam(DampingIndex ~ s(TempDiff_C, k=7) + s(Light_Level), data=Fc.damping)
+# 
+# vis.gam(Ci, plot.type = "contour")
+# vis.gam(Cm, plot.type = "contour")
+# vis.gam(Cp, plot.type = "contour")
+# vis.gam(Cr, plot.type = "contour")
+# vis.gam(Cv, plot.type = "contour")
+# vis.gam(Tp, plot.type = "contour")
+# vis.gam(Fc, plot.type = "contour")
+```
