@@ -64,9 +64,9 @@ A2_m2 = 1E20
 
 ### Metadata Import
 ```{r import metadata}
-googlesheets4::gs4_deauth()
+#googlesheets4::gs4_deauth()
 
-SackvilleMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/13QTuZybpU-m63X-x8DeM3eVRDmFz8JIZTRnLWsMeIw0/edit?usp=sharing")
+#SackvilleMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/13QTuZybpU-m63X-x8DeM3eVRDmFz8JIZTRnLWsMeIw0/edit?usp=sharing")
 ```
 
 

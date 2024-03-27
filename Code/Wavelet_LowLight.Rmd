@@ -50,9 +50,9 @@ wavelet <- function(data_list){
   wavelet_list <- lapply(data_list, function(data) {
     WaveletComp::analyze.wavelet(data, "FvFmrunnorm",
                                  method = "white.noise",
-                                 loess.span = 0.75, 
-                                 dt = 1, dj=1/200, 
-                                 n.sim = 200, 
+                                 loess.span = 0.85, 
+                                 dt = 1, dj=1/500, 
+                                 n.sim = 100, 
                                  verbose = FALSE)
   })
 return(wavelet_list)
@@ -293,6 +293,7 @@ Cp_damping <- damping(Cp_reconstruction)  %>%
 ```
 
 
+
 ### Cr
 ```{r import Cr data}
 Cr_data <- list.files(path = DataIn, pattern = paste(Cr, FileID, sep = "_"), full.names = TRUE) %>%
@@ -324,6 +325,7 @@ Cr_damping <- damping(Cr_reconstruction)  %>%
     mutate(Strain = Cr, GrowthTemp_C = 24, 
          TempDiff_C = as.numeric(Temp_C) - GrowthTemp_C)
 ```
+
 
 
 # Sackville 
@@ -392,6 +394,7 @@ Tp_damping <- damping(Tp_reconstruction)  %>%
     mutate(Strain = Tp, GrowthTemp_C = 22, 
          TempDiff_C = as.numeric(Temp_C) - GrowthTemp_C)
 ```
+
 
 # Merging Results 
 

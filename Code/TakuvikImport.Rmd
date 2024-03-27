@@ -244,6 +244,7 @@ SolFitsFragilariopsis <- conversion(SolFitsFragilariopsis)
 ```
 
 
+
 ### Test Plots
 ```{r}
 SolFitsFragilariopsis %>%
