@@ -16,6 +16,7 @@ This RMD imports data to generate figures for Natasha Ryan's undergraduate honou
 library(tidyverse)
 library(metR)
 library(viridis)
+library(flextable)
 ```
 
 ```{r create ggplot theme}
@@ -60,7 +61,7 @@ Fc_data <- readRDS("../Data/CleanData/LOW_Fragilariopsis_cylindrus_SolFitsTrim.R
 
 # Results
 
-### Representative Fluorescence Oscillations
+## Representative Fluorescence Oscillations
 
 ```{r warning=FALSE}
 Cp_data <- readRDS("../Data/CleanData/LOW_Chlamydomonas_priscuii_SolFitsTrim.Rds") %>%
@@ -101,7 +102,7 @@ Cp_data %>%
 
 
 
-### FFT
+## FFT
 ```{r}
 Cp_data %>%
   filter(CultureID == "MaPo1001", 
@@ -136,7 +137,7 @@ WaveletComp::reconstruct(wave_data, only.sig=FALSE,
 ```
 
 
-### Wavelet Periodicity 
+## Wavelet Periodicity 
 
 ```{r}
 wavelets <- readRDS("../Data/ProcessedData/LOW_Wavelets.Rds") 
@@ -209,7 +210,7 @@ plot.wt.grid(Cp_wavelets)
  #      path="../Output")
 ```
 
-### Reconstruction 
+## Reconstruction 
 
 ```{r}
 reconstructions <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_Reconstructions.Rds") 
@@ -280,26 +281,52 @@ plot.reconstruction(Cp_reconstruction)
 ```
 
 
-### Damping Across Taxa
+## Damping Across Taxa
 
 ```{r}
 sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Damping.Rds") %>%
   mutate(Strain = factor(Strain))
 
 split.sstate <- split(sstate_damping, sstate_damping$Strain)
-names(split.sstate) <- c("Ci.damping", "Cm.damping", "Cp.damping", "Cr.damping", 
-                         "Cv.damping", "Fc.damping", "Tp.damping")
-#list2env(split.sstate, envir = .GlobalEnv)
+names(split.sstate) <- c("Ci_damping", "Cm_damping", "Cp_damping", "Cr_damping", 
+                         "Cv_damping", "Fc_damping", "Tp_damping")
+
+list2env(split.sstate, envir = .GlobalEnv)
+```
+
+```{r Plot Setup}
+strain.labs <- c(
+  "Fragilariopsis_cylindrus" = "Fragilariopsis cylindrus",
+  "Thalassiosira_pseudonana" = "Thalassiosira pseudonana",
+  "Chlamydomonas_ICEMDV" = "C. ICEMDV",
+  "Chlamydomonas_malina" = "C. malina",
+  "Chlamydomonas_priscuii" = "C. priscuii",
+  "Chlamydomonas_reinhardtii" = "C. reinhardtii",
+  "Chlorella_vulgaris" = "C. vulgaris")
+
+temp.labs <- c("0" = "Grown at 0°C",
+               "6" = "Grown at 6°C",
+               "22" = "Grown at 22°C")
+
+diatom.vlines <- data.frame(
+  Strain = c("Fragilariopsis_cylindrus", "Fragilariopsis_cylindrus", "Thalassiosira_pseudonana"),
+  GrowthTemp_C = c(0, 6, 22))
+
+algae.vlines <- data.frame(
+  Strain = c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", 
+             "Chlorella_vulgaris", "Chlamydomonas_reinhardtii"),
+  GrowthTemp_C = c(4.1, 4.1, 4.1, 22, 23.9), 
+  ThermalTolerance = c("Polar", "Polar", "Polar", "Temperate", "Temperate"))
 ```
 
 
-##### By Deviation from Growth Temp 
-```{r}
-predict.data.tempdiff <- function(damping) {
+#### By Deviation from Growth Temp 
+```{r Function for temperature difference }
+predict.data.diff <- function(damping) {
   
   Strain <- unique(damping$Strain)
   
-  loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, span=0.8, data = damping)
+  loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, span=0.85, data = damping)
   
   data <- with(damping, expand.grid(
     Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
@@ -313,77 +340,75 @@ predict.data.tempdiff <- function(damping) {
            Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
     dplyr::rename("DampingIndex" = "value") %>%
     mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
-    mutate(Strain = Strain)
-  
+    mutate(Strain = Strain, 
+           Strain = factor(Strain),
+           ThermalTolerance= ifelse(Strain %in% c("Fragilariopsis_cylindrus", 
+                           "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina"),
+                           "Polar", 
+                           ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
+                                               "Thalassiosira_pseudonana"), "Temperate", NA)),
+           ThermalTolerance = factor(ThermalTolerance))
   return(melt)
 }
 ```
 
 
-```{r}
-predicted.td <- lapply(split.sstate, predict.data.tempdiff)
-predicted.td <- bind_rows(predicted.td) 
-
-predicted.td$Strain <- factor(predicted.td$Strain,  levels= c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana","Chlamydomonas_ICEMDV", "Chlorella_vulgaris", "Chlamydomonas_priscuii","Chlamydomonas_reinhardtii" ,"Chlamydomonas_malina"))
-
-strain.labs <- c("Fragilariopsis cylindrus", "Thalassiosira pseudonana", "Chlamydomonas ICEMDV", "Chlamydomonas malina", "Chlamydomonas priscuii", "Chlamydomonas reinhardtii", "Chlorella vulgaris")
-names(strain.labs) <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana", "Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", "Chlamydomonas_reinhardtii", "Chlorella_vulgaris")
+```{r predict temperature difference }
+predict.diff <- lapply(split.sstate, predict.data.diff)
+predict.diff <- bind_rows(predict.diff) 
 ```
 
-```{r}
-x.breaks <- seq(min(sstate_damping$TempDiff_C), max(sstate_damping$TempDiff_C),4)
-y.breaks <- seq(0, 0.9, 0.2)
 
+```{r}
 #diatoms
-predicted.td %>%
-  filter(Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
+predict.diff %>%
+  filter(Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")) %>%
   ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
   geom_contour_fill() + 
   geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
   geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
   labs(x= "Deviation from Growth Temperature (°C)",
        y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
-       fill= "Damping Index"
-         ) +
-  scale_fill_viridis(option="mako",
-                     breaks = seq(0, 12, by = 3)) +
+       fill= "Damping Index") +
+  scale_fill_viridis(option="mako", breaks = seq(0, 12, by = 3)) +
   coord_cartesian(ylim = c(0.03, 0.53)) +
-  scale_x_continuous(limits= c(-6,6),breaks= c(x.breaks), expand=c(0,0)) +
+  scale_x_continuous(limits= c(-6,6),breaks= c(-12,-8,-4,0,4,8), expand=c(0,0)) +
   scale_y_continuous(breaks= c(0.1,0.2,0.3,0.4,0.5), expand=c(0,0)) +
-  facet_wrap(vars(Strain), ncol=2, labeller = labeller(Strain=strain.labs)) + 
+  ggh4x::facet_nested_wrap(vars(ThermalTolerance, Strain), ncol = 1, strip.position = "right",
+                             labeller = labeller(Strain = strain.labs)) +
   theme_thesis() +
   theme(strip.text = element_text(face="italic"))
 
-# ggsave("diatoms_diff.png", width = 8 , height = 4, dpi = 900,
+
+# ggsave("diatoms_diff.png", width = 6 , height = 5, dpi = 900,
 #        plot=last_plot(),
 #        path="../Output")
 ```
 
 ```{r}
 #algae
-predicted.td %>%
-  filter(!Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
+predict.diff %>%
+  filter(Strain %in% c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", 
+             "Chlorella_vulgaris", "Chlamydomonas_reinhardtii")) %>%
   ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
   geom_contour_fill() + 
   geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
   geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
-  geom_vline(xintercept = 0, col="white") +
   labs(x= "Deviation from Growth Temperature (°C)",
        y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
-       fill= "Damping Index"
-         ) +
-  scale_fill_viridis(option="mako",
-                     breaks = seq(0, 12, by = 3)) +
+       fill= "Damping Index") + 
+  scale_fill_viridis(option="mako",breaks = seq(0, 12, by = 3)) +
   coord_cartesian(ylim = c(0.03, 0.66)) +
-  scale_x_continuous(breaks= c(x.breaks), expand=c(0,0)) +
-  scale_y_continuous(breaks= c(y.breaks), expand=c(0,0)) +
-  facet_wrap(vars(Strain), ncol=2, scales="free_x", labeller = labeller(Strain=strain.labs)) + 
+  scale_x_continuous(breaks= c(-12,-8,-4,0,4,8), expand=c(0,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  ggh4x::facet_nested_wrap(vars(ThermalTolerance, Strain), ncol = 1, strip.position = "right",
+                           labeller = labeller(Strain=strain.labs)) +
   theme_thesis() +
   theme(strip.text = element_text(face="italic"),
-        legend.position = c(1,0), legend.justification = c(1, 0),
-        panel.spacing.x = unit(6, "mm"), panel.spacing.y = unit(6, "mm"))
+        panel.spacing.x = unit(6, "mm"), 
+        strip.placement = "outside")
 
-# ggsave("algae_diff.png", width = 7 , height = 6, dpi = 900,
+# ggsave("algae_diff.png", width = 7 , height = 7, dpi = 900,
 #        plot=last_plot(),
 #        path="../Output")
 ```
@@ -391,11 +416,13 @@ predicted.td %>%
 
 
 
-##### By Measurement Temperature
-```{r}
+#### By Measurement Temperature
+
+```{r set function by temp}
 predict.data.temp <- function(damping) {
   
   Strain <- unique(damping$Strain)
+  GrowthTemp_C <- unique(damping$GrowthTemp_C)
   
   loess <- loess(DampingIndex ~ Temp_C * Light_Level, span=0.8, data = damping)
   
@@ -411,86 +438,90 @@ predict.data.temp <- function(damping) {
            Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
     dplyr::rename("DampingIndex" = "value") %>%
     mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
-    mutate(Strain = Strain)
-  
+    mutate(Strain = Strain, GrowthTemp_C = GrowthTemp_C, 
+           Strain = factor(Strain),
+           ThermalTolerance= ifelse(Strain %in% c("Fragilariopsis_cylindrus", 
+                           "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina"),
+                           "Polar", 
+                           ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
+                                               "Thalassiosira_pseudonana"), "Temperate", NA)),
+           ThermalTolerance = factor(ThermalTolerance))
   return(melt)
 }
 ```
 
 
-```{r}
-predicted.t <- lapply(split.sstate, predict.data.temp)
-predicted.t <- bind_rows(predicted.t) 
+```{r Prepare damping list }
+#Split Fc by Growth Temp 
+FcG0_damping <- split.sstate[["Fc_damping"]] %>% filter(GrowthTemp_C == 0)
+FcG6_damping <- split.sstate[["Fc_damping"]] %>% filter(GrowthTemp_C == 6)
 
-
-Strain <- c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana","Chlamydomonas_ICEMDV", "Chlorella_vulgaris", "Chlamydomonas_priscuii","Chlamydomonas_reinhardtii" ,"Chlamydomonas_malina")
-GrowthTemp_C <- c(6,22,4,22,4,24,4)
-
-v.lines <- data.frame(Strain, GrowthTemp_C)
-
-predicted.t$Strain <- factor(predicted.t$Strain, levels= c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana","Chlamydomonas_ICEMDV", "Chlorella_vulgaris", "Chlamydomonas_priscuii","Chlamydomonas_reinhardtii" ,"Chlamydomonas_malina"))
+temp.sstate <- list(Ci_damping, Cm_damping, Cp_damping, Cr_damping, Cv_damping, Tp_damping, FcG0_damping, FcG6_damping)
 ```
 
-```{r}
-x.breaks.t <- seq(min(sstate_damping$Temp_C), max(sstate_damping$Temp_C),4)
-y.breaks <- seq(0, 0.9, 0.2)
+```{r by temp df setup}
+predict.temp <- lapply(temp.sstate, predict.data.temp)
+predict.temp <- bind_rows(predict.temp) 
+```
 
+
+```{r plot diatom temp}
 #diatoms
-predicted.t %>%
+predict.temp %>%
   filter(Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
   ggplot(aes(x=Temp_C, y=Light_Level, z= DampingIndex)) +
   geom_contour_fill() + 
   geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
-  geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
-  geom_vline(data=subset(v.lines, 
-                         Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")),
-             aes(xintercept=GrowthTemp_C), col= "white", linetype = "longdash") +
+  geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.3, 
+                    label.placer = label_placer_fraction(frac=0.4)) +
+  geom_vline(data=diatom.vlines, aes(xintercept=GrowthTemp_C), col= "white", linetype = "longdash") +
   labs(x= "Measurement Temperature (°C)",
        y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
-       fill= "Damping Index"
-         ) +
-  scale_fill_viridis(option="mako",
-                     breaks = seq(0, 12, by = 3)) +
+       fill= "Damping Index") +
+  scale_fill_viridis(option="rocket", breaks = seq(0, 12, by = 3)) +
   coord_cartesian(ylim = c(0.03, 0.53)) +
-  scale_x_continuous(breaks= c(x.breaks.t), expand=c(0,0)) +
-  scale_y_continuous(breaks= c(0.1,0.2,0.3,0.4,0.5), expand=c(0,0)) +
-  facet_wrap(vars(Strain), ncol=2, scales= "free", labeller = labeller(Strain=strain.labs)) + 
+  scale_x_continuous(breaks = c(2, 6, 10, 14, 18, 22, 26), expand=c(0,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  ggh4x::facet_nested_wrap(vars(Strain, GrowthTemp_C), ncol = 3, 
+                           strip.position = "top", scales="free_x", 
+                           labeller = labeller(Strain=strain.labs, GrowthTemp_C = temp.labs)) +
   theme_thesis() +
-  theme(strip.text = element_text(face="italic"))
-# 
-# ggsave("diatoms_temp.png", width = 8 , height = 4, dpi = 900,
+  theme(strip.text = element_text(face="italic"),
+        panel.spacing.x = unit(4, "mm"))
+
+ 
+# ggsave("diatoms_temp.png", width = 9.5 , height = 4.5, dpi = 900,
 #        plot=last_plot(),
 #        path="../Output")
 ```
 
 
-```{r}
+```{r plot algae temp}
 #algae
-predicted.t%>%
-  filter(!Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
+predict.temp%>%
+  filter(Strain %in% c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", 
+             "Chlorella_vulgaris", "Chlamydomonas_reinhardtii")) %>%
   ggplot(aes(x=Temp_C, y=Light_Level, z= DampingIndex)) +
   geom_contour_fill() + 
   geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
   geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
   labs(x= "Measurement Temperature (°C)",
        y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
-       fill= "Damping Index"
-         ) +
-   geom_vline(data=subset(v.lines, 
-                         !Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")),
-             aes(xintercept=GrowthTemp_C), col= "white", linetype = "longdash") +
-  scale_fill_viridis(option="mako",
-                     breaks = seq(0, 12, by = 3)) +
-  coord_cartesian(ylim = c(0.03, 0.66)) +
-  scale_x_continuous(breaks= c(x.breaks.t), expand=c(0,0)) +
-  scale_y_continuous(breaks= c(y.breaks), expand=c(0,0)) +
-  facet_wrap(vars(Strain), ncol=2, scales="free_x", labeller = labeller(Strain=strain.labs)) + 
+       fill= "Damping Index") +
+  geom_vline(data= algae.vlines, aes(xintercept=GrowthTemp_C),
+             col= "white", linewidth= 1,  linetype = "dashed") +
+  scale_fill_viridis(option="rocket", breaks = seq(0, 12, by = 3)) +
+  coord_cartesian(ylim = c(0.05, 0.65)) +
+  scale_x_continuous(breaks= c(0,4,8,12,16,20,24,28), expand=c(0,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  ggh4x::facet_nested_wrap(vars(ThermalTolerance, Strain), ncol = 3, strip.position = "top",
+                       scales = "free_x", labeller = labeller(Strain = strain.labs)) +
   theme_thesis() +
-  theme(strip.text = element_text(face="italic"), 
-        legend.position = c(1,0), legend.justification = c(1, 0),
-        panel.spacing.x = unit(6, "mm"), panel.spacing.y = unit(6, "mm"))
+  theme(strip.text = element_text(face="italic"),
+        strip.placement = "outside",
+        panel.spacing.x = unit(4, "mm"))
 
-# ggsave("algae_temp.png", width = 8 , height = 6.5, dpi = 900,
+# ggsave("algae_temp.png", width = 9.5 , height = 5.5, dpi = 900,
 #        plot=last_plot(),
 #        path="../Output")
 ```

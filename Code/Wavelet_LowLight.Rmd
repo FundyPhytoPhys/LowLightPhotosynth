@@ -188,8 +188,7 @@ Fc_damping <- damping(Fc_reconstruction)  %>%
   mutate(Strain = Fc) %>%
   mutate(TempDiff_C = ifelse(GrowthTemp_C == 0, Temp_C, 
                              ifelse(GrowthTemp_C == 6, as.numeric(Temp_C) - 6, NA))) %>%
-  #relocate(DampingIndex, .before = )
-  select(-"GrowthTemp_C")
+  relocate(DampingIndex, .before = GrowthTemp_C)
 ```
 
 
@@ -223,7 +222,8 @@ Ci_damping <- damping(Ci_reconstruction)  %>%
   mutate(damping.index = ifelse(!condition %in% Ci_significant, 0, damping.index)) %>%
   rename(DampingIndex = damping.index) %>%
   separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "Light_Level"), sep = "_") %>%
-  mutate(Strain = Ci, TempDiff_C = as.numeric(Temp_C) - 4)
+  mutate(Strain = Ci, GrowthTemp_C = 4, 
+         TempDiff_C = as.numeric(Temp_C) - GrowthTemp_C)
 ```
 
 
@@ -255,7 +255,8 @@ Cm_damping <- damping(Cm_reconstruction)  %>%
   mutate(damping.index = ifelse(!condition %in% Cm_significant, 0, damping.index)) %>%
   rename(DampingIndex = damping.index) %>%
   separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "Light_Level"), sep = "_") %>%
-  mutate(Strain = Cm, TempDiff_C = as.numeric(Temp_C) - 4)
+  mutate(Strain = Cm, GrowthTemp_C = 4, 
+         TempDiff_C = as.numeric(Temp_C) - GrowthTemp_C)
 ```
 
 
@@ -287,7 +288,8 @@ Cp_damping <- damping(Cp_reconstruction)  %>%
   mutate(damping.index = ifelse(!condition %in% Cp_significant, 0, damping.index)) %>%
   rename(DampingIndex = damping.index) %>%
   separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "Light_Level"), sep = "_") %>%
-  mutate(Strain = Cp, TempDiff_C = as.numeric(Temp_C) - 4)
+    mutate(Strain = Cp, GrowthTemp_C = 4, 
+         TempDiff_C = as.numeric(Temp_C) - GrowthTemp_C)
 ```
 
 
@@ -319,7 +321,8 @@ Cr_damping <- damping(Cr_reconstruction)  %>%
   mutate(damping.index = ifelse(!condition %in% Cr_significant, 0, damping.index)) %>%
   rename(DampingIndex = damping.index) %>%
   separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "Light_Level"), sep = "_") %>%
-  mutate(Strain = Cr, TempDiff_C = as.numeric(Temp_C) - 24)
+    mutate(Strain = Cr, GrowthTemp_C = 24, 
+         TempDiff_C = as.numeric(Temp_C) - GrowthTemp_C)
 ```
 
 
@@ -353,7 +356,8 @@ Cv_damping <- damping(Cv_reconstruction)  %>%
   mutate(damping.index = ifelse(!condition %in% Cv_significant, 0, damping.index)) %>%
   rename(DampingIndex = damping.index) %>%
   separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "Light_Level"), sep = "_") %>%
-  mutate(Strain = Cv, TempDiff_C = as.numeric(Temp_C) - 22)
+    mutate(Strain = Cv, GrowthTemp_C = 22, 
+         TempDiff_C = as.numeric(Temp_C) - GrowthTemp_C)
 ```
 
 
@@ -385,7 +389,8 @@ Tp_damping <- damping(Tp_reconstruction)  %>%
   mutate(damping.index = ifelse(!condition %in% Tp_significant, 0, damping.index)) %>%
   rename(DampingIndex = damping.index) %>%
   separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "Light_Level"), sep = "_") %>%
-  mutate(Strain = Tp, TempDiff_C = as.numeric(Temp_C) - 22)
+    mutate(Strain = Tp, GrowthTemp_C = 22, 
+         TempDiff_C = as.numeric(Temp_C) - GrowthTemp_C)
 ```
 
 # Merging Results 
