@@ -119,7 +119,6 @@ Cp_data %>%
   theme_thesis() +
   theme(legend.position = "none")
 
-
 # ggsave("wavelet_before.png", width = 4, height = 4, dpi = 900,
 #        plot=last_plot(),
 #        path="../Output")
@@ -201,12 +200,14 @@ plot.wt.grid(Cv_wavelets)
 plot.wt.grid(Tp_wavelets)
 plot.wt.grid(FcG6_wavelets)
 plot.wt.grid(FcG0_wavelets)
-```
 
+plot.wt.grid(Cr_wavelets)
+ # ggsave("temperate_wtavg.png", width = 9.5, height = 5, dpi = 900,
+ #      plot=last_plot(),
+ #      path="../Output")
 
-```{r Periodicity Test, warning=FALSE}
 plot.wt.grid(Cp_wavelets)
- # ggsave("representative_wtavg.png", width = 9.5, height = 6, dpi = 900,
+ # ggsave("polar_wtavg.png", width = 9.5, height = 5, dpi = 900,
  #      plot=last_plot(),
  #      path="../Output")
 ```
@@ -273,8 +274,9 @@ plot.reconstruction(Cv_reconstruction)
 plot.reconstruction(Tp_reconstruction)
 plot.reconstruction(FcG0_reconstruction)
 plot.reconstruction(FcG6_reconstruction)
-plot.reconstruction(Cp_reconstruction)
 
+
+plot.reconstruction(Cp_reconstruction)
  # ggsave("representative_reconstruction.png", width = 10, height = 6, dpi = 900,
  #      plot=last_plot(),
  #      path="../Output")
@@ -287,13 +289,25 @@ plot.reconstruction(Cp_reconstruction)
 sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Damping.Rds") %>%
   mutate(Strain = factor(Strain))
 
-split.sstate <- split(sstate_damping, sstate_damping$Strain)
-names(split.sstate) <- c("Ci_damping", "Cm_damping", "Cp_damping", "Cr_damping", 
+diff.sstate <- split(sstate_damping, sstate_damping$Strain)
+names(diff.sstate) <- c("Ci_damping", "Cm_damping", "Cp_damping", "Cr_damping", 
                          "Cv_damping", "Fc_damping", "Tp_damping")
 
-list2env(split.sstate, envir = .GlobalEnv)
+list2env(diff.sstate, envir = .GlobalEnv)
 ```
 
+
+```{r Prepare damping list }
+#Split Fc by Growth Temp 
+FcG0_damping <- diff.sstate[["Fc_damping"]] %>% filter(GrowthTemp_C == 0)
+FcG6_damping <- diff.sstate[["Fc_damping"]] %>% filter(GrowthTemp_C == 6)
+
+temp.sstate <- list(
+  Ci_damping = Ci_damping, Cm_damping = Cm_damping, Cp_damping = Cp_damping,
+  Cr_damping = Cr_damping, Cv_damping = Cv_damping,
+  Tp_damping = Tp_damping, FcG0_damping = FcG0_damping, FcG6_damping = FcG6_damping
+)
+```
 
 
 ```{r Plot Setup}
@@ -359,25 +373,26 @@ mtrx.data  %>%
 ```
 
 
-### By Deviation from Growth Temp 
-```{r Function for temperature difference }
-predict.data.diff <- function(damping) {
+### GAM Approach 
+
+##### Deviation From Growth Temp
+```{r Functions for GAM by Diff}
+predict.diff.gam <- function(damping) {
+  
+  knots <- n_distinct(damping$TempDiff_C)
   
   Strain <- unique(damping$Strain)
   
-  loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, span=0.85, data = damping)
-  
+  gam <- mgcv::gam(DampingIndex ~ te(TempDiff_C, Light_Level, k=knots), data = damping, method = "REML")
+
   data <- with(damping, expand.grid(
     Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
     TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.1)
   ))
   
-  predict <- predict(loess, newdata = data)
+  data$DampingIndex <- predict(gam, newdata = data)
   
-  melt <- reshape2::melt(predict, id.vars = c('TempDiff_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
-    mutate(TempDiff_C = as.numeric(str_sub(TempDiff_C, str_locate(TempDiff_C, '=')[1,1] + 1)),
-           Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
-    dplyr::rename("DampingIndex" = "value") %>%
+  data <- data %>%
     mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
     mutate(Strain = Strain, 
            Strain = factor(Strain),
@@ -387,20 +402,32 @@ predict.data.diff <- function(damping) {
                            ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
                                                "Thalassiosira_pseudonana"), "Temperate", NA)),
            ThermalTolerance = factor(ThermalTolerance))
-  return(melt)
+  
+  return(data) 
+}
+
+
+summary.diff.gam <- function(damping) {
+  knots <- n_distinct(damping$TempDiff_C)
+  gam <- mgcv::gam(DampingIndex ~ te(TempDiff_C, Light_Level, k=knots), data = damping, method = "REML")
+  summary <- summary(gam)
+  return(summary)
 }
 ```
 
-
-```{r predict temperature difference }
-predict.diff <- lapply(split.sstate, predict.data.diff)
-predict.diff <- bind_rows(predict.diff) 
+```{r Create Predicted df}
+predict.gam.d <- lapply(diff.sstate, predict.diff.gam)
+predict.gam.d <- bind_rows(predict.gam.d) 
 ```
 
+```{r Generate model summaries}
+summary.gam.d <- lapply(diff.sstate, summary.diff.gam)
+```
+
+**Plotting**
 
 ```{r}
-#diatoms
-diatom.diff <- predict.diff %>%
+predict.gam.d %>%
   filter(Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana")) %>%
   ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
   geom_contour_fill() + 
@@ -418,16 +445,14 @@ diatom.diff <- predict.diff %>%
   theme_thesis() +
   theme(strip.text = element_text(face="italic"))
 
-diatom.diff
-
-# ggsave("diatom_diff.png", width = 6.5 , height = 5, dpi = 900,
+# ggsave("diatoms_diff.png", width = 7 , height = 5, dpi = 900,
 #        plot=last_plot(),
 #        path="../Output")
 ```
 
+
 ```{r}
-#algae
-algae.diff <- predict.diff %>%
+predict.gam.d %>%
   filter(Strain %in% c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", 
              "Chlorella_vulgaris", "Chlamydomonas_reinhardtii")) %>%
   ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
@@ -446,54 +471,32 @@ algae.diff <- predict.diff %>%
   theme_thesis() +
   theme(strip.text = element_text(face="italic"))
 
-algae.diff
-
 # ggsave("algae_diff.png", width = 7 , height = 8, dpi = 900,
 #        plot=last_plot(),
 #        path="../Output")
 ```
 
-To show them together: 
-```{r warning=FALSE}
-# diff.arrange <- ggarrange(diatom.diff + rremove("ylab") + rremove("xlab"), NA, 
-#                     algae.diff + rremove("ylab") + rremove("xlab"),
-#                     ncol = 1, heights = c(0.5, 0.05 ,1), 
-#                     common.legend = TRUE, legend = "right")
-# 
-# 
-# annotate_figure(diff.arrange, 
-#                 left = text_grob(expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"), 
-#                                  size= 12, family = "Times", rot = 90, vjust = 1),
-#                     bottom = text_grob("Deviation from Growth Temperature (°C)", 
-#                                        hjust = 0.75, size= 12, family = "Times"))
-
-# ggsave("sstate_diff.png", width = 11 , height = 7, dpi = 900,
-#        plot=last_plot(),
-#        path="../Output")
-```
 
 
-### By Measurement Temperature
+##### Measurement Temp 
 
-```{r set function by temp}
-predict.data.temp <- function(damping) {
+```{r Functions for GAM by Temp}
+predict.temp.gam <- function(damping) {
   
+  knots <- n_distinct(damping$Temp_C)
   Strain <- unique(damping$Strain)
   GrowthTemp_C <- unique(damping$GrowthTemp_C)
   
-  loess <- loess(DampingIndex ~ Temp_C * Light_Level, span=0.8, data = damping)
-  
+  gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping, method = "REML")
+
   data <- with(damping, expand.grid(
     Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
     Temp_C = seq(min(Temp_C), max(Temp_C), 0.1)
   ))
   
-  predict <- predict(loess, newdata = data)
+  data$DampingIndex <- predict(gam, newdata = data)
   
-  melt <- reshape2::melt(predict, id.vars = c('Temp_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
-    mutate(Temp_C = as.numeric(str_sub(Temp_C, str_locate(Temp_C, '=')[1,1] + 1)),
-           Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
-    dplyr::rename("DampingIndex" = "value") %>%
+  data <- data %>%
     mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
     mutate(Strain = Strain, GrowthTemp_C = GrowthTemp_C, 
            Strain = factor(Strain),
@@ -503,28 +506,33 @@ predict.data.temp <- function(damping) {
                            ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
                                                "Thalassiosira_pseudonana"), "Temperate", NA)),
            ThermalTolerance = factor(ThermalTolerance))
-  return(melt)
+  
+  return(data) 
+}
+
+
+summary.temp.gam <- function(damping) {
+  knots <- n_distinct(damping$Temp_C)
+  gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping, method = "REML")
+  summary <- summary(gam)
+  return(summary)
 }
 ```
 
-
-```{r Prepare damping list }
-#Split Fc by Growth Temp 
-FcG0_damping <- split.sstate[["Fc_damping"]] %>% filter(GrowthTemp_C == 0)
-FcG6_damping <- split.sstate[["Fc_damping"]] %>% filter(GrowthTemp_C == 6)
-
-temp.sstate <- list(Ci_damping, Cm_damping, Cp_damping, Cr_damping, Cv_damping, Tp_damping, FcG0_damping, FcG6_damping)
+```{r}
+predict.gam.t <- lapply(temp.sstate, predict.temp.gam)
+predict.gam.t <- bind_rows(predict.gam.t) 
 ```
 
-```{r by temp df setup}
-predict.temp <- lapply(temp.sstate, predict.data.temp)
-predict.temp <- bind_rows(predict.temp) 
+```{r}
+summary.gam.t <- lapply(temp.sstate, summary.temp.gam)
 ```
 
 
-```{r plot diatom temp}
-#diatoms
-predict.temp %>%
+**Plotting**
+
+```{r}
+predict.gam.t %>%
   filter(Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
   ggplot(aes(x=Temp_C, y=Light_Level, z= DampingIndex)) +
   geom_contour_fill() + 
@@ -547,15 +555,14 @@ predict.temp %>%
         panel.spacing.x = unit(4, "mm"),
         legend.position = c(0.89, 0.07), legend.justification = c(1,0))
 
-# ggsave("diatoms_temp.png", width = 7 , height = 5.5, dpi = 900,
-#        plot=last_plot(),
-#        path="../Output")
+ggsave("diatoms_temp.png", width = 7 , height = 4.5, dpi = 900,
+       plot=last_plot(),
+       path="../Output")
 ```
 
 
-```{r plot algae temp}
-#algae
-predict.temp%>%
+```{r}
+predict.gam.t %>%
   filter(Strain %in% c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", 
              "Chlorella_vulgaris", "Chlamydomonas_reinhardtii")) %>%
   ggplot(aes(x=Temp_C, y=Light_Level, z= DampingIndex)) +
@@ -585,24 +592,82 @@ predict.temp%>%
 #        path="../Output")
 ```
 
-# Other Stuff
 
-```{r}
-#GAMs were not the best model for the data 
-# library(mgcv)
-# Ci <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Ci.damping)
-# Cm <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Cm.damping)
-# Cp <- gam(DampingIndex ~ s(TempDiff_C, k=3) + s(Light_Level), data=Cp.damping)
-# Cr <- gam(DampingIndex ~ s(TempDiff_C, k=4) + s(Light_Level), data=Cr.damping)
-# Cv <- gam(DampingIndex ~ s(TempDiff_C, k=5) + s(Light_Level), data=Cv.damping)
-# Tp <- gam(DampingIndex ~ s(TempDiff_C, k=7) + s(Light_Level), data=Tp.damping)
-# Fc <- gam(DampingIndex ~ s(TempDiff_C, k=7) + s(Light_Level), data=Fc.damping)
-# 
-# vis.gam(Ci, plot.type = "contour")
-# vis.gam(Cm, plot.type = "contour")
-# vis.gam(Cp, plot.type = "contour")
-# vis.gam(Cr, plot.type = "contour")
-# vis.gam(Cv, plot.type = "contour")
-# vis.gam(Tp, plot.type = "contour")
-# vis.gam(Fc, plot.type = "contour")
+### Loess Approach 
+Deviation From Growth Temp 
+```{r Function for temperature difference }
+# predict.diff.loess <- function(damping) {
+#   
+#   Strain <- unique(damping$Strain)
+#   
+#   loess <- loess(DampingIndex ~ TempDiff_C * Light_Level, span=0.85, data = damping)
+#   
+#   data <- with(damping, expand.grid(
+#     Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
+#     TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.1)
+#   ))
+#   
+#   predict <- predict(loess, newdata = data)
+#   
+#   melt <- reshape2::melt(predict, id.vars = c('TempDiff_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
+#     mutate(TempDiff_C = as.numeric(str_sub(TempDiff_C, str_locate(TempDiff_C, '=')[1,1] + 1)),
+#            Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
+#     dplyr::rename("DampingIndex" = "value") %>%
+#     mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
+#     mutate(Strain = Strain, 
+#            Strain = factor(Strain),
+#            ThermalTolerance= ifelse(Strain %in% c("Fragilariopsis_cylindrus", 
+#                            "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina"),
+#                            "Polar", 
+#                            ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
+#                                                "Thalassiosira_pseudonana"), "Temperate", NA)),
+#            ThermalTolerance = factor(ThermalTolerance))
+#   
+#   return(melt) 
+# }
 ```
+
+```{r predict temperature difference }
+# predict.loess.d <- lapply(diff.sstate, predict.diff.loess)
+# predict.loess.d <- bind_rows(predict.loess.d) 
+```
+
+Measurement Temperature
+```{r set function by temp}
+# predict.temp.loess <- function(damping) {
+#   
+#   Strain <- unique(damping$Strain)
+#   GrowthTemp_C <- unique(damping$GrowthTemp_C)
+#   
+#   loess <- loess(DampingIndex ~ Temp_C * Light_Level, span=0.8, data = damping)
+#   
+#   data <- with(damping, expand.grid(
+#     Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
+#     Temp_C = seq(min(Temp_C), max(Temp_C), 0.1)
+#   ))
+#   
+#   predict <- predict(loess, newdata = data)
+#   
+#   melt <- reshape2::melt(predict, id.vars = c('Temp_C', 'Light_Level'), measure.vars = 'DampingIndex') %>%
+#     mutate(Temp_C = as.numeric(str_sub(Temp_C, str_locate(Temp_C, '=')[1,1] + 1)),
+#            Light_Level = as.numeric(str_sub(Light_Level, str_locate(Light_Level, '=')[1,1] + 1))) %>%
+#     dplyr::rename("DampingIndex" = "value") %>%
+#     mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
+#     mutate(Strain = Strain, GrowthTemp_C = GrowthTemp_C, 
+#            Strain = factor(Strain),
+#            ThermalTolerance= ifelse(Strain %in% c("Fragilariopsis_cylindrus", 
+#                            "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina"),
+#                            "Polar", 
+#                            ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
+#                                                "Thalassiosira_pseudonana"), "Temperate", NA)),
+#            ThermalTolerance = factor(ThermalTolerance))
+#   return(melt)
+# }
+```
+
+```{r by temp df setup}
+# predict.loess.t <- lapply(temp.sstate, predict.temp.loess)
+# predict.loess.t <- bind_rows(predict.loess.t) 
+```
+
+- Plots are the same as in GAM section 
