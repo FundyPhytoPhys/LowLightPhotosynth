@@ -336,7 +336,7 @@ algae.vlines <- data.frame(
 ```
 
 
-### Significance Matrix
+**Significance Matrix**
 ```{r Plot significance matrix }
 mtrx.data <- sstate_damping %>%
   mutate(DampingIndex = ifelse(DampingIndex > 0, 1, 0),
@@ -375,7 +375,8 @@ mtrx.data  %>%
 
 ### GAM Approach 
 
-##### Deviation From Growth Temp
+### Deviation From Growth Temp
+
 ```{r Functions for GAM by Diff}
 predict.diff.gam <- function(damping) {
   
@@ -410,10 +411,27 @@ predict.diff.gam <- function(damping) {
 summary.diff.gam <- function(damping) {
   knots <- n_distinct(damping$TempDiff_C)
   gam <- mgcv::gam(DampingIndex ~ te(TempDiff_C, Light_Level, k=knots), data = damping, method = "REML")
+  
   summary <- summary(gam)
-  return(summary)
+  
+  shapiro <- shapiro.test(resid(gam))
+  
+  k <- mgcv::k.check(gam)
+  
+  hov <- 
+
+  vis.fit <- mgcViz::getViz(gam)
+  check <- mgcViz::check.gamViz(vis.fit,
+                                a.qq = list(method = "tnorm", 
+                                            a.cipoly = list(fill = "light blue")), 
+                                a.respoi = list(size = 1), 
+                                a.hist = list(bins = 4))
+  
+  combined <- list(summary = summary, norm = shapiro, check.k = k, plot.assumptions = check)
+  return(combined)
 }
 ```
+
 
 ```{r Create Predicted df}
 predict.gam.d <- lapply(diff.sstate, predict.diff.gam)
@@ -423,6 +441,12 @@ predict.gam.d <- bind_rows(predict.gam.d)
 ```{r Generate model summaries}
 summary.gam.d <- lapply(diff.sstate, summary.diff.gam)
 ```
+
+```{r}
+summary.gam.d[["Cp_damping"]][["norm"]]
+```
+
+
 
 **Plotting**
 
