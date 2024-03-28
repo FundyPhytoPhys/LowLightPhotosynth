@@ -32,15 +32,15 @@ theme_thesis <- function() {
   )
 }
 
-s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
+#s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
 ```
 
 
 # Methods 
 
 ```{r }
-Fc_data <- readRDS("../Data/CleanData/LOW_Fragilariopsis_cylindrus_SolFitsTrim.Rds") %>%
-  mutate(SState = ifelse(SState == 4, 0, SState))
+# Fc_data <- readRDS("../Data/CleanData/LOW_Fragilariopsis_cylindrus_SolFitsTrim.Rds") %>%
+#   mutate(SState = ifelse(SState == 4, 0, SState))
 
 
 # Fc_data %>%
@@ -81,7 +81,7 @@ Cp_data %>%
                       "20230918_MaPo1001_4C_1s",  "20230918_MaPo1001_4C_4s", "20230918_MaPo1001_4C_16s")) %>%
   ggplot() +
   geom_point(aes(x=Flashnumber, y=FvFmrunnorm, col=as.factor(SState))) +
-  scale_color_manual(values = s.col) +
+  scale_color_manual(values = c(carto_pal(n=4,"Temps"))) +
   labs(x= "Flash Number", 
        y=expression("Normalized Chlorophyll Fluorescence (F"[v]*" / F"[m]*")"),
        col= "Majority S-State") +
@@ -95,7 +95,7 @@ Cp_data %>%
                                        breaks = NULL, labels = NULL)) +
   theme_thesis()
 
-# ggsave("representativeoscillations.png", width = 9, height = 6, dpi = 900,
+# ggsave("representativeoscillations.png", width = 9, height = 5, dpi = 900,
 #       plot=last_plot(),
 #       path="../Output")
 ```
@@ -411,22 +411,15 @@ predict.diff.gam <- function(damping) {
 summary.diff.gam <- function(damping) {
   knots <- n_distinct(damping$TempDiff_C)
   gam <- mgcv::gam(DampingIndex ~ te(TempDiff_C, Light_Level, k=knots), data = damping, method = "REML")
-  
   summary <- summary(gam)
-  
   shapiro <- shapiro.test(resid(gam))
-  
   k <- mgcv::k.check(gam)
-  
-  hov <- 
-
   vis.fit <- mgcViz::getViz(gam)
   check <- mgcViz::check.gamViz(vis.fit,
                                 a.qq = list(method = "tnorm", 
                                             a.cipoly = list(fill = "light blue")), 
                                 a.respoi = list(size = 1), 
                                 a.hist = list(bins = 4))
-  
   combined <- list(summary = summary, norm = shapiro, check.k = k, plot.assumptions = check)
   return(combined)
 }
@@ -443,7 +436,7 @@ summary.gam.d <- lapply(diff.sstate, summary.diff.gam)
 ```
 
 ```{r}
-summary.gam.d[["Cp_damping"]][["norm"]]
+summary.gam.d[["Ci_damping"]][["summary"]]
 ```
 
 
@@ -462,7 +455,7 @@ predict.gam.d %>%
        fill= "Damping Index") +
   scale_fill_viridis(option="mako", breaks = seq(0, 12, by = 3)) +
   coord_cartesian(ylim = c(0.03, 0.53)) +
-  scale_x_continuous(limits= c(-6,6),breaks= c(-12,-8,-4,0,4,8), expand=c(0,0)) +
+  scale_x_continuous(breaks= c(-12,-8,-4,0,4,8), expand=c(0,0)) +
   scale_y_continuous(breaks= c(0.1,0.2,0.3,0.4,0.5), expand=c(0,0)) +
   ggh4x::facet_nested_wrap(vars(ThermalTolerance, Strain), ncol = 1, strip.position = "right",
                              labeller = labeller(Strain = strain.labs)) +
@@ -534,12 +527,20 @@ predict.temp.gam <- function(damping) {
   return(data) 
 }
 
-
 summary.temp.gam <- function(damping) {
   knots <- n_distinct(damping$Temp_C)
   gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping, method = "REML")
   summary <- summary(gam)
-  return(summary)
+  shapiro <- shapiro.test(resid(gam))
+  k <- mgcv::k.check(gam)
+  vis.fit <- mgcViz::getViz(gam)
+  check <- mgcViz::check.gamViz(vis.fit,
+                                a.qq = list(method = "tnorm", 
+                                            a.cipoly = list(fill = "light blue")), 
+                                a.respoi = list(size = 1), 
+                                a.hist = list(bins = 4))
+  combined <- list(summary = summary, norm = shapiro, check.k = k, plot.assumptions = check)
+  return(combined)
 }
 ```
 
@@ -552,6 +553,9 @@ predict.gam.t <- bind_rows(predict.gam.t)
 summary.gam.t <- lapply(temp.sstate, summary.temp.gam)
 ```
 
+```{r}
+summary.gam.t[["Ci_damping"]][["summary"]]
+```
 
 **Plotting**
 
