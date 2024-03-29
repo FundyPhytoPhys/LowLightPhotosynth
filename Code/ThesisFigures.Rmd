@@ -31,8 +31,6 @@ theme_thesis <- function() {
         panel.grid.minor = element_blank()
   )
 }
-
-#s.col <- c("#003D4F","#375D97","#3397A6","#9FD4C2")
 ```
 
 
@@ -146,6 +144,12 @@ list2env(specieslists, envir = .GlobalEnv)
 FcG0_wavelets <- Fc_wavelets[grepl(paste("_0$", collapse = "|"), names(Fc_wavelets))]
 FcG6_wavelets <- Fc_wavelets[grepl(paste("_6$", collapse = "|"), names(Fc_wavelets))]
 ```
+
+```{r}
+G0 <- wt.significance(FcG0_wavelets)
+G6 <- wt.significance(FcG6_wavelets)
+```
+
 
 ```{r periodicity function}
 plot.wt.grid <- function(wavelets) {
@@ -372,6 +376,25 @@ mtrx.data  %>%
 #        path="../Output")
 ```
 
+```{r}
+mtrx.data  %>%
+  filter(Strain == 	"Fragilariopsis_cylindrus") %>%
+  ggplot() +
+  geom_tile(aes(x= as.factor(Temp_C), y=as.factor(PulseSpace_s), fill=as.factor(DampingIndex))) +
+  scale_fill_manual(values= c("black","skyblue"), 
+                      name= bquote(atop("Significance of", "4-Step Periodcity")), 
+                      labels =c("p > 0.05", "p ≤ 0.05")) +
+  labs(x = "Measurement Temperature (°C)", 
+       y= "Flash Spacing (s)") +
+  facet_wrap(vars(GrowthTemp_C), labeller = labeller(GrowthTemp_C = temp.labs)) +
+  theme_thesis() +
+  theme(legend.title = element_text(size=11))
+
+# ggsave("Fc_mtrx.png", width = 6 , height = 3, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output")
+```
+
 
 ### GAM Approach 
 
@@ -507,7 +530,7 @@ predict.temp.gam <- function(damping) {
   gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping, method = "REML")
 
   data <- with(damping, expand.grid(
-    Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
+    Light_Level = seq(min(Light_Level), max(Light_Level), 0.05),
     Temp_C = seq(min(Temp_C), max(Temp_C), 0.1)
   ))
   
@@ -553,9 +576,6 @@ predict.gam.t <- bind_rows(predict.gam.t)
 summary.gam.t <- lapply(temp.sstate, summary.temp.gam)
 ```
 
-```{r}
-summary.gam.t[["Ci_damping"]][["summary"]]
-```
 
 **Plotting**
 
@@ -583,9 +603,33 @@ predict.gam.t %>%
         panel.spacing.x = unit(4, "mm"),
         legend.position = c(0.89, 0.07), legend.justification = c(1,0))
 
-ggsave("diatoms_temp.png", width = 7 , height = 4.5, dpi = 900,
-       plot=last_plot(),
-       path="../Output")
+# ggsave("diatoms_temp.png", width = 7 , height = 4.5, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output")
+```
+
+```{r}
+comp.labs <- str_wrap(c("Thalassiosira_pseudonana_22" = "Thalassiosira pseudonana",
+               "Fragilariopsis_cylindrus_6" = "Fragilariopsis cylindrus grown at 6°C",
+               "Fragilariopsis_cylindrus_0" = "Fragilariopsis cylindrus grown at 0°C"), width = 25)
+
+predict.gam.t %>%
+  filter(Strain %in% c("Thalassiosira_pseudonana", "Fragilariopsis_cylindrus")) %>%
+  filter(Temp_C == 10) %>%
+  mutate(Culture = paste(Strain, GrowthTemp_C, sep = "_")) %>%
+  ggplot() +
+  geom_point(aes(x= Light_Level, y=DampingIndex, col= Culture, shape= Culture )) +
+  geom_path(aes(x= Light_Level, y=DampingIndex, col= Culture)) +
+  labs(x = "Light Level", y = "Damping Index") +
+  scale_color_manual(values=c("#009392","#91B8AB", "#DFA0A0"), labels=c(comp.labs)) +
+  scale_shape_discrete(labels=c(comp.labs)) + 
+  scale_y_continuous(limits = c(0,12), breaks = c(2,4,6,8,10,12)) +
+  theme_thesis() +
+  theme(legend.key.size = unit(1, "cm"), legend.text = element_text(face = "italic"))
+
+# ggsave("diatom_comp.png", width = 8 , height = 3.5, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output")
 ```
 
 
@@ -608,7 +652,8 @@ predict.gam.t %>%
   scale_x_continuous(breaks= c(0,4,8,12,16,20,24,28), expand=c(0,0)) +
   scale_y_continuous(expand=c(0,0)) +
   ggh4x::facet_nested_wrap(vars(ThermalTolerance, Strain), ncol = 3, strip.position = "top",
-                       scales = "free_x", labeller = labeller(Strain = strain.labs)) +
+                       scales = "free_x", 
+                       labeller = labeller(Strain = strain.labs)) +
   theme_thesis() +
   theme(strip.text = element_text(face="italic"),
         strip.placement = "outside",
@@ -619,6 +664,26 @@ predict.gam.t %>%
 #        plot=last_plot(),
 #        path="../Output")
 ```
+
+```{r}
+predict.gam.t %>%
+  filter(Strain %in% c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii", 
+             "Chlorella_vulgaris", "Chlamydomonas_reinhardtii")) %>%
+  filter(Temp_C == 12) %>%
+  ggplot() +
+  geom_point(aes(x= Light_Level, y=DampingIndex, col= Strain, shape= Strain )) +
+  geom_path(aes(x= Light_Level, y=DampingIndex, col= Strain)) +
+  labs(x = "Light Level", y = "Damping Index") +
+  scale_color_manual(values=c(carto_pal(n=5,"Temps")), labels=c(strain.labs)) +
+  scale_shape_manual(values=c(16,3,17,18,8), labels=c(strain.labs)) +
+  theme_thesis() +
+  theme(legend.text = element_text(face = "italic")) 
+
+# ggsave("algae_comp.png", width = 8 , height = 3.5, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output")
+```
+
 
 
 ### Loess Approach 
