@@ -145,11 +145,6 @@ FcG0_wavelets <- Fc_wavelets[grepl(paste("_0$", collapse = "|"), names(Fc_wavele
 FcG6_wavelets <- Fc_wavelets[grepl(paste("_6$", collapse = "|"), names(Fc_wavelets))]
 ```
 
-```{r}
-G0 <- wt.significance(FcG0_wavelets)
-G6 <- wt.significance(FcG6_wavelets)
-```
-
 
 ```{r periodicity function}
 plot.wt.grid <- function(wavelets) {
@@ -348,7 +343,7 @@ mtrx.data <- sstate_damping %>%
                            "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina"),
                            "Polar", 
                            ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
-                                               "Thalassiosira_pseudonana"), "Temperate", NA)), 
+                                               "Thalassiosira_pseudonana"), "Temperate", NA)),
   Strain = factor(Strain, levels=c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana", 
                                    "Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii",
                                    "Chlorella_vulgaris", "Chlamydomonas_reinhardtii")))
@@ -364,13 +359,16 @@ mtrx.data  %>%
                       labels =c("p > 0.05", "p ≤ 0.05")) +
   labs(x = "Measurement Temperature (°C)", 
        y= "Flash Spacing (s)") +
-  ggh4x::facet_nested_wrap(vars(ThermalTolerance, Strain), ncol=4, nrow=2, scales="free_x", 
+  ggh4x::facet_nested_wrap(vars(ThermalTolerance, Strain), ncol=4, nrow=2, scales="free_x",
                              labeller = labeller(Strain = strain.labs)) +
-  theme_thesis() +
+  theme_pres() +
   theme(legend.title = element_text(size=11),
         strip.text = element_text(face="italic"),
         legend.position = c(0.97,0.1), legend.justification = c(1,0))
 
+ggsave("pres_mtrx.png", width = 10 , height = 6, dpi = 900,
+       plot=last_plot(),
+       path="~/Downloads")
 # ggsave("periodicity_mtrx.png", width = 7 , height = 5, dpi = 900,
 #        plot=last_plot(),
 #        path="../Output")
@@ -410,7 +408,7 @@ predict.diff.gam <- function(damping) {
   gam <- mgcv::gam(DampingIndex ~ te(TempDiff_C, Light_Level, k=knots), data = damping, method = "REML")
 
   data <- with(damping, expand.grid(
-    Light_Level = seq(min(Light_Level), max(Light_Level), 0.1),
+    Light_Level = seq(min(Light_Level), max(Light_Level), 0.05),
     TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.1)
   ))
   
@@ -463,7 +461,6 @@ summary.gam.d[["Ci_damping"]][["summary"]]
 ```
 
 
-
 **Plotting**
 
 ```{r}
@@ -507,6 +504,29 @@ predict.gam.d %>%
   scale_x_continuous(breaks= c(-12,-8,-4,0,4,8), expand=c(0,0)) +
   scale_y_continuous(expand=c(0,0)) +
   ggh4x::facet_nested_wrap(vars(ThermalTolerance, Strain), ncol = 1, strip.position = "right",
+                           labeller = labeller(Strain=strain.labs)) +
+  theme_thesis() +
+  theme(strip.text = element_text(face="italic"))
+
+# ggsave("algae_diff.png", width = 7 , height = 8, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output")
+```
+```{r}
+predict.gam.d %>%
+  ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
+  geom_contour_fill() + 
+  geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
+  geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
+  labs(x= "Deviation from Growth Temperature (°C)",
+       y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+       fill= "Damping Index") + 
+  scale_fill_viridis(option="mako",breaks = seq(0, 12, by = 3)) +
+  coord_cartesian(ylim = c(0.03, 0.66)) +
+  scale_x_continuous(breaks= c(-12,-8,-4,0,4,8), expand=c(0,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  
+  ggh4x::facet_nested_wrap(vars(ThermalTolerance, Strain), ncol = 2, strip.position = "right",
                            labeller = labeller(Strain=strain.labs)) +
   theme_thesis() +
   theme(strip.text = element_text(face="italic"))
@@ -683,6 +703,171 @@ predict.gam.t %>%
 #        plot=last_plot(),
 #        path="../Output")
 ```
+
+# For Presentation 
+```{r}
+theme_pres <- function() {
+  theme_bw() +
+  theme(text = element_text(family = "Georgia"), 
+        axis.text=element_text(size=11), axis.title=element_text(size=13),
+        legend.text=element_text(size=11), legend.title=element_text(size=13),
+        strip.background = element_rect(colour="black", fill=NA),
+        strip.text = element_text(size=11), 
+        panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank()
+  )
+}
+```
+
+```{r}
+damping.group <- sstate_damping %>% 
+   mutate(ThermalTolerance= ifelse(Strain %in% c("Fragilariopsis_cylindrus", 
+                           "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina"),
+                           "Polar", 
+                           ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
+                                               "Thalassiosira_pseudonana"), "Temperate", NA)), 
+         Type = ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
+                           "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina"),
+                           "Algae", 
+                           ifelse(Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana"),
+                                  "Diatom", NA)), 
+         Group = paste(ThermalTolerance, Type, sep = "_")) %>%
+  doBy::splitBy(formula = ~ Group)
+```
+
+
+```{r}
+predict.diff.group <- function(damping) {
+  
+  knots <- n_distinct(damping$TempDiff_C)
+  
+  Group <- unique(damping$Group)
+  
+  gam <- mgcv::gam(DampingIndex ~  s(TempDiff_C, k=3) + s(Light_Level) + 
+                    ti(TempDiff_C, Light_Level, k=3), data = damping)
+
+  data <- with(damping, expand.grid(
+    Light_Level = seq(0.047, 0.53, 0.01),
+    TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.05)
+  ))
+  
+  data$DampingIndex <- predict(gam, newdata = data)
+  
+  data <- data %>%
+    mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
+    mutate(Group = Group) %>%
+    separate(Group,into= c("ThermalTolerance", "Type"), sep="_")
+  
+  return(data) 
+}
+```
+
+
+```{r}
+predict.group <- lapply(damping.group, predict.diff.group)
+predict.group <- bind_rows(predict.group) 
+```
+
+
+```{r warning=FALSE}
+predict.group %>%
+  ggplot(aes(x=TempDiff_C, y=Light_Level, fill= DampingIndex)) +
+  geom_tile() + 
+  labs(x= "Deviation from Growth Temperature (°C)",
+       y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+       fill= "Damping Index") +
+  #facet_grid(rows=vars(ThermalTolerance), cols=vars(Type)) +
+  #geom_vline(xintercept= 0, col= "white", linewidth= 0.7,  linetype = "dashed") +
+  #scale_fill_gradientn(colors = pals::ocean.ice(26600)) +
+  scale_fill_viridis(option = "viridis") +
+  scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
+  theme_pres() 
+```
+
+```{r}
+predict.group %>%
+  ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
+  geom_contour_fill() + 
+  geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
+  geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
+  labs(x= "Deviation from Growth Temperature (°C)",
+       y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+       fill= "Damping Index") + 
+  scale_fill_gradientn(colors = pals::ocean.deep(13)) +
+  #scale_fill_viridis(option="mako") +
+  scale_x_continuous(expand=c(0,0)) +
+  scale_y_continuous(expand=c(0,0)) +
+  facet_grid(rows=vars(ThermalTolerance), cols=vars(Type), scales = "free_x") +
+  theme_pres() 
+
+# ggsave("between_pres.png", width = 10 , height = 4.5, dpi = 900,
+#        plot=last_plot(),
+#        path="~/Downloads")
+```
+
+```{r}
+predict.temp.group <- function(damping) {
+  
+  knots <- n_distinct(damping$Temp_C)
+  
+  Group <- unique(damping$Group)
+  
+  gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping, method = "REML")
+
+  data <- with(damping, expand.grid(
+    Light_Level = seq(0.047, 0.53, 0.01),
+    Temp_C = seq(min(Temp_C), max(Temp_C), 0.05)
+  ))
+  
+  data$DampingIndex <- predict(gam, newdata = data)
+  
+  data <- data %>%
+    mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
+    mutate(Group = Group) %>%
+    separate(Group,into= c("ThermalTolerance", "Type"), sep="_")
+  
+  return(data) 
+}
+```
+
+
+```{r}
+predict.group.temp <- lapply(damping.group, predict.temp.group)
+predict.group.temp <- bind_rows(predict.group.temp) 
+```
+
+
+```{r warning=FALSE}
+predict.group.temp %>%
+  ggplot(aes(x=Temp_C, y=Light_Level, fill= DampingIndex)) +
+  geom_tile() + 
+  labs(x= "Measurement Temperature (°C)",
+       y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+       fill= "Damping Index") +
+  facet_grid(rows=vars(Type), cols=vars(ThermalTolerance), scales = "free_x") +
+  #geom_vline(xintercept= 0, col= "white", linewidth= 0.7,  linetype = "dashed") +
+  #scale_fill_gradientn(colors = pals::ocean.ice(26600)) +
+  scale_fill_viridis(option = "viridis") +
+  scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
+  theme_pres() +
+  theme(panel.spacing.x = unit(6, "mm"),
+        panel.spacing.y = unit(6, "mm"))
+
+ggsave("within_pres.png", width = 10 , height = 4.5, dpi = 900,
+       plot=last_plot(),
+       path="~/Downloads")
+```
+
+```{r}
+test <- mgcv::gam(DampingIndex ~  s(TempDiff_C, k=3) + s(Light_Level) + 
+                    ti(TempDiff_C, Light_Level, k=3), data = Cp_damping)
+
+summary(test)
+vis.gam(test, plot.type= "contour")
+gam.check(test)
+```
+
+
 
 
 
