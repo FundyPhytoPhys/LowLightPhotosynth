@@ -1,0 +1,124 @@
+---
+title: "Soliense Limitations"
+author: "Natasha Ryan"
+output: 
+  html_document: default
+editor_options: 
+  chunk_output_type: inline
+---
+
+This RMD imports pilot data collected in September 2023 in Sackville New Brunswick to evaluate the capacity of the Soliense LIFT-REM fluorometer (Version LIFT-REM 1.0, Soliense Inc) to deliver flashes at short intervals. 
+
+# Setup
+```{r}
+library(tidyverse)
+library(doBy)
+```
+
+```{r}
+Project <- "LOW"
+
+DataOut <- file.path("..","Data", "CleanData")
+CalibData <- file.path("..","Data", "CalibData")
+
+SackvilleIn <- file.path("..","Data", "RawData","Sackville", fsep = .Platform$file.sep)
+OttawaIn <- file.path("..","Data", "RawData","UOttawa", fsep = .Platform$file.sep)
+TakuvikIn <- file.path("..","Data", "RawData","Takuvik", fsep = .Platform$file.sep)
+
+FileID <- "fit"
+FileEncode <- "UTF-8" 
+Delimiter <- ","
+HeaderRows <- 0
+```
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(Filename = flnm)
+}
+```
+
+
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+SackvilleFiles <- list.files(path = SackvilleIn, pattern = FileID, full.names = TRUE)
+SackvilleFiles
+
+OttawaFiles <- list.files(path = OttawaIn, pattern = FileID, full.names = TRUE)
+OttawaFiles
+
+TakuvikFiles <- list.files(path = TakuvikIn, pattern = FileID, full.names = TRUE)
+TakuvikFiles
+
+SolisenseFiles <- c(SackvilleFiles, OttawaFiles, TakuvikFiles)
+
+unique(duplicated(SolisenseFiles)) 
+
+SolFits <- SolisenseFiles %>%
+  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows)) #purrr::map to read all files
+```
+
+
+
+```{r initial tidy}
+# First Tidy 
+SolFitsTrim <- SolFits %>%
+  filter(!grepl("----", DATE)) |> # remove rows with "----" 
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X","Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6", "Tau1QA","Alp1QA","Alp1PQ","Tau1PQ")) %>% # remove superfluous columns
+  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) %>%
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) %>%
+  separate(Filename, into=c("Location", "YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), 
+           sep = "([\\/\\_])", remove = FALSE) %>%
+  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+          TIME = as.character(TIME)) %>%
+   rename(ObsDate = DATE,
+         ObsTime = TIME,
+         FvFm = "Fv.Fm") |>
+  mutate(Temp_C = str_remove(Temp_C, "C"),
+         PulseSpace_s = str_remove(PulseSpace_s, "S"), 
+         PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(PulseSpace_s = case_when(
+    PulseSpace_s == "01" ~  0.1,
+    PulseSpace_s == "025" ~  0.25,
+    PulseSpace_s == "05" ~  0.5,
+    TRUE ~ as.numeric(PulseSpace_s))) %>%
+  type_convert() %>%
+  group_by(Filename) %>%
+  mutate(Flashnumber = row_number()) %>%
+  relocate(Flashnumber, .before=p) %>%
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000) %>%
+  ungroup()
+```
+
+
+```{r}
+# Create a time difference column 
+SolFitsTrim <- SolFitsTrim %>% 
+  group_by(Filename) %>%
+  mutate(TimeDiff_s = c(NA, diff(Time__mSec)/1000)) %>% #shows actual spacing between flashes
+  ungroup() %>%
+  na.omit() 
+
+# Remove Files With Significant Time Deviation Issues
+ProblemFits <- SolFitsTrim %>% 
+  mutate(TimeDev = abs(PulseSpace_s - TimeDiff_s)) %>%
+  filter(TimeDev > 1)
+
+ProblemFiles <- unique(ProblemFits$Filename)
+
+SolFitsClean <- SolFitsTrim %>%
+  filter(!Filename %in% c(ProblemFiles))
+
+# Determine Average Actual Spacing for each Nominal Spacing  
+SolFitsTime <- summaryBy(TimeDiff_s ~ PulseSpace_s, data= SolFitsClean, FUN = c(mean, var, min, max)) 
+
+SolFitsTime <- SolFitsTime %>%
+  rename(Mean = TimeDiff_s.mean, 
+         Variance = TimeDiff_s.var,
+         Maximum = TimeDiff_s.max, 
+         Minimum = TimeDiff_s.min) %>%
+  mutate(Range = Maximum - Minimum)
+```
+
+
+
+
+
+

@@ -124,47 +124,76 @@ SolFitsTrim <-SolFitsTrim %>%
   group_by(Filename) %>%
   mutate(Flashnumber = row_number()) %>%
   relocate(Flashnumber, .before=p) %>%
-  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>%
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000,
+         .before=Flashnumber) %>% #add col for time elapsed 
+  mutate(TimeDiff_s = c(NA, diff(Time__mSec)/1000)) %>%
   ungroup()
 ```
 
 
 ```{r correct file issues}
-ProblemFiles <- unique(SolFitsTrim$Filename[SolFitsTrim$Flashnumber >32])
+ProblemFits <- SolFitsTrim %>% 
+  na.omit() %>%
+  mutate(TimeDev = abs(PulseSpace_s - TimeDiff_s)) %>%
+  filter(TimeDev > 1)
+
+ProblemFiles <- unique(ProblemFits$Filename)
 
 ProblemList <- SolFitsTrim %>% 
   filter(Filename %in% c(ProblemFiles)) %>% 
-  group_by(Filename) %>%
-  mutate(TimeDiff = c(NA, diff(ObsTime))) %>% #shows actual spacing between flashes
-  ungroup() %>%
   doBy::split_by("Filename") #creates list of problem files
 ```
 
+
 From ProblemList, use spacing between flashes to decipher runs:
 Keep last 32 flashes in:
-  20230918_MaPo1001_4C_16s        - 33 flashes 
   20230919_MaPo1004_4C_8s         - 33 flashes 
   20230918_MaPo1002_8C_16s        - 36 flashes 
+  20230918_MaPo1002_4C_16s        - 33 flashes
+  20230919_MaPo1002_12C_8s        - 33 flashes
+
+Last 31: 
+  20230918_MaPo1001_12C_16s       - triple, contains 3 runs, 1-32 = 8s, 33-64 = 2s, and 65-96 = 16s
+  20230918_MaPo1001_4C_16s
+  20230919_MaPo1004_4C_16s        - keep last 31 
+  20230920_MaPo1006_12C_16s       - keep last 31
+  20230918_MaPo1002_4C_16s        - 33 flashes
   20230919_MaPo1004_8C_16s        - 36 flashes 
   20230919_MaPo1001_4C_16s        - 48 flashes
-  20230918_MaPo1002_4C_16s        - 33 flashes
   20230920_MaPo1005_12C_16s       - 37 flashes
-  20230919_MaPo1002_12C_8s        - 33 flashes
-  20230918_MaPo1001_12C_16s       - triple, contains 3 runs, 1-32 = 8s, 33-64 = 2s, and 65-96 = 16s
   
 Other adjustments: 
+  20230918_MaPo1001_12C_16s       - triple, contains 3 runs, 1-32 = 8s, 33-64 = 2s, and 65-96 = 16s
   20230918_MaPo1001_4C_1s         - double, keep first run
-  20230920_MaPo1005_24C_16s       - keep 3-33
-
+  20230920_MaPo1005_24C_16s       - keep 4-33
+  20230918_MaPo1003_12C_16s       - one random 19s interval (probably fine)
+  20230918_MaPo1003_12C_2s        - one random 6s interval 
+  20230918_MaPo1003_12C_4s        - one random 6s interval 
+  20230919_MaPo1004_4C_16s        - keep last 31 
+  20230920_MaPo1006_12C_16s       - keep last 31
+  20230920_MaPo1006_24C_4s        - one 5s interval (probably fine)
+  
+  
+```{r}
+manualtrim <- c("20230918_MaPo1001_4C_1s", "20230920_MaPo1005_24C_16s", "20230919_MaPo1004_4C_16s", "20230920_MaPo1006_12C_16s", "20230918_MaPo1001_12C_16s")
+```
 
 ```{r manually trim data}
 last32 <- SolFitsTrim %>%
-  filter(!Filename %in% c("20230918_MaPo1001_4C_1s", "20230920_MaPo1005_24C_16s")) %>%
+  filter(!Filename %in% c(manualtrim)) %>%
   group_by(Filename) %>%
   slice(tail(row_number(),32)) %>% 
   mutate(Flashnumber = row_number()) %>%
   ungroup()
 
+last31 <- SolFitsTrim %>%
+  filter(Filename %in% c("20230919_MaPo1004_4C_16s", "20230920_MaPo1006_12C_16s",
+                         "20230918_MaPo1001_12C_16s")) %>%
+  group_by(Filename) %>%
+  slice(tail(row_number(),31)) %>% 
+  mutate(Flashnumber = row_number()) %>%
+  ungroup()
+  
 MaPo1001_4C_1s <- SolFitsTrim %>%
   filter(Filename== "20230918_MaPo1001_4C_1s") %>%
   filter(Flashnumber <= 32)
@@ -174,7 +203,7 @@ MaPo1005_24C_16s <- SolFitsTrim %>%
   filter(Flashnumber %in% c(3:33)) %>%
   mutate(Flashnumber = row_number())
 
-SolFitsTrim2 <- rbind(last32, MaPo1001_4C_1s, MaPo1005_24C_16s)
+SolFitsTrim2 <- rbind(last32, last31, MaPo1001_4C_1s, MaPo1005_24C_16s)
 ```
 
 
@@ -206,6 +235,8 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
                   NA))) %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
 ```
+
+
 
 
 ### Group by Taxon 

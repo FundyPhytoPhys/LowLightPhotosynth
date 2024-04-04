@@ -81,6 +81,14 @@ conversion <- function(data){
     mutate(Light_Level = round(Light_Level, 5)) %>%
     ungroup()
 }
+
+conversion.actual <- function(data){
+  data %>%
+    group_by(ActualSpace_s, TempDiff_C) %>% 
+    mutate(Light_Level = (1/ActualSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
+    mutate(Light_Level = round(Light_Level, 5)) %>%
+    ungroup()
+}
 ```
 
 
@@ -138,20 +146,24 @@ SolFitsTrim <- SolFitsTrim %>%
   mutate(Flashnumber = row_number()) %>% #add flashnumber column 
   relocate(Flashnumber, .before=p) %>%
   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000, .before=Flashnumber) %>% #add col for time elapsed 
+  mutate(TimeDiff_s = c(NA, diff(Time__mSec)/1000)) %>%
   ungroup()
 ```
 
 
 ```{r correct file issues}
-ProblemFiles <- unique(SolFitsTrim$Filename[SolFitsTrim$Flashnumber >32])
+ProblemFits <- SolFitsTrim %>% 
+  na.omit() %>%
+  mutate(TimeDev = abs(PulseSpace_s - TimeDiff_s)) %>%
+  filter(TimeDev > 1)
 
-ProblemList <- SolFitsTrim %>% 
+ProblemFiles <- unique(ProblemFits$Filename)
+
+ProblemList_Tavuvik <- SolFitsTrim %>% 
   filter(Filename %in% c(ProblemFiles)) %>% 
-  group_by(Filename) %>%
-  mutate(TimeDiff = c(NA, diff(ObsTime))) %>% #shows actual spacing between flashes
-  ungroup() %>%
   doBy::split_by("Filename") #creates list of problem files
 ```
+
 
 From ProblemList, use spacing between flashes to decipher runs:
 Keep last 32 flashes in:
@@ -176,10 +188,22 @@ Other adjustments:
   20230925_SeGu1005_2C_16s        - 120 flashes, use 58-89
   20230926_SeGu1001_6C_16s        - remove, incorrect spacing
   20230925_SeGu1005_2C_8s         - remove, file error 
+  20230927_SeGu1001_6C_16s        - only keep last 31
+  20230926_SeGu1001_10C_16s       - only keep last 31
+  20230925_SeGu1008_2C_2s         - random 4 second interval between flashes 13 & 14 (probably fine)
+  20230926_SeGu1001_6C_1s         - mislabeled, pulsespace is 4
+  20230926_SeGu1001_6C_2s         - pulse spacing of 5.7 ?
+  20230926_SeGu1001_6C_4s         - mislabeled, pulsespace is 8 
+  20230926_SeGu1001_6C_8s         - mislabeled, pulsespace is 12 
+  
+```{r}
+otheradjustments <- c("20230927_SeGu1006_2C_16s", "20230925_SeGu1005_2C_16s", "20230926_SeGu1001_6C_16s", "20230925_SeGu1005_2C_8s", "20230927_SeGu1001_6C_16s", "20230926_SeGu1001_10C_16s", "20230926_SeGu1001_6C_1s", "20230926_SeGu1001_6C_2s","20230926_SeGu1001_6C_4s","20230926_SeGu1001_6C_8s")
+```
+
 
 ```{r manual trim}
 last32 <- SolFitsTrim %>%
-  filter(!Filename %in% c('20230927_SeGu1006_2C_16s', '20230925_SeGu1005_2C_16s', '20230926_SeGu1001_6C_16s', '20230925_SeGu1005_2C_8s')) %>%
+  filter(!Filename %in% c(otheradjustments)) %>%
   group_by(Filename) %>%
   slice(tail(row_number(),32)) %>% 
   mutate(Flashnumber = row_number()) %>%
@@ -194,9 +218,25 @@ SeGu1006_2C_16s <- SolFitsTrim %>%
   filter(Filename == '20230927_SeGu1006_2C_16s') %>%
   filter(Flashnumber %in% c(2:33)) %>%
   mutate(Flashnumber = row_number())
-  
 
-SolFitsTrim2 <- rbind(last32,SeGu1005_2C_16s, SeGu1006_2C_16s)
+SeGu1001_6C <- SolFitsTrim %>%
+  filter(Filename %in% c("20230926_SeGu1001_6C_1s", "20230926_SeGu1001_6C_2s", 
+                         "20230926_SeGu1001_6C_4s","20230926_SeGu1001_6C_8s")) %>%
+  mutate(PulseSpace_s = case_when(
+    Filename == "20230926_SeGu1001_6C_1s" ~ 4.7, 
+    Filename == "20230926_SeGu1001_6C_2s" ~ 5.7,
+    Filename == "20230926_SeGu1001_6C_4s" ~ 7.7,
+    Filename == "20230926_SeGu1001_6C_8s" ~ 11.7))
+
+last31 <- SolFitsTrim %>%
+  filter(Filename %in% c("20230927_SeGu1001_6C_16s","20230926_SeGu1001_10C_16s")) %>%
+  group_by(Filename) %>%
+  slice(tail(row_number(),31)) %>% 
+  mutate(Flashnumber = row_number()) %>%
+  ungroup()
+
+SolFitsTrim2 <- rbind(last32, last31, SeGu1005_2C_16s, SeGu1006_2C_16s)
+# note the SeGu1001_6C was excluded from analysis 
 ```
 
 ### Normalize Fluorescence & Add Temperature Differential Column 
@@ -215,6 +255,13 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
          Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
          Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
          FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
+  ungroup()
+
+# Add column for actual PulseSpacing (for run)
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  group_by(Filename) %>%
+  mutate(ActualSpace_s = mean(TimeDiff_s, na.rm = TRUE), 
+         ActualSpace_s = round(ActualSpace_s, 1)) %>%
   ungroup()
 
 # Add columns for growth temperature and difference between measurement & growth temps
@@ -243,6 +290,9 @@ SolFitsChaeotoceros <- conversion(SolFitsChaeotoceros)
 SolFitsFragilariopsis <- conversion(SolFitsFragilariopsis)
 ```
 
+```{r}
+#SolFitsFragilariopsis2 <- conversion.actual(SolFitsFragilariopsis)
+```
 
 
 ### Test Plots
