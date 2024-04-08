@@ -357,41 +357,6 @@ mtrx.data  %>%
 
 ### GAM By Deviation From Growth Temp
 
-```{r}
-# come back to list later 
-predict.gam <- function(list, predictor) {
-      
-  combineddata <- lapply(list, function(damping){
-  gam <- mgcv::gam(DampingIndex ~ te(get(predictor), Light_Level, k= n_distinct(damping[[predictor]])), 
-                   data = damping, method = "REML")
-
-  data <- with(damping, expand.grid( Light_Level = seq(min(Light_Level), max(Light_Level), 0.05),
-    predictor = seq(min(damping[[predictor]]), max(damping[[predictor]]), 0.1)))
-  
-  data <- data %>%
-    mutate(DampingIndex = predict(gam, newdata = data), 
-           DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex),
-           Strain = factor(unique(damping$Strain)),
-           l.strain = unique(damping$l.strain),
-           GrowthTemp_C = factor(unique(damping$GrowthTemp_C)), 
-           l.temp = unique(damping$l.temp),
-           ThermalTolerance = factor(unique(damping$ThermalTolerance))) 
-      return(data) })
-  combineddata <- do.call(bind_rows, combineddata)
-  return(combineddata)
-}
-```
-
-
-```{r}
-predict.gam.d <- predict.gam(diff.list, TempDiff_C)
-```
-
-
-
-
-
-
 ```{r Functions for GAM by Diff}
 predict.diff.gam <- function(diff.list) {
   combineddata <- lapply(diff.list, function(damping){
@@ -717,7 +682,7 @@ theme_pres <- function() {
   theme_bw() +
   theme(text = element_text(family = "Georgia"), 
         axis.text=element_text(size=11), axis.title=element_text(size=13),
-        legend.text=element_text(size=11), legend.title=element_text(size=13),
+        legend.text=element_text(size=11), legend.title=element_text(size=11),
         strip.background = element_rect(colour="black", fill=NA),
         strip.text = element_text(size=11), 
         panel.grid.major = element_blank(), 
@@ -726,158 +691,178 @@ theme_pres <- function() {
 }
 ```
 
+```{r warning=FALSE}
+power_list <- lapply(names(Cp_wavelets), function(condition_name) {
+    condition <- Cp_wavelets[[condition_name]]
+    Power.avg <- condition$Power.avg
+    Power.avg.pval <- condition$Power.avg.pval
+    Period <- condition$Period
+    Condition <- rep(condition_name, length(Power.avg))
+    df <- data.frame(Power.avg, Power.avg.pval, Period, Condition) %>%
+      separate(Condition, into = c("Strain", "PulseSpace_s", "Temp_C", "LightLevel"), sep = "_") %>%
+      mutate(Power.avg.pval = ifelse(Power.avg.pval <= 0.05, 0, 1)) 
+     return(df)
+  })
+power.data <- bind_rows(power_list)
+  
+power.data %>%
+    filter(Temp_C == "8") %>% 
+    group_by(PulseSpace_s) %>%
+    mutate(Light_Level = mean(as.numeric(LightLevel))) %>%
+    mutate(Light_Level = round(Light_Level, 2)) %>%
+    ungroup() %>%
+    ggplot()+ 
+    geom_path(aes(x= Power.avg, y= Period, col=Power.avg.pval), linewidth=0.8) +
+    scale_color_gradient(low="skyblue", high="black", breaks= c(0.05, 1), 
+                         labels= c("p ≤ 0.05", "p > 0.05"), guide="legend") +
+    labs(x= "Average Wavelet Power", colour= bquote(atop("Significance of", "ChlF Oscillations"))) +
+    ggh4x::facet_nested(cols=vars(Light_Level)) +
+    scale_y_continuous(limits= c(0,10), breaks= c(0,4,8), expand=c(0,0)) +
+    scale_x_continuous(limits= c(0,1), breaks=c(0, 0.4, 0.8),expand=c(0,0), 
+          sec.axis=sec_axis(~ . , name = bquote(Light ~ Level ~ (µmol ~ photons ~ m^-2 ~ s^-1)), 
+                            breaks = NULL, labels = NULL)) +
+    theme_pres() 
+
+# ggsave("wtpower_pres.png", width = 9.5 , height = 4.5, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output/HonoursDay")
+```
+
+```{r warning = false}
+pres.reconstruction <- function(reconstructed) {
+  result_list <- Map(function(condition_name, condition_data) {
+    series <- as.data.frame(condition_data$series)
+    series <- mutate(series, Condition = condition_name) %>%
+      mutate(Flashnumber = row_number())  %>%
+      separate(Condition, into = c("Strain", "PulseSpace_s", "Temp_C", "LightLevel"),
+                sep = "([\\/\\_])") %>%
+       mutate(PulseSpace_s = factor(PulseSpace_s))
+    return(series)
+  }, names(reconstructed), reconstructed) }
+
+Cp.recon <- bind_rows(pres.reconstruction(Cp_reconstruction)) %>%
+  group_by(PulseSpace_s) %>%
+  mutate(LightLevel = round(mean(as.numeric(LightLevel)), 2)) %>%
+  ungroup() %>%
+  select(-c(FvFmrunnorm.trend)) %>%
+  filter(Temp_C == "8", LightLevel == 0.71)
+
+Cp.long <- Cp.recon %>%
+  pivot_longer(cols = starts_with("FvFmrunnorm"), names_to = "Series", values_to = "FvFmrunnorm_value") %>%
+  mutate(Series = ifelse(Series == "FvFmrunnorm", "Original~Wavelet",
+                paste(expression(paste("Reconstruction at ", alpha, " = 0.05")))))
+                  
+ Cp.long %>%
+   ggplot(aes(x=Flashnumber, y=FvFmrunnorm_value, col = Series)) +
+   geom_line() + 
+   facet_wrap(vars(Series), labeller=label_parsed) + 
+   scale_colour_manual(values=c("black", "deepskyblue3")) +
+   labs(x= "Flash Number",  y="Transformed ChlF") +
+   scale_x_continuous(breaks = seq(0,32,4), expand = c(0,0)) +
+   theme_pres() +
+   theme(legend.position = "none", panel.spacing.x = unit(2, "cm"), 
+         strip.background = element_rect(colour= NA, fill=NA),
+         strip.text = element_text(size=17, margin=margin(b=15)),
+         panel.border = element_rect(color = "black", size = 1))
+ 
+# ggsave("reconstruct_pres.png", width = 11 , height = 4.5, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output/HonoursDay")
+```
+
+
+```{r}
+spacing.average <- sstate_damping %>%
+  mutate(DampingIndex = ifelse(DampingIndex > 0, 1, 0)) %>%
+  group_by(PulseSpace_s) %>%
+  mutate(mean.light = mean(Light_Level),
+         mean.light = round(mean.light,2)) %>%
+  ungroup()
+
+spacing.average  %>%
+  ggplot() +
+  geom_tile(aes(x= as.factor(Temp_C), y=as.factor(mean.light), fill=as.factor(DampingIndex))) +
+  scale_fill_manual(values= c("black","skyblue"), 
+                      name= bquote(atop("Significance of", "ChlF Oscillations")), 
+                      labels =c("p > 0.05", "p ≤ 0.05")) +
+  labs(x = "Measurement Temperature (°C)", y= bquote(Light ~ Level ~ (µmol ~ photons ~ m^-2 ~ s^-1))) +
+  facet_grid(cols=vars(ThermalTolerance), scales = "free_x", space = "free_x") +
+  scale_x_discrete(expand=c(0,0)) + scale_y_discrete(expand=c(0,0)) +
+  theme_pres() 
+
+# ggsave("mtrx_pres.png", width = 10 , height = 4, dpi = 900,
+#        plot=last_plot(),
+#        path="../Output/HonoursDay")
+```
+
 ```{r}
 damping.group <- sstate_damping %>% 
-   mutate(ThermalTolerance= ifelse(Strain %in% c("Fragilariopsis_cylindrus", 
-                           "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina"),
-                           "Polar", 
-                           ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
-                                               "Thalassiosira_pseudonana"), "Temperate", NA)), 
-         Type = ifelse(Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
-                           "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina"),
-                           "Algae", 
-                           ifelse(Strain %in% c("Fragilariopsis_cylindrus", "Thalassiosira_pseudonana"),
-                                  "Diatom", NA)), 
-         Group = paste(ThermalTolerance, Type, sep = "_")) %>%
-  doBy::splitBy(formula = ~ Group)
+  doBy::splitBy(formula = ~ ThermalTolerance) 
 ```
 
 ```{r}
-general.group <- sstate_damping %>% 
-  doBy::splitBy(formula = ~ ThermalTolerance)
-```
+predict.diff.group <- function(group.list) {
+  combineddata <- lapply(group.list, function(damping){
+  gam <- mgcv::gam(DampingIndex ~ te(TempDiff_C, Light_Level, k= n_distinct(damping$TempDiff_C)), 
+                   data = damping, method = "REML")
 
-```{r}
-predict.diff.group <- function(damping) {
-  
-  knots <- n_distinct(damping$TempDiff_C)
-  
-  gam <- mgcv::gam(DampingIndex ~ te(TempDiff_C, Light_Level, k=3), data = damping)
-
-  data <- with(damping, expand.grid(
-    Light_Level = seq(0.025, 0.65, 0.01),
-    TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.05)
-  ))
-  
-  data$DampingIndex <- predict(gam, newdata = data)
+  data <- with(damping, expand.grid( Light_Level = seq(0.025, 0.65, 0.01),
+    TempDiff_C = seq(min(TempDiff_C), max(TempDiff_C), 0.1)))
   
   data <- data %>%
-    mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
-    mutate(ThermalTolerance = unique(damping$ThermalTolerance))
-  
-  return(data) 
+    mutate(DampingIndex = predict(gam, newdata = data), 
+           DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex),
+           ThermalTolerance = factor(unique(damping$ThermalTolerance))) 
+      return(data) })
+  combineddata <- do.call(bind_rows, combineddata)
+  return(combineddata)
 }
 ```
 
-
 ```{r}
-predict.group <- lapply(general.group, predict.diff.group)
-predict.group <- bind_rows(predict.group) 
-```
+predict.group <- predict.diff.group(damping.group)
+legend.lab <- str_wrap("Duration of Significant ChlF Oscillations", width = 20)
 
-
-```{r}
 predict.group %>%
   ggplot(aes(x=TempDiff_C, y=Light_Level, z= DampingIndex)) +
   geom_contour_fill() + 
   geom_contour2(color = "white", linemitre = 10, linewidth=0.25) +
   geom_text_contour(stroke = 0.1, family = "Times New Roman", size = 3.5) +
-  geom_vline(xintercept=0, col= "white", linetype = 1, linewidth = 1.3) +  
-  geom_vline(xintercept=0, col= "black", linetype = 2, linewidth = 0.8) +  
-  labs(x= "Deviation from Growth Temperature (°C)",
+  labs(x= "Deviation from Growth Temperature During Measurement (°C)",
        y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
-       fill= "Damping Index") + 
-  scale_fill_gradientn(colors = pals::ocean.deep(13)) +
-  scale_x_continuous(expand=c(0,0)) +
-  scale_y_continuous(expand=c(0,0)) +
-  ggh4x::facet_nested_wrap(vars(ThermalTolerance), ncol = 1, strip.position = "right") +
-  theme_pres() 
+       fill = legend.lab) +
+  scale_fill_gradientn(colors = pals::ocean.deep(13), limits=c(0,12), breaks = c(0,3,6,9,12)) +
+  scale_x_continuous(expand=c(0,0), limits= c(-6,6)) + scale_y_continuous(expand=c(0,0)) +
+  facet_wrap(vars(ThermalTolerance), ncol = 2) +
+  theme_pres() + theme(panel.spacing.x = unit(6, "mm"))
 
-# ggsave("between_pres.png", width = 10 , height = 4.5, dpi = 900,
+# ggsave("between_pres.png", width = 9 , height = 4, dpi = 900,
 #        plot=last_plot(),
-#        path="~/Downloads")
+#        path="../Output/HonoursDay")
 ```
 
 ```{r}
-predict.temp.group <- function(damping) {
+gam.within <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level), 
+                   data = sstate_damping, method = "REML")
+
+data.within <- with(sstate_damping, expand.grid( Light_Level = seq(0.025, 0.65, 0.01),
+    Temp_C = seq(min(Temp_C), max(Temp_C), 0.1)))
   
-  knots <- n_distinct(damping$Temp_C)
-  
-  gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping)
+data.within <- data.within %>%
+    mutate(DampingIndex = predict(gam.within, newdata = data.within), 
+           DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex))
 
-  data <- with(damping, expand.grid(
-    Light_Level = seq(0.025, 0.7, 0.01),
-    Temp_C = seq(min(Temp_C), max(Temp_C), 0.05)
-  ))
-  
-  data$DampingIndex <- predict(gam, newdata = data)
-  
-  data <- data %>%
-    mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
-    mutate(ThermalTolerance = unique(damping$ThermalTolerance))
-  
-  return(data) 
-}
-```
-
-
-
-
-```{r}
-predict.group.temp <- lapply(general.group, predict.temp.group)
-predict.group.df <- bind_rows(predict.group.temp) 
-```
-
-
-
-```{r warning=FALSE}
-predict.group.df %>%
+data.within %>%
   ggplot(aes(x=Temp_C, y=Light_Level, fill= DampingIndex)) +
   geom_tile() + 
-  labs(x= "Measurement Temperature (°C)",
-       y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
-       fill= "Damping Index") +
-  scale_fill_gradientn(colors = pals::ocean.matter(26600)) +
-  scale_x_continuous(expand=c(0,0)) + scale_y_continuous(expand=c(0,0)) +
-  facet_wrap(vars(ThermalTolerance), ncol = 2, scales= "free_x") +
-  theme_pres() +
-  theme(panel.spacing.x = unit(6, "mm"))
+  labs(x= "Measurement Temperature (°C)", y= expression("Light Level ("*mu*"mol photons m"^"-2"~s^-1*")"),
+       fill= legend.lab) +
+  scale_fill_gradientn(colors = pals::ocean.matter(16272),limits=c(0,12), breaks = c(0,3,6,9,12)) +
+  scale_x_continuous(expand=c(0,0), breaks=c(0,4,8,12,16,20,24,28)) + scale_y_continuous(expand=c(0,0)) +
+  theme_pres() 
 
-# ggsave("within_pres.png", width = 10 , height = 4.5, dpi = 900,
+# ggsave("within_pres.png", width = 7.5 , height = 4.2, dpi = 900,
 #        plot=last_plot(),
-#        path="~/Downloads")
-```
-
-```{r}
-# Define the volume of the cube
-volume <- 2000
-
-# Calculate the side length of the cube
-side_length <- volume^(1/3)
-
-# Load the 'rgl' library for 3D plotting
-library(rgl)
-
-# Create a new 3D plot window
-open3d()
-
-# Define the vertices of the cube
-vertices <- cbind(c(0, 0, side_length, side_length, 0, 0, side_length, side_length),
-                  c(0, side_length, side_length, 0, 0, side_length, side_length, 0),
-                  c(0, 0, 0, 0, side_length, side_length, side_length, side_length))
-
-# Define the edges of the cube
-edges <- matrix(c(1, 2, 3, 4, 1, 5, 6, 7, 8, 5, 6, 2, 3, 7, 8, 4), ncol = 2, byrow = TRUE)
-
-# Plot the cube
-segments3d(vertices[edges[, 1], 1], vertices[edges[, 1], 2], vertices[edges[, 1], 3],
-           vertices[edges[, 2], 1], vertices[edges[, 2], 2], vertices[edges[, 2], 3])
-
-# Add labels and adjust plot settings if needed
-# Add labels
-# Set plot options
-aspect3d(1, 1, 1)  # Set equal aspect ratio
-axis3d()            # Show axis
-
+#        path="../Output/HonoursDay")
 ```
 
