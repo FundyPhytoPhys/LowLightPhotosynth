@@ -508,11 +508,6 @@ predict.gam.d %>%
 #        plot=last_plot(),
 #        path="../Output")
 ```
-```{r}
-sstate_damping %>%
-  filter(Type== "Green Algae",
-         Temp_C %in% c(10,12))
-```
 
 
 ### GAMs By Measurement Temp 
@@ -852,3 +847,37 @@ predict.group.df %>%
 #        plot=last_plot(),
 #        path="~/Downloads")
 ```
+
+```{r}
+# Define the volume of the cube
+volume <- 2000
+
+# Calculate the side length of the cube
+side_length <- volume^(1/3)
+
+# Load the 'rgl' library for 3D plotting
+library(rgl)
+
+# Create a new 3D plot window
+open3d()
+
+# Define the vertices of the cube
+vertices <- cbind(c(0, 0, side_length, side_length, 0, 0, side_length, side_length),
+                  c(0, side_length, side_length, 0, 0, side_length, side_length, 0),
+                  c(0, 0, 0, 0, side_length, side_length, side_length, side_length))
+
+# Define the edges of the cube
+edges <- matrix(c(1, 2, 3, 4, 1, 5, 6, 7, 8, 5, 6, 2, 3, 7, 8, 4), ncol = 2, byrow = TRUE)
+
+# Plot the cube
+segments3d(vertices[edges[, 1], 1], vertices[edges[, 1], 2], vertices[edges[, 1], 3],
+           vertices[edges[, 2], 1], vertices[edges[, 2], 2], vertices[edges[, 2], 3])
+
+# Add labels and adjust plot settings if needed
+# Add labels
+# Set plot options
+aspect3d(1, 1, 1)  # Set equal aspect ratio
+axis3d()            # Show axis
+
+```
+
