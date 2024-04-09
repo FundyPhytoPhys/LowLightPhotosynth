@@ -228,7 +228,7 @@ plot.reconstruction <- function(reconstructed) {
     geom_line(aes(x=Flashnumber, y=FvFmrunnorm, col = "Original")) +
     geom_line(aes(x=Flashnumber, y=FvFmrunnorm.r, col= "Reconstructed"))  +
     scale_colour_manual(values=c("black", "deepskyblue3"), 
-                        labels = c("Original", expression(paste("Reconstucted (", alpha, " = 0.05)")))) +
+                        labels = c("Original", expression(paste("Reconstructed (", alpha, " = 0.05)")))) +
     labs(x= "Flash Number", 
          y=expression("Normalized Chlorophyll Fluorescence (F"[v]*" / F"[m]*")"),
          col= "Wave Function") +
