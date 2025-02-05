@@ -7,7 +7,14 @@ editor_options:
   chunk_output_type: inline
 ---
 
-This RMD imports processed generated in Wavelet_LowLight.Rmd for generalized additive modelling and generating figures for Natasha Ryan's undergraduate honours thesis at Mount Allison University. 
+This RMD reads objects from the global environment, generated immediately before in Wavelet_LowLight.Rmd for generalized additive modelling and generating figures for Natasha Ryan's undergraduate honours thesis at Mount Allison University. 
+
+Two list objects missing???
+# Line 411 'diff.sstate' not found
+# Line 533 'temp.sstate' not found
+
+Should they be 'diff.list' and 'temp.list'?
+Code does not run with those names?
 
 # Setup
 ```{r load libraries}
@@ -15,6 +22,7 @@ library(tidyverse)
 library(metR)
 library(mgcv)
 library(ggpubr)
+# library(commonR)  Natasha defined her own theme_pres(), used here and in other .Rmd;  sloppy handling of functions, variables and environments
 ```
 
 ```{r create ggplot theme}
@@ -194,7 +202,7 @@ plot.wt.grid(Cp_wavelets)
 # Reconstruction 
 
 ```{r}
-reconstructions <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_Reconstructions.Rds") 
+reconstructions <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Reconstructions.Rds" )) 
 reconstruction.list <- split(reconstructions, sub("_.*", "_reconstruction", names(reconstructions)))
 list2env(reconstruction.list, envir = .GlobalEnv)
 
@@ -265,7 +273,7 @@ plot.reconstruction(Cp_reconstruction)
 # Damping Across Taxa
 
 ```{r import & wrangle data}
-sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Damping.Rds") %>%
+sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>%
   mutate(Strain = factor(Strain), 
   ThermalTolerance = case_when(
      Strain %in% c("Fragilariopsis_cylindrus", "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii",
@@ -284,7 +292,8 @@ sstate_damping <- readRDS("~/LowLightPhotosynth/Data/ProcessedData/LOW_SState_Da
     Strain == "Chlorella_vulgaris" ~ "~italic('C. vulgaris')",
     Strain == "Fragilariopsis_cylindrus" ~ "~italic('F. cylindrus')", 
     Strain == "Thalassiosira_pseudonana" ~ "~italic('T. pseudonana')"),
-  l.temp = paste0("Grown~at~", GrowthTemp_C,"*degree*C"))
+  l.temp = paste0("Grown~at~", GrowthTemp_C,"*degree*C")
+  )
 
 diff.list <- doBy::splitBy(sstate_damping, formula = "Strain")
 temp.list <- doBy::splitBy(sstate_damping, formula = c("Strain", "GrowthTemp_C"))
@@ -517,6 +526,8 @@ summary.temp.gam <- function(damping) {
   return(combined)
 }
 ```
+
+
 
 ```{r}
 predict.gam.t <- lapply(temp.sstate, predict.temp.gam)
