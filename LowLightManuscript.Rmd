@@ -101,6 +101,15 @@ ScientificTen <- function(x, sf = 2) {
 ```
 
 # Introduction {.unnumbered}
+Phytoplankton are a functional grouping of photosynthetic microorganisms, with diverse evolutionary histories and ecologies[@pierellakarlusichPhytoplanktonTaraOcean2020].
+Photolithotrophic growth, a defining characteristic of phytoplankton, fuels biomass production by harnessing light energy to reduce and assimilate inorganic carbon, nitrogen, phosphorus, sulphur, and other essential micronutrients [@ravenPutOutLight2000]. Photosynthetically active radiation (PAR), however, decreases with depth, as the light passing through the water column is scattered and absorbed [@kirkLightPhotosynthesisAquatic2011]. Therefore, with photons as the sole energy input, phytoplankton growth is constrained to the photic zone, the region of water receiving sufficient light for photosynthesis. Eventually, light attenuates to a level defined as the bottom limit of the photic zone at 2-20 µmol photons m^-2^ s^-1^, 1% of surface irradiance [[@ravenPutOutLight2000]].  
+
+Light availability is further constrained in polar seas, presenting unique challenges for phytoplankton growth [@hanckeExtremeLowLight2018, @randelhoffArcticMidwinterPhytoplankton2020, @hoppePhotosyntheticLightRequirement2024]. Seasonally varying solar angle, sea ice, and snow, limit the light penetrating the ice [@leuArcticSpringAwakening2015] to water below [@hanckeExtremeLowLight2018].
+
+
+
+
+
 
 ## Study Sites {.unnumbered}
 
@@ -184,9 +193,8 @@ We next plotted bacterial counts vs. average air temperature (°C) over the prec
 knitr::include_graphics(file.path( FigsFP,"mean_temp_prior48_fig.png"))
 ```
 
-Temperature at the time of sampling at all three study sites showed a left-skewed distribution [@shapiroAnalysisVarianceTest1965] peaking at around 18 °C (Supplemental Fig \@ref(fig:ggdensity)).
-
-We next plotted bacterial counts vs. cumulative precipitation (mm) over the preceding 48 h (Fig \@ref(fig:precip)) from the weather stations, since coastal contamination often results from run off [@healthcanadaGuidelinesCanadianRecreational2012, @maninAssessmentSpatioTemporalVariability2022]. Note that most measurement points fell on days with low cumulative precipitation over the preceding 48 h, a pattern partially obscured by heavy overlap of many points below \~ 10 mm cumulative precipitation.
+(Supplemental Fig \@ref(fig:ggdensity)).
+(Fig \@ref(fig:precip)) many points below \~ 10 mm cumulative precipitation.
 
 ```{r precip, fig.cap = "*Bacterial count vs. cumulative precipitation (mm) over preceding 48 h* at study sites.* Faecal Coliform or *Escherichia coli* per 100 mL (log~10~ scale) from years 2010 to 2023, with thresholds of 200 (red dotted line) or 43 (blue dotted line) bacteria per 100 mL.", out.height = "100%", out.width = "100%", echo = FALSE}
 
