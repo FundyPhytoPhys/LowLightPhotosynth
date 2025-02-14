@@ -173,26 +173,23 @@ Media <- c(rep("F2",2), rep("BG11", 2), rep("F2", 3), rep("BBM",4))
 GenusSpeciesGrowth <- tibble(Genus_Species, Growth_C, PAR, Media)
 
 GenusSpeciesGrowth
+
+
+# StatsAll_table3 %>% 
+#   #arrange(Location, Threshold) %>% 
+#   #select(Location, Threshold, everything()) %>% 
+#   kable(caption ="*Summary statistics of binomial probabilities and p values for bacterial count above 200 bacteria per 100 mL threshold, vs. cumulative precipitation (mm) over 48 h, with heaviest rain days removed from analyses (more than 40 mm cumulative precipitation over 48 h).* Year (2010 to 2023) and mean temperature (°C) over preceding 48 h are co-variants.", digits = 2,
+#         col.names = c("Location", "Precip 48 h", "Year", "Temp 48 h", "p, Precip 48 h ", "p, Year ", "p, Temp 48 h")
+#         ) #%>% 
+#   #kableExtra::kable_classic()
 ```
 
 
 
 
-StatsAll_table3 %>% 
-  #arrange(Location, Threshold) %>% 
-  #select(Location, Threshold, everything()) %>% 
-  kable(caption ="*Summary statistics of binomial probabilities and p values for bacterial count above 200 bacteria per 100 mL threshold, vs. cumulative precipitation (mm) over 48 h, with heaviest rain days removed from analyses (more than 40 mm cumulative precipitation over 48 h).* Year (2010 to 2023) and mean temperature (°C) over preceding 48 h are co-variants.", digits = 2,
-        col.names = c("Location", "Precip 48 h", "Year", "Temp 48 h", "p, Precip 48 h ", "p, Year ", "p, Temp 48 h")
-        ) #%>% 
-  #kableExtra::kable_classic()
-
-
-
-[@environmentandclimatechangecanadaShellfishWaterClassification2020]
 
 Data handling, analysis and presentation were done using the 'knitr' [@R-knitr], 'tidyverse' [@R-tidyverse], 'datastreamr' [@R-datastreamr], 'lutz' [@R-lutz], 'kableExtra' [@R-kableExtra], 'viridis' [@R-viridis], 'stats' [@R-stats] and 'broom' [@R-broom] packages, running under R [@Rcore] and R Studio [@RStudio].
 
-geometric mean faecal coliform MPN of the water is ≤ 14 per 100 mL AND b) not more than 10% of the samples exceed a faecal coliform MPN of 43 per 100 mL, for a five-tube decimal dilution test [@americanpublichealthassociationStandardMethodsExamination2022].
 
 # Results {.unnumbered}
 
@@ -203,7 +200,6 @@ For years 2010-2023 we firstly plot bacterial count (Faecal Coliform or *Escheri
 knitr::include_graphics(file.path( FigsFP,"measurement_date_fig.png"))
 ```
 
-In subsequent statistical analyses sampling date is included as a co-variant, to capture any temporal trends in contamination events.
 
 We next plotted bacterial counts vs. average air temperature (°C) over the preceding 48 h, from the weather stations nearest the respective sampling sites (Fig \@ref(fig:temp)).
 
@@ -241,8 +237,6 @@ StatsAll_table %>%
 ```
 
 # Discussion {.unnumbered}
-
-Atf management and policy interventions [@departmentofenvironmentandlocalgovernmentgovernmentofnewbrunswickIntegratedWatershedManagement2021; @crandallengineeringltdGreaterShediacSewerage2019; @WaterStrategyNew2017; @donelleStateBayWater2017; @hendersonenvironmentalconsultingltdAnalysisFactorsThat1999; @ShediacBylawRestricts2012]. In more
 
 # Acknowledgements {.unnumbered}
 
