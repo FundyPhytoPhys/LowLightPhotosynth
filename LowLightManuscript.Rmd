@@ -186,14 +186,45 @@ F_V = \frac{F_M}{F_O}
 For each culture sample we adjusted the number and power of flashlets per flash to achieve closure of ~ 0.95 of PSII complexes, as estimated by the fitting of the chlorophyll fluorescence induction [@kolberMeasurementsVariableChlorophyll1998; @schubackSingleTurnoverVariableChlorophyll2021]. Ideally the saturating flash would achieve complete closure of the PSII population, but at F~M~ concomitant re-opening of PSII by downstream electron transport results in a steady state ratio of closed PSII to open PSII.  The flash power required to drive the PSII population to closure depends largely upon the effective absorption cross-section of photosystem II (σ~PSII~), estimated from the ChlF induction curve during the saturation phase [@kolberMeasurementsVariableChlorophyll1998]. σ~PSII~ represents the probability of light capture by the PSII antenna bed associated with the dark-adapted PSII [@schubackSingleTurnoverVariableChlorophyll2021,@xuPhytoplanktonSPSIIExcitation2018]. When σ~PSII~ for a sample is larger, weaker or fewer, flashlets are required to saturate the population of PSII,  while limiting excitation stress or double turnovers of PSII associated with excess light [@xuPhytoplanktonSPSIIExcitation2018]. Conversely, a sample with a smaller σ~PSII~ requires brighter or more numerous flashlets to ensure that the proportion of closed reaction centres increases progressively to saturation. If the brightness and number of sub-saturating flashlets are appropriate for the culture, the fluorescence will reach a plateau after approximately 70-80% of the flashlets, as depicted in Figure XXXX [@kolberMeasurementsVariableChlorophyll1998]. 
 We kept the single turnover excitation flash as short as feasible, and avoided excessive excitation, to limit the probability of re-opening followed by re-closure of PSII complexes, which contributes to desynchronization of the progression of the PSII complexes through S-States.
 
+XXXX
+Desynchronization resulting from 'misses' in which a PSII fails to perform a charge separation and close during a flash has an upper bound of:
+
+D~M~ ~ 1 * e^(0.05 * n)
+```{r miss desynch}
+n = c(1,2,3,4,5,6,7,8)
+DM = -(1 - exp(0.05 * n))
+DM
+```
+
+
+Where the D~M~ is the cumulative desynchronization resulting from photochemical misses during each flash, and n are the number of flashes applied. 0.05 is is the fraction of PSII remaining open during a flash.  This is an upper bound because the 0.0.05 represents a balance between closure and re-opening during the flash.
+
+
+
+Desynchronization resulting from double hits and double rounds of photochemistry during the flash is approximated by
+
+D~D~ ~ 1 * e^(0.05 * n)
+σ~PSII~ * P * t
+P - flash power, µmol photons m^-2^ s^-1^
+t - flash duration, s
+6.022E17 photons µmol^-1^
+1E-20 m^2^ A^-1^
+
+need to estimate exponential growth of reopened PSII as fraction
+then estimate probability of another hit
+...
+
+
 XXXXestimate these probabilities of misses vs. double hitsXXXX.
 
-Each flash is bright enough to deliver, on average, a photon to each PSII, but short enough to limit the probability of a PSII going through two rounds of photochemistry during the flash. Each flash thus advances  a transition between S-States for each PSII. Thus, as sequential flashes are applied to the culture, each individual PSII is driven through the four S-States (Figure 5) [29]. As the oxygen-evolving complex of PSII  moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020]. 
+Each flash is bright enough to deliver, on average, at least one photon to each PSII, but short enough to limit the probability of a PSII re-opening and going through a second round of photochemistry during the flash. Each flash thus advances  a transition between S-States for each PSII. Thus, as sequential flashes are applied to the culture, each individual PSII is driven through the four S-States (Figure 5) [29]. As the oxygen-evolving complex of PSII  moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020]. 
 
 
-Since the population of PSII starts from a dark acclimated state, predominantly in S0, the population of PSII will cycle synchronously through S States, reflected by an ongoing oscillation in chlorophyll fluorescence with a period of four (Figure 5) [@dewijnSstateDependenceMiss2002]. However, a recombination reaction, representing the loss of charge separation, will cause a missed step in the S-State cycling of an individual PSII. As more recombination events occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence [@dewijnSstateDependenceMiss2002]. Prolonged synchronous cycling thus reflects a lower probability of desynchronizations, and thus a lower probability of losses through recombinations.
+
+XXXJUSTIFYXXX
 
 ## Measurement Conditions
+
 By evaluating the S-State cycling of polar and temperate taxa of diatoms and green algae under a range of measurement temperatures and effective light levels (Table 2), we can determine if polar taxa suppress wasteful recombination reactions, to maintain electron transport under low light.
  Measurement temperatures ranged from 0 to 28°C, depending on the taxa (Table 2). While light absorption and energy transfer within PSII are not temperature-sensitive, the redox reactions associated with downstream electron transport are highly temperature-dependent [@hunerPhotosyntheticAdaptationMulticellularity2023]. Notably, the incidence of charge recombination typically decreases with temperature[@ivanovAcclimationTemperatureIrradiance2006], as temperature drops below the activation energies for recombinations. However, this effect may be minimized in strains possessing adaptive mechanisms to regulate photosynthetic electron flow, S-State transitions, and energy partitioning [@hunerPhotosyntheticAdaptationMulticellularity2023]. 
 
@@ -208,24 +239,35 @@ Light () = \frac{1}{flash spacing (s)|}
 $$
 Light (\mu mol \lambda m^{-2} s{-1}) = \frac{1}{flash spacing (s)} * {\frac{1}{\sigma_{PSII} (A^2 \lambda^-1)} * \frac{1 m^2}{1E20A^2} * \frac{\mu mol}{6.022E17 \lambda}
 $$
+Since the population of PSII starts from a dark acclimated state, predominantly in S0, the population of PSII will cycle synchronously through S States, reflected by an ongoing oscillation in chlorophyll fluorescence with a period of four (Figure 5) [@dewijnSstateDependenceMiss2002]. However, a recombination reaction, representing the loss of charge separation, will cause a missed step in the S-State cycling of an individual PSII. As more recombination events occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence [@dewijnSstateDependenceMiss2002]. Prolonged synchronous cycling thus reflects a lower probability of desynchronizations, and thus a lower probability of losses through recombinations.  Photochemical misses, or double hits, also contribute to desynchronization, but should not respond strongly to changes in flash spacing nor to temperature.
 
 The conversions of flash spacing to light levels yielded similar ranges of effective measurement light levels for each strain (Table XXXx). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m-2s-1, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m-2s-1 threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans [@ravenPutOutLight2000].
 
 
 
-
+XXX
 ## Analytical Methods 
-Data was processed using R version 4.3.2 [@Rcore] and RStudio version 2023.12.0+369 [@RStudio] on the x86_64-apple-darwin20 (64-bit) platform and running under macOS Sonoma 14.3.1. Fluorescence data files generated by LIFT software were imported, tidied and combined with metadata on each culture using the tidyverse [@R-tidyverse], lubridate [52], and googlesheets4 [53] packages. The tidyverse, doBy [54], and WaveletComp [55] packages were used for wavelet analyses. Lastly, the mgcv [56] and mgcViz [57] packages were used for generalized additive modelling, while the ggplot2 [58] and metR [59] packages were used for data visualization. 
+Data was processed using R version 4.3.2 [@Rcore] and RStudio version 2023.12.0+369 [@RStudio] on the x86_64-apple-darwin20 (64-bit) platform and running under macOS Sonoma 14.3.1. Fluorescence data files generated by LIFT software were imported, tidied and combined with metadata on each culture using the tidyverse [@R-tidyverse], lubridate [52], and googlesheets4 [53] packages. The tidyverse, doBy [54], and WaveletComp [55] packages were used for wavelet analyses. Lastly, the mgcv [56] and mgcViz [57] packages were used for generalized additive modelling, while the ggplot2 [58] and metR [59] packages were used for data visualization. XXX
 
 Data presentations were done using the 'knitr' [@R-knitr],  'kableExtra' [@R-kableExtra],   and 'broom' [@R-broom] packages.
 
 ## Wavelet Transformations
-The fluorescence data yields a time series of Fv/Fm over 32 flashes for each flash spacing and each measurement temperature, for each culture sample. The fluorescence time series were analyzed for each combination of strain, growth conditions, measurement temperature, and flash spacing, using wavelet transformations [60], as exemplified in Figure 6. Unlike traditional methods, wavelet analysis does not assume that the statistical properties of a time series are constant. Instead, wavelet transformations locally decompose the signal across different time scales and estimate spectral characteristics as a function of time [61]. By examining the frequency and wavelet power spectra, we can uncover the dominant patterns in the data [60]. 
 
-Figure 7: Representative wavelet transformation of Chlamydomonas priscuii fluorescence over 32 consecutive flashes, measured at 4°C and 1-second flash spacing, equivalent to a photon delivery rate to PSII achieved under an equivalent light level of 0.708 µmol photons m-2 s-1. 
+The fluorescence data yields a time series of F~V~/F~M~ over 32 sequentially applied flashes,  for each flash spacing, and each measurement temperature, for each culture sample. The F~V~/F~M~ time series were analyzed for each combination of strain, growth conditions, measurement temperature, and flash spacing, using wavelet transformations [@theisSpectralTransformations2010], as exemplified in Figure XXX. Unlike traditional methods, wavelet analysis does not assume that the statistical properties of a time series are constant. Instead, wavelet transformations locally decompose the signal across different time scales and estimate spectral characteristics as a function of time [@cazellesWaveletAnalysisEcological2008]. By examining the frequency and wavelet power spectra, we can uncover the dominant patterns in the data [@theisSpectralTransformations2010]. 
 
-The core of the wavelet transformation involves computing the wavelet power spectrum of the standardized time series using the Morlet wavelet [60]. Further, the statistical significance of the periodic components in the time series was calculated using a simulation algorithm. Surrogate time series are generated based on a white noise model, consisting of uncorrelated random values with constant mean and variance. Comparing the wavelet of the original data with the white noise model, p-values are calculated to determine whether the observed periodic components are statistically significant [60].
-The statistical significance of the wavelet power at a periodicity of four indicates whether the culture is exhibiting the periodic oscillations in chlorophyll fluorescence that indicate synchronous S-State cycling across the PSII population. For wavelets exhibiting S-State cycling, we generated a reconstruction limited to areas with a statistically significant signal, as depicted in Figure 7. Damping of the reconstructed wavelet represents the significance of the signal dropping below the threshold of p=0.05. The damping index then represents the number of flashes applied before this damping occurs, indicating how many successive photons are received by the PSII population before recombination reactions desynchronize the S-State cycle towards randomness across the population.
+Figure XXX: Representative wavelet transformation of Chlamydomonas priscuii fluorescence over 32 consecutive flashes, measured at 4°C and 1-second flash spacing, equivalent to a photon delivery rate to PSII achieved under an equivalent light level of 0.708 µmol photons m-2 s-1. 
+
+The core of the wavelet transformation involves computing the wavelet power spectrum of the standardized time series using the Morlet wavelet [@theisSpectralTransformations2010]. Further, the statistical significance of the periodic components in the time series was calculated using a simulation algorithm. Surrogate time series are generated based on a white noise model, consisting of uncorrelated random values with constant mean and variance. Comparing the wavelet of the original data with the white noise model, p-values are calculated to determine whether the observed periodic components are statistically significant [@theisSpectralTransformations2010].
+The statistical significance of the wavelet power at a periodicity of four indicates whether the culture is exhibiting the periodic oscillations in chlorophyll fluorescence that indicate synchronous S-State cycling across the PSII population. For wavelets exhibiting S-State cycling, we generated a reconstruction limited to areas with a statistically significant signal, as depicted in Figure XXX. Damping of the reconstructed wavelet represents the significance of the signal dropping below the threshold of p=0.05. The damping index then represents the number of flashes applied before this damping occurs, indicating how many successive photons are received by the PSII population before recombinations, misses, or double hits desynchronize the S-State cycle towards randomness across the population.
+
+## Generalized Additive Modelling 
+
+The observed patterns in the persistence of S-State cycling across conditions within taxa were then modelled using the nonparametric method of generalized additive modelling (GAM). GAMs fit a model to predict the damping index based on a tensor product smooth of the two predictors, temperature, and light level. The response variable is linked to the independent variables using a smoothing function, where many localized polynomials are joined to form a piecewise function called a spline [62]. For each strain, two separate GAM models were fit to the data using the restricted maximum likelihood method. The first examines the response of S-State damping to light level and deviation from growth temperature according to the following equation, where n is the number of distinct levels of temperature deviation evaluated for that strain:
+ (Equation 3)
+The second examines the response of S-State damping to light level and measurement temperature according to the following equation, where n is the number of distinct levels of temperature measured for that strain:
+ (Equation 4)
+Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [63]. Based on the fitted models, the damping index can then be predicted for other combinations of temperature and light [64]. These predictions were then visually represented with a contour plot. 
+
 
 # Results {.unnumbered}
 
@@ -273,11 +315,17 @@ StatsAll_table %>%
 ```
 
 ## Generalized Additive Modelling 
-The observed patterns in the persistence of S-State cycling across conditions within taxa were then modelled using the nonparametric method of generalized additive modelling (GAM). GAMs fit a model to predict the damping index based on a tensor product smooth of the two predictors, temperature, and light level. The response variable is linked to the independent variables using a smoothing function, where many localized polynomials are joined to form a piecewise function called a spline [62]. For each strain, two separate GAM models were fit to the data using the restricted maximum likelihood method. The first examines the response of S-State damping to light level and deviation from growth temperature according to the following equation, where n is the number of distinct levels of temperature deviation evaluated for that strain:
+The observed patterns in the persistence of S-State cycling across conditions within taxa were then modelled using the nonparametric method of generalized additive modelling (GAM). GAMs fit a model to predict the damping index based on a tensor product smooth of the two predictors, temperature, and light level. The response variable is linked to the independent variables using a smoothing function, where many localized polynomials are joined to form a piecewise function called a spline [@inillaNonParametricGeneralizedAdditive2021]. For each strain, two separate GAM models were fit to the data using the restricted maximum likelihood method. The first examines the response of S-State damping to light level and deviation from growth temperature according to the following equation, where n is the number of distinct levels of temperature deviation evaluated for that strain:
+
  (Equation 3)
+ XXX
+ 
 The second examines the response of S-State damping to light level and measurement temperature according to the following equation, where n is the number of distinct levels of temperature measured for that strain:
+
  (Equation 4)
-Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [63]. Based on the fitted models, the damping index can then be predicted for other combinations of temperature and light [64]. These predictions were then visually represented with a contour plot. 
+ XXX
+ 
+Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [63]. Based on the fitted models, the damping index can then be predicted for other combinations of temperature and light [@woodGeneralizedAdditiveModels2017]. These predictions were then visually represented with contour plots. 
 
 
 # Discussion {.unnumbered}
