@@ -37,6 +37,22 @@ editor_options:
     wrap: 72
 ---
 
+# To Do
+## process tau data to track how long PSII is closed after flash
+
+## do math to estimate probability of double hits contributing to desynchronization and whether that probability varies with flash spacing or temperature
+
+## convert damping index to relative probability of desynchronization
+
+## generate figures; do we need the missing variables?
+
+## format for PLoSOne or for Frontiers?
+
+## circulate to co-authors
+
+## more measures in Ottawa, Halifax or Sackville?
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.path = "Figures/")
 ```
@@ -171,7 +187,7 @@ GenusSpeciesGrowth
 ## Single Turnover Variable Chlorophyll Fluorescence
 We used series of single turnover, saturating, flashes to induce variable chlorophyll fluorescence (St-ChlF) [@kolberMeasurementsVariableChlorophyll1998], to evaluate progressive desynchronization of the S-State cycle across a range of phytoplankton species and growth temperatures. 
 A 100 µL sample of each culture was taken for a chlorophyll assay. Chlorophyll was extracted using a solution of acetone and DMSO XXXCITATION or DELETEXXXX, and concentrations measured using a Trilogy Laboratory Fluorometer (Turner Designs). 
-Then, a 3 mL sample of culture was loaded into a temperature-controlled water-jacketed cuvette (PolyScience) placed within the measurement chamber of a Soliense LIFT-REM fluorometer (Version LIFT-REM 1.0, Soliense Inc). The apparatus was covered to block out incident light and cells were acclimated to the dark for a minimum of 30 seconds. In a dark regulated state, non-photochemical quenching processes are relaxed, and electrons pass downstream, leaving PSII reaction centres in ground state, open for photochemistry upon receipt of an incident photon. Therefore, when PSII receives a photon, the maximum proportion of energy will be partitioned to photochemistry, corresponding to minimum ChlF (F~O~) [@schubackSingleTurnoverVariableChlorophyll2021]. In parallel the oxygen evolving complex (OEC) relaxes primarily to S0 or S1  XXXXCITATONXXXX, so the population of PSII are nearly synchronized.
+Then, a 3 mL sample of culture was loaded into a temperature-controlled water-jacketed cuvette (PolyScience) placed within the measurement chamber of a Soliense fluorometer (Version LIFT-REM 1.0, Soliense Inc). The apparatus was covered to block out incident light and cells were acclimated to the dark for a minimum of 30 seconds. In the dark PSII reaction centres relax to ground state, open for photochemistry upon receipt of an absorbed photon. [@schubackSingleTurnoverVariableChlorophyll2021]. In parallel the oxygen evolving complex (OEC) relaxes primarily to S1 [@hanDirectQuantificationFour2008], so S-States of the population of PSII are largely synchronized.
 The sample was then exposed to a series of 32 short, high power, evenly spaced flashes at 445 nm.  Each flash comprises a rapid series of 50-70 sub-saturating flashlets of 1.6 µs, delivered every 4.1 µs, over a total 205 - 287 µs [@schubackSingleTurnoverVariableChlorophyll2021]. These flashlets cumulatively deliver light to PSII, which passes an electron downstream to Q~A~-, closing PSII for photochemistry for  ~1000 µs, the lifetime for re-opening by downstream electron transport [@dauTimeresolvedXraySpectroscopy2007, @schubackSingleTurnoverVariableChlorophyll2021]. Closing the photochemistry pathway redirects a greater proportion of additional incoming light energy to ChlF, driving ChlF towards a maximum (F~M~) (Figure XXXX) [@schubackSingleTurnoverVariableChlorophyll2021]. For each flash, F~O~ and F~M~ are extracted using a fitting model (LIFT software version 22.11.11, Solisense Inc) [@kolberMeasurementsVariableChlorophyll1998]. F~O~ and F~M~ can then be used to derive the maximum quantum yield of photochemistry for open PSII [@schubackSingleTurnoverVariableChlorophyll2021], a secondary ChlF parameter calculated as :
 
 \begin{equation}
