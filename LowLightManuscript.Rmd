@@ -1,11 +1,9 @@
 ---
 title: "Photosystem II Sustained Function under Low Light and Low Temperatures; Polar vs. Temperate Phytoplankton"
 author:
-    institute: mta 
 - Natasha M. Ryan:
     institute: mta 
-- Douglas A. Campbell:     
-    
+- Douglas A. Campbell:
     institute: mta     
     email: dcampbel@mta.ca     
     correspondence: TRUE
@@ -13,12 +11,6 @@ institute:
 - mta: 'Department of Biology, Mount Allison University, Sackville NB, Canada, E4L1G7'
 date: "`r Sys.Date()`"
 output:
-  bookdown::word_document2:
-    fig_caption: yes
-    reference_docx: KnitTemplate.docx
-    pandoc_args:
-      - '--lua-filter=scholarly-metadata.lua'
-      - '--lua-filter=author-info-blocks.lua'  
   bookdown::html_document2:
     code_folding: show
     keep_md: yes
@@ -26,9 +18,15 @@ output:
     pandoc_args:
       - '--lua-filter=scholarly-metadata.lua'
       - '--lua-filter=author-info-blocks.lua'
-keywords: "water quality, Northumberland Strait, New Brunswick, DataStream, *Escherichia coli*"
-abstract: "Polar phytoplankton achieve slow, but ecologically significant productivity, under exceptionally low light. We hypothesized that maintaining photosynthesis under low light involves suppression of energetically wasteful charge recombinations in Photosystem II. We used single turnover variable chlorophyll fluorescence to track persistence of synchronized Photosystem II photochemistry in polar diatoms and green algae, in response to changing temperature and extreme low light, emulated by increasing spacing of photon deliveries. Prolonged synchronous cycling indicates fewer desynchronizations from wasteful recombination reactions and, thus, more efficient photosynthetic energy conversion under low light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa,  under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton suppress energetically wasteful charge recombinations and sustain photosynthesis even under extremely low light. This research shows that temperature interacts with the limits on photosynthesis under light limitation.
-"
+  bookdown::word_document2:
+    fig_caption: yes
+    reference_docx: KnitTemplate.docx
+    pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'  
+keywords: "Photosystem II, Polar Phytoplankton, Low Light Photosynthesis"
+
+abstract: "Polar phytoplankton achieve slow, but ecologically significant productivity, under exceptionally low light. We hypothesized that maintaining photosynthesis under low light involves suppression of energetically wasteful charge recombinations in Photosystem II. We used single turnover variable chlorophyll fluorescence to track persistence of synchronized Photosystem II photochemistry in polar diatoms and green algae, in response to changing temperature and extreme low light, emulated by increasing spacing of photon deliveries. Prolonged synchronous cycling indicates fewer desynchronizations from wasteful recombination reactions and, thus, more efficient photosynthetic energy conversion under low light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa,  under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton suppress energetically wasteful charge recombinations and sustain photosynthesis even under extremely low light. This research shows that temperature interacts with the limits on photosynthesis under light limitation."
 bibliography: [LowLightPhotosynthesis.bib, packages.bib]
 csl: plos-one.csl
 always_allow_html: true
@@ -86,7 +84,7 @@ OutputFP <- file.path("Output", fsep="\\")
 # saveRDS(object = DataDictionary, file = file.path("DataIn", "DataDictionary.Rds"))
 
 #Load from locally saved .Rds
-DataDictionary = readRDS(file.path("DataIn", "DataDictionary.Rds"))
+#DataDictionary = readRDS(file.path("DataIn", "DataDictionary.Rds"))
 ```
 
 
@@ -228,9 +226,9 @@ XXXestimate these probabilities of misses vs. double hitsXXX.
 Each flash is bright enough to deliver, on average, at least one absorbed photon to each PSII, but short enough to limit the probability of a PSII re-opening and going through a second round of photochemistry during the flash. Thus, as sequential flashes are applied to the culture, each individual PSII is driven through the four S-States (Fig \@ref(fig:representativeoscillations)) [@dauTimeresolvedXraySpectroscopy2007].  As the oxygen-evolving complex of PSII moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020]. 
 
 
-```{r representativesocillations, fig.cap = "*Oscillations of Chlorophyll Fluorescence over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ normalized to the average value over the series for comparison across samples of XXXXSAMPLE?XXXX, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r representativeoscillations, fig.cap = "*Oscillations of Chlorophyll Fluorescence over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ normalized to the average value over the series for comparison across samples of XXXXSAMPLE?XXXX, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
-knitr::include_graphics(file.path( Figures,"representativesocillations.png"))
+knitr::include_graphics(file.path( "Figures","representativeoscillations.png"))
 ```
 
 
