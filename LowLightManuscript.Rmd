@@ -149,9 +149,9 @@ By comparing the S-State cycling over flash cycles, of psychrophilic and tempera
 # Materials and methods {.unnumbered}
 
 ## Study Strains and Culturing Conditions
-The seven study taxa,  including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxacultures)). 
+The seven study taxa,  including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxa_cultures)). 
 
-```{r taxacultures}
+```{r taxa_cultures}
 Taxa <- c("Thalassiosira pseudonana", "Thalassiosira pseudonana", "Chlorella vulgaris", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus", "Fragilariopsis cylindrus",  "Chlamydomonas priscuii", "Chlamydomonas ICEMDV", "Chlamydomona malina")
 
 Origin <- c(rep("Temperate", 5), rep("Polar", 5))
@@ -177,7 +177,8 @@ TaxaCultures |>
 
 Cultures of *T. pseudonana* and *C. vulgaris* were prepared by Naaman Omar (Mount Allison University); *Chlamydomonas* cultures were prepared by MacKenzie Poirier (Cvetskova Lab, University of Ottawa); and *F. cylindrus* cultures were prepared by Sébastien Guérin (Takuvik International Research Laboratory, Université Laval).
 
-## Single Turnover Variable Chlorophyll Fluorescence
+## Single Turnover Variable Chlorophyll Fluorescence  
+
 We used series of single turnover, saturating, flashes to induce variable chlorophyll fluorescence (St-ChlF) [@kolberMeasurementsVariableChlorophyll1998], to evaluate progressive desynchronization of the S-State cycle across a range of phytoplankton species and growth temperatures. A 100 µL sample of each culture was taken for a chlorophyll assay (XXXX citationXXX). Then, a
 3 mL sample of culture was loaded into a temperature-controlled water-jacketed quartz cuvette (PolyScience) placed within the measurement chamber of a Soliense fluorometer (Version LIFT-REM 1.0, Soliense Inc). The apparatus was covered to block out incident light and cells were acclimated to the dark for a minimum of 30 seconds. In the dark PSII reaction centres relax to ground state, open for photochemistry upon receipt of an absorbed photon, with a low fluorescence yield [@schubackSingleTurnoverVariableChlorophyll2021]. In parallel the oxygen evolving complex (OEC) relaxes primarily to S1 [@hanDirectQuantificationFour2008], so the S-States of the population of PSII are largely synchronized.
 The sample was then exposed to a series of 32 short, high power, evenly spaced flashes at 445 nm.  Each flash comprises a rapid series of 50-70 sub-saturating flashlets of 1.6 µs, delivered every 4.1 µs, over a total 205 - 287 µs per flash [@schubackSingleTurnoverVariableChlorophyll2021]. These flashlets cumulatively deliver light to PSII, which passes an electron downstream to Q~A~-, closing PSII for photochemistry for ~1000 µs, the lifetime for re-opening by downstream electron transport [@dauTimeresolvedXraySpectroscopy2007, @schubackSingleTurnoverVariableChlorophyll2021]. Closing the photochemistry pathway redirects a greater proportion of additional incoming light energy to ChlF, driving ChlF progressively from minimum (F~O~) towards a maximum (F~M~) [@schubackSingleTurnoverVariableChlorophyll2021]. For each flash, F~O~ and F~M~ are extracted using a fitting model (LIFT software version 22.11.11, Solisense Inc) [@kolberMeasurementsVariableChlorophyll1998]. F~O~ and F~M~ can then be used to derive the maximum quantum yield of photochemistry for open PSII [@schubackSingleTurnoverVariableChlorophyll2021], a secondary ChlF parameter calculated as :
@@ -218,21 +219,38 @@ then estimate probability of another hit
 
 XXXestimate these probabilities of misses vs. double hitsXXX.
 
-Each flash is bright enough to deliver, on average, at least one absorbed photon to each PSII, but short enough to limit the probability of a PSII re-opening and going through a second round of photochemistry during the flash. Thus, as sequential flashes are applied to the culture, each individual PSII is driven through the four S-States (Fig \@ref(fig:representativeoscillations)) [@dauTimeresolvedXraySpectroscopy2007].  As the oxygen-evolving complex of PSII moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020]. 
+Each flash is bright enough to deliver, on average, at least one absorbed photon to each PSII, but short enough to limit the probability of a PSII re-opening and going through a second round of photochemistry during the flash. Thus, as sequential flashes are applied to the culture, each individual PSII is driven through the four S-States (Fig \@ref(fig:rep_osc)) [@dauTimeresolvedXraySpectroscopy2007].  As the oxygen-evolving complex of PSII moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020]. 
 
 
-```{r representativeoscillations, fig.cap = "*Oscillations of Chlorophyll Fluorescence over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ normalized to the average value over the series for comparison across samples of XXXXSAMPLE?XXXX, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r rep_osc, fig.cap = "*Oscillations of Chlorophyll Fluorescence over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ normalized to the average value over the series for comparison across samples of XXXXSAMPLE?XXXX, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
-knitr::include_graphics(file.path( "Figures","representativeoscillations.png"))
+knitr::include_graphics(file.path( "Figures","rep_osc.png"))
 ```
 
 
 ## Measurements
 
-By evaluating the S-State cycling of polar and temperate taxa of diatoms and green algae under a range of measurement temperatures and effective light levels (Table 2), we can determine if polar taxa maintain synchronized PSII function, as an index of their capacity for electron transport under low light, by suppressing wasteful recombinations.
- Measurement temperatures ranged from 0 to 28°C, depending on the taxa \@ref(tab:fluormeasures)). 
+By evaluating the S-State cycling of polar and temperate taxa of diatoms and green algae under a range of measurement temperatures and effective light levels (\@ref(tab:fluor_meas)), we can determine if polar taxa maintain synchronized PSII function, as an index of their capacity for electron transport under low light, by suppressing wasteful recombinations. While light absorption and excitation energy transfer within PSII are not temperature-sensitive, the redox reactions associated with downstream electron transport are highly temperature-dependent [@hunerPhotosyntheticAdaptationMulticellularity2023]. Furthermore, the probability of charge recombinations decrease below room temperature temperature[@ivanovAcclimationTemperatureIrradiance2006, @hanDirectQuantificationFour2008], as temperature drops below the activation energies for recombination paths. This temperature dependence may interact with acclimatory mechanisms to regulate photosynthetic electron flow, S-State transitions, and energy partitioning [@hunerPhotosyntheticAdaptationMulticellularity2023]. Measurement temperatures ranged from 0 to 28°C, depending on the taxa \@ref(tab:fluor_meas). 
 
-```{r fluormeasures}
+Increasing the spacing between sequential flashes decreases the repeat rate for excitations, thereby approximating a decrease in continuous irradiance. As irradiance decreases, fewer photons are delivered to PSII per s, corresponding to longer spacing between sequential saturating flashes in our measurement protocol (Fig \@ref(fig:rep_osc)).  Our instrument control limited our minimum flash spacing to 1 s, so cultures were evaluated at flash spacings of 1, 2, 4, 8, and 16 seconds \@ref(tab:fluor_meask). The equivalent effective light levels are estimated using the σ~PSII~ determined for each culture as follows: 
+
+
+\begin{equation}
+Light (µmol photons m^-2^ s^-1^) = \frac{1}{flash spacing (s)|}
+\end{equation}
+
+
+$$
+Light (\mu mol \photon m^{-2} s^{-1}) = \frac{1}{flash spacing (s)} * {\frac{1}{\sigma_{PSII} (A^{2})} * \frac{1 m^{2}}{1E20A^{2}} * \frac{\mu mol}{6.022E17}
+$$
+Since the population of PSII starts predominantly from S1 in the dark acclimated state, the population of PSII will initially cycle synchronously through S States, reflected by an oscillation in chlorophyll fluorescence with a period of four(Fig \@ref(fig:rep_osc))[@dewijnSstateDependenceMiss2002]. Recombination reactions, representing the loss of charge separation in a PSII, will cause a missed step in the S-State cycling of an individual PSII. As more recombination events occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence [@dewijnSstateDependenceMiss2002]. Prolonged synchronous cycling thus reflects a lower probability of desynchronization at each excitation, and thus a lower probability of losses through recombinations.  Photochemical misses, or photochemical double hits, also contribute to desynchronization [@hanMolecularBasisTurnover2022, @hanDirectQuantificationFour2008], but should not vary strongly across changes in flash spacing nor temperature within a sample.
+
+XXXextract plots tau vs. temperature to justify this argumentXXXX
+
+The conversions of flash spacing to equivalent light levels yielded similar ranges of effective measurement light levels applied to each strain \@ref(tab:fluor_meas). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m^-2^s^-1^ threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans [@ravenPutOutLight2000].
+
+XXXConsider redoing this as data with conversionsXXX
+```{r fluor_meas}
 TaxaFluor <- c("Thalassiosira pseudonana", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus",  "Chlamydomonas priscuii", "Chlamydomonas ICEMDV", "Chlamydomona malina")
 
 Flash_Spacings <- c(rep("1, 2, 4, 8, 16",7))
@@ -248,42 +266,26 @@ FluorMeasures |>
   kableExtra::kable_classic()
 ```
  
- 
- 
- While light absorption and excitation energy transfer within PSII are not temperature-sensitive, the redox reactions associated with downstream electron transport are highly temperature-dependent [@hunerPhotosyntheticAdaptationMulticellularity2023]. Notably, the probability of charge recombinations decrease below room temeprature temperature[@ivanovAcclimationTemperatureIrradiance2006, @hanDirectQuantificationFour2008], as temperature drops below the activation energies for recombination paths. This temperature dependence may interact with acclimatory mechanisms to regulate photosynthetic electron flow, S-State transitions, and energy partitioning [@hunerPhotosyntheticAdaptationMulticellularity2023]. 
 
-Increasing the spacing between sequential flashes decreases the repeat rate for excitations, thereby approximating a decrease in continuous irradiance. As irradiance decreases, fewer photons are delivered to PSII per s, corresponding to longer spacing between sequential saturating flashes in our measurement protocol (Fig \@ref(fig:representativeoscillations)).  Our instrument control limited our minimum flash spacing to 1 s, so cultures were evaluated at flash spacings of 1, 2, 4, 8, and 16 seconds. The equivalent effective light levels are estimated using the σ~PSII~ determined for each culture as follows: 
+## Analytical Methods  
 
-
-\begin{equation}
-Light () = \frac{1}{flash spacing (s)|}
-\end{equation}
-
-
-$$
-Light (\mu mol \lambda m^{-2} s{-1}) = \frac{1}{flash spacing (s)} * {\frac{1}{\sigma_{PSII} (A^2 \lambda^-1)} * \frac{1 m^2}{1E20A^2} * \frac{\mu mol}{6.022E17 \lambda}
-$$
-Since the population of PSII starts predominantly from S1 in the dark acclimated state, the population of PSII will initially cycle synchronously through S States, reflected by an oscillation in chlorophyll fluorescence with a period of four(Fig \@ref(fig:representativeoscillations))[@dewijnSstateDependenceMiss2002]. However, recombination reactions, representing the loss of charge separation, will cause a missed step in the S-State cycling of an individual PSII. As more recombination events occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence [@dewijnSstateDependenceMiss2002]. Prolonged synchronous cycling thus reflects a lower probability of desynchronization at each excitation, and thus a lower probability of losses through recombinations.  Photochemical misses, or photochemical double hits, also contribute to desynchronization [@hanMolecularBasisTurnover2022, @hanDirectQuantificationFour2008], but should not vary strongly across changes in flash spacing nor temperature within a sample.
-
-XXXextract plots tau vs. temperature to justify this argumentXXXX
-
-The conversions of flash spacing to light levels yielded similar ranges of effective measurement light levels applied to each strain (Table XXX). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m^-2^s^-1^ threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans [@ravenPutOutLight2000].
-
-
-## Analytical Methods 
 Data was processed using R version 4.3.2 [@Rcore] and RStudio version 2023.12.0+369 [@RStudio] on the x86_64-apple-darwin20 (64-bit) platform and running under macOS Sonoma 14.3.1. Fluorescence data files generated by LIFT software were imported, tidied and combined with metadata on each culture using the tidyverse [@R-tidyverse], lubridate [52], and googlesheets4 [53] packages. The tidyverse, doBy [54], and WaveletComp [55] packages were used for wavelet analyses. The mgcv [56] and mgcViz [57] packages were used for generalized additive modelling, while the ggplot2 [58] and metR [59] packages were used for data visualization. XXX
 
 Statistical results tables were done using the packages 'broom' [@R-broom], 'knitr' [@R-knitr], and 'kableExtra' [@R-kableExtra].
 
 ## Wavelet Transformations
 
-The fluorescence data yields a time series of F~V~/F~M~ over 32 sequentially applied flashes,  for each flash spacing, and each measurement temperature, for each culture sample. The F~V~/F~M~ time series were analyzed for each combination of strain, growth conditions, measurement temperature, and flash spacing, using wavelet transformations [@theisSpectralTransformations2010], as exemplified in (Fig \@ref(fig:XXX)). Unlike traditional methods, wavelet analysis does not assume that the statistical properties of a time series are constant. Instead, wavelet transformations locally decompose the signal across different time scales and estimate spectral characteristics as a function of time [@cazellesWaveletAnalysisEcological2008]. By examining the frequency and wavelet power spectra, we can uncover the dominant patterns in the data [@theisSpectralTransformations2010]. 
+The fluorescence data yields a time series of F~V~/F~M~ over 32 sequentially applied flashes,  for each flash spacing, and each measurement temperature, for each culture sample. The F~V~/F~M~ time series were analyzed for each combination of strain, growth conditions, measurement temperature, and flash spacing, using wavelet transformations [@theisSpectralTransformations2010], as exemplified in (Fig \@ref(fig:rep_recon)). Unlike traditional methods, wavelet analysis does not assume that the statistical properties of a time series are constant. Instead, wavelet transformations locally decompose the signal across different time scales and estimate spectral characteristics as a function of time [@cazellesWaveletAnalysisEcological2008]. By examining the frequency and wavelet power spectra, we can uncover the dominant patterns in the data [@theisSpectralTransformations2010]. 
 
-XXXCAptionFormatXXX
-(Fig \@ref(fig:XXX)): Representative wavelet transformation of *Chlamydomonas priscuii* fluorescence over 32 consecutive flashes, measured at 4°C and 1-second flash spacing, equivalent to a photon delivery rate to PSII achieved under an equivalent light level of 0.708 µmol photons m^-2^ s^-1^. 
+
+```{r rep_recon, fig.cap = "Representative wavelet transformations of Antarctic *Chlamydomonas priscuii* variable chlorophyll fluorescence (F~V~/F~M~) measured at 4, 8 or 12°C, over 32 consecutive single turnover saturating flashes, applied at spacings of 1, 2, 4, 8, 16 s, equivalent to photon delivery rates to PSII achieved under light levels from 0.708 down to 0.045 µmol photons m^-2^ s^-1^.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+
+knitr::include_graphics(file.path("Figures","rep_recon.png"))
+```
+
 
 The wavelet transformation involves computing the wavelet power spectrum of the standardized time series using the Morlet wavelet [@theisSpectralTransformations2010]. The statistical significance of the periodic components in the time series was then calculated using a simulation algorithm. Surrogate time series are generated based on a white noise model, consisting of uncorrelated random values with constant mean and variance. The wavelet transform of the data is compared with the white noise model, to estimate p-values for whether the observed periodic components are statistically significant [@theisSpectralTransformations2010].
-Statistical significance of the wavelet power at a periodicity of four indicates the culture is exhibiting periodic oscillations in chlorophyll fluorescence, reflecting synchronous S-State cycling across the PSII population. For wavelets exhibiting detectable S-State cycling, we generated a reconstruction limited to areas with a statistically significant signal, as depicted in (Fig \@ref(fig:XXX)). We extracted a Damping Index as the number of flashes applied before desynchronization results in the reconstructed wavelet dropping below a detection threshold significance of p=0.05 above random noise. This Damping Index indicates how many successive photochemical charge separations occur in the PSII population before recombinations, photochemical misses, or photochemical double hits, desynchronize the S-State cycle to a randomized distribution of S-States across the population.
+Statistical significance of the wavelet power at a periodicity of four indicates the culture is exhibiting periodic oscillations in chlorophyll fluorescence, reflecting synchronous S-State cycling across the PSII population. For wavelets exhibiting detectable S-State cycling, we generated a reconstruction limited to areas with a statistically significant signal statistically different from the average value of F~V~/F~M~ (Fig \@ref(fig:rep_recon)). We then extracted a Damping Index as the number of flashes applied before desynchronization results in the reconstructed wavelet dropping below a detection threshold significance of p=0.05 above random noise. This Damping Index indicates how many successive photochemical charge separations occur in the PSII population before recombinations, photochemical misses, or photochemical double hits, desynchronize the S-State cycle to a randomized distribution of S-States across the population.
 
 ## Generalized Additive Modelling 
 
@@ -301,12 +303,6 @@ Models were validated by verifying the choice of basis dimensions (k) and evalua
 # Results {.unnumbered}
 
 For years 2010-2023 we firstly plot bacterial count (Faecal Coliform or *Escherichia coli* per 100 mL) vs. sample collection date (Fig \@ref(fig:year)).
-
-```{r year, fig.cap = "*Bacterial count vs. sample collection date at study sites.* Faecal Coliform or *Escherichia coli* per 100 mL (log~10~ scale) from years 2010 to 2023, with thresholds of 200 (red dotted line) or 43 (blue dotted line) bacteria per 100 mL. Parlee Beach had increased sampling intensity from year 2017 onward.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
-
-knitr::include_graphics(file.path( FigsFP,"measurement_date_fig.png"))
-```
-
 
 We next plotted bacterial counts vs. average air temperature (°C) over the preceding 48 h, from the weather stations nearest the respective sampling sites (Fig \@ref(fig:temp)).
 
