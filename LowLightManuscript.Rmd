@@ -226,7 +226,7 @@ XXXestimate these probabilities of misses vs. double hitsXXX.
 Each flash is bright enough to deliver, on average, at least one absorbed photon to each PSII, but short enough to limit the probability of a PSII re-opening and going through a second round of photochemistry during the flash. Thus, as sequential flashes are applied to the culture, each individual PSII is driven through the four S-States (Fig \@ref(fig:representativeoscillations)) [@dauTimeresolvedXraySpectroscopy2007].  As the oxygen-evolving complex of PSII moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020]. 
 
 
-```{r representativeoscillations, fig.cap = "*Oscillations of Chlorophyll Fluorescence over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ normalized to the average value over the series for comparison across samples of XXXXSAMPLE?XXXX, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r representativeoscillations, fig.cap = "*Oscillations of Chlorophyll Fluorescence over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ normalized to the average value over the series for comparison across samples of XXXXSAMPLE?XXXX, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path( "Figures","representativeoscillations.png"))
 ```
