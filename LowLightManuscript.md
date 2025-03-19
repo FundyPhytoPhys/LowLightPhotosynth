@@ -9,7 +9,7 @@ author:
     correspondence: TRUE
 institute:  
 - mta: 'Department of Biology, Mount Allison University, Sackville NB, Canada, E4L1G7'
-date: "`r Sys.Date()`"
+date: "2025-03-19"
 output:
   bookdown::html_document2:
     code_folding: show
@@ -55,68 +55,18 @@ editor_options:
 
 
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE, fig.path = "Figures/")
-```
-
-```{r, import libraries, include = FALSE}
-library(tidyverse)
-library(knitr)
-#library(googlesheets4)
-#library(gridExtra)
-#required for density plots
-library(ggpubr)
-library(broom)
-```
-
-```{r, save package citations, include = FALSE}
-
-#This is final version of the .bib file - includes ALL packages from ALL scripts used in this project.
-
-knitr:: write_bib(c('knitr', 'tidyverse', 'datastreamr', 'lutz', 'ggbreak', 'gridExtra', 'kableExtra', 'googlesheets4', 'viridis', 'stats', 'broom','sf'), "packages.bib")
-```
-
-```{r defining filepaths, include = FALSE}
-OutputFP <- file.path("Output", fsep="\\")
-```
-
-```{r import data dictionary, include=FALSE}
-# Import from external GoogleSheet
-# gs4_deauth()
-# DataDictionary <- read_sheet("https://docs.google.com/spreadsheets/d/1HyLRlI2qI4KmYXvHeqayAA8NbXNvIgN8FEWzSyLQm10/edit#gid=0")
-# 
-# saveRDS(object = DataDictionary, file = file.path("DataIn", "DataDictionary.Rds"))
-
-#Load from locally saved .Rds
-#DataDictionary = readRDS(file.path("DataIn", "DataDictionary.Rds"))
-```
 
 
-```{r ScientificTen, include=FALSE}
-# Sourced from FundyPhytoPhysCodeChunks
-ScientificTen <- function(x, sf = 2) {
-  x <- as.numeric(x)
-  if (is.na(x)) {
-    return("NA")
-  }
-  
-  y <- format(signif(x, sf), scientific = TRUE) %>% as.character()
-  z <- str_split(y, pattern = "e")[[1]]
-  
-  base <- z[1]
-  exponent <- as.numeric(z[2])
-  
-  if (is.na(exponent)) {
-    return("NA")
-  }
-  
-  if (abs(exponent) > 3) {
-    return(paste(base, "× 10^", exponent, "^", sep = ""))
-  } else {
-    return(signif(x, sf))
-  }
-}
-```
+
+
+
+
+
+
+
+
+
+
 
 # Introduction {.unnumbered}
 Phytoplankton are a functional grouping of photosynthetic microorganisms, with diverse evolutionary histories and ecologies [@pierellakarlusichPhytoplanktonTaraOcean2020].
@@ -151,27 +101,101 @@ By comparing the S-State cycling over flash cycles, of psychrophilic and tempera
 ## Study Strains and Culturing Conditions
 The seven study taxa,  including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxa_cultures)). 
 
-```{r taxa_cultures}
-Taxa <- c("Thalassiosira pseudonana", "Thalassiosira pseudonana", "Chlorella vulgaris", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus", "Fragilariopsis cylindrus",  "Chlamydomonas priscuii", "Chlamydomonas ICEMDV", "Chlamydomona malina")
-
-Origin <- c(rep("Temperate", 5), rep("Polar", 5))
-Growth_C <- c(rep(22, 4), 24, 0, 6, rep(4,3))
-
-Growth_PAR <- c(70, rep(50, 3), 70, rep(10, 5))
-
-Growth_Photoperiod <- c(rep(12, 4), rep(24, 6))
-
-Media <- c(rep("F2",2), rep("BG11", 2), "BBM", rep("F2", 2), rep("BBM",3))
-
-TaxaCultures <- tibble(Taxa, Origin, Growth_C, Growth_PAR, Growth_Photoperiod, Media)
-                            
-#TaxaCultures
-
-TaxaCultures |>
-  kable(caption ="Study taxa and culture growth conditions.",         col.names = c("Taxa", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")) |>
-  kableExtra::column_spec(1, italic = TRUE) |>
-  kableExtra::kable_classic()
-```
+<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
+<caption>(\#tab:taxa_cultures)(\#tab:taxa_cultures)Study taxa and culture growth conditions.</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Taxa </th>
+   <th style="text-align:left;"> Origin </th>
+   <th style="text-align:right;"> Growth °C </th>
+   <th style="text-align:right;"> PAR (µE) </th>
+   <th style="text-align:right;"> Photoperiod (h) </th>
+   <th style="text-align:left;"> Media </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Thalassiosira pseudonana </td>
+   <td style="text-align:left;"> Temperate </td>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:right;"> 70 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:left;"> F2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Thalassiosira pseudonana </td>
+   <td style="text-align:left;"> Temperate </td>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:right;"> 50 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:left;"> F2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlorella vulgaris </td>
+   <td style="text-align:left;"> Temperate </td>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:right;"> 50 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:left;"> BG11 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlorella vulgaris </td>
+   <td style="text-align:left;"> Temperate </td>
+   <td style="text-align:right;"> 22 </td>
+   <td style="text-align:right;"> 50 </td>
+   <td style="text-align:right;"> 12 </td>
+   <td style="text-align:left;"> BG11 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlamydomonas reinhardtii </td>
+   <td style="text-align:left;"> Temperate </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:right;"> 70 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> BBM </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Fragilariopsis cylindrus </td>
+   <td style="text-align:left;"> Polar </td>
+   <td style="text-align:right;"> 0 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> F2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Fragilariopsis cylindrus </td>
+   <td style="text-align:left;"> Polar </td>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> F2 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlamydomonas priscuii </td>
+   <td style="text-align:left;"> Polar </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> BBM </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlamydomonas ICEMDV </td>
+   <td style="text-align:left;"> Polar </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> BBM </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlamydomona malina </td>
+   <td style="text-align:left;"> Polar </td>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 24 </td>
+   <td style="text-align:left;"> BBM </td>
+  </tr>
+</tbody>
+</table>
 *Fragilariopsis cylindrus*, a psychrophilic pennate diatom measuring 15-55 µm, thrives in the high salinity and subzero temperatures of Arctic and Antarctic sea-ice systems [@otteDiatomFragilariopsisCylindrus2023, @cefarelliDiversityDiatomGenus2010]. Forming large blooms in the bottom layer of sea ice and across the wider sea ice zone, *F. cylindrus* is as a keystone species for polar ecosystems [@otteDiatomFragilariopsisCylindrus2023,@kangFragilariopsisCylindrusGrunow1992]. Conversely, *Thalassiosira pseudonana* (*Cyclotella nana*) is a small (2.5-15 μm) centric diatom found worldwide in diverse freshwater, coastal, brackish, and marine habitats [35]. *T. pseudonana* can tolerate a wide range of salinities (0.5%–37%) and temperatures (4–25°C), contributing to its use as a model diatom species [@poulsenThalassiosiraPseudonanaCyclotella2023].
 *Chlamydomonas* ICEMDV and *Chlamydomonas priscuii* are halotolerant algae isolated from the perennially ice-covered hypersaline Lake Bonney, in McMurdo Dry Valleys, Antarctica [@ookAntarcticPsychrophilesChlamydomonas2019,@stahl-rommelCyclicElectronFlow2022]. With 15 to 20 μm biflagellate cells, *C.* ICEMDV dominates the shallow photic zone, where it experiences higher irradiance, extreme nutrient limitation, and lower salinity [@cookAntarcticPsychrophilesChlamydomonas2019, @liUltrastructuralSingleCellLevelCharacterization2016]. The smaller *C. priscuii* dominates the deep photic zone, characterized by permanent low temperatures, low irradiance, and high salinity [@cvetkovskaTemperatureStressPsychrophilic2022,@hunerPhotosyntheticAdaptationMulticellularity2023]. *Chlamydomonas malina* is a marine microalga isolated from the Arctic Ocean’s Beaufort Sea, measuring around 10 μm in length and 5 μm in width, and growing optimally at 4°C [@balzanoDiversityCulturedPhotosynthetic2012,@morales-sanchezTemperatureDependentLipidAccumulation2020]. The temperate *Chlamydomonas reinhardtii* is a model green alga approximately 10 μm in size, found in soil and aquatic environments with an optimal temperature range of 20-32°C [@sassoMolecularManipulationDomesticated2018,@xieChlamydomonasReinhardtiiThermal2013]. *Further, *Chlorella vulgaris*, ranging from 2 μm to 10 μm in size, is primarily found in freshwater environments and grows optimally at 27°C [@wielCharacterizationChlorellaVulgaris2017,@leyvaAccumulationFattyAcids2014].
 
@@ -194,10 +218,10 @@ XXXX
 Desynchronization resulting from 'misses' in which a PSII fails to perform a charge separation and close during a flash has an upper bound of:
 
 D~M~ ~ 1 * e^(0.05 * n)
-```{r miss desynch}
-n = c(1,2,3,4,5,6,7,8)
-DM = -(1 - exp(0.05 * n))
-DM
+
+```
+## [1] 0.0512711 0.1051709 0.1618342 0.2214028 0.2840254 0.3498588 0.4190675
+## [8] 0.4918247
 ```
 
 
@@ -222,10 +246,10 @@ XXXestimate these probabilities of misses vs. double hitsXXX.
 Each flash is bright enough to deliver, on average, at least one absorbed photon to each PSII, but short enough to limit the probability of a PSII re-opening and going through a second round of photochemistry during the flash. Thus, as sequential flashes are applied to the culture, each individual PSII is driven through the four S-States (Fig \@ref(fig:rep_osc)) [@dauTimeresolvedXraySpectroscopy2007].  As the oxygen-evolving complex of PSII moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020]. 
 
 
-```{r rep_osc, fig.cap = "*Oscillations of Chlorophyll Fluorescence over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ normalized to the average value over the series for comparison across samples of XXXXSAMPLE?XXXX, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
-
-knitr::include_graphics(file.path( "Figures","rep_osc.png"))
-```
+<div class="figure">
+<img src="Figures/rep_osc.png" alt="*Oscillations of Chlorophyll Fluorescence over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ normalized to the average value over the series for comparison across samples of XXXXSAMPLE?XXXX, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence." width="100%" height="100%" />
+<p class="caption">(\#fig:rep_osc)*Oscillations of Chlorophyll Fluorescence over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ normalized to the average value over the series for comparison across samples of XXXXSAMPLE?XXXX, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence.</p>
+</div>
 
 
 ## Measurements
@@ -250,21 +274,61 @@ XXXextract plots tau vs. temperature to justify this argumentXXXX
 The conversions of flash spacing to equivalent light levels yielded similar ranges of effective measurement light levels applied to each strain \@ref(tab:fluor_meas). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m^-2^s^-1^ threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans [@ravenPutOutLight2000].
 
 XXXConsider redoing this as data with conversionsXXX
-```{r fluor_meas}
-TaxaFluor <- c("Thalassiosira pseudonana", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus",  "Chlamydomonas priscuii", "Chlamydomonas ICEMDV", "Chlamydomona malina")
-
-Flash_Spacings <- c(rep("1, 2, 4, 8, 16",7))
-Equiv_Light <- c("0.02428 - 0.53428", "0.05102 - 0.89781", "0.04670 - 0.84377", "0.02981 - 0.65678", "0.04289 - 0.77084", "0.04252 - 0.73733", "0.03705 - 0.65817")
-Meas_Temp <- c("10, 14, 18, 20, 22, 24, 28", "10, 14, 18, 22, 26", "12, 16, 20, 24", "0, 2, 6, 10",  rep("4, 8, 12", 3))
-
-FluorMeasures <- tibble(TaxaFluor, Flash_Spacings, Equiv_Light, Meas_Temp)
-                            
-FluorMeasures |>
-  kable(caption ="Study taxa and single turnover saturating flash measurement conditions.",         col.names = c("Taxa", "Flash Spacings (s)", "Equivalent Light (µE)", "Measurement Temperatures (°C)")
-        ) |>
-  kableExtra::column_spec(1, italic = TRUE) |>
-  kableExtra::kable_classic()
-```
+<table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
+<caption>(\#tab:fluor_meas)(\#tab:fluor_meas)Study taxa and single turnover saturating flash measurement conditions.</caption>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Taxa </th>
+   <th style="text-align:left;"> Flash Spacings (s) </th>
+   <th style="text-align:left;"> Equivalent Light (µE) </th>
+   <th style="text-align:left;"> Measurement Temperatures (°C) </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Thalassiosira pseudonana </td>
+   <td style="text-align:left;"> 1, 2, 4, 8, 16 </td>
+   <td style="text-align:left;"> 0.02428 - 0.53428 </td>
+   <td style="text-align:left;"> 10, 14, 18, 20, 22, 24, 28 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlorella vulgaris </td>
+   <td style="text-align:left;"> 1, 2, 4, 8, 16 </td>
+   <td style="text-align:left;"> 0.05102 - 0.89781 </td>
+   <td style="text-align:left;"> 10, 14, 18, 22, 26 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlamydomonas reinhardtii </td>
+   <td style="text-align:left;"> 1, 2, 4, 8, 16 </td>
+   <td style="text-align:left;"> 0.04670 - 0.84377 </td>
+   <td style="text-align:left;"> 12, 16, 20, 24 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Fragilariopsis cylindrus </td>
+   <td style="text-align:left;"> 1, 2, 4, 8, 16 </td>
+   <td style="text-align:left;"> 0.02981 - 0.65678 </td>
+   <td style="text-align:left;"> 0, 2, 6, 10 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlamydomonas priscuii </td>
+   <td style="text-align:left;"> 1, 2, 4, 8, 16 </td>
+   <td style="text-align:left;"> 0.04289 - 0.77084 </td>
+   <td style="text-align:left;"> 4, 8, 12 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlamydomonas ICEMDV </td>
+   <td style="text-align:left;"> 1, 2, 4, 8, 16 </td>
+   <td style="text-align:left;"> 0.04252 - 0.73733 </td>
+   <td style="text-align:left;"> 4, 8, 12 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;font-style: italic;"> Chlamydomona malina </td>
+   <td style="text-align:left;"> 1, 2, 4, 8, 16 </td>
+   <td style="text-align:left;"> 0.03705 - 0.65817 </td>
+   <td style="text-align:left;"> 4, 8, 12 </td>
+  </tr>
+</tbody>
+</table>
  
 
 ## Analytical Methods  
@@ -278,10 +342,10 @@ Statistical results tables were done using the packages 'broom' [@R-broom], 'kni
 The fluorescence data yields a time series of F~V~/F~M~ over 32 sequentially applied flashes,  for each flash spacing, and each measurement temperature, for each culture sample. The F~V~/F~M~ time series were analyzed for each combination of strain, growth conditions, measurement temperature, and flash spacing, using wavelet transformations [@theisSpectralTransformations2010], as exemplified in (Fig \@ref(fig:rep_recon)). Unlike traditional methods, wavelet analysis does not assume that the statistical properties of a time series are constant. Instead, wavelet transformations locally decompose the signal across different time scales and estimate spectral characteristics as a function of time [@cazellesWaveletAnalysisEcological2008]. By examining the frequency and wavelet power spectra, we can uncover the dominant patterns in the data [@theisSpectralTransformations2010]. 
 
 
-```{r rep_recon, fig.cap = "Representative wavelet transformations of Antarctic *Chlamydomonas priscuii* variable chlorophyll fluorescence (F~V~/F~M~) measured at 4, 8 or 12°C, over 32 consecutive single turnover saturating flashes, applied at spacings of 1, 2, 4, 8, 16 s, equivalent to photon delivery rates to PSII achieved under light levels from 0.708 down to 0.045 µmol photons m^-2^ s^-1^.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
-
-knitr::include_graphics(file.path("Figures","rep_recon.png"))
-```
+<div class="figure">
+<img src="Figures/rep_recon.png" alt="Representative wavelet transformations of Antarctic *Chlamydomonas priscuii* variable chlorophyll fluorescence (F~V~/F~M~) measured at 4, 8 or 12°C, over 32 consecutive single turnover saturating flashes, applied at spacings of 1, 2, 4, 8, 16 s, equivalent to photon delivery rates to PSII achieved under light levels from 0.708 down to 0.045 µmol photons m^-2^ s^-1^." width="100%" height="100%" />
+<p class="caption">(\#fig:rep_recon)Representative wavelet transformations of Antarctic *Chlamydomonas priscuii* variable chlorophyll fluorescence (F~V~/F~M~) measured at 4, 8 or 12°C, over 32 consecutive single turnover saturating flashes, applied at spacings of 1, 2, 4, 8, 16 s, equivalent to photon delivery rates to PSII achieved under light levels from 0.708 down to 0.045 µmol photons m^-2^ s^-1^.</p>
+</div>
 
 
 The wavelet transformation involves computing the wavelet power spectrum of the standardized time series using the Morlet wavelet [@theisSpectralTransformations2010]. The statistical significance of the periodic components in the time series was then calculated using a simulation algorithm. Surrogate time series are generated based on a white noise model, consisting of uncorrelated random values with constant mean and variance. The wavelet transform of the data is compared with the white noise model, to estimate p-values for whether the observed periodic components are statistically significant [@theisSpectralTransformations2010].
