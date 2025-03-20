@@ -226,7 +226,7 @@ Each flash is bright enough to deliver, on average, at least one absorbed photon
 
 ```{r rep_osc, fig.cap = "**Oscillations of the maximum quantum yield of PSII photochemistry over a Series of Single Turnover Saturating Flashes.** F~V~/F~M~ was normalized to the average value over the series for comparison across samples of *Chlamydomonas priscuii*, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes, excitation rates equivalent to irradiance with 0.708, 0.177 or 0.044 µmol photons m-2s-1. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
-knitr::include_graphics(file.path( "Figures","rep_osc.png"))
+knitr::include_graphics(file.path( "Figures","Rep_osc.png"))
 ```
 
 
@@ -249,7 +249,7 @@ Since the population of PSII starts predominantly from S1 in the dark acclimated
 
 XXXextract plots tau vs. temperature to justify this argumentXXXX
 
-The conversions of flash spacing to equivalent light levels yielded similar ranges of effective measurement light levels applied to each strain \@ref(tab:fluor_meas). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m^-2^s^-1^ threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans [@ravenPutOutLight2000].
+The conversions of flash spacing to equivalent effective light levels yielded similar ranges of light levels applied to each strain \@ref(tab:fluor_meas). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m^-2^s^-1^ threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans [@ravenPutOutLight2000].
 
 XXXConsider redoing this as data with conversionsXXX
 ```{r fluor_meas}
@@ -282,7 +282,7 @@ The fluorescence data yields a time series of F~V~/F~M~ over 32 sequentially app
 
 ```{r rep_recon, fig.cap = "Representative wavelet transformations of Antarctic *Chlamydomonas priscuii* variable chlorophyll fluorescence (F~V~/F~M~) measured at 4, 8 or 12°C, over 32 consecutive single turnover saturating flashes, applied at spacings of 1, 2, 4, 8, 16 s, equivalent to photon delivery rates to PSII achieved under light levels from 0.708 down to 0.045 µmol photons m^-2^ s^-1^.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
-knitr::include_graphics(file.path("Figures","rep_recon.png"))
+knitr::include_graphics(file.path("Figures","Rep_recon.png"))
 ```
 
 
@@ -293,9 +293,9 @@ Statistical significance of the wavelet power at a periodicity of four indicates
 
 The observed patterns in the persistence of S-State cycling across conditions within taxa were then modelled using the nonparametric method of generalized additive modelling (GAM). GAMs fit a model to predict the damping index based on a tensor product smooth of the two predictors, temperature, and light level. The response variable is linked to the independent variables using a smoothing function, where many localized polynomials are joined to form a piecewise function called a spline [@pinillaNonParametricGeneralizedAdditive2021]. For each strain, GAM models were fit to the data using the restricted maximum likelihood method (REML).
  
-One GAM model examines the response of S-State damping to the measurement temperature and the light level equivalent to the measurement flash spacing.
+One GAM model examines the response of S-State damping to the measurement temperature and the equivalent effective light level equivalent for the measurement flash spacing.
  
-A second GAM model examines the response of S-State damping to the difference between measurement temperature and growth temperature,  and the light level equivalent to the measurement flash spacing.
+A second GAM model examines the response of S-State damping to the difference between measurement temperature and growth temperature,  and the equivalent effective light level equivalent for the measurement flash spacing.
  
 Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [@schoenigWorkshopGeneralizedAdditive2023]. Based on the fitted models, the damping index can then be predicted for other combinations of temperature and light [@woodGeneralizedAdditiveModels2017]. These predictions were then visually represented with a contour plot. 
 
@@ -304,26 +304,45 @@ Models were validated by verifying the choice of basis dimensions (k) and evalua
 
 ## Single Turnover Variable Chlorophyll Fluorescence
 
-Exposing phytoplankton cultures to a series of 32 successive flashes produced oscillations in the maximum quantum yield of photochemistry in PSII, as estimated through the secondary chlorophyll fluorescence parameter F~V~/F~M~. Initially, the majority of the dark-adapted population of PSII is at S1, with a smaller fraction at S0 [@gatesRealtimeKineticsLight2020, @dewijnSstateDependenceMiss2002]. As shown in Fig \@ref(fig:rep_osc) for the polar alga *C. priscuii*, the time series of F~V~/F~M~ over successive flashes reveals consistent variations in fluorescence yield as the predominant S-States follow each other across the PSII within the population. However, the amplitude of the ChlF oscillations declines progressively over time, and with wider spacing of sequential flashes, equivalent to decreasing light levels, and is less persistent at a higher measurement temperature
+Exposing phytoplankton cultures to a series of 32 successive flashes produced oscillations in the maximum quantum yield of photochemistry in PSII, as estimated through the secondary chlorophyll fluorescence parameter F~V~/F~M~. Initially, the majority of the dark-adapted population of PSII is at S1, with a smaller fraction at S0 [@gatesRealtimeKineticsLight2020, @dewijnSstateDependenceMiss2002]. As shown in Fig \@ref(fig:rep_osc) for the polar alga *C. priscuii*, the time series of F~V~/F~M~ over successive flashes reveals consistent variations in fluorescence yield as the predominant S-States follow each other across the PSII within the population. However, the amplitude of the ChlF oscillations declines progressively over time, and with wider spacing of sequential flashes, equivalent to decreasing effective light levels, and is less persistent at a higher measurement temperature
 
 ## Wavelet Analysis  
 
-Wavelet transformations were computed for the fluorescence time series of each unique combination of measurement temperature, flash spacing (equivalent to effective light level), growth temperature, and species or strain. Assessing the wavelet power of a 4-step periodicity across conditions, key trends emerge. As exemplified by the Antarctic green alga *C. priscuii* (Figure (Figure \@ref(fig:cpriscuii_waveletpower))), the average wavelet power declines with increasing flash spacings, equivalent to decreasing effective light levels, and also with increasing measurement temperatures. 
+Wavelet transformations were computed for the fluorescence time series of each unique combination of measurement temperature, flash spacing, growth temperature, and species or strain. Assessing the wavelet power of a 4-step periodicity across conditions, key trends emerge. As exemplified by the Antarctic green alga *C. priscuii* (Figure (Figure \@ref(fig:cpriscuii_waveletpower))), the average wavelet power declines with increasing flash spacings, equivalent to decreasing effective light levels, and also with increasing measurement temperatures. 
 
 
-```{r cpriscuii_waveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry Antarctic green algae *Chlamydomonas priscuii*, grown at 4°C, and measured across a range of measurement temperatures and flash spacings, with the equivalent light levels. Regions where wavelet power reached statistical significance (p < 0.05) shaded in blue", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r cpriscuii_waveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry Antarctic green algae *Chlamydomonas priscuii*, grown at 4°C, and measured across a range of measurement temperatures and flash spacings, with the equivalent effective light levels. Regions where wavelet power reached statistical significance (p < 0.05) shaded in blue", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","Cpriscuii_waveletpower.png"))
 ```
 
-In contrast, in the temperate green algae *C. reinhardtii* (Figure \@ref(fig:creinhardtiii_waveletpower)), the wavelet power is consistently lower, suggesting a weaker 4-step periodicity of ChlF in temperate taxa, which only reaches statistical significance at the shorter flash spacings, with higher equivalent light levels. 
+In contrast, in the temperate green algae *C. reinhardtii* (Figure \@ref(fig:creinhardtiii_waveletpower)), the wavelet power is consistently lower, suggesting a weaker 4-step periodicity of ChlF in temperate taxa, which only reaches statistical significance at the shorter flash spacings, with higher equivalent effective light levels. 
 
-```{r creinhardtiii_waveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry in the temperate green algae *Chlamydomonas reinhardtii*, grown at 4°C, and measured across a range of measurement temperatures and flash spacings, with the equivalent light levels. Regions where wavelet power reached statistical significance (p < 0.05) shaded in blue", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r creinhardtiii_waveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry in the temperate green algae *Chlamydomonas reinhardtii*, grown at 4°C, and measured across a range of measurement temperatures and flash spacings, with the equivalent effective light levels. Regions where wavelet power reached statistical significance (p < 0.05) shaded in blue", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","Creinhardtii_waveletpower.png"))
 ```
 
+Polar taxa maintained significant 4-step oscillations in Fv/Fm, and thus stronger synchronization of PSII S-State cycling at longer Flash Spacing intervals, and thus at lower equivalent effective light levels, than did their temperate counterparts (Figure \@ref(fig:periodicity_mtrx)), including measures taken at a common temperature of 12°C. 
 
+XXXFix X Axes Scaling in GAM_Figures.RmdXXX
+```{r periodicity_mtrx, fig.cap = "Statistical significance of 4-step oscillations in the maximum quantum yield of PSII photochemistry across polar and temperate phytoplankton taxa, as measured through variable chlorophyll fluorescence. Measurement conditions where wavelet power for 4-step periodicity reached statistical significance (p < 0.05) shaded in blue", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+
+knitr::include_graphics(file.path("Figures","Periodicity_mtrx.png"))
+```
+
+## Generalized Additive Modelling by Deviation from Growth Temperature
+
+
+Predictions from generalized additive modelling were generated for the damping of S-State-induced chlorophyll fluorescence oscillations, as predicted by the tensor product smooth of the deviation from growth temperature during measurements (°C) and the equivalent effective light level (µmol photons m^-2^s^-1^; Table 3) for each strain. 
+
+Table 3: Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of S-State-induced chlorophyll fluorescence oscillations to the predictors of deviation from growth temperature (°C) and the effective light level (µmol photons m-2s-1). 
+
+
+## Generalized Additive Modelling By Measurement Temperature  
+
+To facilitate comparison across actual measurement temperatures, additional generalized additive models were fit to the data. For T. pseudonana, C. ICEMDV, C. priscuii, C. malina, C. reinhardtii, and C. vulgaris, replicate cultures of the strain were grown at the same temperatures. Therefore, the GAMs generated for these strains encompass a different temperature range but are represented by the same summary statistics (Table 4). Conversely, the polar diatom F. cylindrus was cultured at both 0 and 6°C. Thus, separate models were fit for each F. cylindrus culture to account for possible physiological differences resulting from the distinct growth conditions. 
+The smoothing term was significant for both F. cylindrus cultures (0°C F = 4.46, p = 0.00827; 6°C F = 3.42, p = 0.0279). However, while the model accounted for 73.4% of the deviance in the damping response of F. cylindrus grown at 0°C (adjusted R2 = 0.609), it only accounted for 65.1% (adjusted R2 = 0.509) in F. cylindrus grown at 6°C (Table 4). 
 
 # Discussion {.unnumbered}
 
