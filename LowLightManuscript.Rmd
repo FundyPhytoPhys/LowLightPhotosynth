@@ -36,6 +36,8 @@ editor_options:
 ---
 
 # To Do
+
+## Fix R package citation bibtex
 ## process tau data to track how long PSII is closed after flash
 
 ## do math to estimate probability of double hits contributing to desynchronization and whether that probability varies with flash spacing or temperature
@@ -50,8 +52,8 @@ editor_options:
 
 ## more measures in Ottawa, Halifax or Sackville?
 
-# Figure \@ref(fig:chunk-name))
-# Table \@ref(tab:chunk-name))
+# Figure \@ref{fig:chunk-name})
+# Table \@ref{tab:chunk-name})
 
 
 
@@ -77,7 +79,7 @@ knitr:: write_bib(c('knitr', 'tidyverse', 'datastreamr', 'lutz', 'ggbreak', 'gri
 ```
 
 ```{r defining filepaths, include = FALSE}
-OutputFP <- file.path("Output", fsep="\\")
+#OutputFP <- file.path("Output", fsep="\\")
 ```
 
 ```{r import data dictionary, include=FALSE}
@@ -149,7 +151,7 @@ By comparing the S-State cycling over flash cycles, of psychrophilic and tempera
 # Materials and methods {.unnumbered}
 
 ## Study Strains and Culturing Conditions
-The seven study taxa,  including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxa_cultures)). 
+The seven study taxa,  including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref{tab:taxa_cultures). 
 
 ```{r taxa_cultures}
 Taxa <- c("Thalassiosira pseudonana", "Thalassiosira pseudonana", "Chlorella vulgaris", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus", "Fragilariopsis cylindrus",  "Chlamydomonas priscuii", "Chlamydomonas ICEMDV", "Chlamydomona malina")
@@ -173,7 +175,7 @@ TaxaCultures |>
   kableExtra::kable_classic()
 ```
 *Fragilariopsis cylindrus*, a psychrophilic pennate diatom measuring 15-55 µm, thrives in the high salinity and subzero temperatures of Arctic and Antarctic sea-ice systems [@otteDiatomFragilariopsisCylindrus2023, @cefarelliDiversityDiatomGenus2010]. Forming large blooms in the bottom layer of sea ice and across the wider sea ice zone, *F. cylindrus* is as a keystone species for polar ecosystems [@otteDiatomFragilariopsisCylindrus2023,@kangFragilariopsisCylindrusGrunow1992]. Conversely, *Thalassiosira pseudonana* (*Cyclotella nana*) is a small (2.5-15 μm) centric diatom found worldwide in diverse freshwater, coastal, brackish, and marine habitats [35]. *T. pseudonana* can tolerate a wide range of salinities (0.5%–37%) and temperatures (4–25°C), contributing to its use as a model diatom species [@poulsenThalassiosiraPseudonanaCyclotella2023].
-*Chlamydomonas* ICEMDV and *Chlamydomonas priscuii* are halotolerant algae isolated from the perennially ice-covered hypersaline Lake Bonney, in McMurdo Dry Valleys, Antarctica [@ookAntarcticPsychrophilesChlamydomonas2019,@stahl-rommelCyclicElectronFlow2022]. With 15 to 20 μm biflagellate cells, *C.* ICEMDV dominates the shallow photic zone, where it experiences higher irradiance, extreme nutrient limitation, and lower salinity [@cookAntarcticPsychrophilesChlamydomonas2019, @liUltrastructuralSingleCellLevelCharacterization2016]. The smaller *C. priscuii* dominates the deep photic zone, characterized by permanent low temperatures, low irradiance, and high salinity [@cvetkovskaTemperatureStressPsychrophilic2022,@hunerPhotosyntheticAdaptationMulticellularity2023]. *Chlamydomonas malina* is a marine microalga isolated from the Arctic Ocean’s Beaufort Sea, measuring around 10 μm in length and 5 μm in width, and growing optimally at 4°C [@balzanoDiversityCulturedPhotosynthetic2012,@morales-sanchezTemperatureDependentLipidAccumulation2020]. The temperate *Chlamydomonas reinhardtii* is a model green alga approximately 10 μm in size, found in soil and aquatic environments with an optimal temperature range of 20-32°C [@sassoMolecularManipulationDomesticated2018,@xieChlamydomonasReinhardtiiThermal2013]. *Further, *Chlorella vulgaris*, ranging from 2 μm to 10 μm in size, is primarily found in freshwater environments and grows optimally at 27°C [@wielCharacterizationChlorellaVulgaris2017,@leyvaAccumulationFattyAcids2014].
+*Chlamydomonas* ICEMDV and *Chlamydomonas priscuii* are halotolerant algae isolated from the perennially ice-covered hypersaline Lake Bonney, in McMurdo Dry Valleys, Antarctica [@CookAntarcticPsychrophilesChlamydomonas2019,@stahl-rommelCyclicElectronFlow2022]. With 15 to 20 μm biflagellate cells, *C.* ICEMDV dominates the shallow photic zone, where it experiences higher irradiance, extreme nutrient limitation, and lower salinity [@cookAntarcticPsychrophilesChlamydomonas2019, @liUltrastructuralSingleCellLevelCharacterization2016]. The smaller *C. priscuii* dominates the deep photic zone, characterized by permanent low temperatures, low irradiance, and high salinity [@cvetkovskaTemperatureStressPsychrophilic2022,@hunerPhotosyntheticAdaptationMulticellularity2023]. *Chlamydomonas malina* is a marine microalga isolated from the Arctic Ocean’s Beaufort Sea, measuring around 10 μm in length and 5 μm in width, and growing optimally at 4°C [@balzanoDiversityCulturedPhotosynthetic2012,@morales-sanchezTemperatureDependentLipidAccumulation2020]. The temperate *Chlamydomonas reinhardtii* is a model green alga approximately 10 μm in size, found in soil and aquatic environments with an optimal temperature range of 20-32°C [@sassoMolecularManipulationDomesticated2018,@xieChlamydomonasReinhardtiiThermal2013]. *Further, *Chlorella vulgaris*, ranging from 2 μm to 10 μm in size, is primarily found in freshwater environments and grows optimally at 27°C [@wielCharacterizationChlorellaVulgaris2017,@leyvaAccumulationFattyAcids2014].
 
 Cultures of *T. pseudonana* and *C. vulgaris* were prepared by Naaman Omar (Mount Allison University); *Chlamydomonas* cultures were prepared by MacKenzie Poirier (Cvetskova Lab, University of Ottawa); and *F. cylindrus* cultures were prepared by Sébastien Guérin (Takuvik International Research Laboratory, Université Laval).
 
@@ -222,10 +224,7 @@ XXXestimate these probabilities of misses vs. double hitsXXX.
 Each flash is bright enough to deliver, on average, at least one absorbed photon to each PSII, but short enough to limit the probability of a PSII re-opening and going through a second round of photochemistry during the flash. Thus, as sequential flashes are applied to the culture, each individual PSII is driven through the four S-States (Fig \@ref(fig:rep_osc)) [@dauTimeresolvedXraySpectroscopy2007].  As the oxygen-evolving complex of PSII moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020]. 
 
 
-```{r rep_osc, fig.cap = "*Oscillations of in the maximum quantum yield of PSII photochemistry over a Series of Single Turnover Saturating Flashes.* F~V~/F~M~ was normalized to the average value over the series for comparison across samples of *Chlamydomonas priscuii*, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes, excitation rates equivalent to irradiance with 0.708, 0.177 or 0.044 µmol photons m-2s-1. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence.
-
-Oscillations  in  cultures over a series of 32 flashes, as measured through the secondary chlorophyll fluorescence parameter FV/FM. Representative conditions include cultures measured at 4 or 12 °C, with flash spacings of 8 – 1 seconds, equivalent to effective light levels of 0.088 – 0.708 µmol photons m-2s-1. 
-", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r rep_osc, fig.cap = "**Oscillations of the maximum quantum yield of PSII photochemistry over a Series of Single Turnover Saturating Flashes.** F~V~/F~M~ was normalized to the average value over the series for comparison across samples of *Chlamydomonas priscuii*, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes, excitation rates equivalent to irradiance with 0.708, 0.177 or 0.044 µmol photons m-2s-1. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path( "Figures","rep_osc.png"))
 ```
