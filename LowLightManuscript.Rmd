@@ -200,19 +200,22 @@ For each culture sample we adjusted the number and power of flashlets per flash 
 We kept the single turnover excitation flash as short as feasible, to avoid excessive excitation, and to limit the probability of re-openings of PSII, followed by re-closures of PSII complexes by a second round of photochemistry, which contributes to desynchronization of the progression of the PSII complexes through S-States.
 
 XXXX
-Desynchronization resulting from 'misses' in which a PSII fails to perform a charge separation and close during a flash has an upper bound of:
+The saturating single turnover flash trains drive the pool of PSII to ~ 95% closure through charge separation.  Therefore, desynchronization of the PSII S-State progression accumulates through  'misses' in which a PSII fails to perform a charge separation and close during a flash is approximated by:
 
-D~M~ ~ 1 * e^(0.05 * n)
-```{r miss desynch}
-n = c(1,2,3,4,5,6,7,8)
-DM = -(1 - exp(0.05 * n))
+D~M~ = 1 * e^(-0.95 * n)
+```{r desync_miss}
+n = c(0:32)
+DM = 1 * (exp(-0.95 * n))
 DM
+
 ```
 
 
-Where the D~M~ is the cumulative desynchronization resulting from photochemical misses during each flash, and n are the number of flashes applied. 0.05 is is the fraction of PSII remaining open during a flash.  This is an upper bound because the 0.0.05 represents a balance between closure and re-opening during the flash.
+Where the D~M~ is the cumulative desynchronization resulting from photochemical misses during each single turnover saturating flash, and n are the number of flashes applied from 0 to 32. 0.95 is the fraction of PSII closed after photochemistry during a flash.
 
-Desynchronization resulting from double hits of photochemistry during the flash is approximated by
+Desynchronization can also result from double hits of photochemistry during the flash, if a PSII is closed by a round of photochemistry, but then re-opens and undergoes a second round of photochemistry.
+
+Although the saturating single turnover flash is much shorter than the exponential lifetime of PSII photochemistry, ....approximated by
 
 D~D~ ~ 1 * e^(0.05 * n)
 σ~PSII~ * P * t
