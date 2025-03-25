@@ -28,7 +28,7 @@ keywords: "Photosystem II, Polar Phytoplankton, Low Light Photosynthesis"
 
 abstract: "Polar phytoplankton achieve slow, but ecologically significant productivity, under exceptionally low light. We hypothesized that maintaining photosynthesis under low light involves suppression of energetically wasteful charge recombinations in Photosystem II. We used single turnover variable chlorophyll fluorescence to track persistence of synchronized Photosystem II photochemistry in polar diatoms and green algae, in response to changing temperature and extreme low light, emulated by increasing spacing of photon deliveries. Prolonged synchronous cycling indicates fewer desynchronizations from wasteful recombination reactions and, thus, more efficient photosynthetic energy conversion under low light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa,  under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton suppress energetically wasteful charge recombinations and sustain photosynthesis even under extremely low light. This research shows that temperature interacts with the limits on photosynthesis under light limitation."
 bibliography: [LowLightPhotosynthesis.bib, packages.bib]
-csl: plos-one.csl
+csl: frontiers.csl
 always_allow_html: true
 editor_options: 
   markdown: 
