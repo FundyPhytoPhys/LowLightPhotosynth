@@ -143,24 +143,23 @@ Oxygenic photosynthesis in eukaryotic phytoplankton occurs in chloroplasts, boun
 
 In PSII, photons are captured by light-harvesting chlorophyll molecules, [@kirkLightPhotosynthesisAquatic2011], initiating a transition from the ground state to an electrically excited state. Energy absorbed by light harvesting complexes undergoes rounds of inductive resonance transfer among multiple pigments before eventually reaching the photochemical reaction center of PSII,  P~680~, [@kirkLightPhotosynthesisAquatic2011], composed of a Chl a heterodimer [@shenPhotosynthesisPhotosystemII2021, @vassRoleChargeRecombination2011]. Excitation energy is then distributed variably among: i) photochemistry; ii) dissipation as heat; or iii) re-emission as fluorescence (ChlF) [@schubackSingleTurnoverVariableChlorophyll2021].  When P~680~ is raised to its excited state, P~680~*, it shifts reduction potential, allowing transfer of an electron to an initial pheophytin (Phe) acceptor molecule, thereby photoxidizing to P~680~+ [@vassRoleChargeRecombination2011]. The electron from reduced Phe- is transferred to plastoquinone A (Q~A~), followed by transfer to plastoquinone B (Q~B~) [@shenPhotosynthesisPhotosystemII2021]. Q~B~, once fully reduced by receiving two electrons, is released, carrying the electrons into the mobile plastoquinone pool in the lipid phase of the thylakoid membrane [@kirkLightPhotosynthesisAquatic2011]. P~680~+  returns to its ground state P~680~ by taking an electron from a tyrosine residue D1-Tyr-161 (Yz). Yz, in turn, extracts an electron from a manganese cluster on the thylakoid lumenal side of PSII [@shenPhotosynthesisPhotosystemII2021, @mukhopadhyayManganeseClustersRelevance2004].
 
-During photosynthesis, electron transfers thus stabilize separated charges [@vassRoleChargeRecombination2011]. However, these charge separations are reversible through recombination reactions [@vassJanusfacedChargeRecombinations2009]. Recombinations represent a futile cycle of photochemistry, but contribute to both photodamage and photoprotection of PSII, and are essential under excess light conditions [@rappaportKineticsPathwaysCharge2002, @rappaportChargeRecombinationThermoluminescence2005], when prior reduction of downstream electron acceptors blocks electron transfer from P~680~*. Under such conditions, the primary radical pair [P~680~+Phe-] will recombine, generating the excited triplet chlorophyll ^3^P~680~ [@laloiGeneticApproachElucidating2006]. Chlorophyll triplets react with ground-state molecular oxygen to produce singlet oxygen (^1^O~2~), a highly damaging, photoinhibitory reactive oxygen species [@rappaportChargeRecombinationThermoluminescence2005].
+During photosynthesis, electron transfers thus stabilize separated charges [@vassRoleChargeRecombination2011]. However, these charge separations are reversible through recombination reactions [@vassJanusfacedChargeRecombinations2009, @hanMissesWaterOxidation2012]. Recombinations represent a futile cycle of photochemistry, ans contribute to both photodamage, but also to photoprotection of PSII essential under excess light conditions [@rappaportKineticsPathwaysCharge2002, @rappaportChargeRecombinationThermoluminescence2005], when prior reduction of downstream electron acceptors blocks electron transfer from P~680~*. Under such conditions, the primary radical pair [P~680~+Phe-] will recombine, generating the excited triplet chlorophyll ^3^P~680~ [@laloiGeneticApproachElucidating2006]. Chlorophyll triplets react with ground-state molecular oxygen to produce singlet oxygen (^1^O~2~), a highly damaging, photoinhibitory reactive oxygen species [@rappaportChargeRecombinationThermoluminescence2005].
 Conversely, non-radiative charge recombinations act as a mechanism of photoprotection [@vassRoleChargeRecombination2011], enabling direct recombination from the singlet P~680~+Phe- or P~680~+Q~A~- states [@rutherfordBackreactionsShortcircuitsLeaks2012]. Direct recombination helps prevent the accumulation of excess energy and competes with triplet chlorophyll formation in the PSII reaction center, thereby suppressing the formation of harmful ROS [@vassJanusfacedChargeRecombinations2009].  Since there are activation energies for recombinations, the probabilities of recombinations vary with temperature, [@ivanovAcclimationTemperatureIrradiance2006, @hanDirectQuantificationFour2008]. Both plants and cyanobacteria modulate the potentials of electron transfer intermediates, changing the probabilities and temperature dependencies of recombinations [@ivanovAcclimationTemperatureIrradiance2006, @saneChangesRedoxPotential2003, @saneTransientExchangePhotosystem2002, @ivanovLowtemperatureModulationRedox2003]
 
-Beyond their roles in photodamage and photoprotection, charge recombination reactions are wasteful processes that lower photosynthetic energy conversion efficiency [@rappaportChargeRecombinationThermoluminescence2005]. Shifting reduction potentials of downstream electron acceptors, leading to changes in energy gaps for recombinations, may represent evolutionary adaptations aimed at maximizing photoprotection and minimizing losses through back-reactions under light-limited conditions [@vinyardPhotosystemIIReaction2013]. 
+Beyond their roles in photodamage and photoprotection, charge recombination reactions are wasteful 'miss' processes that lower photosynthetic energy conversion efficiency [@rappaportChargeRecombinationThermoluminescence2005, @hanMissesWaterOxidation2012]. Shifting reduction potentials of downstream electron acceptors, leading to changes in energy gaps for recombinations, may represent evolutionary adaptations aimed at maximizing photoprotection and minimizing losses through back-reactions under light-limited conditions [@vinyardPhotosystemIIReaction2013]. 
 
 The oxygen-evolving complex (OEC) of PSII consists of a manganese-oxo cluster (Mn~4~CaO~5~) where water is oxidized, releasing oxygen and protons [@gatesRealtimeKineticsLight2020]. Four consecutive charge separations at P~680~ induce increasingly oxidized states of the Mn cluster, known as S-States [@zaharievaEnergeticsKineticsSState2019], denoted , from most reduced to most oxidized, as S0, S1,  S2, and S3, followed by a transient S4 state, which rapidly decays to S0. Once the Mn cluster has progessively lost four electrons, the Mn cluster oxidizes two water molecules to one molecule of O~2~. Therefore, a complete water oxidation cycle during oxygenic photosynthesis requires the sequential absorption of four photons by a PSII, with the progressive accumulation of four oxidizing equivalents in the OEC [@dauTimeresolvedXraySpectroscopy2007, @gatesRealtimeKineticsLight2020, @zaharievaEnergeticsKineticsSState2019].  
 
 Under light limitation, excitations of P~680~ are widely spaced. With widely spaced PSII excitations, electron transfer intermediates must persist for longer periods of time,  elevating the probability of energetically wasteful recombination reactions, representing a step backward in the S-State cycle [@kerenMechanismPhotosystemII1997, @dewijnSstateDependenceMiss2002, @hanDirectQuantificationFour2008]. Stable and progressive S-State cycling under low light, in contrast, sustains electron flow for ATP and NADPH production, while minimizing risk of low-light photodamage to PSII [@rappaportChargeRecombinationThermoluminescence2005,@kerenMechanismPhotosystemII1997]. 
 
-We therefore evaluated whether psychrophilic polar diatoms and green algae maintain stable S-State cycling, and thus productive electron transport, under extremely low light and low temperatures. S-State cycling in a phytoplankton sample can be tracked by the applications of sequences of short, very bright, single-turnover light flashes. In darkness the PSII population relaxes primarily to S1 [@hanDirectQuantificationFour2008]. As sequential light flashes are applied, the population of PSII complexes is driven through the S-State cycle [@dauTimeresolvedXraySpectroscopy2007]. In an idealized sample, the four S-States will be reflected by an ongoing periodic oscillation in ChlF, since the S-States have different intrinsic fluorescence yields [@gatesRealtimeKineticsLight2020, @zaharievaEnergeticsKineticsSState2019. However, recombination reactions cause wasteful slippage in the S-State cycling of individual PSII. As recombination events occur, they contribute to desynchronization of S-State cycling among the PSII population, dampening the observed ChlF oscillation [@dewijnSstateDependenceMiss2002] towards a steady state averaged ChlF for the PSII population. An organism exhibiting S-State cycling sustained over more flash cycles indicates fewer slippages and thus more efficient photosynthetic energy conversion. 
-By comparing the S-State cycling over flash cycles, of psychrophilic and temperate taxa, we can determine if psychrophilic diatoms and green algae have higher ability to maintain PSII function under extreme low light, for stable extraction of electrons from water. 
+We therefore evaluated whether psychrophilic polar diatoms and green algae maintain stable S-State cycling, and thus productive electron transport, under extremely low light and low temperatures. S-State cycling in a phytoplankton sample can be tracked by the applications of sequences of short, very bright, single-turnover light flashes. In darkness the PSII population relaxes primarily to S1 [@hanDirectQuantificationFour2008]. As sequential light flashes are applied, the population of PSII complexes is driven through the S-State cycle [@dauTimeresolvedXraySpectroscopy2007]. In an idealized sample, the four S-States will be reflected by an ongoing periodic oscillation in ChlF, since the S-States have different intrinsic fluorescence yields [@gatesRealtimeKineticsLight2020, @zaharievaEnergeticsKineticsSState2019]. However, recombination reactions contribute to wasteful misses in the S-State cycling of individual PSII [@hanMissesWaterOxidation2012]. As recombination events occur, they contribute to desynchronization of S-State cycling among the PSII population, dampening the observed ChlF oscillation [@dewijnSstateDependenceMiss2002] towards a steady state averaged ChlF for the PSII population. An organism exhibiting S-State cycling sustained over more flash cycles indicates fewer misses, and thus more efficient sustained photosynthetic energy conversion. By comparing the S-State cycling over flash cycles, of psychrophilic and temperate taxa, we can determine if psychrophilic diatoms and green algae have higher ability to maintain PSII function under extreme low light, for stable extraction of electrons from water. 
 
 # Materials and methods {.unnumbered}
 
 ## Study Strains and Culturing Conditions
-The seven study taxa,  including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref{tab:taxa_cultures). 
+The seven study taxa,  including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxa_cultures). 
 
-```{r taxa_cultures}
+```{r taxa_cultures, echo = FALSE}
 Taxa <- c("Thalassiosira pseudonana", "Thalassiosira pseudonana", "Chlorella vulgaris", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus", "Fragilariopsis cylindrus",  "Chlamydomonas priscuii", "Chlamydomonas ICEMDV", "Chlamydomona malina")
 
 Origin <- c(rep("Temperate", 5), rep("Polar", 5))
@@ -174,10 +173,9 @@ Media <- c(rep("F2",2), rep("BG11", 2), "BBM", rep("F2", 2), rep("BBM",3))
 
 TaxaCultures <- tibble(Taxa, Origin, Growth_C, Growth_PAR, Growth_Photoperiod, Media)
                             
-#TaxaCultures
-
-TaxaCultures |>
-  kable(caption ="Study taxa and culture growth conditions.",         col.names = c("Taxa", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")) |>
+TaxaCultures |> 
+  kable(caption ="Study taxa and culture growth conditions.",
+        col.names = c("Taxa", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")) |>
   kableExtra::column_spec(1, italic = TRUE) |>
   kableExtra::kable_classic()
 ```
@@ -225,33 +223,33 @@ then estimate probability of another hit during a flashlet, and cumulatively
 
  # Each flash comprises a rapid series of 50-70 sub-saturating flashlets of 1.6 µs, delivered every 4.1 µs, over a total 205 - 287 µs per flash
 
-photons_umol <- 6.022E17
-m2_A2 <- 1E-20 
-  
-n <- c(0:32)
-tau_s = 500E-6
-#replace with measurements of tau later
-
-sigma_psii_m2 = 300E-18
-#replace with measurements of sigma_psii_m2 later
-
-I_photons_m2_s1 = 15000 * 6.022E17
-DutyCycle = 1.6/4.1
-Icorr_photons_m2_s1 = DutyCycle * I_photons_m2_s1
-#replace with measurements later
-
-#replace with vector estimates later
-flashlet_time_s = 1.6E-6
-flashlets_n <- c(50,70)
-flashtime_s = flashlets_n * flashcycle_time_s
-PSIIreopen = 1- (1 * exp(-1/tau * flashtime_s[1]))
-
-#Midpoint approximation for doublehit during a single flashlet
-PSIIdouble = PSIIreopen/2 * flashlet_time_s * sigma_psii_m2 * 
-  I_photons_m2_s1 
-
-#cumulative double hits over flash train
-PSIIdouble_cum = PSIIdouble * n
+# photons_umol <- 6.022E17
+# m2_A2 <- 1E-20 
+#   
+# n <- c(0:32)
+# tau_s = 500E-6
+# #replace with measurements of tau later
+# 
+# sigma_psii_m2 = 300E-18
+# #replace with measurements of sigma_psii_m2 later
+# 
+# I_photons_m2_s1 = 15000 * 6.022E17
+# DutyCycle = 1.6/4.1
+# Icorr_photons_m2_s1 = DutyCycle * I_photons_m2_s1
+# #replace with measurements later
+# 
+# #replace with vector estimates later
+# flashlet_time_s = 1.6E-6
+# flashlets_n <- c(50,70)
+# flashtime_s = flashlets_n * flashcycle_time_s
+# PSIIreopen = 1- (1 * exp(-1/tau * flashtime_s[1]))
+# 
+# #Midpoint approximation for doublehit during a single flashlet
+# PSIIdouble = PSIIreopen/2 * flashlet_time_s * sigma_psii_m2 * 
+#   I_photons_m2_s1 
+# 
+# #cumulative double hits over flash train
+# PSIIdouble_cum = PSIIdouble * n
 ```
 
 
@@ -454,9 +452,7 @@ knitr::include_graphics(file.path("Figures","Greens_GAMtemp.png"))
 # Discussion {.unnumbered}
 
 Across all study strains ChlF oscillations, provoked by a series of single turnover saturating flashes, showed wavelet power at a period of four, that declined with increasing temperatures and decreasing equivalent light. Thus sustained synchronized S-State cycling of PSII decayed faster under higher temperatures and lower equivalent light (Figure \@ref(fig:cpriscuii_waveletpower)). This decrease in the number of consecutive flashes before the ChlF oscillations damp out suggests that cultures are maintaining synchronicity in their S-State cycling for shorter durations (Figure 14, 16) [@dewijnSstateDependenceMiss2002].  The desynchronization of S-State cycling between the PSII in a population indicates that a sufficient number of charge recombinations have taken place to create a PSII population with a random distribution of S-States. Thus, if this desynchronization occurs after fewer consecutive flashes, it signifies an increased proportion of PSIIs undergoing charge recombinations after each flash. By inference, PSII populations with increased incidence of energetically wasteful charge recombinations, such as those under high temperatures and low light levels, are less efficient in their photosynthetic energy conversion [@rappaportChargeRecombinationThermoluminescence2005]. 
-These results are consistent with previous literature evaluating the response of recombination reactions to light conditions. As light levels decline, there are longer intervals between successive PSII excitations, pushing fewer electrons through the electron transport chain [@kerenMechanismPhotosystemII1997]. Consequently, the probability of energetically wasteful charge recombinations is higher, corresponding to weaker maintenance of S-State cycling [@kerenMechanismPhotosystemII1997,@dewijnSstateDependenceMiss2002]. Similarly, these findings are consistent with known relationships between charge recombination and temperature, as recombination reactions typically decrease with temperature [@ivanovAcclimationTemperatureIrradiance2006]. However, these results are in direct contrast with previous literature regarding the temperature dependence of S-State transitions.
-
-XXXXIn 2022, Han et al. compared the miss probability of S-State transitions at -10, 1, 10, and 20 °C. Applying a variable series of flashes to isolated PSII in temperature-controlled ethanol baths, they demonstrated that the average miss probability of S-State transitions was highest at -10 °C and lowest at 10 °C [@hanMolecularBasisTurnover2022]. Therefore, we would expect to have seen more sustained S-State transitions at moderate temperatures. XXXX
+These results are consistent with previous literature evaluating the response of recombination reactions to light conditions. As light levels decline, there are longer intervals between successive PSII excitations, pushing fewer electrons through the electron transport chain [@kerenMechanismPhotosystemII1997]. Consequently, the probability of energetically wasteful charge recombinations is higher, corresponding to weaker maintenance of S-State cycling [@kerenMechanismPhotosystemII1997,@dewijnSstateDependenceMiss2002]. These findings are consistent with recombination reactions decreasing with temperature [@ivanovAcclimationTemperatureIrradiance2006] as ambient temperature falls below the activation temperatures of the recombinations.   In contrast, in PSII-enriched membrane fractions isolated from spinach, the average miss probability of S-State transitions was highest at -10 °C and lowest at 10 °C [@hanMolecularBasisTurnover2022]. Therefore, we would expect to have seen more sustained S-State transitions at moderate temperatures. XXXX
 
 ## Comparisons Among Strains  
 
@@ -467,7 +463,7 @@ Through analyzing ChlF oscillations, we extrapolated the duration of significant
 
 ## Ecological Implications & Future Directions  
 
-Unravelling the mechanisms enabling polar phytoplankton to sustain slow, but significant productivity under the ice in the winter is crucial for predicting the changing dynamics of spring phytoplankton blooms, in the face of rapid warming [@ardynaPhytoplanktonDynamicsChanging2020]. Beyond direct temperature changes, polar aquatic ecosystems are experiencing reductions in sea ice extent and thickness, escalating freshwater inputs, acidification, and increased winds and storms [@ardynaPhytoplanktonDynamicsChanging2020,@cvetkovskaTemperatureStressPsychrophilic2022]. These pressures are causing alterations in the productivity and seasonal peaks of phytoplankton blooms [@ardynaPhytoplanktonDynamicsChanging2020,@CroteauContrastingNonphotochemicalQuenching2021]. Understanding the nature of maintaining an intact photosystem under the ice in the winter allows us to better predict under what conditions these blooms will initiate, and which phytoplankton strains will be involved [@hanckeExtremeLowLight2018].
+Unravelling the mechanisms enabling polar phytoplankton to sustain slow, but significant productivity under the ice in the winter is crucial for predicting the changing dynamics of spring phytoplankton blooms, in the face of rapid warming [@ardynaPhytoplanktonDynamicsChanging2020]. Beyond direct temperature changes, polar aquatic ecosystems are experiencing reductions in sea ice extent and thickness, escalating freshwater inputs, acidification, and increased winds and storms [@ardynaPhytoplanktonDynamicsChanging2020,@cvetkovskaTemperatureStressPsychrophilic2022]. These pressures are causing alterations in the productivity and seasonal peaks of phytoplankton blooms [@ardynaPhytoplanktonDynamicsChanging2020,@croteauContrastingNonphotochemicalQuenching2021]. Understanding the nature of maintaining an intact photosystem under the ice in the winter allows us to better predict under what conditions these blooms will initiate, and which phytoplankton strains will be involved [@hanckeExtremeLowLight2018].
 The ability to maintain efficient photosynthetic energy conversion over winter is crucial for the timing and speed of spring bloom initiation [@hanckeExtremeLowLight2018]. Strains with this ability may possess a competitive advantage in quickly initiating spring growth, giving them first access to the nutrients required to form an extensive bloom. Thus, the proportions of these strains may increase in polar regions. Altering the phytoplankton community composition may, in turn, exert bottom-up effects on polar ecosystems [@ardynaPhytoplanktonDynamicsChanging2020]. 
 Future directions for this research include more extensive comparative analyses to further our understanding. Incorporating more strains of diatoms and green algae, as well as other phytoplankton groups will enable us to uncover whether certain groups have a higher capacity to suppress energetically wasteful charge recombinations. A difference between these groups may affect their contribution to the phytoplankton community, leading to differences in the ecosystem services offered by spring phytoplankton blooms. Moreover, since there were differences observed between *Fragilariopsis cylindrus* strains grown at 0 and 6 °C, further comparison between ecotypes may yield information on the conditions that lead to the evolution of this ability. 
 

@@ -9,7 +9,7 @@ author:
     correspondence: TRUE
 institute:  
 - mta: 'Department of Biology, Mount Allison University, Sackville NB, Canada, E4L1G7'
-date: "2025-03-25"
+date: "2025-03-26"
 output:
   bookdown::html_document2:
     code_folding: show
@@ -110,7 +110,7 @@ By comparing the S-State cycling over flash cycles, of psychrophilic and tempera
 # Materials and methods {.unnumbered}
 
 ## Study Strains and Culturing Conditions
-The seven study taxa,  including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref{tab:taxa_cultures). 
+The seven study taxa,  including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxa_cultures). 
 
 <table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
 <caption>(\#tab:taxa_cultures)(\#tab:taxa_cultures)Study taxa and culture growth conditions.</caption>
@@ -222,39 +222,35 @@ The sample was then exposed to a series of 32 short, high power, evenly spaced f
 F_V = \frac{F_M}{F_O}
 \end{equation}
 
-For each culture sample we adjusted the number and power of flashlets per flash to achieve closure of ~ 0.95 of PSII complexes, as estimated by the fitting of the chlorophyll fluorescence induction [@kolberMeasurementsVariableChlorophyll1998; @schubackSingleTurnoverVariableChlorophyll2021]. Ideally the saturating flash would achieve complete closure of the PSII population, but concomitant re-opening of PSII by downstream electron transport results in a steady state ratio of mainly closed PSII to a fraction of open PSII, even at F~M~.  The flash power required to drive the PSII population to closure depends largely upon the effective absorption cross-section of photosystem II (σ~PSII~), itself estimated from the ChlF induction curve during the saturation phase [@kolberMeasurementsVariableChlorophyll1998]. σ~PSII~ represents the probability of light capture by the PSII antenna bed associated with the dark-adapted PSII [@schubackSingleTurnoverVariableChlorophyll2021,@xuPhytoplanktonSPSIIExcitation2018]. When σ~PSII~ for a sample is large, weaker or fewer, flashlets are required to saturate the population of PSII,  while limiting excitation stress or double turnovers of PSII associated with excess light [@xuPhytoplanktonSPSIIExcitation2018]. Conversely, a sample with a smaller σ~PSII~ requires brighter, or more numerous flashlets, to drive the proportion of closed reaction centres  progressively towards saturation. If the brightness and number of sub-saturating flashlets are appropriate for the culture, the fluorescence will reach a plateau after approximately 70-80% of the flashlets [@kolberMeasurementsVariableChlorophyll1998]. 
-We kept the single turnover excitation flash as short as feasible, to avoid excessive excitation, and to limit the probability of re-openings of PSII, followed by re-closures of PSII complexes by a second round of photochemistry, which contributes to desynchronization of the progression of the PSII complexes through S-States.
+For each culture sample we adjusted the number and power of flashlets per flash to achieve closure of ~ 0.95 of PSII complexes, as estimated by the fitting of the chlorophyll fluorescence induction [@kolberMeasurementsVariableChlorophyll1998; @schubackSingleTurnoverVariableChlorophyll2021]. Ideally the saturating flash would achieve complete closure of the PSII population, but concomitant re-opening of PSII by downstream electron transport results in a steady state ratio of mainly closed PSII to a fraction of open PSII, even at F~M~.  The flash power required to drive the PSII population to closure depends largely upon the effective absorption cross-section of photosystem II (σ~PSII~), itself estimated from the ChlF induction curve during the saturation phase [@kolberMeasurementsVariableChlorophyll1998]. σ~PSII~ represents the probability of light capture by the PSII antenna bed associated with the dark-adapted PSII [@schubackSingleTurnoverVariableChlorophyll2021,@xuPhytoplanktonSPSIIExcitation2018]. When σ~PSII~ for a sample is large, weaker or fewer, flashlets are required to saturate the population of PSII,  while limiting excitation stress or double turnovers of PSII associated with excess light [@xuPhytoplanktonSPSIIExcitation2018]. Conversely, a sample with a smaller σ~PSII~ requires brighter, or more numerous flashlets, to drive the proportion of closed reaction centres  progressively towards saturation. If the brightness and number of sub-saturating flashlets are appropriate for the culture, the fluorescence will reach a plateau after approximately 70-80% of the flashlets [@kolberMeasurementsVariableChlorophyll1998].  
 
-XXXX
-Desynchronization resulting from 'misses' in which a PSII fails to perform a charge separation and close during a flash has an upper bound of:
+We kept the single turnover excitation flash train as short as feasible, to avoid excessive excitation, and to limit the probability of re-openings of PSII, followed by re-closures of PSII complexes by a second round of photochemistry, which contributes to desynchronization of the progression of the PSII complexes through S-States. Thus, as sequential flashes are applied to the culture, each individual PSII is ideally driven through the four S-States (Fig \@ref(fig:rep_osc)) [@dauTimeresolvedXraySpectroscopy2007].  As the oxygen-evolving complex of PSII moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020], so we can use ChlF to monitor S-State progression. 
 
-D~M~ ~ 1 * e^(0.05 * n)
+The saturating single turnover flash trains drive the pool of PSII to ~ 95% closure through charge separation.  Therefore, desynchronization of the PSII S-State progression accumulates through  'misses' in which a PSII fails to perform a charge separation and close during a flash is approximated by:
+
+D~M~ = 1 * e^(-0.95 * n)
+
 
 ```
-## [1] 0.0512711 0.1051709 0.1618342 0.2214028 0.2840254 0.3498588 0.4190675
-## [8] 0.4918247
+##  [1] 1.000000e+00 3.867410e-01 1.495686e-01 5.784432e-02 2.237077e-02
+##  [6] 8.651695e-03 3.345965e-03 1.294022e-03 5.004514e-04 1.935451e-04
+## [11] 7.485183e-05 2.894827e-05 1.119548e-05 4.329753e-06 1.674493e-06
+## [16] 6.475952e-07 2.504516e-07 9.685992e-08 3.745971e-08 1.448720e-08
+## [21] 5.602796e-09 2.166831e-09 8.380025e-10 3.240900e-10 1.253389e-10
+## [26] 4.847369e-11 1.874676e-11 7.250142e-12 2.803928e-12 1.084394e-12
+## [31] 4.193796e-13 1.621913e-13 6.272602e-14
 ```
 
+Where the D~M~ is the cumulative desynchronization resulting from photochemical misses during each single turnover saturating flash, and n are the number of flashes applied from 0 to 32. 0.95 is the fraction of PSII closed after photochemistry during a flash.
 
-Where the D~M~ is the cumulative desynchronization resulting from photochemical misses during each flash, and n are the number of flashes applied. 0.05 is is the fraction of PSII remaining open during a flash.  This is an upper bound because the 0.0.05 represents a balance between closure and re-opening during the flash.
+Desynchronization can also result from double hits of photochemistry during the flash, if a PSII is closed by a round of photochemistry, but then re-opens and undergoes a second round of photochemistry.
 
-Desynchronization resulting from double hits of photochemistry during the flash is approximated by
+XXX These estimates seem high; review
 
-D~D~ ~ 1 * e^(0.05 * n)
-σ~PSII~ * P * t
-P - flash power, µmol photons m^-2^ s^-1^
-t - flash duration, s
-6.022E17 photons µmol^-1^
-1E-20 m^2^ A^-1^
-
-need to estimate exponential growth of reopened PSII as fraction
-then estimate probability of another hit
-...
+need to estimate exponential growth of reopened PSII 
+then estimate probability of another hit during a flashlet, and cumulatively
 
 
-XXXestimate these probabilities of misses vs. double hitsXXX.
-
-Each flash is bright enough to deliver, on average, at least one absorbed photon to each PSII, but short enough to limit the probability of a PSII re-opening and going through a second round of photochemistry during the flash. Thus, as sequential flashes are applied to the culture, each individual PSII is driven through the four S-States (Fig \@ref(fig:rep_osc)) [@dauTimeresolvedXraySpectroscopy2007].  As the oxygen-evolving complex of PSII moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], and the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020]. 
 
 
 <div class="figure">
@@ -282,7 +278,7 @@ Since the population of PSII starts predominantly from S1 in the dark acclimated
 
 XXXextract plots tau vs. temperature to justify this argumentXXXX
 
-The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain \@ref(tab:fluor_meas). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m^-2^s^-1^ threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans [@ravenPutOutLight2000].
+The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain \@ref(tab:fluor_meas). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m^-2^s^-1^ threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans [@ravenPutOutLight2000], but span light ranges found to support phytoplankton productivity in field studies [@hanckeExtremeLowLight2018, @randelhoffArcticMidwinterPhytoplankton2020, @hoppePhotosyntheticLightRequirement2024].
 
 XXXConsider redoing this as data with conversionsXXX
 <table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
@@ -340,6 +336,7 @@ XXXConsider redoing this as data with conversionsXXX
   </tr>
 </tbody>
 </table>
+
  
 
 ## Analytical Methods  
@@ -367,8 +364,16 @@ Statistical significance of the wavelet power at a periodicity of four indicates
 
 The observed patterns in the persistence of S-State cycling across conditions within taxa were then modelled using the nonparametric method of generalized additive modelling (GAM). GAMs fit a model to predict the damping index based on a tensor product smooth of the two predictors, temperature, and light level. The response variable is linked to the independent variables using a smoothing function, where many localized polynomials are joined to form a piecewise function called a spline [@pinillaNonParametricGeneralizedAdditive2021]. For each strain, GAM models were fit to the data using the restricted maximum likelihood method (REML).
  
-One GAM model examines the response of S-State damping to the measurement temperature (°C, Tables XXX) and the equivalent effective light level (µmol photons m^-2^ s^-1^) for the measurement flash spacing. A second GAM model examines the response of S-State damping to the difference between measurement temperature and growth temperature (Δ°C, Table XXX ), and the equivalent effective light level (µmol photons m^-2^ s^-1^) equivalent for the measurement flash spacing.
- 
+One GAM model (Table \@ref(tab:gammodel_temp)) examines the response of S-State damping to the measurement temperature (°C) and the equivalent effective light level (µmol photons m^-2^ s^-1^) for the measurement flash spacing. 
+
+#do this as output of model not retyped
+
+
+A second GAM model (Table \@ref(tab:gammodel_delta)) examines the response of S-State damping to the difference between measurement temperature and growth temperature (Δ°C, Table XXX ), and the equivalent effective light level (µmol photons m^-2^ s^-1^) equivalent for the measurement flash spacing.
+
+#do this as output of model not retyped
+
+
 Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [@schoenigWorkshopGeneralizedAdditive2023]. Based on the fitted models, the damping index can then be predicted for other combinations of temperature and light [@woodGeneralizedAdditiveModels2017]. These predictions were then visually represented with a contour plot.
 
 # Results {.unnumbered}  
