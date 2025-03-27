@@ -321,6 +321,7 @@ spacing.algae <- doBy::summaryBy(Light_Level ~ PulseSpace_s, data = subset(sstat
 
 
 ### Significance Matrix
+Figure out what to do with growth temps
 https://teunbrand.github.io/ggh4x/articles/Facets.html#position-scales
 ```{r Plot significance matrix, warning=FALSE}
 mtrx.data <- sstate_damping %>%
@@ -335,11 +336,14 @@ mtrx.data  %>%
                       name= bquote(atop("Significance of", "4-Step Periodicity")), 
                       labels =c("p > 0.05", "p ≤ 0.05")) +
   labs(x = "Measurement Temperature (°C)", y= "Flash Spacing (s)") +
-  ggh4x::facet_nested_wrap(vars(ThermalTolerance, l.strain), ncol=4, nrow=2, scales="free_x",
+  geom_vline(xintercept = as.factor(mtrx.data$GrowthTemp_C), colour = "green", size = 1) +
+  ggh4x::facet_nested_wrap(vars(ThermalTolerance, l.strain), nrow=2, scales="free_x",
                              labeller = label_parsed) +
   theme_thesis() +
   theme(legend.title = element_text(size=11), strip.text = element_text(face="italic"),
         legend.position = c(0.97,0.1), legend.justification = c(1,0))
+
+#, GrowthTemp_C add to ggh4x::facet_nested_wrap?
 
 #free_x
 
