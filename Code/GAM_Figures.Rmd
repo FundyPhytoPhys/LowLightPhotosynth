@@ -109,15 +109,16 @@ Cp_data %>%
 #        path="../Output")
 ```
 
+# Cp_wavelets missing; defined in another missing .Rmd by Natasha?
 ```{r}
-wave_data <- Cp_wavelets[["Cp_1_4_0.77084"]]
-
-
-WaveletComp::reconstruct(wave_data, only.sig=FALSE,
-            plot.waves = TRUE, plot.rec = FALSE,
-            spec.time.axis = list(at = c(0,4,8,12,16,20,24,28,32)),
-            timelab = "Flash Number",
-            verbose = FALSE)
+# wave_data <- Cp_wavelets[["Cp_1_4_0.77084"]]
+# 
+# 
+# WaveletComp::reconstruct(wave_data, only.sig=FALSE,
+#             plot.waves = TRUE, plot.rec = FALSE,
+#             spec.time.axis = list(at = c(0,4,8,12,16,20,24,28,32)),
+#             timelab = "Flash Number",
+#             verbose = FALSE)
 ```
 
 
@@ -342,9 +343,9 @@ mtrx.data  %>%
 
 #free_x
 
-# ggsave("periodicity_mtrx.png", width = 7 , height = 5, dpi = 900,
-#        plot=last_plot(),
-#        path="../Output")
+ ggsave("periodicity_mtrx.png", width = 7 , height = 5, dpi = 900,
+        plot=last_plot(),
+        path="../Output")
 ```
 
 ## Significance matrix with fixed X axes scales for direct comparison

@@ -373,7 +373,7 @@ Models were validated by verifying the choice of basis dimensions (k) and evalua
 
 ## Single Turnover Variable Chlorophyll Fluorescence
 
-Exposing phytoplankton cultures to a series of 32 successive flashes produced oscillations in the maximum quantum yield of photochemistry in PSII, as estimated through the secondary chlorophyll fluorescence parameter F~V~/F~M~. Initially, the majority of the dark-adapted population of PSII is at S1, with a smaller fraction at S0 [@gatesRealtimeKineticsLight2020, @dewijnSstateDependenceMiss2002]. As shown in Fig \@ref(fig:rep_osc) for the polar alga *Chlamydomonas priscuii*, the time series of F~V~/F~M~ over successive flashes reveals consistent variations in fluorescence yield as the predominant S-States follow each other across the PSII within the population. However, the amplitude of the ChlF oscillations declines progressively over time, and with wider spacing of sequential flashes, equivalent to decreasing effective light levels, and is less persistent at a higher measurement temperature
+Exposing phytoplankton cultures to a series of 32 successive flashes produced oscillations in the maximum quantum yield of photochemistry in PSII, as estimated through the secondary chlorophyll fluorescence parameter F~V~/F~M~. Initially, the majority of the dark-adapted population of PSII is at S1, with a smaller fraction at S0 [@gatesRealtimeKineticsLight2020, @dewijnSstateDependenceMiss2002]. As shown in Fig \@ref(fig:rep_osc) and Fig \@ref(fig:rep_recon), the time series of F~V~/F~M~ over successive flashes reveals consistent variations in fluorescence yield as the predominant S-States, with different yields for ChlF, follow each other across the PSII within the population. However, the amplitudes of the ChlF oscillations declines progressively over time, and with wider spacing of sequential flashes, equivalent to decreasing effective light levels, and is less persistent at a higher measurement temperature
 
 ## Wavelet Analysis  
 
@@ -395,6 +395,7 @@ knitr::include_graphics(file.path("Figures","Creinhardtii_waveletpower.png"))
 Polar taxa maintained significant 4-step oscillations in F~V~/F~M~, and thus stronger synchronization of PSII S-State cycling at longer Flash Spacing intervals, and thus at lower equivalent effective light levels, than did their temperate counterparts (Figure \@ref(fig:periodicity_mtrx)), including measures taken at a common temperature of 12°C. 
 
 XXXFix X Axes Scaling in GAM_Figures.RmdXXX
+XXXFix periodicity spellin
 ```{r periodicity_mtrx, fig.cap = "Statistical significance of 4-step oscillations in the maximum quantum yield of PSII photochemistry across polar and temperate phytoplankton taxa, as measured through variable chlorophyll fluorescence. Measurement conditions where wavelet power for 4-step periodicity reached statistical significance (p < 0.05) shaded in blue", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","Periodicity_mtrx.png"))
@@ -423,7 +424,10 @@ knitr::include_graphics(file.path("Figures","Diatoms_GAMdiff.png"))
 The GAM outputs varied more among the green algae tested (Table XXX). For *Chlamydomonas priscuii* the three measurement temperatures, limiting the number of basis dimensions used to create the smooth function (k) to 3 [@schoenigWorkshopGeneralizedAdditive2023], proved insufficient to capture the underlying relationship between the predictors and the response variable (Table A2). *Chlamydomonas malina* showed a significant outlier (measurement temperature of 12 °C and a 2-second interval between flashes) in the model training data (see model training dataset at XXX GitHub: S-State Damping), as evaluated by Cook’s distances [@yagerDetectingInfluentialObservations1998]. Removing this outlier point increases the variation explained by the model from 60.2 to 75.2 % and produces a significant smooth term (F = 4.544, p = 0.0255). 
 Overall, model predictions for green algal strains exhibited a similar pattern to the diatoms, with the longest predicted oscillations in ChlF at measurement conditions with higher effective light levels (shorter spacing between flashes) and lower measurement temperatures relative to growth temperature (Fig \@ref(fig:greens_gamdiff)). The trends shown by the three strains of polar algae are consistent, differing by only 1-2 flashes before signal damping, under identical conditions (Fig \@ref(fig:greens_gamdiff)). Further, much like the temperate diatoms, the temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature under low light conditions produced by longer flash spacings 
 
+```{r greens_gamdiff, fig.cap = "GAM models for polar and temperate green algae, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the difference from growth temperature (Δ°C) during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). White dashed vertical lines represent the growth temperatures.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
+knitr::include_graphics(file.path("Figures","Greens_GAMdiff.png"))
+```
 
 
 ## Generalized Additive Modelling By Measurement Temperature  
