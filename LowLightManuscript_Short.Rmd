@@ -53,7 +53,7 @@ editor_options:
 
 # To Do
 
-Fix R package citation bibtex
+Fix R package citation bibtex; only citations in main .bib on Zotero are showing up
 
 Fix figure & table citation issue
 Fix table output
@@ -79,8 +79,6 @@ more Chlamy measures in Ottawa?
 format for Frontiers special issue?
 
 
-
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.path = "Figures/")
 ```
@@ -88,6 +86,7 @@ knitr::opts_chunk$set(echo = FALSE, fig.path = "Figures/")
 ```{r, import libraries, include = FALSE}
 library(tidyverse)
 library(knitr)
+library(kableExtra, options(kableExtra.auto_format = FALSE))
 #library(googlesheets4)
 #library(gridExtra)
 #required for density plots

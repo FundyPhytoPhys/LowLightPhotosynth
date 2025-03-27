@@ -1,14 +1,31 @@
 ---
-title: "Photosystem II Sustained Function under Low Light and Low Temperatures; Polar vs. Temperate Phytoplankton"
+title: "Photosystem II Function under Extreme Low Light and Low Temperatures in Polar vs. Temperate Phytoplankton"
 author:
 - Natasha M. Ryan:
     institute: mta 
+- Mackenzie Poirier:
+    institute: ottawa
+- Pomona Osmers:
+    institute: ottawa
+- Arthur Plassart:
+    institute: takuvik
+- Sébastien Guérin:
+    institute: takuvik
+- Marina Cvetkovska:
+    institute: ottawa 
+- Marcel Babin:
+    institute: takuvik  
+- Maximilian Berthold:
+    institute: germany     
 - Douglas A. Campbell:
     institute: mta     
     email: dcampbel@mta.ca     
     correspondence: TRUE
 institute:  
 - mta: 'Department of Biology, Mount Allison University, Sackville NB, Canada, E4L1G7'
+- takuvik: 'Takuvik Joint International Laboratory, Université Laval (Canada) - CNRS (France)'
+- ottawa: 'Department of Biology, University of Ottawa, Ottawa, ON, Canada'
+- germany: 'Max Current Address'
 date: "2025-03-27"
 output:
   bookdown::html_document2:
@@ -39,6 +56,7 @@ editor_options:
 Fix R package citation bibtex
 
 Fix figure & table citation issue
+Fix table output
 
 Scan recent literature; Gates?
 
