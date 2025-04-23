@@ -305,7 +305,7 @@ knitr::include_graphics(file.path("Figures","Cpriscui_waveletpower.png"))
 
 In contrast, in the temperate green algae *Chlamydomonas reinhardtii* (Figure \@ref(fig:creinhardtiiiwaveletpower)), the wavelet power is consistently lower, showing a weaker 4-step periodicity of ChlF in the temperate taxa, which only reaches statistical significance at shorter flash spacings, with higher equivalent effective light levels. 
 
-```{r creinhardtiiiwaveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry in the temperate green algae *Chlamydomonas reinhardtii*, grown at 4°C, and measured across a range of measurement temperatures and flash spacings, with the equivalent effective light levels. Regions where wavelet power reached statistical significance (p < 0.05) shaded in blue", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r creinhardtiiiwaveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry in the temperate green algae *Chlamydomonas reinhardtii*, grown at 24°C, and measured across a range of measurement temperatures and flash spacings, with the equivalent effective light levels. Regions where wavelet power reached statistical significance (p < 0.05) shaded in blue", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","Creinhardtii_waveletpower.png"))
 ```
