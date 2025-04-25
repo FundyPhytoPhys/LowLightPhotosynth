@@ -171,6 +171,11 @@ Polar algae thrive under light limited conditions and, therefore, we therefore e
 ## Study Strains and Culturing Conditions {.unnumbered}
 The seven study taxa, including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxacultures). 
 
+<<<<<<< HEAD
+=======
+\newpage
+
+>>>>>>> 6c675abaacbbfffb0acd77053c7590c1fc573886
 ```{r taxacultures, echo = FALSE}
 Taxa <- c("Thalassiosira pseudonana", "Thalassiosira pseudonana", "Chlorella vulgaris", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus", "Fragilariopsis cylindrus",  "Chlamydomonas priscui", "Chlamydomonas sp. ICE-MDV", "Chlamydomona malina")
 
@@ -185,11 +190,20 @@ Media <- c(rep("F2",2), rep("BG11", 2), "BBM", rep("F2", 2), rep("BBM",3))
 
 TaxaCultures <- tibble(Taxa, Origin, Growth_C, Growth_PAR, Growth_Photoperiod, Media)
                             
-TaxaCultures |> 
-  kable(caption ="Study taxa and culture growth conditions.",
-        col.names = c("Taxa", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")) |>
-  kableExtra::column_spec(1, italic = TRUE) |>
-  kableExtra::kable_classic()
+ if (knitr::is_html_output()) { 
+  knitr::kable(TaxaCultures,
+    caption ="Study taxa and culture growth conditions.",
+    col.names = c("Taxa", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")
+    ) |>
+    kableExtra::column_spec(1, italic = TRUE) |>
+    kableExtra::kable_classic()
+ } else {
+   knitr::kable(TaxaCultures,
+    format = "pipe",
+    caption ="Study taxa and culture growth conditions.",
+    col.names = c("Taxa", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")
+   ) 
+   } 
 ```
 
 
@@ -239,9 +253,9 @@ Since the population of PSII starts predominantly from S1 in the dark acclimated
 
 XXXextract plots tau vs. temperature to justify this argument?XXX
 
-The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain (\@ref(tab:fluormeas)). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, while the threshold for the bottom of the photic zone supporting photosynthetic productivity in the oceans is conventionally defined as ~ 20 µmol photons m-2s-1 [@ravenPutOutLight2000]. Therefore our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the minimum photic zone threshold , but span light ranges found to support phytoplankton productivity in field studies [@hanckeExtremeLowLight2018; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024].
+The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain (Table \@ref(tab:fluormeas)). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, while the threshold for the bottom of the photic zone supporting photosynthetic productivity in the oceans is conventionally defined as ~ 20 µmol photons m^-2^s^-1^ [@ravenPutOutLight2000]. Therefore our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the minimum photic zone threshold , but span light ranges found to support phytoplankton productivity in field studies [@hanckeExtremeLowLight2018; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024].
 
-
+\newpage
 
 XXXredo this as data with conversionsXXX
 ```{r fluormeas}
@@ -253,12 +267,21 @@ Meas_Temp <- c("10, 14, 18, 20, 22, 24, 28", "10, 14, 18, 22, 26", "12, 16, 20, 
 
 FluorMeasures <- tibble(TaxaFluor, Flash_Spacings, Equiv_Light, Meas_Temp)
                             
-FluorMeasures |>
-  kable(caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
+# FluorMeasures |>
+if (knitr::is_html_output()) {
+  kable(FluorMeasures,
+        caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
         col.names = c("Taxa", "Flash Spacings (s)", "Equivalent Light (µE)", "Measurement Temperatures (°C)")
         ) |>
   kableExtra::column_spec(1, italic = TRUE) |>
   kableExtra::kable_classic()
+} else {
+  kable(FluorMeasures,
+        format = "pipe",
+        caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
+        col.names = c("Taxa", "Flash Spacings (s)", "Equivalent Light (µE)", "Measurement Temperatures (°C)")
+        )
+}
 ```
 
 
@@ -297,7 +320,9 @@ Pomona: I am assuming that priscui and reinhardtii are the extreme cases, it wou
 
 Photochemical misses, including recombination reactions causing loss of charge separation in a PSII, will cause a missed step in the S-State cycling of an individual PSII. As more photochemical misses occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence (de Wijn and van Gorkom, 2002; Han et al., 2022). Prolonged synchronous cycling thus reflects a lower probability of desynchronization at each excitation, and thus a lower probability of losses through photochemical misses. Photochemical double hits also contribute to desynchronization (Han et al., 2022; Han et al., 2008), but should not vary strongly across changes in flash spacing nor temperature within a sample.
 
-The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain @ref(tab:fluor_meas). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m-2s-1, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m-2s-1 threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans (Raven et al., 2000), but span light ranges found to support phytoplankton productivity in field studies (Hancke et al., 2018; Randelhoff et al., 2020; Hoppe et al., 2024).
+XXX FYI - This paragraph is already written above, line 252 XXX
+
+The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain (Table \@ref(tab:fluormeas)). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m-2s-1, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m-2s-1 threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans (Raven et al., 2000), but span light ranges found to support phytoplankton productivity in field studies (Hancke et al., 2018; Randelhoff et al., 2020; Hoppe et al., 2024).
 
 
 ## Wavelet Analysis {.unnumbered}  
@@ -364,7 +389,7 @@ knitr::include_graphics(file.path("Figures","Diatoms_GAMtemp.png"))
 
 (Fig \@ref(fig:greensgamtemp)).
 
-```{r greensgamtemp, fig.cap = "GAM models for polar and temperate green algae, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the difference from growth temperature (Δ°C) during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). White dashed vertical lines represent the growth temperatures.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r greensgamtemp, fig.cap = "GAM models for polar and temperate green algae, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the difference from growth temperature (\u0394°C) during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). White dashed vertical lines represent the growth temperatures.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","Greens_GAMtemp.png"))
 ```
