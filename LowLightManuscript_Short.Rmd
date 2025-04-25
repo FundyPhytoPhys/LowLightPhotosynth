@@ -249,8 +249,6 @@ Since the population of PSII starts predominantly from S1 in the dark acclimated
 
 XXXextract plots tau vs. temperature to justify this argument?XXX
 
-The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain (Table \@ref(tab:fluormeas)). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, while the threshold for the bottom of the photic zone supporting photosynthetic productivity in the oceans is conventionally defined as ~ 20 µmol photons m^-2^s^-1^ [@ravenPutOutLight2000]. Therefore our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the minimum photic zone threshold , but span light ranges found to support phytoplankton productivity in field studies [@hanckeExtremeLowLight2018; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024].
-
 
 XXXredo this as data with conversionsXXX
 ```{r fluormeas}
@@ -316,9 +314,7 @@ Pomona: I am assuming that priscui and reinhardtii are the extreme cases, it wou
 
 Photochemical misses, including recombination reactions causing loss of charge separation in a PSII, will cause a missed step in the S-State cycling of an individual PSII. As more photochemical misses occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence (de Wijn and van Gorkom, 2002; Han et al., 2022). Prolonged synchronous cycling thus reflects a lower probability of desynchronization at each excitation, and thus a lower probability of losses through photochemical misses. Photochemical double hits also contribute to desynchronization (Han et al., 2022; Han et al., 2008), but should not vary strongly across changes in flash spacing nor temperature within a sample.
 
-XXX FYI - This paragraph is already written above, line 252 XXX
-
-The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain (Table \@ref(tab:fluormeas)). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m-2s-1, so our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the ~ 20 µmol photons m-2s-1 threshold, used to define the conventional bottom of the photic zone supporting photosynthetic productivity in the oceans (Raven et al., 2000), but span light ranges found to support phytoplankton productivity in field studies (Hancke et al., 2018; Randelhoff et al., 2020; Hoppe et al., 2024).
+The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain (Table \@ref(tab:fluormeas)). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, while the threshold for the bottom of the photic zone supporting photosynthetic productivity in the oceans is conventionally defined as ~ 20 µmol photons m^-2^s^-1^ [@ravenPutOutLight2000]. Therefore our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the minimum photic zone threshold , but span light ranges found to support phytoplankton productivity in field studies [@hanckeExtremeLowLight2018; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024].
 
 
 ## Wavelet Analysis {.unnumbered}  
