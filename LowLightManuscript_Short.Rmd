@@ -143,7 +143,8 @@ ScientificTen <- function(x, sf = 2) {
 }
 ```
 
-# Introduction {.unnumbered}
+# Introduction {.unnumbered} 
+
 Phytoplankton are a functional grouping of photosynthetic microorganisms, of diverse lineages and ecologies [@pierellakarlusichPhytoplanktonTaraOcean2020]. These organisms are characterized by photolithotrophic growth, harnessing energy from Photosynthetically Active Radiation (PAR) to reduce and assimilate inorganic carbon, nitrogen, phosphorus, sulphur, and other essential micronutrients [@ravenPutOutLight2000]. PAR, however, decreases with depth, as light passing through the water column is scattered and absorbed [@kirkLightPhotosynthesisAquatic2011]. Therefore, with photons as an energy input, phytoplankton growth is constrained to the photic zone, the region of water receiving sufficient light for photosynthesis, operationally defined in past as extending down to a limit receiving 1% of surface irradiance, thus 2-20 µmol photons m^-2^ s^-1^  [@ravenPutOutLight2000].  
 
 Light availability is further constrained in polar aquatic habitats, when seasonally varying low solar angles, ice cover, and snow cover, limit light penetrating the water [@leuArcticSpringAwakening2015; @hanckeExtremeLowLight2018], presenting unique challenges for phytoplankton growth [@hanckeExtremeLowLight2018; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024]. Indeed the lower limit of the photic zone was reconsidered when benthic microalgae in the Antarctic were reported as photosynthetically active at light levels less than 1 µmol photons m^-2^ s^-1^ [@robinsonMicroalgalLightHarvestingExtreme1995; @mcminnDiurnalChangesPhotosynthesis2003]. Some polar psychrophile phytoplankton further demonstrate slow, but ecologically significant, productivity in the winter through photosynthesis below 0.15 µmol photons m^-2^ s^-1^  [@randelhoffArcticMidwinterPhytoplankton2020; @hanckeExtremeLowLight2018; ; @morgan-kissPhotoadaptationPolarNight2016; @hoppePhotosyntheticLightRequirement2024], with implications for the responses of phytoplankton communities to climate change [@ardynaPhytoplanktonDynamicsChanging2020].
@@ -171,11 +172,6 @@ Polar algae thrive under light limited conditions and, therefore, we therefore e
 ## Study Strains and Culturing Conditions {.unnumbered}
 The seven study taxa, including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxacultures). 
 
-<<<<<<< HEAD
-=======
-\newpage
-
->>>>>>> 6c675abaacbbfffb0acd77053c7590c1fc573886
 ```{r taxacultures, echo = FALSE}
 Taxa <- c("Thalassiosira pseudonana", "Thalassiosira pseudonana", "Chlorella vulgaris", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus", "Fragilariopsis cylindrus",  "Chlamydomonas priscui", "Chlamydomonas sp. ICE-MDV", "Chlamydomona malina")
 
@@ -255,7 +251,6 @@ XXXextract plots tau vs. temperature to justify this argument?XXX
 
 The conversions of flash spacing to equivalent effective light levels gave similar ranges of light levels applied to each strain (Table \@ref(tab:fluormeas)). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, while the threshold for the bottom of the photic zone supporting photosynthetic productivity in the oceans is conventionally defined as ~ 20 µmol photons m^-2^s^-1^ [@ravenPutOutLight2000]. Therefore our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the minimum photic zone threshold , but span light ranges found to support phytoplankton productivity in field studies [@hanckeExtremeLowLight2018; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024].
 
-\newpage
 
 XXXredo this as data with conversionsXXX
 ```{r fluormeas}
@@ -283,6 +278,7 @@ if (knitr::is_html_output()) {
         )
 }
 ```
+
 
 
 ## Analytical Methods {.unnumbered}  
@@ -352,7 +348,7 @@ Polar taxa maintained significant 4-step oscillations in F~V~/F~M~, and thus str
 knitr::include_graphics(file.path("Figures","Periodicity_mtrx.png"))
 ```
 
-## Generalized Additive Modelling of Damping of 4-step oscillations By Measurement Temperature {.unnumbered}  
+## Generalized Additive Modelling of Damping of 4-step oscillations By Measurement Temperature {.unnumbered}
 
 Predictions from generalized additive modelling were generated for the damping of S-State-induced chlorophyll fluorescence oscillations, as predicted by the tensor product smooth of the temperature during measurements (°C) and the equivalent effective light level (µmol photons m^-2^s^-1^; ((Table \@ref(tab:gammodeltemp)), Table (\@ref(tab:fluormeas))) set by flash spacing, for each strain. For *Thalassiosira pseudonana*, *Chlamydomonas sp. ICE-MDV*, *Chlamydomonas priscui*, *Chlamydomonas malina*, *Chlamydomonas reinhardtii*, and *Chlorella vulgaris*, all replicate cultures of each taxa were grown at the same temperature (Table \@ref(tab:gammodeltemp)). The polar diatom *Fragilariopsis cylindrus* was cultured at both 0 and 6°C. XXXXMENTION DIFFERENCES OR DROP 0?XXX Thus, separate models were fit for each *Fragilariopsis cylindrus* culture to account for possible physiological differences resulting from the distinct growth conditions.  All of the model fits explained over 50% of the variation in the response variable. Both diatom taxa exhibited the longest predicted periodic oscillations in ChlF at higher effective light levels and lower temperatures. Notably, the polar *Fragilariopsis cylindrus* sustained cycling longer than its temperate counterpart, *Thalassiosira pseudonana*, under comparable conditions. This disparity was particularly prevalent at measurements taken above the growth temperature and when longer spacing between flashes produced lower effective light levels (Fig \@ref(fig:diatomsgamtemp)), where *Thalassiosira pseudonana* cultures did not retain the significant 4-step oscillation in ChlF indicative of synchronized S-State cycling. 
 
