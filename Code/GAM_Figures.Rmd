@@ -22,6 +22,7 @@ library(tidyverse)
 library(metR)
 library(mgcv)
 library(ggpubr)
+library(knitr)
 # library(commonR)  Natasha defined her own theme_pres(), used here and in other .Rmd;  sloppy handling of functions, variables and environments
 ```
 
@@ -109,31 +110,32 @@ Cp_data %>%
 #        path="../Output")
 ```
 
-
+##Chunk returns error
 ```{r}
-wave_data <- Cp_wavelets[["Cp_1_4_0.77084"]]
-
-
-WaveletComp::reconstruct(wave_data, only.sig=FALSE,
-            plot.waves = TRUE, plot.rec = FALSE,
-            spec.time.axis = list(at = c(0,4,8,12,16,20,24,28,32)),
-            timelab = "Flash Number",
-            verbose = FALSE)
+# wave_data <- Cp_wavelets[["Cp_1_4_0.77084"]]
+# 
+# 
+# WaveletComp::reconstruct(wave_data, only.sig=FALSE,
+#             plot.waves = TRUE, plot.rec = FALSE,
+#             spec.time.axis = list(at = c(0,4,8,12,16,20,24,28,32)),
+#             timelab = "Flash Number",
+#             verbose = FALSE)
 ```
 
+##Chunk returns error, no file 'LOW_Wavelets.Rds' in directory
 
 # Wavelet Periodicity 
 
 ```{r}
-wavelets <- readRDS("../Data/ProcessedData/LOW_Wavelets.Rds") 
-specieslists <- split(wavelets, sub("_.*", "_wavelets", names(wavelets)))
-list2env(specieslists, envir = .GlobalEnv)
-
-FcG0_wavelets <- Fc_wavelets[grepl(paste("_0$", collapse = "|"), names(Fc_wavelets))]
-FcG6_wavelets <- Fc_wavelets[grepl(paste("_6$", collapse = "|"), names(Fc_wavelets))]
+# wavelets <- readRDS("../Data/ProcessedData/LOW_Wavelets.Rds") 
+# specieslists <- split(wavelets, sub("_.*", "_wavelets", names(wavelets)))
+# list2env(specieslists, envir = .GlobalEnv)
+# 
+# FcG0_wavelets <- Fc_wavelets[grepl(paste("_0$", collapse = "|"), names(Fc_wavelets))]
+# FcG6_wavelets <- Fc_wavelets[grepl(paste("_6$", collapse = "|"), names(Fc_wavelets))]
 ```
 
-
+##No wavelet data
 ```{r periodicity function}
 plot.wt.grid <- function(wavelets) {
   result_list <- lapply(names(wavelets), function(condition_name) {
@@ -179,7 +181,7 @@ plot.wt.grid <- function(wavelets) {
 }
 ```
 
-
+##No wavelet data
 ```{r Periodicity Test, warning=FALSE}
 plot.wt.grid(Ci_wavelets)
 plot.wt.grid(Cm_wavelets)
@@ -550,8 +552,196 @@ summary.temp.gam <- function(damping) {
 XXXXSubstitute Mirelle GAM code
 Run on 'sstate_damping' dataframe
 Response variable 'DampingIndex'
-Predictors are 'Temp_C' and 'LightLevel'
+Predictors are 'Temp_C' and 'Light_Level'
 Grouping variables are 'Strain' and GrowthTemp_C'
+
+```{r DampingIndex GAM}
+
+# GamWL = "680min750" #680min750 750 680
+GamParaMod = "DampingIndex" 
+# GamVar = "Chl" #Chl CC Ab BV ATN\
+
+#https://stackoverflow.com/questions/49570452/is-it-possible-to-specify-lower-bound-in-response-variable-during-smooth-with-ga 
+possibGAM = possibly(.f = mgcv::gam, otherwise = NULL)
+possibPRED = possibly(.f = mgcv::predict.gam, otherwise = NULL)
+
+PAR_Temp_Model <- expand_grid(
+  Light_Level = seq(from=min(0), 
+              to=max(1), 
+              length.out = 50),
+  Temp_C = seq(from=min(0), 
+              to=max(28), 
+              length.out = 50) 
+  ) %>% as_tibble() 
+
+DampingIndex_Gam <- sstate_damping %>% 
+   ungroup() %>%
+  group_by(Strain, GrowthTemp_C) %>%
+  nest() %>%
+  mutate(
+    GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(Light_Level, k = 3) + s(Temp_C, k = 3) + ti(Temp_C, Light_Level, k = 3), data = .x,
+                                    family = "gaussian"(link = "log"), 
+                                    method = "REML")),
+    predicted = map(GamModel, ~possibPRED(.x, newdata = PAR_Temp_Model, type = "response", se.fit = TRUE)),
+    tidied = map(GamModel, ~tidy(.x)),
+    augmented = map(GamModel, ~augment(.x)),
+    glance = map(GamModel, ~glance(.x))
+  ) %>% 
+  ungroup()
+
+DampingIndex_Pred <- DampingIndex_Gam %>%
+  dplyr::select(predicted, Strain) %>%
+  dplyr::filter(predicted != "NULL") %>%
+  rowwise() %>%
+  mutate(db = list(cbind(predicted, PAR_Temp_Model))) %>%
+  dplyr::select(-predicted) %>%
+  unnest(col = db) 
+
+# %>%
+#   mutate(Wavelength = GamWL)
+
+# GAM model results into table
+kable(DampingIndex_Gam %>% 
+  dplyr::select(Strain, tidied) %>% 
+  unnest(tidied), 
+  digits = 3)
+
+
+
+```
+
+```{r Plot DampingIndex GAM}
+
+# Run this chunk each time for each strain to generate strain specific hypervolume 
+GamStrain = "Chlamydomonas_malina" 
+#Fragilariopsis_cylindrus
+#Thalassiosira_pseudonana 
+#Chlamydomonas_ICEMDV 
+#Chlamydomonas_malina 
+#Chlamydomonas_priscuii 
+#Chlorella_vulgaris 
+#Chlamydomonas_reinhardtii
+
+ErrorTol = 30
+
+StrainColors = c(Fragilariopsis_cylindrus = "blue", Thalassiosira_pseudonana = "red", Chlamydomonas_ICEMDV =  "green", Chlamydomonas_malina = "orange",Chlamydomonas_priscuii = "brown", Chlorella_vulgaris = "violet", Chlamydomonas_reinhardtii = "grey")
+
+ColourDF <- data.frame(
+  Strain = c('Fragilariopsis_cylindrus' , 'Thalassiosira_pseudonana' , 'Chlamydomonas_ICEMDV' , 'Chlamydomonas_malina' ,'Chlamydomonas_priscuii' , 'Chlorella_vulgaris', 'Chlamydomonas_reinhardtii'),
+  ColourStrain = c( "blue","red",  "green",  "orange", "brown", "violet", "grey" )
+) %>%
+ filter(Strain %in% GamStrain) %>%
+ dplyr::select(ColourStrain)
+
+
+DampingIndex_Hyper <- DampingIndex_Pred %>% 
+  filter(Strain %in% GamStrain) %>%
+  mutate(fit = case_when(fit < 0 ~ 0.00001,# changes negative predicted fits to small number to allow proper faulty data filter in next mutate
+                             TRUE ~ fit),
+          fit = case_when(se.fit/fit*100 < ErrorTol ~ (fit*1),#filters faulty data where Standarderror larger +/- Errortolerance
+                         FALSE ~ (fit))) 
+
+maxDI <- DampingIndex_Hyper %>%
+  filter(fit == max(fit, na.rm = TRUE))
+maxDI <- maxDI$fit
+
+minMuDI <- DampingIndex_Hyper %>%
+  filter(fit == min(fit, na.rm = TRUE))
+minMuDI <- minMuDI$fit
+
+
+ContourBreaks <- DampingIndex_Hyper %>%
+  mutate(upper10 = quantile(fit, 0.9, na.rm = TRUE),
+         upper25 = quantile(fit, 0.75, na.rm = TRUE),
+         median50 = quantile(fit, 0.5, na.rm = TRUE),
+         lower25 = quantile(fit, 0.25, na.rm = TRUE),
+         lower10 = quantile(fit, 0.1, na.rm = TRUE)) %>%
+  ungroup() %>%
+  dplyr::select(Strain, upper10, upper25, median50, lower25, lower10) %>%
+  distinct() %>%
+  pivot_longer(cols = c(upper10, upper25, median50, lower25, lower10), names_to = 'quantile', values_to = 'quantileValue') %>%
+  mutate(quantileValue = round(quantileValue, digits = 2))
+
+# g_legend<-function(a.gplot){
+#   tmp <- ggplot_gtable(ggplot_build(a.gplot))
+#   leg <- which(sapply(tmp$grobs, function(x) x$name) == "guide-box")
+#   legend <- tmp$grobs[[leg]]
+#   legend
+# }
+# 
+# LayoutNiche <- rbind(c(1, 1, 1, 1, NA), 
+#                      c(1, 1, 1, 1, 2),
+#                      c(1, 1, 1, 1, NA))
+##############
+###plot
+#https://stackoverflow.com/questions/28775036/ggplot-line-graph-with-na-values
+#https://stackoverflow.com/questions/6906661/ggplot2-make-missing-value-in-geom-tile-not-blank
+#https://stackoverflow.com/questions/24822621/multiple-legends-in-a-plot-with-geom-tile
+#https://stackoverflow.com/questions/43395219/plotting-multiple-layers-with-geom-raster-or-geom-tile-or-geom-rect
+#https://stackoverflow.com/questions/59949635/ggplot-align-grid-lines-with-end-of-geom-tile
+#https://stackoverflow.com/questions/22945651/remove-space-between-plotted-data-and-the-axes
+#https://stackoverflow.com/questions/5293715/how-to-use-greek-symbols-in-ggplot2
+
+# HyperChlPlot <- SaltGAM_Pred %>%
+#   filter(
+#          strain %in% GamStrain,
+#          DM == "Chl",
+#          term %in% PlotMu
+#   )
+ContourLines <- ContourBreaks 
+ContourLines <- ContourLines$quantileValue 
+
+(ContourDI <- ggplot(na.omit(DampingIndex_Hyper), aes(Temp_C, Light_Level, z = fit, fill = fit)) + geom_tile() +
+   scale_fill_gradientn(name = bquote("Damping Index"), colors = pals::ocean.matter(14),limits  = range(0, 12), na.value = "white") +
+    # scale_fill_gradientn(name = bquote("Damping Index"), colours=c(low = "white", "gold"), limits  = range(0, 12), na.value = "white") + #, limits  = range(0.1, 0.5)
+    #       scale_fill_manual("", values = StrainColors,  drop = FALSE, na.value = "white") +
+    #metR::geom_contour_fill(aes(z = fit, fill = strain, alpha = fit)) +
+    metR::geom_contour2(aes(label = stat(level)),
+                        breaks = ContourLines,
+                        skip = 0) +
+    #metR::geom_text_contour(stroke = 0.15) +
+    #geom_contour(breaks = ContourLines, colour = "black") + #add breaks for upper 10% values
+    scale_x_continuous(limits = c(0, 30), expand = c(0, 0)) +
+    scale_y_continuous(limits = c(0, 1), expand = c(0, 0)) + 
+    labs(title = bquote("Damping Index" ~ "contour plot "*.(GamStrain))) + 
+    xlab("Temperature (C)") +
+    ylab("PAR (µE)") +
+    theme_classic() +
+    theme(axis.text=element_text(size=12))) 
+
+# Dynamically name the plot with strain variable
+assign(paste0("plot_", GamStrain), ContourDI)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r}
 predict.gam.t <- lapply(temp.sstate, predict.temp.gam)
