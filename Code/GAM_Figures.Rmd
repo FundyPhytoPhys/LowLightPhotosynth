@@ -16,6 +16,20 @@ Two list objects missing???
 Should they be 'diff.list' and 'temp.list'?
 Code does not run with those names?
 
+Introduction
+
+This script fits Generalized Additive Models (GAMs) using mgcv::gam combined with possibGAM (from purrr::possibly), allowing model fitting without halting execution due to errors. Smooth terms (s) and interaction effects (ti) are used to capture nonlinear relationships.  gam.check is used to run model diagnostics guiding basis dimension (k) selection.
+
+GamParaMod : is the response variable input for the GAM. It is assigned at the start of each GAM chunk.
+s(CalcSal) and s(par_ue): main effects
+ti(CalcSal, par_ue, k = 3): Tensor product smooth for modeling interaction between CalcSal and par_ue.
+
+Unlike te(), ti() includes only the interaction term (not the main effects), which is appropriate here because main effects are already modeled separately using s(CalcSal) and s(par_ue).
+This avoids redundancy and helps reduce overfitting.
+The k parameter limits the flexibility of the interaction term. High k = more flexibility for more complex patterns, low k = simple curves.
+
+
+
 # Setup
 ```{r load libraries}
 library(tidyverse)
@@ -184,23 +198,23 @@ Cp_data %>%
 
 ##No wavelet data
 ```{r Periodicity Test, warning=FALSE}
-plot.wt.grid(Ci_wavelets)
-plot.wt.grid(Cm_wavelets)
-plot.wt.grid(Cr_wavelets)
-plot.wt.grid(Cv_wavelets)
-plot.wt.grid(Tp_wavelets)
-plot.wt.grid(FcG6_wavelets)
-plot.wt.grid(FcG0_wavelets)
-
-plot.wt.grid(Cr_wavelets)
- # ggsave("temperate_wtavg.png", width = 9.5, height = 5, dpi = 900,
- #      plot=last_plot(),
- #      path="../Output")
-
-plot.wt.grid(Cp_wavelets)
- # ggsave("polar_wtavg.png", width = 9.5, height = 5, dpi = 900,
- #      plot=last_plot(),
- #      path="../Output")
+# plot.wt.grid(Ci_wavelets)
+# plot.wt.grid(Cm_wavelets)
+# plot.wt.grid(Cr_wavelets)
+# plot.wt.grid(Cv_wavelets)
+# plot.wt.grid(Tp_wavelets)
+# plot.wt.grid(FcG6_wavelets)
+# plot.wt.grid(FcG0_wavelets)
+# 
+# plot.wt.grid(Cr_wavelets)
+#  # ggsave("temperate_wtavg.png", width = 9.5, height = 5, dpi = 900,
+#  #      plot=last_plot(),
+#  #      path="../Output")
+# 
+# plot.wt.grid(Cp_wavelets)
+#  # ggsave("polar_wtavg.png", width = 9.5, height = 5, dpi = 900,
+#  #      plot=last_plot(),
+#  #      path="../Output")
 ```
 
 # Reconstruction 
@@ -258,16 +272,16 @@ plot.wt.grid(Cp_wavelets)
 
 
 ```{r warning=FALSE}
-plot.reconstruction(Ci_reconstruction)
-plot.reconstruction(Cm_reconstruction)
-plot.reconstruction(Cr_reconstruction)
-plot.reconstruction(Cv_reconstruction)
-plot.reconstruction(Tp_reconstruction)
-plot.reconstruction(FcG0_reconstruction)
-plot.reconstruction(FcG6_reconstruction)
-
-
-plot.reconstruction(Cp_reconstruction)
+# plot.reconstruction(Ci_reconstruction)
+# plot.reconstruction(Cm_reconstruction)
+# plot.reconstruction(Cr_reconstruction)
+# plot.reconstruction(Cv_reconstruction)
+# plot.reconstruction(Tp_reconstruction)
+# plot.reconstruction(FcG0_reconstruction)
+# plot.reconstruction(FcG6_reconstruction)
+# 
+# 
+# plot.reconstruction(Cp_reconstruction)
  # ggsave("representative_reconstruction.png", width = 10, height = 6, dpi = 900,
  #      plot=last_plot(),
  #      path="../Output")
@@ -510,44 +524,44 @@ mtrx.data  %>%
 ### GAMs By Measurement Temp 
 
 ```{r Functions for GAM by Temp}
-predict.temp.gam <- function(damping) {
-  
-  knots <- n_distinct(damping$Temp_C)
-  
-  gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping, method = "REML")
-
-  data <- with(damping, expand.grid(
-    Light_Level = seq(min(Light_Level), max(Light_Level), 0.05),
-    Temp_C = seq(min(Temp_C), max(Temp_C), 0.1)
-  ))
-  
-  data$DampingIndex <- predict(gam, newdata = data)
-  
-  data <- data %>%
-    mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
-    mutate(Strain = factor(unique(damping$Strain)), 
-           l.strain = unique(damping$l.strain),
-           GrowthTemp_C = factor(unique(damping$GrowthTemp_C)), 
-           ThermalTolerance = factor(unique(damping$ThermalTolerance))) 
-  
-  return(data) 
-}
-
-summary.temp.gam <- function(damping) {
-  knots <- n_distinct(damping$Temp_C)
-  gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping, method = "REML")
-  summary <- summary(gam)
-  shapiro <- shapiro.test(resid(gam))
-  k <- mgcv::k.check(gam)
-  vis.fit <- mgcViz::getViz(gam)
-  check <- mgcViz::check.gamViz(vis.fit,
-                                a.qq = list(method = "tnorm", 
-                                            a.cipoly = list(fill = "light blue")), 
-                                a.respoi = list(size = 1), 
-                                a.hist = list(bins = 4))
-  combined <- list(summary = summary, norm = shapiro, check.k = k, plot.assumptions = check)
-  return(combined)
-}
+# predict.temp.gam <- function(damping) {
+#   
+#   knots <- n_distinct(damping$Temp_C)
+#   
+#   gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping, method = "REML")
+# 
+#   data <- with(damping, expand.grid(
+#     Light_Level = seq(min(Light_Level), max(Light_Level), 0.05),
+#     Temp_C = seq(min(Temp_C), max(Temp_C), 0.1)
+#   ))
+#   
+#   data$DampingIndex <- predict(gam, newdata = data)
+#   
+#   data <- data %>%
+#     mutate(DampingIndex = ifelse(DampingIndex < 0, 0, DampingIndex)) %>%
+#     mutate(Strain = factor(unique(damping$Strain)), 
+#            l.strain = unique(damping$l.strain),
+#            GrowthTemp_C = factor(unique(damping$GrowthTemp_C)), 
+#            ThermalTolerance = factor(unique(damping$ThermalTolerance))) 
+#   
+#   return(data) 
+# }
+# 
+# summary.temp.gam <- function(damping) {
+#   knots <- n_distinct(damping$Temp_C)
+#   gam <- mgcv::gam(DampingIndex ~ te(Temp_C, Light_Level, k=knots), data = damping, method = "REML")
+#   summary <- summary(gam)
+#   shapiro <- shapiro.test(resid(gam))
+#   k <- mgcv::k.check(gam)
+#   vis.fit <- mgcViz::getViz(gam)
+#   check <- mgcViz::check.gamViz(vis.fit,
+#                                 a.qq = list(method = "tnorm", 
+#                                             a.cipoly = list(fill = "light blue")), 
+#                                 a.respoi = list(size = 1), 
+#                                 a.hist = list(bins = 4))
+#   combined <- list(summary = summary, norm = shapiro, check.k = k, plot.assumptions = check)
+#   return(combined)
+# }
 ```
 
 XXXXSubstitute Mirelle GAM code
@@ -580,7 +594,7 @@ DampingIndex_Gam <- sstate_damping %>%
   group_by(Strain, GrowthTemp_C) %>%
   nest() %>%
   mutate(
-    GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(Light_Level, k = 3) + s(Temp_C, k = 3) + te(Temp_C, Light_Level, k = 3), data = .x,
+    GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(Light_Level, k = 3) + s(Temp_C, k = 3) + ti(Temp_C, Light_Level, k = 3), data = .x,
                                     family = "gaussian"(link = "log"), 
                                     method = "REML")),
     predicted = map(GamModel, ~possibPRED(.x, newdata = PAR_Temp_Model, type = "response", se.fit = TRUE)),
@@ -611,10 +625,25 @@ kable(DampingIndex_Gam %>%
 
 ```
 
+
+```{r check DampingIndex GAM}
+
+#check that EDF (Effective Degrees of Freedom)
+# Note: Low p-value in gam.check() for a smooth term means k may be too small
+# not that the term is statistically significant, but that it may be under fitting.
+purrr::walk(DampingIndex_Gam$GamModel, gam.check)
+
+# GAM CHECK RESULTS
+
+# in s(Light_Level, k = 4) , k is too low for ; however, k = 4 returns 'NULL' for all GAMs 
+# in s(CalcSal, k = 3) , k is good
+# in ti(CalcSal, par_ue, k = 3) k is good
+```
+
 ```{r Plot DampingIndex GAM}
 
 # Run this chunk each time for each strain to generate strain specific hypervolume 
-GamStrain = "Chlamydomonas_ICEMDV" 
+GamStrain = "Chlamydomonas_reinhardtii" 
 #Fragilariopsis_cylindrus
 #Thalassiosira_pseudonana 
 #Chlamydomonas_ICEMDV 
@@ -694,7 +723,7 @@ ContourLines <- ContourLines$quantileValue
 
 (ContourDI <- ggplot(na.omit(DampingIndex_Hyper), aes(Temp_C, Light_Level, z = fit, fill = fit)) + 
     geom_tile() +
-   scale_fill_gradientn(name = bquote("Damping Index"), colors = pals::ocean.matter(14),limits  = range(0, 16), na.value = "white") +
+   scale_fill_gradientn(name = bquote("Damping Index"), colors = pals::ocean.matter(14),limits  = range(0, 16), na.value = "black") +
     # scale_fill_gradientn(name = bquote("Damping Index"), colours=c(low = "white", "gold"), limits  = range(0, 12), na.value = "white") + #, limits  = range(0.1, 0.5)
     #       scale_fill_manual("", values = StrainColors,  drop = FALSE, na.value = "white") +
     # metR::geom_contour_fill(aes(z = fit, alpha = fit)) +
