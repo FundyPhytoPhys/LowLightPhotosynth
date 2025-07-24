@@ -38,13 +38,15 @@ library(mgcv)
 library(ggpubr)
 library(knitr)
 library(broom)
+library(patchwork)
+
 # library(commonR)  Natasha defined her own theme_pres(), used here and in other .Rmd;  sloppy handling of functions, variables and environments
 ```
 
 ```{r create ggplot theme}
 theme_thesis <- function() {
   ggplot2::theme_bw() +
-  ggplot2::theme(text = element_text(family = "Times New Roman"), 
+  ggplot2::theme(text = element_text(family = "sans"), 
         axis.text=element_text(size=11), axis.title=element_text(size=13),
         legend.text=element_text(size=11), legend.title=element_text(size=13),
         strip.background = element_rect(colour="black", fill=NA),
@@ -572,26 +574,28 @@ Grouping variables are 'Strain' and GrowthTemp_C'
 
 ```{r DampingIndex GAM}
 
-# GamWL = "680min750" #680min750 750 680
 GamParaMod = "DampingIndex" 
-# GamVar = "Chl" #Chl CC Ab BV ATN\
 
 #https://stackoverflow.com/questions/49570452/is-it-possible-to-specify-lower-bound-in-response-variable-during-smooth-with-ga 
 possibGAM = possibly(.f = mgcv::gam, otherwise = NULL)
 possibPRED = possibly(.f = mgcv::predict.gam, otherwise = NULL)
 
 PAR_Temp_Model <- expand_grid(
-  Light_Level = seq(from=min(0), 
-              to=max(1), 
-              length.out = 100),
+  Light_Level = seq(from=min(0.02), 
+              to=max(1.0), 
+              length.out = 150),
   Temp_C = seq(from=min(0), 
               to=max(28), 
-              length.out = 100) 
+              length.out = 150) 
   ) %>% as_tibble() 
+
+
+summary(PAR_Temp_Model) 
+
 
 DampingIndex_Gam <- sstate_damping %>% 
    ungroup() %>%
-  group_by(Strain, GrowthTemp_C) %>%
+  group_by(Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp) %>%
   nest() %>%
   mutate(
     GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(Light_Level, k = 3) + s(Temp_C, k = 3) + ti(Temp_C, Light_Level, k = 3), data = .x,
@@ -605,23 +609,18 @@ DampingIndex_Gam <- sstate_damping %>%
   ungroup()
 
 DampingIndex_Pred <- DampingIndex_Gam %>%
-  dplyr::select(predicted, Strain) %>%
+  dplyr::select(predicted, Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp) %>%
   dplyr::filter(predicted != "NULL") %>%
   rowwise() %>%
   mutate(db = list(cbind(predicted, PAR_Temp_Model))) %>%
   dplyr::select(-predicted) %>%
   unnest(col = db) 
 
-# %>%
-#   mutate(Wavelength = GamWL)
-
 # GAM model results into table
 kable(DampingIndex_Gam %>% 
   dplyr::select(Strain, tidied) %>% 
   unnest(tidied), 
   digits = 3)
-
-
 
 ```
 
@@ -643,7 +642,7 @@ purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 ```{r Plot DampingIndex GAM}
 
 # Run this chunk each time for each strain to generate strain specific hypervolume 
-GamStrain = "Chlamydomonas_reinhardtii" 
+GamStrain = "Chlamydomonas_priscuii" 
 #Fragilariopsis_cylindrus
 #Thalassiosira_pseudonana 
 #Chlamydomonas_ICEMDV 
@@ -652,32 +651,30 @@ GamStrain = "Chlamydomonas_reinhardtii"
 #Chlorella_vulgaris 
 #Chlamydomonas_reinhardtii
 
-ErrorTol = 50
-
-StrainColors = c(Fragilariopsis_cylindrus = "blue", Thalassiosira_pseudonana = "red", Chlamydomonas_ICEMDV =  "green", Chlamydomonas_malina = "orange",Chlamydomonas_priscuii = "brown", Chlorella_vulgaris = "violet", Chlamydomonas_reinhardtii = "grey")
-
-ColourDF <- data.frame(
-  Strain = c('Fragilariopsis_cylindrus' , 'Thalassiosira_pseudonana' , 'Chlamydomonas_ICEMDV' , 'Chlamydomonas_malina' ,'Chlamydomonas_priscuii' , 'Chlorella_vulgaris', 'Chlamydomonas_reinhardtii'),
-  ColourStrain = c( "blue","red",  "green",  "orange", "brown", "violet", "grey" )
-) %>%
- filter(Strain %in% GamStrain) %>%
- dplyr::select(ColourStrain)
+ErrorTol = 200
 
 
 DampingIndex_Hyper <- DampingIndex_Pred %>% 
   filter(Strain %in% GamStrain) %>%
-  mutate(fit = case_when(fit < 0 ~ 0.00001,# changes negative predicted fits to small number to allow proper faulty data filter in next mutate
-                             TRUE ~ fit),
-          fit = case_when(se.fit/fit*100 < ErrorTol ~ (fit*1),#filters faulty data where Standarderror larger +/- Errortolerance
-                         FALSE ~ (fit))) 
+  group_by(Strain, GrowthTemp_C) %>% 
+  mutate(IsFitGood = case_when(se.fit/fit*100 < ErrorTol ~ (1),#filters faulty data where Standarderror larger +/- Errortolerance
+                    TRUE ~ (0))) %>% 
+  filter(IsFitGood == 1) %>% 
+    # fit = case_when(se.fit/fit*100 < ErrorTol ~ (fit*1),#filters faulty data where Standarderror larger +/- Errortolerance
+    #                      FALSE ~ (fit))) %>% 
+  ungroup()
+  
+  # mutate(fit = case_when(fit < 0 ~ 0.001,# changes negative predicted fits to small number to allow proper faulty data filter in next mutate
+  #                            TRUE ~ fit),
 
+       
 maxDI <- DampingIndex_Hyper %>%
   filter(fit == max(fit, na.rm = TRUE))
 maxDI <- maxDI$fit
 
-minMuDI <- DampingIndex_Hyper %>%
+minDI <- DampingIndex_Hyper %>%
   filter(fit == min(fit, na.rm = TRUE))
-minMuDI <- minMuDI$fit
+minDI <- minDI$fit
 
 
 ContourBreaks <- DampingIndex_Hyper %>%
@@ -690,7 +687,7 @@ ContourBreaks <- DampingIndex_Hyper %>%
   dplyr::select(Strain, upper10, upper25, median50, lower25, lower10) %>%
   distinct() %>%
   pivot_longer(cols = c(upper10, upper25, median50, lower25, lower10), names_to = 'quantile', values_to = 'quantileValue') %>%
-  mutate(quantileValue = round(quantileValue, digits = 2))
+  mutate(quantileValue = round(quantileValue, digits = 1))
 
 # g_legend<-function(a.gplot){
 #   tmp <- ggplot_gtable(ggplot_build(a.gplot))
@@ -712,42 +709,60 @@ ContourBreaks <- DampingIndex_Hyper %>%
 #https://stackoverflow.com/questions/22945651/remove-space-between-plotted-data-and-the-axes
 #https://stackoverflow.com/questions/5293715/how-to-use-greek-symbols-in-ggplot2
 
-# HyperChlPlot <- SaltGAM_Pred %>%
-#   filter(
-#          strain %in% GamStrain,
-#          DM == "Chl",
-#          term %in% PlotMu
-#   )
+
 ContourLines <- ContourBreaks 
 ContourLines <- ContourLines$quantileValue 
 
 (ContourDI <- ggplot(na.omit(DampingIndex_Hyper), aes(Temp_C, Light_Level, z = fit, fill = fit)) + 
-    geom_tile() +
-   scale_fill_gradientn(name = bquote("Damping Index"), colors = pals::ocean.matter(14),limits  = range(0, 16), na.value = "black") +
+  geom_tile() +
+  scale_fill_gradientn(name = bquote("Damping Index"), colors = pals::ocean.matter(14), limits  = range(0, 16), na.value = "pink") +
     # scale_fill_gradientn(name = bquote("Damping Index"), colours=c(low = "white", "gold"), limits  = range(0, 12), na.value = "white") + #, limits  = range(0.1, 0.5)
     #       scale_fill_manual("", values = StrainColors,  drop = FALSE, na.value = "white") +
     # metR::geom_contour_fill(aes(z = fit, alpha = fit)) +
     metR::geom_contour2(aes(label = stat(level)),
                         breaks = ContourLines,
-                        skip = 0) +
+                        skip = 0, 
+                        color = "white", 
+                        linemitre = 10, 
+                        linewidth = 0.25,
+                        stroke = 0.1) + 
+    # geom_text_contour(stroke = 0.1, family = "sans", size = 3.3,
+    #                 label.placer = label_placer_fraction(frac=0.4)) +
     #metR::geom_text_contour(stroke = 0.15) +
     #geom_contour(breaks = ContourLines, colour = "black") + #add breaks for upper 10% values
     scale_x_continuous(limits = c(4, 12), expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0, 0.6), expand = c(0, 0)) + 
-    labs(title = bquote("Damping Index" ~ "contour plot "*.(GamStrain))) + 
-    xlab("Temperature (C)") +
-    ylab("PAR (µE)") +
-    theme_classic() +
-    theme(axis.text=element_text(size=12))) 
+    scale_y_continuous(limits = c(0, 0.9), expand = c(0, 0)) + 
+    coord_cartesian(clip = "off") +
+    # labs(title = bquote("Damping Index ")) + 
+    xlab("Measurement Temperature (°C)") +
+    ylab("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")") +
+  ggh4x::facet_nested_wrap(vars(ThermalTolerance, l.strain), nrow=2, scales="free_x", 
+                             labeller = label_parsed) +
+  geom_vline(aes(xintercept = GrowthTemp_C), 
+             col= "white", linetype = 2, linewidth = 1) +
+  # ggh4x::force_panelsizes(cols = c(10, 8, 8, 8, 18, 16, 12), respect = TRUE, total_width = unit(12, "cm")) +
+  theme_thesis())
+    # theme_classic() +
+    # theme(axis.text=element_text(size=12)))
 
 ContourDI
+
 # Dynamically name the plot with strain variable
-assign(paste0("plot_", GamStrain), ContourDI)
+assign(paste0("ti_plot_", GamStrain), ContourDI)
 
 ```
 
 
 
+```{r}
+
+# Diatoms_temp <- (ti_plot_Chlamydomonas_ICEMDV + ti_plot_Chlamydomonas_malina + ti_plot_Chlamydomonas_priscuii) / (ti_plot_Chlamydomonas_reinhardtii + ti_plot_Chlorella_vulgaris)
+# 
+# Diatoms_temp
+# ggsave("diatoms_temp.png", width = 7.5 , height = 5, dpi = 900,
+#        plot=last_plot(),
+#        path="../Figures")
+```
 
 
 
