@@ -39,8 +39,14 @@ library(ggpubr)
 library(knitr)
 library(broom)
 library(patchwork)
+library(cowplot)  # for get_legend() necessary for combining plots and use ggdraw
+library(grid) # for textGrob necessary for combining axis
 
 # library(commonR)  Natasha defined her own theme_pres(), used here and in other .Rmd;  sloppy handling of functions, variables and environments
+```
+```{r define paths}
+
+PlotsOut <- file.path("..", "Figures")
 ```
 
 ```{r create ggplot theme}
@@ -580,14 +586,33 @@ GamParaMod = "DampingIndex"
 possibGAM = possibly(.f = mgcv::gam, otherwise = NULL)
 possibPRED = possibly(.f = mgcv::predict.gam, otherwise = NULL)
 
+# build a grid that includes measured temperatures (0,2,4,6,8,10,12,14,16,18,20,22,24,26,28)
+# Define important Temp_C values
+
+
+# Build Temp_C vector that includes both the full sequence and key values
+Temp_C_vals <- seq(0, 28, by = 0.05)
+
+# Same for Light_Level if needed (optional: if you want specific values there too)
+Light_vals <- seq(0.02, 1.0, by = 0.02)
+
+# Build the grid
 PAR_Temp_Model <- expand_grid(
-  Light_Level = seq(from=min(0.02), 
-              to=max(1.0), 
-              length.out = 150),
-  Temp_C = seq(from=min(0), 
-              to=max(28), 
-              length.out = 150) 
-  ) %>% as_tibble() 
+  Light_Level = Light_vals,
+  Temp_C = Temp_C_vals
+) %>% 
+  as_tibble()
+
+
+# this generates a grid but the exact measured temperatures are excluded therefore may show a gap at axis limits (example, for x-axis 4 to 12 has Temp data starting at 4.13 so white space from 4.13 to 4.0 on plot)
+# PAR_Temp_Model <- expand_grid(
+#   Light_Level = seq(from=min(0.02),
+#               to=max(1.0),
+#               length.out = 150),
+#   Temp_C = seq(from=min(0),
+#               to=max(28),
+#               length.out = 150)
+#   ) %>% as_tibble()
 
 
 summary(PAR_Temp_Model) 
@@ -634,15 +659,18 @@ purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 
 # GAM CHECK RESULTS
 
-# in s(Light_Level, k = 4) , k is too low for ; however, k = 4 returns 'NULL' for all GAMs 
+# in s(Light_Level, k = 3) , k is too low for F.c, C.ICEMDV and C.priscuii; however, k = 4 returns 'NULL' for all GAMs 
 # in s(CalcSal, k = 3) , k is good
-# in ti(CalcSal, par_ue, k = 3) k is good
+# in ti(CalcSal, par_ue, k = 3) k is too low for C.priscuii; however, k = 4 returns 'NULL' for all GAMs 
 ```
 
 ```{r Plot DampingIndex GAM}
 
 # Run this chunk each time for each strain to generate strain specific hypervolume 
-GamStrain = "Chlamydomonas_priscuii" 
+ # GamStrain = c("Chlamydomonas_ICEMDV", "Chlamydomonas_malina", "Chlamydomonas_priscuii")
+# GamStrain = c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris")
+
+ GamStrain = "Chlamydomonas_ICEMDV"
 #Fragilariopsis_cylindrus
 #Thalassiosira_pseudonana 
 #Chlamydomonas_ICEMDV 
@@ -651,7 +679,7 @@ GamStrain = "Chlamydomonas_priscuii"
 #Chlorella_vulgaris 
 #Chlamydomonas_reinhardtii
 
-ErrorTol = 200
+ErrorTol = 170
 
 
 DampingIndex_Hyper <- DampingIndex_Pred %>% 
@@ -678,6 +706,7 @@ minDI <- minDI$fit
 
 
 ContourBreaks <- DampingIndex_Hyper %>%
+  group_by(Strain) %>% 
   mutate(upper10 = quantile(fit, 0.9, na.rm = TRUE),
          upper25 = quantile(fit, 0.75, na.rm = TRUE),
          median50 = quantile(fit, 0.5, na.rm = TRUE),
@@ -713,37 +742,41 @@ ContourBreaks <- DampingIndex_Hyper %>%
 ContourLines <- ContourBreaks 
 ContourLines <- ContourLines$quantileValue 
 
-(ContourDI <- ggplot(na.omit(DampingIndex_Hyper), aes(Temp_C, Light_Level, z = fit, fill = fit)) + 
+(ContourDI <- ggplot(na.omit(DampingIndex_Hyper), aes(Temp_C, Light_Level, z = fit, fill = fit)) +
   geom_tile() +
-  scale_fill_gradientn(name = bquote("Damping Index"), colors = pals::ocean.matter(14), limits  = range(0, 16), na.value = "pink") +
-    # scale_fill_gradientn(name = bquote("Damping Index"), colours=c(low = "white", "gold"), limits  = range(0, 12), na.value = "white") + #, limits  = range(0.1, 0.5)
-    #       scale_fill_manual("", values = StrainColors,  drop = FALSE, na.value = "white") +
-    # metR::geom_contour_fill(aes(z = fit, alpha = fit)) +
+  scale_fill_gradientn(name = bquote("Damping Index"), colors = pals::ocean.matter(14), limits  = range(0, 13), na.value = "pink") +
     metR::geom_contour2(aes(label = stat(level)),
                         breaks = ContourLines,
-                        skip = 0, 
-                        color = "white", 
-                        linemitre = 10, 
-                        linewidth = 0.25,
-                        stroke = 0.1) + 
-    # geom_text_contour(stroke = 0.1, family = "sans", size = 3.3,
-    #                 label.placer = label_placer_fraction(frac=0.4)) +
-    #metR::geom_text_contour(stroke = 0.15) +
-    #geom_contour(breaks = ContourLines, colour = "black") + #add breaks for upper 10% values
-    scale_x_continuous(limits = c(4, 12), expand = c(0, 0)) +
-    scale_y_continuous(limits = c(0, 0.9), expand = c(0, 0)) + 
-    coord_cartesian(clip = "off") +
-    # labs(title = bquote("Damping Index ")) + 
+                        skip = 0,
+                        color = "white",
+                        linemitre = 10,
+                        linewidth = 0.5,
+                        stroke = 0.5,
+                        size = 3.3,
+                        label.placer = label_placer_fraction(frac = 0.4)) +
+    # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
+    #               label.placer = label_placer_fraction(frac = 0.4)) +
+      # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris & T.p
+    scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 4), expand = c(0, 0)) + # For C.ICE, C.malina & C.priscuii
+    # scale_x_continuous(limits = c(12, 24), breaks = seq(12, 24, by = 4), expand = c(0, 0)) + # For C.reinhardtii
+    # scale_x_continuous(limits = c(0, 10), breaks = seq(2, 10, by = 4), expand = c(0, 0)) + # For F.c
+    scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand = c(0, 0)) +
+    coord_cartesian(expand = FALSE, clip = "on") +
+    # labs(title = GamStrain) +
     xlab("Measurement Temperature (°C)") +
     ylab("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")") +
-  ggh4x::facet_nested_wrap(vars(ThermalTolerance, l.strain), nrow=2, scales="free_x", 
+    # ylab(NULL) +
+  ggh4x::facet_nested_wrap(vars(l.strain), nrow=1, scales="free_x",
                              labeller = label_parsed) +
-  geom_vline(aes(xintercept = GrowthTemp_C), 
-             col= "white", linetype = 2, linewidth = 1) +
+  geom_vline(aes(xintercept = GrowthTemp_C + 0.025),
+             col= "black", linetype = 2, linewidth = 1.7) +
   # ggh4x::force_panelsizes(cols = c(10, 8, 8, 8, 18, 16, 12), respect = TRUE, total_width = unit(12, "cm")) +
-  theme_thesis())
-    # theme_classic() +
-    # theme(axis.text=element_text(size=12)))
+  theme_thesis()+
+    theme(legend.position = "right")  +
+  theme(panel.spacing.x = unit(4, "mm")))
+        
+        # ,
+        # legend.position = c(0.89, 0.07), legend.justification = c(1,0)))
 
 ContourDI
 
@@ -752,16 +785,163 @@ assign(paste0("ti_plot_", GamStrain), ContourDI)
 
 ```
 
+```{r Combine and save Algae Damping Index GAMs}
+
+Filename <- "AlgaeGAMs"
+
+# Remove individual legends
+p1 <- ti_plot_Chlamydomonas_ICEMDV + theme(legend.position = "none") +
+  labs(x = NULL, y = NULL)
+p2 <- ti_plot_Chlamydomonas_malina + theme(legend.position = "none") +
+  labs(x = NULL, y = NULL)
+p3 <- ti_plot_Chlamydomonas_priscuii+ theme(legend.position = "none") +
+  labs(x = NULL, y = NULL) 
+p4 <- ti_plot_Chlamydomonas_reinhardtii + theme(legend.position = "none") +
+  labs(x = NULL, y = NULL)
+p5 <- ti_plot_Chlorella_vulgaris + theme(legend.position = "none") +
+  labs(x = NULL, y = NULL)
+
+# Extract vertical legend from p1
+legend_grob <- get_legend(
+  p1 + theme(legend.position = "right", legend.direction = "vertical")
+)
+
+# Combine with manual layout
+CombineAlgae <- patchwork::wrap_plots(
+  p1, p2, p3,
+ p4, p5, gridExtra::arrangeGrob(legend_grob),
+  design = c(
+    area(1, 1), area(1, 2), area(1, 3),  # row 1
+    area(2, 1), area(2, 2), area(2, 3)   # row 2 (legend under p3)
+  )
+)
+
+CombineAlgae
+
+# Make the shared axis labels
+# textGrob uses 'Grid' package
+x_axis_label <- textGrob("Measurement Temperature (°C)", gp = gpar(fontsize = 16))
+y_axis_label <- textGrob("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")", rot = 90, gp = gpar(fontsize = 16))
+
+
+# Compose the full layout
+# ggdraw uses the 'cowplot' package
+AlgaeGAMs <- ggdraw() +
+  draw_plot(CombineAlgae, x = 0.1, y = 0.1, width = 0.85, height = 0.85) +  # main plot area
+  draw_grob(x_axis_label, x = 0, y = -0.45) + # x axis bottom center
+  draw_grob(y_axis_label, x = -0.45, y = 0) # y axis left center
+
+AlgaeGAMs
+
+# must use cowplot to save as x and y axisa are lost using ggsave 
+cowplot::save_plot(
+  filename = file.path(PlotsOut, paste0(Filename, ".png")),
+  plot = AlgaeGAMs,
+  base_height = 10,
+  base_width = 15,
+  dpi = 300,
+  bg ="white" # need a white background for axis visibility
+)
+
+```
+
+
+### Next Combine Diatoms
+
+
+```{r Combine and save Algae Damping Index GAMs}
+
+Filename <- "DiatomsGAMs"
+
+# Remove individual legends
+# p1 <- ti_plot_Chlamydomonas_ICEMDV + theme(legend.position = "none") +
+#   labs(x = NULL, y = NULL)
+# p2 <- ti_plot_Chlamydomonas_malina + theme(legend.position = "none") +
+#   labs(x = NULL, y = NULL)
+# p3 <- ti_plot_Chlamydomonas_priscuii+ theme(legend.position = "none") +
+#   labs(x = NULL, y = NULL) 
+# p4 <- ti_plot_Chlamydomonas_reinhardtii + theme(legend.position = "none") +
+#   labs(x = NULL, y = NULL)
+# p5 <- ti_plot_Chlorella_vulgaris + theme(legend.position = "none") +
+#   labs(x = NULL, y = NULL)
+
+# Extract vertical legend from p1
+legend_grob <- get_legend(
+  p1 + theme(legend.position = "right", legend.direction = "vertical")
+)
+
+# Combine with manual layout
+CombineDiatoms <- patchwork::wrap_plots(
+  p1, p2, p3,
+ p4, p5, gridExtra::arrangeGrob(legend_grob),
+  design = c(
+    area(1, 1), area(1, 2), area(1, 3),  # row 1
+    area(2, 1), area(2, 2), area(2, 3)   # row 2 (legend under p3)
+  )
+)
+
+CombineDiatoms
+
+# Make the shared axis labels
+# textGrob uses 'Grid' package
+x_axis_label <- textGrob("Measurement Temperature (°C)", gp = gpar(fontsize = 16))
+y_axis_label <- textGrob("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")", rot = 90, gp = gpar(fontsize = 16))
+
+
+# Compose the full layout
+# ggdraw uses the 'cowplot' package
+DiatomGAMs <- ggdraw() +
+  draw_plot(CombineDiatoms, x = 0.1, y = 0.1, width = 0.85, height = 0.85) +  # main plot area
+  draw_grob(x_axis_label, x = 0, y = -0.45) + # x axis bottom center
+  draw_grob(y_axis_label, x = -0.45, y = 0) # y axis left center
+
+DiatomGAMs
+
+# must use cowplot to save as x and y axisa are lost using ggsave 
+cowplot::save_plot(
+  filename = file.path(PlotsOut, paste0(Filename, ".png")),
+  plot = DiatomGAMs,
+  base_height = 10,
+  base_width = 15,
+  dpi = 300,
+  bg ="white" # need a white background for axis visibility
+)
+
+```
+
+
 
 
 ```{r}
 
-# Diatoms_temp <- (ti_plot_Chlamydomonas_ICEMDV + ti_plot_Chlamydomonas_malina + ti_plot_Chlamydomonas_priscuii) / (ti_plot_Chlamydomonas_reinhardtii + ti_plot_Chlorella_vulgaris)
-# 
-# Diatoms_temp
+Diatoms_temp <- (ti_plot_Chlamydomonas_ICEMDV + ti_plot_Chlamydomonas_malina + ti_plot_Chlamydomonas_priscuii ) / (ti_plot_Chlamydomonas_reinhardtii +  (ti_plot_Chlorella_vulgaris)) +
+  plot_layout(guides = "collect") & theme(legend.position = "right",
+        axis.title.x = element_blank()# remove individual x labels
+        )
+
+
+
+ Diatoms_temp <- ti_plot_Chlamydomonas_priscuii + ti_plot_Chlorella_vulgaris +
+  plot_layout(guides = "collect") & theme(legend.position = "right",
+        axis.title.x = element_blank()# remove individual x labels
+        )
+ 
+ Diatoms_temp
+ 
+ Diatoms_temp_plot <-  Diatoms_temp + 
+  plot_annotation(
+    caption = "Measurement Temperature (°C)"
+  ) & 
+  theme(
+    plot.caption = element_text(hjust = 0.5, size = 12, margin = margin(t = 10)),
+    legend.position = c(0.89, 0.07), legend.justification = c(1,0)
+  )
+ Diatoms_temp_plot
 # ggsave("diatoms_temp.png", width = 7.5 , height = 5, dpi = 900,
 #        plot=last_plot(),
 #        path="../Figures")
+ 
+
 ```
 
 
