@@ -787,7 +787,7 @@ assign(paste0("ti_plot_", GamStrain), ContourDI)
 
 ```{r Combine and save Algae Damping Index GAMs}
 
-Filename <- "AlgaeGAMs"
+Filename <- "AlgaeGAM"
 
 # Remove individual legends
 p1 <- ti_plot_Chlamydomonas_ICEMDV + theme(legend.position = "none") +
@@ -826,17 +826,17 @@ y_axis_label <- textGrob("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")", rot = 9
 
 # Compose the full layout
 # ggdraw uses the 'cowplot' package
-AlgaeGAMs <- ggdraw() +
+AlgaeGAM <- ggdraw() +
   draw_plot(CombineAlgae, x = 0.1, y = 0.1, width = 0.85, height = 0.85) +  # main plot area
   draw_grob(x_axis_label, x = 0, y = -0.45) + # x axis bottom center
   draw_grob(y_axis_label, x = -0.45, y = 0) # y axis left center
 
-AlgaeGAMs
+AlgaeGAM
 
 # must use cowplot to save as x and y axisa are lost using ggsave 
 cowplot::save_plot(
   filename = file.path(PlotsOut, paste0(Filename, ".png")),
-  plot = AlgaeGAMs,
+  plot = AlgaeGAM,
   base_height = 10,
   base_width = 15,
   dpi = 300,
@@ -851,7 +851,7 @@ cowplot::save_plot(
 
 ```{r Combine and save Algae Damping Index GAMs}
 
-Filename <- "DiatomsGAMs"
+Filename <- "DiatomsGAM"
 
 # Remove individual legends
 # p1 <- ti_plot_Chlamydomonas_ICEMDV + theme(legend.position = "none") +
@@ -890,17 +890,17 @@ y_axis_label <- textGrob("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")", rot = 9
 
 # Compose the full layout
 # ggdraw uses the 'cowplot' package
-DiatomGAMs <- ggdraw() +
+DiatomGAM <- ggdraw() +
   draw_plot(CombineDiatoms, x = 0.1, y = 0.1, width = 0.85, height = 0.85) +  # main plot area
   draw_grob(x_axis_label, x = 0, y = -0.45) + # x axis bottom center
   draw_grob(y_axis_label, x = -0.45, y = 0) # y axis left center
 
-DiatomGAMs
+DiatomGAM
 
 # must use cowplot to save as x and y axisa are lost using ggsave 
 cowplot::save_plot(
   filename = file.path(PlotsOut, paste0(Filename, ".png")),
-  plot = DiatomGAMs,
+  plot = DiatomGAM,
   base_height = 10,
   base_width = 15,
   dpi = 300,
