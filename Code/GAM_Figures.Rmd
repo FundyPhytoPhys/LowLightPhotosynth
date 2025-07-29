@@ -654,8 +654,7 @@ kable(DampingIndex_Gam %>%
 ```{r check DampingIndex GAM}
 
 #check that EDF (Effective Degrees of Freedom)
-# Note: Low p-value in gam.check() for a smooth term means k may be too small
-# not that the term is statistically significant, but that it may be under fitting.
+# Note: Low p-value in gam.check() for a smooth term means k may be too small not that the term is statistically significant, but that it may be under fitting.
 purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 
 # GAM CHECK RESULTS
@@ -844,7 +843,7 @@ AlgaeGAM <- ggdraw() +
     
 AlgaeGAM
 
-# must use cowplot to save as x and y axisa are lost using ggsave 
+# must use cowplot to save as x and y axis are lost using ggsave 
 cowplot::save_plot(
   filename = file.path(PlotsOut, paste0(Filename, ".png")),
   plot = AlgaeGAM,
@@ -1010,7 +1009,7 @@ DiatomGAM <- ggdraw() +
     
 DiatomGAM
 
-# must use cowplot to save as x and y axisa are lost using ggsave 
+# must use cowplot to save as x and y axis are lost using ggsave 
 cowplot::save_plot(
   filename = file.path(PlotsOut, paste0(Filename, ".png")),
   plot = DiatomGAM,
@@ -1026,7 +1025,7 @@ cowplot::save_plot(
 
 
 
-
+### remaining chunks are Natasha's
 ```{r}
 predict.gam.t <- lapply(temp.sstate, predict.temp.gam)
 
