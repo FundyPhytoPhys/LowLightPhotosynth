@@ -32,6 +32,8 @@ library(knitr)
 library(broom)
 # library(commonR)  Natasha defined her own theme_pres(), used here and in other .Rmd;  sloppy handling of functions, variables and environments
 ```
+
+
 ```{r define paths}
 DataOut <- file.path("..", "Data", "ProcessedData")
 PlotsOut <- file.path("..", "Figures")
@@ -65,11 +67,10 @@ sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_S
 ```
 
 
-Run on 'sstate_damping' dataframe
+Run GAM on 'sstate_damping' dataframe
 Response variable 'DampingIndex'
 Predictors are 'Temp_C' and 'Light_Level'
 Grouping variables are 'Strain' and GrowthTemp_C'
-
 ```{r DampingIndex GAM}
 
 GamParaMod = "DampingIndex" 
@@ -78,14 +79,10 @@ GamParaMod = "DampingIndex"
 possibGAM = possibly(.f = mgcv::gam, otherwise = NULL)
 possibPRED = possibly(.f = mgcv::predict.gam, otherwise = NULL)
 
-# build a grid that includes measured temperatures (0,2,4,6,8,10,12,14,16,18,20,22,24,26,28)
-# Define important Temp_C values
-
-
-# Build Temp_C vector that includes both the full sequence and key values
+# Build Temp_C vector 
 Temp_C_vals <- seq(0, 28, by = 0.05)
 
-# Same for Light_Level if needed (optional: if you want specific values there too)
+# Same for Light_Level
 Light_vals <- seq(0.02, 1.0, by = 0.02)
 
 # Build the grid to fill in predicted data
@@ -145,17 +142,9 @@ purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 ```
 
 
-
-
-
-
-
 ```{r save rds}
 
  saveRDS(object = DampingIndex_Pred, file = file.path(DataOut, "DampingIndex_Pred.Rds"), ascii = FALSE, version = NULL, refhook = NULL)
 
 ```
-
-
-
 
