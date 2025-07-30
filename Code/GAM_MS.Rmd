@@ -1,0 +1,161 @@
+---
+title: "GAM and Figures"
+author: "Natasha Ryan"
+output: 
+  html_document: default
+editor_options: 
+  chunk_output_type: inline
+---
+
+
+Introduction
+
+This script fits Generalized Additive Models (GAMs) using mgcv::gam combined with possibGAM (from purrr::possibly), allowing model fitting without halting execution due to errors. Smooth terms (s) and interaction effects (ti) are used to capture nonlinear relationships.  gam.check is used to run model diagnostics guiding basis dimension (k) selection.
+
+GamParaMod : is the response variable input for the GAM. It is assigned at the start of each GAM chunk.
+s(CalcSal) and s(par_ue): main effects
+ti(CalcSal, par_ue, k = 3): Tensor product smooth for modeling interaction between CalcSal and par_ue.
+
+Unlike te(), ti() includes only the interaction term (not the main effects), which is appropriate here because main effects are already modeled separately using s(CalcSal) and s(par_ue).
+This avoids redundancy and helps reduce overfitting.
+The k parameter limits the flexibility of the interaction term. High k = more flexibility for more complex patterns, low k = simple curves.
+
+
+
+# Setup
+```{r load libraries}
+library(tidyverse)
+library(metR)
+library(mgcv)
+library(ggpubr)
+library(knitr)
+library(broom)
+# library(commonR)  Natasha defined her own theme_pres(), used here and in other .Rmd;  sloppy handling of functions, variables and environments
+```
+```{r define paths}
+DataOut <- file.path("..", "Data", "CleanData")
+PlotsOut <- file.path("..", "Figures")
+```
+# Damping Across Taxa
+
+```{r import & wrangle data}
+sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>%
+  mutate(Strain = factor(Strain), 
+  ThermalTolerance = case_when(
+     Strain %in% c("Fragilariopsis_cylindrus", "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii",
+                   "Chlamydomonas_malina") ~ "Polar",
+     Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
+                   "Thalassiosira_pseudonana") ~ "Temperate"),  
+  Type = case_when(
+     Strain %in% c("Fragilariopsis_cylindrus","Thalassiosira_pseudonana") ~ "Diatom", 
+     Strain %in% c("Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina",
+                   "Chlamydomonas_reinhardtii", "Chlorella_vulgaris") ~ "Green Algae"),
+  l.strain = case_when(
+    Strain == "Chlamydomonas_ICEMDV" ~ "~italic('C. ICEMDV')", 
+    Strain == "Chlamydomonas_malina" ~"~italic('C. malina')",
+    Strain == "Chlamydomonas_priscuii" ~ "~italic('C. priscuii')",
+    Strain == "Chlamydomonas_reinhardtii" ~ "~italic('C. reinhardtii')",
+    Strain == "Chlorella_vulgaris" ~ "~italic('C. vulgaris')",
+    Strain == "Fragilariopsis_cylindrus" ~ "~italic('F. cylindrus')", 
+    Strain == "Thalassiosira_pseudonana" ~ "~italic('T. pseudonana')"),
+  l.temp = paste0("Grown~at~", GrowthTemp_C,"*degree*C"),
+  FacetLabel_temp = paste0("grown~at~", GrowthTemp_C,"*degree*C"),
+  )
+
+```
+
+XXXXSubstitute Mirelle GAM code
+Run on 'sstate_damping' dataframe
+Response variable 'DampingIndex'
+Predictors are 'Temp_C' and 'Light_Level'
+Grouping variables are 'Strain' and GrowthTemp_C'
+
+```{r DampingIndex GAM}
+
+GamParaMod = "DampingIndex" 
+
+#https://stackoverflow.com/questions/49570452/is-it-possible-to-specify-lower-bound-in-response-variable-during-smooth-with-ga 
+possibGAM = possibly(.f = mgcv::gam, otherwise = NULL)
+possibPRED = possibly(.f = mgcv::predict.gam, otherwise = NULL)
+
+# build a grid that includes measured temperatures (0,2,4,6,8,10,12,14,16,18,20,22,24,26,28)
+# Define important Temp_C values
+
+
+# Build Temp_C vector that includes both the full sequence and key values
+Temp_C_vals <- seq(0, 28, by = 0.05)
+
+# Same for Light_Level if needed (optional: if you want specific values there too)
+Light_vals <- seq(0.02, 1.0, by = 0.02)
+
+# Build the grid to fill in predicted data
+PAR_Temp_Model <- expand_grid(
+  Light_Level = Light_vals,
+  Temp_C = Temp_C_vals
+) %>% 
+  as_tibble()
+
+
+summary(PAR_Temp_Model) 
+
+
+DampingIndex_Gam <- sstate_damping %>% 
+   ungroup() %>%
+  group_by(Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
+  nest() %>%
+  mutate(
+    GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(Light_Level, k = 3) + s(Temp_C, k = 3) + ti(Temp_C, Light_Level, k = 3), data = .x,
+                                    family = "gaussian"(link = "log"), 
+                                    method = "REML")),
+    predicted = map(GamModel, ~possibPRED(.x, newdata = PAR_Temp_Model, type = "response", se.fit = TRUE)),
+    tidied = map(GamModel, ~tidy(.x)),
+    augmented = map(GamModel, ~augment(.x)),
+    glance = map(GamModel, ~glance(.x))
+  ) %>% 
+  ungroup()
+
+DampingIndex_Pred <- DampingIndex_Gam %>%
+  dplyr::select(predicted, Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
+  dplyr::filter(predicted != "NULL") %>%
+  rowwise() %>%
+  mutate(db = list(cbind(predicted, PAR_Temp_Model))) %>%
+  dplyr::select(-predicted) %>%
+  unnest(col = db) 
+
+# GAM model results into table
+kable(DampingIndex_Gam %>% 
+  dplyr::select(Strain, tidied) %>% 
+  unnest(tidied), 
+  digits = 3)
+
+```
+
+
+```{r check DampingIndex GAM}
+
+#check that EDF (Effective Degrees of Freedom)
+# Note: Low p-value in gam.check() for a smooth term means k may be too small not that the term is statistically significant, but that it may be under fitting.
+purrr::walk(DampingIndex_Gam$GamModel, gam.check)
+
+# GAM CHECK RESULTS
+
+# in s(Light_Level, k = 3) , k is too low for F.c, C.ICEMDV and C.priscuii; however, k = 4 returns 'NULL' for all GAMs 
+# in s(CalcSal, k = 3) , k is good
+# in ti(CalcSal, par_ue, k = 3) k is too low for C.priscuii; however, k = 4 returns 'NULL' for all GAMs 
+```
+
+
+
+
+
+
+
+```{r save rds}
+
+ saveRDS(object = DampingIndex_Pred, file = file.path(DataOut, "DampingIndex_Pred.Rds"), ascii = FALSE, version = NULL, refhook = NULL)
+
+```
+
+
+
+
