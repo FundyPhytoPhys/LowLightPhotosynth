@@ -64,7 +64,7 @@ sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_S
 
 ```
 
-XXXXSubstitute Mirelle GAM code
+
 Run on 'sstate_damping' dataframe
 Response variable 'DampingIndex'
 Predictors are 'Temp_C' and 'Light_Level'
