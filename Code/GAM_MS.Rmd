@@ -1,6 +1,6 @@
 ---
 title: "GAM and Figures"
-author: "Natasha Ryan"
+author: "Mireille Savoie, Natasha Ryan"
 output: 
   html_document: default
 editor_options: 

@@ -1,6 +1,6 @@
 ---
 title: "GAM and Figures"
-author: "Natasha Ryan"
+author: "Mireille Savoie, Natasha Ryan"
 output: 
   html_document: default
 editor_options: 
@@ -26,6 +26,7 @@ library(grid) # for textGrob necessary for combining axis
 
 # library(commonR)  Natasha defined her own theme_pres(), used here and in other .Rmd;  sloppy handling of functions, variables and environments
 ```
+
 ```{r define paths}
 
 PlotsOut <- file.path("..", "Figures")
@@ -50,7 +51,7 @@ theme_thesis <- function() {
 
 ```{r import GAM data}
 
-DampingIndex_Pred <- readRDS(file = file.path("..", "Data", "Processed", "DampingIndex_Pred.Rds" )) 
+DampingIndex_Pred <- readRDS(file = file.path("..", "Data", "ProcessedData", "DampingIndex_Pred.Rds" )) 
 
 ```
 
@@ -113,7 +114,7 @@ spacing.diatom <- sstate_damping %>%
 # Run this chunk each time for each strain to generate strain specific hypervolume by changing the value for Gamstrain and selecting the corresponding "scale_x_continuous" in ggplot below. Example scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris 
 
 #plotting all strains and adding a facet-wrap does not work as the contour lines are determined for each individual strain.
-GamStrain = "Chlorella_vulgaris"
+GamStrain = "Chlamydomonas_reinhardtii"
 #Chlamydomonas_ICEMDV                     #remember to change scale_x_continuous
 #Chlamydomonas_malina                     #remember to change scale_x_continuous                  
 #Chlamydomonas_priscuii                   #remember to change scale_x_continuous
@@ -182,9 +183,9 @@ ContourLines <- ContourLines$quantileValue
                         label.placer = label_placer_fraction(frac = 0.4)) +
     # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
     #               label.placer = label_placer_fraction(frac = 0.4)) +
-    scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris
+   # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris
    # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 4), expand = c(0, 0)) + # For C.ICE, C.malina & C.priscuii
-      # scale_x_continuous(limits = c(12, 24), breaks = seq(12, 24, by = 4), expand = c(0, 0)) + # For C.reinhardtii
+       scale_x_continuous(limits = c(12, 24), breaks = seq(12, 24, by = 4), expand = c(0, 0)) + # For C.reinhardtii
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
                        sec.axis = dup_axis(breaks = c(spacing.algae$Light_Level.mean), 
                                            labels = c(spacing.algae$PulseSpace_s),
@@ -270,8 +271,8 @@ CombineAlgae
 AlgaeGAM <- ggdraw() +
   draw_plot(CombineAlgae, x = 0.1, y = 0.1, width = 0.85, height = 0.85) +
   draw_label("Measurement Temperature (°C)", x = 0.5, y = 0.04, size = 20) +
-  draw_label("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")", x = 0.05, y = 0.5, angle = 90, size = 20) +
-  draw_label("Flash Spacing (s) and Equivalent Light Level", x = 0.97, y = 0.5, angle = 270, size = 20)
+  draw_label("Equivalent PAR (µmol photons"~ m^-2~ ~s^-1~ ")", x = 0.05, y = 0.5, angle = 90, size = 20) +
+  draw_label("Flash Spacing (s)", x = 0.97, y = 0.5, angle = 270, size = 20)
     
 AlgaeGAM
 
@@ -368,7 +369,7 @@ ContourLines <- ContourLines$quantileValue
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
                        sec.axis = dup_axis(breaks = c(spacing.diatom$Light_Level.mean), 
                                            labels = c(spacing.diatom$PulseSpace_s),
-                                           name = sym("Flash Spacing (s) and Equivalent Light Level"))) +
+                                           name = sym("Flash Spacing (s)"))) +
  coord_cartesian(expand = FALSE, clip = "on") +
   #   geom_text(aes(x = 0.1, y = 0.60, label = paste("Grown at", GrowthTemp_C, "°C", sep = " "), 
   #                 show.legend = FALSE),
@@ -435,8 +436,8 @@ CombineDiatoms
 DiatomGAM <- ggdraw() +
   draw_plot(CombineDiatoms, x = 0.1, y = 0.1, width = 0.85, height = 0.85) +
   draw_label("Measurement Temperature (°C)", x = 0.5, y = 0.04, size = 20) +
-  draw_label("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")", x = 0.05, y = 0.5, angle = 90, size = 20) +
-  draw_label("Flash Spacing (s) and Equivalent Light Level", x = 0.97, y = 0.5, angle = 270, size = 20)
+  draw_label("Equivalent PAR (µmol photons"~ m^-2~ ~s^-1~ ")", x = 0.05, y = 0.5, angle = 90, size = 20) +
+  draw_label("Flash Spacing (s)", x = 0.97, y = 0.5, angle = 270, size = 20)
     
 DiatomGAM
 
