@@ -16,8 +16,8 @@ This script plots Generalized Additive Models (GAMs)
 ```{r load libraries}
 library(tidyverse)
 library(metR)
-library(mgcv)
-library(ggpubr)
+# library(mgcv)
+# library(ggpubr)
 library(knitr)
 library(broom)
 library(patchwork)
@@ -50,7 +50,7 @@ theme_thesis <- function() {
 
 ```{r import GAM data}
 
-DampingIndex_Pred <- readRDS(file = file.path("..", "Data", "CleanData", "DampingIndex_Pred.Rds" )) 
+DampingIndex_Pred <- readRDS(file = file.path("..", "Data", "Processed", "DampingIndex_Pred.Rds" )) 
 
 ```
 
