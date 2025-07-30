@@ -10,14 +10,27 @@ editor_options:
 
 Introduction
 
-This script plots Generalized Additive Models (GAMs)
+This script generates a strain-specific contour plot ("hypervolume")
+to visualize the predicted damping index response across measured temperature and equivalent
+light conditions. It uses a Generalized Additive Model (GAM)
+output generated from 'GAM_MS.Rmd' to create smooth interpolations and overlays contour lines
+at key quantiles (10%, 25%, 50%, 75%, and 90%) of the predicted damping index.
+
+Key points:
+- The script is meant to be re-run for each strain individually by
+  selecting the 'GamStrain' variable and selecting the corresponding 'scale_x_continuous'
+  axis limits to represent each strain's experimental range.
+- Filters out predictions with high relative uncertainty (SE/fit > ErrorTol).
+- Computes quantile contour levels dynamically from predicted damping index values.
+- Plots a color-coded of the predicted damping index (fit),
+  overlaid with white contour lines at quantile breaks.
+
+Note: Individual strain ggplot generations is necessary as faceting is not possible because each strain has different temperature ranges; multiple strains cannot be plotted together on shared axes.
 
 # Setup
 ```{r load libraries}
 library(tidyverse)
 library(metR)
-# library(mgcv)
-# library(ggpubr)
 library(knitr)
 library(broom)
 library(patchwork)
@@ -51,7 +64,7 @@ theme_thesis <- function() {
 
 ```{r import GAM data}
 
-DampingIndex_Pred <- readRDS(file = file.path("..", "Data", "ProcessedData", "DampingIndex_Pred.Rds" )) 
+DampingIndex_Pred <- readRDS(file = file.path("..", "Data", "ProcessedData", "DampingIndex_GAMPred.Rds" )) 
 
 ```
 
@@ -111,10 +124,11 @@ spacing.diatom <- sstate_damping %>%
 
 ```{r Plot Algae DampingIndex GAM}
 
-# Run this chunk each time for each strain to generate strain specific hypervolume by changing the value for Gamstrain and selecting the corresponding "scale_x_continuous" in ggplot below. Example scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris 
+# Run this chunk each time for each strain to generate strain specific hypervolume by changing the value for Gamstrain and selecting the corresponding "scale_x_continuous" in ggplot below. 
+# Example scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris 
 
-#plotting all strains and adding a facet-wrap does not work as the contour lines are determined for each individual strain.
-GamStrain = "Chlamydomonas_reinhardtii"
+# plotting all strains and adding a facet-wrap does not work as each strain has different x-axis ranges.
+GamStrain = "Chlorella_vulgaris"
 #Chlamydomonas_ICEMDV                     #remember to change scale_x_continuous
 #Chlamydomonas_malina                     #remember to change scale_x_continuous                  
 #Chlamydomonas_priscuii                   #remember to change scale_x_continuous
@@ -171,7 +185,7 @@ ContourLines <- ContourLines$quantileValue
 
 (ContourDI <- ggplot(na.omit(DampingIndex_Hyper,spacing.algae), aes(Temp_C, Light_Level, z = fit, fill = fit)) +
   geom_tile() +
-  scale_fill_gradientn(name = expression(atop("Damping", "Index")), colors = pals::ocean.matter(14), limits  = range(0, 13), na.value = "pink") +
+  scale_fill_gradientn(name = expression(atop("Damping", "Index")), colors = pals::ocean.matter(14), limits  = range(0, 16), na.value = "pink") +
     metR::geom_contour2(aes(label = stat(level)),
                         breaks = ContourLines,
                         skip = 0,
@@ -183,13 +197,13 @@ ContourLines <- ContourLines$quantileValue
                         label.placer = label_placer_fraction(frac = 0.4)) +
     # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
     #               label.placer = label_placer_fraction(frac = 0.4)) +
-   # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris
+    scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris
    # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 4), expand = c(0, 0)) + # For C.ICE, C.malina & C.priscuii
-       scale_x_continuous(limits = c(12, 24), breaks = seq(12, 24, by = 4), expand = c(0, 0)) + # For C.reinhardtii
+       # scale_x_continuous(limits = c(12, 24), breaks = seq(12, 24, by = 4), expand = c(0, 0)) + # For C.reinhardtii
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
                        sec.axis = dup_axis(breaks = c(spacing.algae$Light_Level.mean), 
                                            labels = c(spacing.algae$PulseSpace_s),
-                                           name = sym("Equivalent Flash Spacing (s)"))) +
+                                           name = sym("Flash Spacing (s)"))) +
     coord_cartesian(expand = FALSE, clip = "on") +
     # labs(title = GamStrain) +
     xlab("Measurement Temperature (°C)") +
@@ -197,7 +211,7 @@ ContourLines <- ContourLines$quantileValue
     # ylab(NULL) +
   ggh4x::facet_nested_wrap(vars(l.strain), nrow=1, scales="free_x",
                              labeller = label_parsed) +
-  geom_vline(aes(xintercept = GrowthTemp_C + 0.025),
+  geom_vline(aes(xintercept = GrowthTemp_C + 0.025), 
              col= "black", linetype = 2, linewidth = 1.7)  +
   # # ggh4x::force_panelsizes(cols = c(10, 8, 8, 8, 18, 16, 12), respect = TRUE, total_width = unit(12, "cm")) +
   theme_thesis()+
@@ -209,7 +223,7 @@ ContourLines <- ContourLines$quantileValue
 
 ContourDI
 
-# Dynamically name the plot with strain variable
+# Dynamically name the plot with strain variable, 'ti' is the GAM parameter that generated the data which modeled the interactions of 'measurement temperature' and 'Equivalent PAR' as opposed to 'te' which includes the interactions and main effects of the predictors
 assign(paste0("ti_plot_", GamStrain), ContourDI)
 
 ```
@@ -220,7 +234,7 @@ assign(paste0("ti_plot_", GamStrain), ContourDI)
 Filename <- "AlgaeGAM"
 
 
-# Remove individual legends
+# Remove individual legends and axes titles
 p1 <- ti_plot_Chlamydomonas_ICEMDV + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
@@ -266,7 +280,7 @@ CombineAlgae <- cowplot::plot_grid(
 CombineAlgae
 
 
-# full layout
+# full layout with consolidated axes titles
 # ggdraw uses the 'cowplot' package
 AlgaeGAM <- ggdraw() +
   draw_plot(CombineAlgae, x = 0.1, y = 0.1, width = 0.85, height = 0.85) +
@@ -291,13 +305,19 @@ cowplot::save_plot(
 ### Plot individual Diatoms
 ```{r Plot Diatoms DampingIndex GAM}
 
-# Run this chunk each time for each strain to generate strain specific hypervolume by changing the value for Gamstrain and selecting the corresponding "scale_x_continuous" in ggplot below. Example scale_x_continuous(limits = c(10, 28), breaks = seq(10, 28, by = 4), expand = c(0, 0)) + # For T.pseudonana
-# plotting all strains and adding a facet-wrap does not work as the contour lines are determined for each individual strain.
+# Run this chunk each time for each strain to generate strain specific hypervolume by changing the value for Gamstrain, selecting the corresponding "scale_x_continuous" in ggplot below and selecting the growth temp in GamTemp. 
+#Example scale_x_continuous(limits = c(10, 28), breaks = seq(10, 28, by = 4), expand = c(0, 0)) + # For T.pseudonana GamTemp = 22
+
+# select growth temp; F.c was grown at 0 and 6°C and T.p was grown at 22°C
+
+
+# plotting all strains and adding a facet-wrap does not work as each strain has different x-axis ranges.
 
  GamStrain = "Fragilariopsis_cylindrus"
-#Fragilariopsis_cylindrus
-#Thalassiosira_pseudonana 
+#Fragilariopsis_cylindrus                     #remember to change scale_x_continuous
+#Thalassiosira_pseudonana                     #remember to change scale_x_continuous
 
+# select growth temp; F.c was grown at 0 and 6°C and T.p was grown at 22°C
 GamTemp = 6 #0 #6 #22 for T.p
 
 ErrorTol = 310
@@ -352,7 +372,7 @@ ContourLines <- ContourLines$quantileValue
 
 (ContourDI <- ggplot(na.omit(DampingIndex_Hyper, spacing.diatom), aes(Temp_C, Light_Level, z = fit, fill = fit)) +
   geom_tile() +
-  scale_fill_gradientn(name = bquote("Damping Index"), colors = pals::ocean.matter(14), limits  = range(0, 16.5), na.value = "pink") +
+  scale_fill_gradientn(name = expression(atop("Damping", "Index")), colors = pals::ocean.matter(14), limits  = range(0, 16.5), na.value = "pink") +
     metR::geom_contour2(aes(label = stat(level)),
                         breaks = ContourLines,
                         skip = 0,
@@ -379,7 +399,7 @@ ContourLines <- ContourLines$quantileValue
   #   size = 5.0
   # )  +
     xlab("Measurement Temperature (°C)") +
-    ylab("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")") +
+    ylab("Equivalent PAR (µmol photons"~ m^-2~ ~s^-1~ ")") +
     # ylab(NULL) +
   ggh4x::facet_nested_wrap(vars(FacetLabel), nrow=1, scales="free_x",
                              labeller = label_parsed) +
@@ -392,17 +412,18 @@ ContourLines <- ContourLines$quantileValue
 
 ContourDI
 
-# Dynamically name the plot with strain variable
+# Dynamically name the plot with strain variable, ti is the GAM parameter that generated the data which modeled the interactions of 'measurement temperature' and 'Equivalent PAR' as opposed to te which includes the interactions and main effects of the predictors
 assign(paste0("ti_plot_", GamStrain, GamTemp), ContourDI)
 
 ```
 
-#Combine plots into 1 figure and save
-```{r Combine and save Algae Damping Index GAMs}
+
+#Combine Diatom plots into 1 figure and save
+```{r Combine and save Diatom Damping Index GAM plots}
 
 Filename <- "DiatomsGAM"
 
-# Remove individual legends
+# Remove individual legends and axes titles
 p1 <- ti_plot_Fragilariopsis_cylindrus0 + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
@@ -419,19 +440,32 @@ legend_grob <- get_legend(
   p1 + theme(legend.position = "right", legend.direction = "vertical")
 )
 
-# Combine with manual layout
-CombineDiatoms <- patchwork::wrap_plots(
-  p1, p2,
- p3, gridExtra::arrangeGrob(legend_grob),
-  design = c(
-    area(1, 1), area(1, 2),  # row 1
-    area(2, 1), area(2, 2)   # row 2 (legend under p2)
-  )
+
+legend_only <- gridExtra::arrangeGrob(legend_grob)
+
+# Define width of each plot based on °C span
+temp_widths <- c(10, 10, 18)
+
+# Normalize widths
+rel_widths <- c(1, 1, 1.8)
+
+top_row <- cowplot::plot_grid(p1, p2, nrow = 1, rel_widths = rel_widths[1:2])
+bottom_row <- cowplot::plot_grid(
+  p3, legend_only,
+  nrow = 1,
+  rel_widths = c(rel_widths[3], 0.2)  # Adjust legend width if needed to get bottom row x-axis to near same scale as top row x-axis
 )
 
+CombineDiatoms <- cowplot::plot_grid(
+  top_row,
+  bottom_row,
+  ncol = 1,
+  rel_heights = c(1, 1)
+)
 CombineDiatoms
 
-# full layout
+
+# full layout with consolidated axes titles
 # ggdraw uses the 'cowplot' package
 DiatomGAM <- ggdraw() +
   draw_plot(CombineDiatoms, x = 0.1, y = 0.1, width = 0.85, height = 0.85) +
@@ -441,7 +475,7 @@ DiatomGAM <- ggdraw() +
     
 DiatomGAM
 
-# must use cowplot to save as x and y axis are lost using ggsave 
+# must use cowplot to save as x and y axis are lost using ggsave
 cowplot::save_plot(
   filename = file.path(PlotsOut, paste0(Filename, ".png")),
   plot = DiatomGAM,
@@ -450,8 +484,6 @@ cowplot::save_plot(
   dpi = 300,
   bg ="white" # need a white background for axis visibility
 )
-
 ```
-
 
 
