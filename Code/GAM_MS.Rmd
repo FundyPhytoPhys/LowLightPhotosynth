@@ -144,7 +144,7 @@ purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 
 ```{r save rds}
 
- saveRDS(object = DampingIndex_Pred, file = file.path(DataOut, "DampingIndex_Pred.Rds"), ascii = FALSE, version = NULL, refhook = NULL)
+ saveRDS(object = DampingIndex_Pred, file = file.path(DataOut, "DampingIndex_GAMPred.Rds"), ascii = FALSE, version = NULL, refhook = NULL)
 
 ```
 
