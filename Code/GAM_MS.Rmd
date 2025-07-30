@@ -33,7 +33,7 @@ library(broom)
 # library(commonR)  Natasha defined her own theme_pres(), used here and in other .Rmd;  sloppy handling of functions, variables and environments
 ```
 ```{r define paths}
-DataOut <- file.path("..", "Data", "CleanData")
+DataOut <- file.path("..", "Data", "ProcessedData")
 PlotsOut <- file.path("..", "Figures")
 ```
 # Damping Across Taxa
