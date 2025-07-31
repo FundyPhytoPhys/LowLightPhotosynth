@@ -185,9 +185,9 @@ ContourLines <- ContourLines$quantileValue
 
 (ContourDI <- ggplot(na.omit(DampingIndex_Hyper,spacing.algae), aes(Temp_C, Light_Level, z = fit, fill = fit)) +
   geom_tile() +
-  scale_fill_gradientn(name = expression(atop("Damping", "Index")), colors = pals::ocean.matter(14), limits  = range(0, 16), na.value = "pink") +
+ scale_fill_gradientn(name = expression(atop("Damping", "Index")), colors = pals::ocean.matter(14), limits  = range(0, 16.5), na.value = "pink") +  # Range is the damping index range plotted. 
     metR::geom_contour2(aes(label = stat(level)),
-                        breaks = ContourLines,
+                        breaks = ContourLines, # can replace 'ContourLines' with distinct breaks that match the legend ex breaks = c(0, 4, 8, 12, 16)
                         skip = 0,
                         color = "white",
                         linemitre = 10,
@@ -372,9 +372,9 @@ ContourLines <- ContourLines$quantileValue
 
 (ContourDI <- ggplot(na.omit(DampingIndex_Hyper, spacing.diatom), aes(Temp_C, Light_Level, z = fit, fill = fit)) +
   geom_tile() +
-  scale_fill_gradientn(name = expression(atop("Damping", "Index")), colors = pals::ocean.matter(14), limits  = range(0, 16.5), na.value = "pink") +
+  scale_fill_gradientn(name = expression(atop("Damping", "Index")), colors = pals::ocean.matter(14), limits  = range(0, 16.5), na.value = "pink") +  # Range is the damping index range plotted. 
     metR::geom_contour2(aes(label = stat(level)),
-                        breaks = ContourLines,
+                        breaks = ContourLines, # can replace 'ContourLines' with distinct breaks that match the legend ex breaks = c(0, 4, 8, 12, 16)
                         skip = 0,
                         color = "white",
                         linemitre = 10,
