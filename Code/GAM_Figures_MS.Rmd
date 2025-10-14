@@ -32,8 +32,7 @@ Note: Individual strain ggplot generations is necessary as faceting is not possi
 library(tidyverse)
 library(metR)
 library(knitr)
-library(broom)
-library(patchwork)
+# library(broom) # unused library loaded
 library(cowplot)  # for get_legend() necessary for combining plots and use ggdraw
 library(grid) # for textGrob necessary for combining axis
 

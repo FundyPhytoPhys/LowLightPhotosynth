@@ -25,7 +25,7 @@ The k parameter limits the flexibility of the interaction term. High k = more fl
 # Setup
 ```{r load libraries}
 library(tidyverse)
-library(metR)
+#library(metR) unused library loaded; used for meteorological data
 library(mgcv)
 library(ggpubr)
 library(knitr)

@@ -77,7 +77,7 @@ library(knitr)
 #library(gridExtra)
 #required for density plots
 library(ggpubr)
-library(broom)
+# library(broom) #unused library loaded
 ```
 
 ```{r, save package citations, include = FALSE}
