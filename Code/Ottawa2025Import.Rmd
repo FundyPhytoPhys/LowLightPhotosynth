@@ -1,0 +1,379 @@
+---
+title: "OttawaImport"
+author:
+- Natasha Ryan
+- Douglas A. Campbell
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+    keep_md: yes
+    fig_caption: yes
+    toc: TRUE
+    toc_float: TRUE   
+csl: plos-one.csl
+editor_options: 
+  chunk_output_type: inline
+---
+
+*Some of the code used to create this R Notebook was refurbished from "PlateAbImport.Rmd" written by Maximilian Berthold, Douglas A. Campbell, Melissa L. Rioux, Sarah J Gore, and Alyson MacCormack.*
+
+```{r load libraries}
+library(tidyverse)
+library(lubridate)
+library(googlesheets4)
+library(googledrive)
+```
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Output/')
+```
+
+#Setup
+
+### Set Project Variables 
+```{r set project variables}
+Project <- "LOW"
+TargetData <- "Ottawa_2025"
+DataOut <- file.path("..","Data", "CleanData")
+CalibData <- file.path("..","Data", "CalibData")
+
+
+DataIn <- file.path("..","Data", "RawData", TargetData, fsep = .Platform$file.sep)
+#DataRefDecay <- file.path("..","Data", "RawData",TargetData, "DecayRef", fsep = .Platform$file.sep)
+DataRLC <- file.path("..","Data", "RawData",TargetData, "RLC", fsep = .Platform$file.sep)
+
+FileID <- "fit"
+
+FileEncode <- "UTF-8" #guess_encoding says 'ASCII"
+
+Delimiter <- ","
+
+HeaderRows <- 0
+
+#conversions
+# us_s = 1000000
+photons_umol = 6.022E17
+A2_m2 = 1E20
+```
+
+
+### Metadata Import
+```{r import metadata}
+googlesheets4::gs4_deauth()
+
+OttawaMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1m8Pjwj4DL10AwdsQo2G3boymSWG1Oq-gJDzjU0csRKs/edit?usp=sharing")
+
+OttawaMetadata <- OttawaMetadata |>
+  filter(!is.na(PrimaryOperator))|>
+  select(-c(InnocDate,CultivatorTank, Tube, Notes, `...19`))
+```
+
+
+### Create Functions
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(Filename = flnm)
+}
+
+conversion <- function(data){
+  data %>%
+    group_by(PulseSpace_s, Temp_C) %>%
+    mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
+    mutate(Light_Level = round(Light_Level, 5)) %>%
+    ungroup()
+}
+```
+
+
+# No Decay Data
+
+### Import
+```{r list PSI files for file import}
+SolisenseFiles <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
+SolisenseFiles
+
+unique(duplicated(SolisenseFiles))
+```
+
+```{r read Solisense files}
+SolFits <- SolisenseFiles %>%
+  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows)) #purrr::map to read all files
+```
+
+### Tidy 
+```{r tidy dataset}
+SolFitsTrim <- SolFits %>%
+  filter(!grepl("----", DATE)) |>
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "Lon", "Lat", "GPS_stat", "LEDSel",  "Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6", "Dur.Wat", "X", "StDev..":"Flag.6" )) |>
+  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) |>
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/Ottawa_2025/")) |>
+  separate(Filename, into=c("YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) |>
+  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+          TIME = as.character(TIME)) |>
+   rename(ObsDate = DATE,
+         ObsTime = TIME,
+         FvFm = "Fv.Fm") |>
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  type_convert() %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(PulseSpace_s = as.numeric(PulseSpace_s)) %>%
+  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
+  relocate(ObsDateTime, .after = ObsTime) %>%
+  relocate(CultureID, .before = ObsDate) %>%
+  type_convert()
+
+SolFitsTrim <-SolFitsTrim %>%
+  group_by(Filename) %>%
+  mutate(Flashnumber = row_number()) %>%
+  relocate(Flashnumber, .before=p) %>%
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000,
+         .before=Flashnumber) %>% #add col for time elapsed 
+  mutate(TimeDiff_s = c(NA, diff(Time__mSec)/1000)) %>%
+  ungroup()
+```
+
+```{r test flash number}
+SolFitsTrimTest <- SolFitsTrim |>
+  filter(Flashnumber > 32)
+
+#Temporary Flashnumber Fix
+
+SolFitsTrim2 <- SolFitsTrim |>
+  filter(Flashnumber <= 32)
+```
+
+```{r correct file issues}
+# ProblemFits <- SolFitsTrim %>% 
+#   na.omit() %>%
+#   mutate(TimeDev = abs(PulseSpace_s - TimeDiff_s)) %>%
+#   filter(TimeDev > 1)
+# 
+# ProblemFiles <- unique(ProblemFits$Filename)
+# 
+# ProblemList <- SolFitsTrim %>% 
+#   filter(Filename %in% c(ProblemFiles)) %>% 
+#   doBy::split_by("Filename") #creates list of problem files
+```
+
+
+From ProblemList, use spacing between flashes to decipher runs:
+Keep last 32 flashes in:
+  20230919_MaPo1004_4C_8s         - 33 flashes 
+  20230918_MaPo1002_8C_16s        - 36 flashes 
+  20230918_MaPo1002_4C_16s        - 33 flashes
+  20230919_MaPo1002_12C_8s        - 33 flashes
+
+Last 31: 
+  20230918_MaPo1001_12C_16s       - triple, contains 3 runs, 1-32 = 8s, 33-64 = 2s, and 65-96 = 16s
+  20230918_MaPo1001_4C_16s
+  20230919_MaPo1004_4C_16s        - keep last 31 
+  20230920_MaPo1006_12C_16s       - keep last 31
+  20230918_MaPo1002_4C_16s        - 33 flashes
+  20230919_MaPo1004_8C_16s        - 36 flashes 
+  20230919_MaPo1001_4C_16s        - 48 flashes
+  20230920_MaPo1005_12C_16s       - 37 flashes
+  
+Other adjustments: 
+  20230918_MaPo1001_12C_16s       - triple, contains 3 runs, 1-32 = 8s, 33-64 = 2s, and 65-96 = 16s
+  20230918_MaPo1001_4C_1s         - double, keep first run
+  20230920_MaPo1005_24C_16s       - keep 4-33
+  20230918_MaPo1003_12C_16s       - one random 19s interval (probably fine)
+  20230918_MaPo1003_12C_2s        - one random 6s interval 
+  20230918_MaPo1003_12C_4s        - one random 6s interval 
+  20230919_MaPo1004_4C_16s        - keep last 31 
+  20230920_MaPo1006_12C_16s       - keep last 31
+  20230920_MaPo1006_24C_4s        - one 5s interval (probably fine)
+  
+  
+```{r}
+# manualtrim <- c("20230918_MaPo1001_4C_1s", "20230920_MaPo1005_24C_16s", "20230919_MaPo1004_4C_16s", "20230920_MaPo1006_12C_16s", "20230918_MaPo1001_12C_16s")
+```
+
+```{r manually trim data}
+# last32 <- SolFitsTrim %>%
+#   filter(!Filename %in% c(manualtrim)) %>%
+#   group_by(Filename) %>%
+#   slice(tail(row_number(),32)) %>% 
+#   mutate(Flashnumber = row_number()) %>%
+#   ungroup()
+# 
+# last31 <- SolFitsTrim %>%
+#   filter(Filename %in% c("20230919_MaPo1004_4C_16s", "20230920_MaPo1006_12C_16s",
+#                          "20230918_MaPo1001_12C_16s")) %>%
+#   group_by(Filename) %>%
+#   slice(tail(row_number(),31)) %>% 
+#   mutate(Flashnumber = row_number()) %>%
+#   ungroup()
+#   
+# MaPo1001_4C_1s <- SolFitsTrim %>%
+#   filter(Filename== "20230918_MaPo1001_4C_1s") %>%
+#   filter(Flashnumber <= 32)
+# 
+# MaPo1005_24C_16s <- SolFitsTrim %>%
+#   filter(Filename== "20230920_MaPo1005_24C_16s") %>%
+#   filter(Flashnumber %in% c(3:33)) %>%
+#   mutate(Flashnumber = row_number())
+# 
+# SolFitsTrim2 <- rbind(last32, last31, MaPo1001_4C_1s, MaPo1005_24C_16s)
+```
+
+
+### Normalize Fluorescence & Add Temperature Differential Column 
+#Temporarily ignoring manual fixes above.
+```{r}
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4)) #add column for sstate
+
+
+#normalize values to final stretch of 10 values from 'randomized' PSII pool, done after cleaning to ensure the last 10 values are correct 
+SolFitsTrim3 <- SolFitsTrim2 %>%
+  filter(Filename != "20251121_MaPo2015_28C_4s"
+  group_by(Filename) %>%
+  mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
+         Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
+         Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
+         FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
+  ungroup()
+
+
+# Add columns for growth temperature and difference between measurement & growth temps
+# SolFitsTrim2 <- SolFitsTrim2 %>%
+#   mutate(GrowthTemp_C = 
+#            ifelse(CultureID %in% c("MaPo1001", "MaPo1002", "MaPo1003", "MaPo1004"), 4,
+#            ifelse(CultureID %in% c("MaPo1005", "MaPo1006"), 24,
+#                   NA))) %>%
+#   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
+```
+
+
+
+
+### Group by Taxon 
+```{r}
+SolFitsPriscuii <- SolFitsTrim2 %>%
+  filter(CultureID %in% c("MaPo1001", "MaPo1004"))
+
+SolFitsICEMDV <- SolFitsTrim2 %>%
+  filter(CultureID %in% "MaPo1002")
+
+SolFitsMalina <- SolFitsTrim2 %>%
+  filter(CultureID %in% "MaPo1003")
+
+SolFitsReinhardtii <- SolFitsTrim2 %>%
+  filter(CultureID %in% c("MaPo1005", "MaPo1006"))
+```
+
+
+### Calculate Light Levels
+```{r}
+# add column for light level (µmol photons/m2/s)
+SolFitsPriscuii <- conversion(SolFitsPriscuii) 
+SolFitsICEMDV <- conversion(SolFitsICEMDV) 
+SolFitsMalina <- conversion(SolFitsMalina) 
+SolFitsReinhardtii <- conversion(SolFitsReinhardtii) 
+```
+
+
+### Test Plots
+
+```{r}
+SolFitsICEMDV %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+SolFitsMalina %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+SolFitsPriscuii %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
+
+SolFitsReinhardtii %>%
+  ggplot()+
+  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
+  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
+  theme_bw() +
+  theme(legend.position = "none")
+```
+
+
+```{r save data}
+saveRDS(SolFitsICEMDV, file.path(DataOut, paste(Project, "Chlamydomonas", "ICEMDV", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(SolFitsMalina, file.path(DataOut, paste(Project, "Chlamydomonas", "malina", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(SolFitsPriscuii, file.path(DataOut, paste(Project, "Chlamydomonas", "priscuii", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+
+saveRDS(SolFitsReinhardtii, file.path(DataOut, paste(Project, "Chlamydomonas", "reinhardtii", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+```
+
+# RLC Data
+### Import
+```{r list RLC files}
+# RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
+# RLCFiles
+# 
+# unique(duplicated(RLCFiles))
+```
+
+```{r create RLC df}
+# RLCFits <- RLCFiles %>%
+#   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
+```
+
+### Tidy
+```{r tidy RLC fits}
+# #for NoDecayDataset
+# RLCFitsTrim <- RLCFits |>
+#   filter(!grepl("----", DATE)) |> # remove rows with "----" 
+#   select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X"))  # remove superfluous columns
+# 
+# RLCFitsTrim <- RLCFitsTrim |>
+#   mutate(Filename = str_remove(string = Filename, pattern = "_RLC_fit.csv")) |>
+#     mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
+#   separate(Filename, into=c("Location", "Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) %>%
+#   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+#           TIME = as.character(TIME)) %>%
+#    rename(ObsDate = DATE,
+#          ObsTime = TIME,
+#          FvFm = "Fv.Fm") |>
+#   mutate(Temp_C = str_remove(Temp_C, "C")) |>
+#   type_convert() |>
+#   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
+#   relocate(ObsDateTime, .after = ObsTime) %>%
+#   relocate(CultureID, .before = ObsDate) |>
+#   type_convert()
+# 
+# 
+# RLCFitsTrim <- RLCFitsTrim |>
+#   group_by(Filename) |>
+#   arrange(ObsTime) |>
+#   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000) %>%
+#   ungroup()
+# 
+# RLCFitsTrim <- RLCFitsTrim |>
+#   rowwise() |>
+#   mutate(PAR_ue = sum(Light_1, Light_2, Light_3, Light_4, Light_5, Light_6)) |>
+#   group_by(Filename) |>
+#   mutate(Dark1s = case_when(row_number() == 1 ~ 0,
+#                             row_number() %% 2 == 0 & row_number() > 1 ~ 0,
+#                             row_number() %% 2 == 1 & row_number() > 1 ~ 1)) |>
+#   ungroup()
+```
+
+
