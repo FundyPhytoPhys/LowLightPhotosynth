@@ -157,36 +157,6 @@ SolFitsTrim2 <- SolFitsTrim |>
 #   doBy::split_by("Filename") #creates list of problem files
 ```
 
-
-From ProblemList, use spacing between flashes to decipher runs:
-Keep last 32 flashes in:
-  20230919_MaPo1004_4C_8s         - 33 flashes 
-  20230918_MaPo1002_8C_16s        - 36 flashes 
-  20230918_MaPo1002_4C_16s        - 33 flashes
-  20230919_MaPo1002_12C_8s        - 33 flashes
-
-Last 31: 
-  20230918_MaPo1001_12C_16s       - triple, contains 3 runs, 1-32 = 8s, 33-64 = 2s, and 65-96 = 16s
-  20230918_MaPo1001_4C_16s
-  20230919_MaPo1004_4C_16s        - keep last 31 
-  20230920_MaPo1006_12C_16s       - keep last 31
-  20230918_MaPo1002_4C_16s        - 33 flashes
-  20230919_MaPo1004_8C_16s        - 36 flashes 
-  20230919_MaPo1001_4C_16s        - 48 flashes
-  20230920_MaPo1005_12C_16s       - 37 flashes
-  
-Other adjustments: 
-  20230918_MaPo1001_12C_16s       - triple, contains 3 runs, 1-32 = 8s, 33-64 = 2s, and 65-96 = 16s
-  20230918_MaPo1001_4C_1s         - double, keep first run
-  20230920_MaPo1005_24C_16s       - keep 4-33
-  20230918_MaPo1003_12C_16s       - one random 19s interval (probably fine)
-  20230918_MaPo1003_12C_2s        - one random 6s interval 
-  20230918_MaPo1003_12C_4s        - one random 6s interval 
-  20230919_MaPo1004_4C_16s        - keep last 31 
-  20230920_MaPo1006_12C_16s       - keep last 31
-  20230920_MaPo1006_24C_4s        - one 5s interval (probably fine)
-  
-  
 ```{r}
 # manualtrim <- c("20230918_MaPo1001_4C_1s", "20230920_MaPo1005_24C_16s", "20230919_MaPo1004_4C_16s", "20230920_MaPo1006_12C_16s", "20230918_MaPo1001_12C_16s")
 ```
@@ -231,13 +201,25 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
 
 
 #normalize values to final stretch of 10 values from 'randomized' PSII pool, done after cleaning to ensure the last 10 values are correct 
-SolFitsTrim3 <- SolFitsTrim2 %>%
-  filter(Filename != "20251121_MaPo2015_28C_4s"
+# SolFitsTrim2 <- SolFitsTrim2 %>%
+#   filter(Filename != "20251121_MaPo2015_28C_4s") |>
+#   group_by(Filename) %>%
+#   mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
+#          Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
+#          Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
+#          FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
+#   ungroup()
+
+#Ottawa_2025 did not run all captures for 32 flashes, so using last 10 points average may be problematic.  Normalize to flashes from 9 to end of flash train.
+
+SolFitsTrim2 <- SolFitsTrim2 %>%
+  filter(Filename != "20251121_MaPo2015_28C_4s") |>
   group_by(Filename) %>%
-  mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
-         Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
-         Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
-         FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
+  mutate(FilenameLength = length(Sig),
+         Sigrunnorm =  Sig/mean(Sig[9]:Sig[length(Sig)], na.rm = TRUE),
+         Forunnorm = Fo/mean(Fo[8]:Fo[length(Fo)], na.rm = TRUE),
+         Fmrunnorm = Fm/mean(Fm[8]:Fm[length(Fm)], na.rm = TRUE),
+         FvFmrunnorm = FvFm/mean(FvFm[8]:FvFm[length(FvFm)], na.rm = TRUE)) %>%
   ungroup()
 
 
@@ -251,21 +233,81 @@ SolFitsTrim3 <- SolFitsTrim2 %>%
 ```
 
 
+```{r, metadata merge}
+SolFitsMeta <- left_join(SolFitsTrim2, OttawaMetadata, by = join_by(CultureID == ID))
+```
+
+```{r test plots}
+SolFitsMeta |>
+  filter(GrowthTemp_C == 4) |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, )) +
+  facet_grid(rows = vars(Temp_C, NaCl_mM), cols = vars(Strain)) +
+  theme_bw()
+
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_priscuii") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, )) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_klinobasis") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, )) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_malina") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, )) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_euryale") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, )) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_reinhardtii") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, )) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+```
+
 
 
 ### Group by Taxon 
 ```{r}
-SolFitsPriscuii <- SolFitsTrim2 %>%
-  filter(CultureID %in% c("MaPo1001", "MaPo1004"))
-
-SolFitsICEMDV <- SolFitsTrim2 %>%
-  filter(CultureID %in% "MaPo1002")
-
-SolFitsMalina <- SolFitsTrim2 %>%
-  filter(CultureID %in% "MaPo1003")
-
-SolFitsReinhardtii <- SolFitsTrim2 %>%
-  filter(CultureID %in% c("MaPo1005", "MaPo1006"))
+# SolFitsPriscuii <- SolFitsTrim2 %>%
+#   filter(CultureID %in% c("MaPo1001", "MaPo1004"))
+# 
+# SolFitsICEMDV <- SolFitsTrim2 %>%
+#   filter(CultureID %in% "MaPo1002")
+# 
+# SolFitsMalina <- SolFitsTrim2 %>%
+#   filter(CultureID %in% "MaPo1003")
+# 
+# SolFitsReinhardtii <- SolFitsTrim2 %>%
+#   filter(CultureID %in% c("MaPo1005", "MaPo1006"))
 ```
 
 
