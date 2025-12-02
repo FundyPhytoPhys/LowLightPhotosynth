@@ -292,7 +292,57 @@ SolFitsMeta |>
   facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 ```
+```{r test plots 1 s}
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_priscuii") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  filter(PulseSpace_s == 1) |>
+  ggplot() +
+  geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
+  theme_bw()
 
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_klinobasis") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  filter(PulseSpace_s == 1) |>
+  ggplot() +
+  geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
+  theme_bw()
+
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_malina") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  filter(PulseSpace_s == 1) |>
+  ggplot() +
+  geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
+  theme_bw()
+
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_euryale") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  filter(PulseSpace_s == 1) |>
+  ggplot() +
+  geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s,NaCl_mM)) +
+  theme_bw()
+
+SolFitsMeta |>
+  filter(Strain == "Chlamydomonas_reinhardtii") |>
+  filter(FvFmrunnorm < 1.5,
+         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  filter(PulseSpace_s == 1) |>
+  ggplot() +
+  geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
+  theme_bw()
+```
 
 
 ### Group by Taxon 
