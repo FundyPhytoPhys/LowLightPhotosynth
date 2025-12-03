@@ -252,8 +252,8 @@ SolFitsMeta <- conversion(SolFitsMeta)
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_priscuii") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  # filter(FvFmrunnorm < 1.5,
+  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM)), size = 0.1) +
   facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
@@ -261,8 +261,8 @@ SolFitsMeta |>
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_klinobasis") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  # filter(FvFmrunnorm < 1.5,
+  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, as.factor(NaCl_mM)), size = 0.1) +
   facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
@@ -270,8 +270,8 @@ SolFitsMeta |>
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_malina") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  # filter(FvFmrunnorm < 1.5,
+  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM)), size = 0.1) +
   facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
@@ -279,8 +279,8 @@ SolFitsMeta |>
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_euryale") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  # filter(FvFmrunnorm < 1.5,
+  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM)), size = 0.1) +
   facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
@@ -288,8 +288,8 @@ SolFitsMeta |>
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_reinhardtii") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+  # filter(FvFmrunnorm < 1.5,
+  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM)), size = 0.1) +
   facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
