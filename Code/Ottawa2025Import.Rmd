@@ -352,21 +352,14 @@ SolFitsMeta |>
   theme_bw()
 ```
 
-
 ```{r save SolFitsMeta}
 saveRDS(SolFitsMeta, file.path(DataOut, paste(Project, "Ottawa_2025", "SolFitsMeta.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 
 
-
-
-
-
-
-
 # RLC Data
-### Import; missing many 8C files?
+### Import RLC; missing 8C & 12C files?
 ```{r list RLC files}
 RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
 RLCFiles
@@ -379,19 +372,7 @@ RLCFits <- RLCFiles %>%
   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
 
-
- 
-
-SolFitsTrim <-SolFitsTrim %>%
-  group_by(Filename) %>%
-  mutate(Flashnumber = row_number()) %>%
-  relocate(Flashnumber, .before=p) %>%
-  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000,
-         .before=Flashnumber) %>% #add col for time elapsed 
-  mutate(TimeDiff_s = c(NA, diff(Time__mSec)/1000)) %>%
-  ungroup()
-
-### Tidy
+### Tidy RLC
 ```{r tidy RLC fits}
 
 RLCFitsTrim <- RLCFits |>
@@ -500,3 +481,9 @@ RLCFitsMeta |>
   facet_grid(rows = vars(Temp_C), cols = vars(Strain, NaCl_mM)) +
   theme_bw()
 ```
+
+
+```{r save RLCFitsMeta}
+saveRDS(RLCFitsMeta, file.path(DataOut, paste(Project, "Ottawa_2025", "RLCFitsMeta.Rds", sep = "_"), fsep = .Platform$file.sep))
+```
+
