@@ -79,8 +79,8 @@ read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.deli
 
 conversion <- function(data){
   data %>%
-    group_by(PulseSpace_s, Temp_C) %>%
-    mutate(Light_Level = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
+    group_by(Filename, PulseSpace_s, Temp_C) %>%
+    mutate(LightLevel_ue = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
     mutate(Light_Level = round(Light_Level, 5)) %>%
     ungroup()
 }
@@ -222,14 +222,6 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
          FvFmrunnorm = FvFm/mean(FvFm[8]:FvFm[length(FvFm)], na.rm = TRUE)) %>%
   ungroup()
 
-
-# Add columns for growth temperature and difference between measurement & growth temps
-# SolFitsTrim2 <- SolFitsTrim2 %>%
-#   mutate(GrowthTemp_C = 
-#            ifelse(CultureID %in% c("MaPo1001", "MaPo1002", "MaPo1003", "MaPo1004"), 4,
-#            ifelse(CultureID %in% c("MaPo1005", "MaPo1006"), 24,
-#                   NA))) %>%
-#   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
 ```
 
 
@@ -237,15 +229,26 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
 SolFitsMeta <- left_join(SolFitsTrim2, OttawaMetadata, by = join_by(CultureID == ID))
 ```
 
+
+
+Add columns for growth temperature and difference between measurement & growth temps
+```{r TempDiff_C}
+
+SolFitsMeta <- SolFitsMeta %>%
+  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
+
+```
+
+
+### Calculate equivalent Light Levels using conversion function
+```{r}
+# add column for light level (µmol photons/m2/s)
+SolFitsMeta <- conversion(SolFitsMeta) 
+
+```
+
+
 ```{r test plots}
-SolFitsMeta |>
-  filter(GrowthTemp_C == 4) |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
-  ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = NaCl_mM), size = 0.1) +
-  facet_grid(rows = vars(Temp_C, NaCl_mM), cols = vars(Strain, PulseSpace_s)) +
-  theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_priscuii") |>
@@ -292,180 +295,208 @@ SolFitsMeta |>
   facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 ```
-```{r test plots 1 s}
+
+
+```{r test plots single flash space}
+
+PulseSpaceSet = 2
+
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_priscuii") |>
   filter(FvFmrunnorm < 1.5,
          FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
-  filter(PulseSpace_s == 1) |>
+  filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
+  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
   theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_klinobasis") |>
   filter(FvFmrunnorm < 1.5,
          FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
-  filter(PulseSpace_s == 1) |>
+  filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
+  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
   theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_malina") |>
   filter(FvFmrunnorm < 1.5,
          FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
-  filter(PulseSpace_s == 1) |>
+  filter(PulseSpace_s == 2) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
+  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
   theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_euryale") |>
   filter(FvFmrunnorm < 1.5,
          FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
-  filter(PulseSpace_s == 1) |>
+  filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s,NaCl_mM)) +
+  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s,NaCl_mM)) +
   theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_reinhardtii") |>
   filter(FvFmrunnorm < 1.5,
          FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
-  filter(PulseSpace_s == 1) |>
+  filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
+  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
   theme_bw()
 ```
 
 
-### Group by Taxon 
-```{r}
-# SolFitsPriscuii <- SolFitsTrim2 %>%
-#   filter(CultureID %in% c("MaPo1001", "MaPo1004"))
-# 
-# SolFitsICEMDV <- SolFitsTrim2 %>%
-#   filter(CultureID %in% "MaPo1002")
-# 
-# SolFitsMalina <- SolFitsTrim2 %>%
-#   filter(CultureID %in% "MaPo1003")
-# 
-# SolFitsReinhardtii <- SolFitsTrim2 %>%
-#   filter(CultureID %in% c("MaPo1005", "MaPo1006"))
+```{r save SolFitsMeta}
+saveRDS(SolFitsMeta, file.path(DataOut, paste(Project, "Ottawa_2025", "SolFitsMeta.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 
-### Calculate Light Levels
-```{r}
-# add column for light level (µmol photons/m2/s)
-SolFitsPriscuii <- conversion(SolFitsPriscuii) 
-SolFitsICEMDV <- conversion(SolFitsICEMDV) 
-SolFitsMalina <- conversion(SolFitsMalina) 
-SolFitsReinhardtii <- conversion(SolFitsReinhardtii) 
-```
 
 
-### Test Plots
-
-```{r}
-SolFitsICEMDV %>%
-  ggplot()+
-  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
-  theme_bw() +
-  theme(legend.position = "none")
-
-SolFitsMalina %>%
-  ggplot()+
-  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
-  theme_bw() +
-  theme(legend.position = "none")
-
-SolFitsPriscuii %>%
-  ggplot()+
-  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
-  theme_bw() +
-  theme(legend.position = "none")
-
-SolFitsReinhardtii %>%
-  ggplot()+
-  geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
-  facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
-  theme_bw() +
-  theme(legend.position = "none")
-```
 
 
-```{r save data}
-saveRDS(SolFitsICEMDV, file.path(DataOut, paste(Project, "Chlamydomonas", "ICEMDV", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 
-saveRDS(SolFitsMalina, file.path(DataOut, paste(Project, "Chlamydomonas", "malina", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 
-saveRDS(SolFitsPriscuii, file.path(DataOut, paste(Project, "Chlamydomonas", "priscuii", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
-
-saveRDS(SolFitsReinhardtii, file.path(DataOut, paste(Project, "Chlamydomonas", "reinhardtii", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
-```
 
 # RLC Data
-### Import
+### Import; missing many 8C files?
 ```{r list RLC files}
-# RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
-# RLCFiles
-# 
-# unique(duplicated(RLCFiles))
+RLCFiles <- list.files(path = DataRLC, pattern = FileID, full.names = TRUE)
+RLCFiles
+
+unique(duplicated(RLCFiles))
 ```
 
 ```{r create RLC df}
-# RLCFits <- RLCFiles %>%
-#   map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
+RLCFits <- RLCFiles %>%
+  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
+
+
+ 
+
+SolFitsTrim <-SolFitsTrim %>%
+  group_by(Filename) %>%
+  mutate(Flashnumber = row_number()) %>%
+  relocate(Flashnumber, .before=p) %>%
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000,
+         .before=Flashnumber) %>% #add col for time elapsed 
+  mutate(TimeDiff_s = c(NA, diff(Time__mSec)/1000)) %>%
+  ungroup()
 
 ### Tidy
 ```{r tidy RLC fits}
-# #for NoDecayDataset
-# RLCFitsTrim <- RLCFits |>
-#   filter(!grepl("----", DATE)) |> # remove rows with "----" 
-#   select(-c("RFID_User_Data", "Barcode_Data","PIF", "LEDSel", "Dur.Wat", "Lon", "Lat", "GPS_stat","X"))  # remove superfluous columns
-# 
-# RLCFitsTrim <- RLCFitsTrim |>
-#   mutate(Filename = str_remove(string = Filename, pattern = "_RLC_fit.csv")) |>
-#     mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/")) |>
-#   separate(Filename, into=c("Location", "Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) %>%
-#   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
-#           TIME = as.character(TIME)) %>%
-#    rename(ObsDate = DATE,
-#          ObsTime = TIME,
-#          FvFm = "Fv.Fm") |>
-#   mutate(Temp_C = str_remove(Temp_C, "C")) |>
-#   type_convert() |>
-#   mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
-#   relocate(ObsDateTime, .after = ObsTime) %>%
-#   relocate(CultureID, .before = ObsDate) |>
-#   type_convert()
-# 
-# 
-# RLCFitsTrim <- RLCFitsTrim |>
-#   group_by(Filename) |>
-#   arrange(ObsTime) |>
-#   mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000) %>%
-#   ungroup()
-# 
-# RLCFitsTrim <- RLCFitsTrim |>
-#   rowwise() |>
-#   mutate(PAR_ue = sum(Light_1, Light_2, Light_3, Light_4, Light_5, Light_6)) |>
-#   group_by(Filename) |>
-#   mutate(Dark1s = case_when(row_number() == 1 ~ 0,
-#                             row_number() %% 2 == 0 & row_number() > 1 ~ 0,
-#                             row_number() %% 2 == 1 & row_number() > 1 ~ 1)) |>
-#   ungroup()
+
+RLCFitsTrim <- RLCFits |>
+  filter(!grepl("----", DATE)) |> # remove rows with "----"
+  select(-c("RFID_User_Data", "Barcode_Data","PIF","Lon", "Lat", "GPS_stat", "LEDSel", "Dur.Wat", "StDev..", "StDev...25", "StDev...28", "StDev...28", "StDev...31", "StDev...34", "StDev...37", "StDev...40", "Flag", "Flag.1", "Flag.2","Flag.3", "Flag.4","Flag.5", "Flag.6", "X"))  # remove superfluous columns
+
+
+RLCFitsTrim <- RLCFitsTrim |>
+  mutate(Filename = str_remove(string = Filename, pattern = "_RLC_fit.csv")) |>
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/"))|>
+  mutate(Filename = str_remove(string = Filename, pattern = "Ottawa_2025/"))|>
+  separate(Filename, into=c("Type", "YYYYMMDD", "CultureID", "Temp_C"), sep = "([\\/\\_])", remove = FALSE) |>
+  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+         TIME = as.character(TIME)) |>
+  rename(ObsDate = DATE,
+         ObsTime = TIME,
+         FvFm = "Fv.Fm") |>
+  mutate(Temp_C = str_remove(Temp_C, "C")) |>
+  type_convert() |>
+  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) |>
+  relocate(ObsDateTime, .after = ObsTime) |>
+  relocate(CultureID, .before = ObsDate) |>
+  type_convert()
+
+
+RLCFitsTrim <- RLCFitsTrim |>
+  group_by(Filename) |>
+  arrange(ObsTime) |>
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec),
+                                                 na.rm = TRUE))/1000) |>
+  ungroup()
+
+
+RLCFitsTrim <- RLCFitsTrim |>
+  rowwise() |>
+  mutate(PAR_ue = Light_1) |>
+  group_by(Filename) |>
+  mutate(Dark1s = case_when(row_number() == 1 ~ 0,
+                            row_number() %% 2 == 0 & row_number() > 1 ~ 0,
+                            row_number() %% 2 == 1 & row_number() > 1 ~ 1)) |>
+  ungroup()
 ```
 
+# RLC test plots
+```{r RLCFitsTrim_testplots}
+RLCFitsTrim |>
+  filter(Dark1s == 0) |>
+  ggplot() +
+  geom_point(aes(x = PAR_ue, y = FvFm)) +
+  facet_grid(rows = vars(Temp_C)) +
+  theme_bw()
+```
 
+#Merge RLC with MetaData
+
+```{r, metadata merge}
+RLCFitsMeta <- left_join(RLCFitsTrim, OttawaMetadata, by = join_by(CultureID == ID))
+```
+
+# RLCFitsMeta test plots
+```{r RLCFitsMeta_testplots}
+RLCFitsMeta |>
+  filter(Dark1s == 0) |>
+  ggplot() +
+  geom_point(aes(x = PAR_ue, y = FvFm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain)) +
+  theme_bw()
+
+RLCFitsMeta |>
+  filter(Dark1s == 0) |>
+  filter(Strain == "Chlamydomonas_priscuii") |>
+  ggplot() +
+  geom_point(aes(x = PAR_ue, y = FvFm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+
+RLCFitsMeta |>
+  filter(Dark1s == 0) |>
+  filter(Strain == "Chlamydomonas_klinobasis") |>
+  ggplot() +
+  geom_point(aes(x = PAR_ue, y = FvFm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+
+RLCFitsMeta |>
+  filter(Dark1s == 0) |>
+  filter(Strain == "Chlamydomonas_malina") |>
+  ggplot() +
+  geom_point(aes(x = PAR_ue, y = FvFm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+
+RLCFitsMeta |>
+  filter(Dark1s == 0) |>
+  filter(Strain == "Chlamydomonas_reinhardtii") |>
+  ggplot() +
+  geom_point(aes(x = PAR_ue, y = FvFm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+
+RLCFitsMeta |>
+  filter(Dark1s == 0) |>
+  filter(Strain == "Chlamydomonas_euryale") |>
+  ggplot() +
+  geom_point(aes(x = PAR_ue, y = FvFm)) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain, NaCl_mM)) +
+  theme_bw()
+```
