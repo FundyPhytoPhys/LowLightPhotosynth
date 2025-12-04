@@ -81,7 +81,7 @@ conversion <- function(data){
   data %>%
     group_by(Filename, PulseSpace_s, Temp_C) %>%
     mutate(LightLevel_ue = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
-    mutate(Light_Level = round(Light_Level, 5)) %>%
+    mutate(LightLevel_ue = round(LightLevel_ue, 5)) %>%
     ungroup()
 }
 ```
@@ -144,6 +144,7 @@ SolFitsTrim2 <- SolFitsTrim |>
   filter(Flashnumber <= 32)
 ```
 
+
 ```{r correct file issues}
 # ProblemFits <- SolFitsTrim %>% 
 #   na.omit() %>%
@@ -155,6 +156,8 @@ SolFitsTrim2 <- SolFitsTrim |>
 # ProblemList <- SolFitsTrim %>% 
 #   filter(Filename %in% c(ProblemFiles)) %>% 
 #   doBy::split_by("Filename") #creates list of problem files
+
+ProblemFiles
 ```
 
 ```{r}
@@ -193,6 +196,9 @@ SolFitsTrim2 <- SolFitsTrim |>
 ### Normalize Fluorescence & Add Temperature Differential Column 
 #Temporarily ignoring manual fixes above.
 ```{r}
+
+NormStartFlash = 9
+
 SolFitsTrim2 <- SolFitsTrim2 %>%
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
                     Flashnumber %% 4 == 2 ~ 2,
@@ -216,10 +222,10 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
   filter(Filename != "20251121_MaPo2015_28C_4s") |>
   group_by(Filename) %>%
   mutate(FilenameLength = length(Sig),
-         Sigrunnorm =  Sig/mean(Sig[9]:Sig[length(Sig)], na.rm = TRUE),
-         Forunnorm = Fo/mean(Fo[8]:Fo[length(Fo)], na.rm = TRUE),
-         Fmrunnorm = Fm/mean(Fm[8]:Fm[length(Fm)], na.rm = TRUE),
-         FvFmrunnorm = FvFm/mean(FvFm[8]:FvFm[length(FvFm)], na.rm = TRUE)) %>%
+         Sigrunnorm =  Sig/mean(Sig[NormStartFlash]:Sig[length(Sig)], na.rm = TRUE),
+         Forunnorm = Fo/mean(Fo[NormStartFlash]:Fo[length(Fo)], na.rm = TRUE),
+         Fmrunnorm = Fm/mean(Fm[NormStartFlash]:Fm[length(Fm)], na.rm = TRUE),
+         FvFmrunnorm = FvFm/mean(FvFm[NormStartFlash]:FvFm[length(FvFm)], na.rm = TRUE)) %>%
   ungroup()
 
 ```
@@ -255,17 +261,17 @@ SolFitsMeta |>
   # filter(FvFmrunnorm < 1.5,
   #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM)), size = 0.1) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_klinobasis") |>
-  # filter(FvFmrunnorm < 1.5,
-  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
+   #filter(FvFmrunnorm < 1.5,
+    #      FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, as.factor(NaCl_mM)), size = 0.1) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 
 SolFitsMeta |>
@@ -273,8 +279,8 @@ SolFitsMeta |>
   # filter(FvFmrunnorm < 1.5,
   #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM)), size = 0.1) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 
 SolFitsMeta |>
@@ -282,18 +288,38 @@ SolFitsMeta |>
   # filter(FvFmrunnorm < 1.5,
   #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM)), size = 0.1) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_reinhardtii") |>
-  # filter(FvFmrunnorm < 1.5,
-  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM)), size = 0.1) +
-  facet_grid(rows = vars(GrowthTemp_C,Temp_C), cols = vars(Strain, PulseSpace_s)) +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
+```
+#Inspection of plots for Problem Runs
+Cr:
+MaPo2002_28C_1 s, another run appended? normalization?
+
+Ce
+MaPo2020_16C_1s; another run appended?
+
+Cm
+nothing obvious
+
+Ck
+nothing obvious
+
+Cp
+some drift nothing obvious
+
+```{r problemplot_filter}
+SolFitsMeta <- SolFitsMeta |>
+  filter(!grepl("MaPo2020_16C_1s", Filename)) |>
+  filter(!grepl("MaPo2002_28C_1s", Filename))
+  
 ```
 
 
@@ -303,8 +329,6 @@ PulseSpaceSet = 2
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_priscuii") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
@@ -313,8 +337,6 @@ SolFitsMeta |>
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_klinobasis") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
@@ -323,8 +345,6 @@ SolFitsMeta |>
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_malina") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   filter(PulseSpace_s == 2) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
@@ -333,8 +353,6 @@ SolFitsMeta |>
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_euryale") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
@@ -343,8 +361,6 @@ SolFitsMeta |>
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_reinhardtii") |>
-  filter(FvFmrunnorm < 1.5,
-         FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
