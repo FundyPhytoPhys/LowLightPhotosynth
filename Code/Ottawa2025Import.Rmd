@@ -308,6 +308,7 @@ MaPo2020_16C_1s; another run appended?
 
 Cm
 nothing obvious
+MaPo2010_4C_8s another run appended?
 
 Ck
 nothing obvious
@@ -317,15 +318,20 @@ some drift nothing obvious
 
 ```{r problemplot_filter}
 SolFitsMeta <- SolFitsMeta |>
-  filter(!grepl("MaPo2020_16C_1s", Filename)) |>
-  filter(!grepl("MaPo2002_28C_1s", Filename))
+  filter(!grepl("MaPo2020_16C_1s", Filename)) |> #remove for now; better to truncate length
+  filter(!grepl("MaPo2002_28C_1s", Filename)) |>
+  filter(!grepl("MaPo2019_16C_2s", Filename)) |> #remove for now; better to truncate length
+  filter(!grepl("MaPo2010_4C_8s", Filename))
+
+#|>
+ # filter(Strain != "Chlamydomonas_reinhardtii" & Temp_C != 12) #poor quality runs
   
 ```
 
 
 ```{r test plots single flash space}
 
-PulseSpaceSet = 2
+PulseSpaceSet = 16
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_priscuii") |>
@@ -345,7 +351,7 @@ SolFitsMeta |>
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_malina") |>
-  filter(PulseSpace_s == 2) |>
+  filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
   facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
