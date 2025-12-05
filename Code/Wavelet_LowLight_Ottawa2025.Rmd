@@ -228,7 +228,7 @@ Cm_significant <- wt.significance(Cm_wavelets)
 ```
 
 ```{r reconstruct waves Cm}
-Cm_reconstruction <- reconstructwave(Ck_wavelets)
+Cm_reconstruction <- reconstructwave(Cm_wavelets)
 ```
 
 ```{r damping index Cm}
@@ -249,6 +249,147 @@ Cm_damping <- damping(Cm_reconstruction)  %>%
 
 ```{r Cm_dampingindex}
 Cm_damping |>
+  ggplot() +
+  geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain)) +
+  theme_bw()
+```
+
+### Cp
+```{r import Cm data }
+Cp_data <- readRDS(file.path(DataIn, "LOW_Ottawa_2025_SolFitsMeta.Rds")) |>
+  filter(Strain == "Chlamydomonas_priscuii")
+
+Cp_data <- summaryBy(FvFmrunnorm ~ PulseSpace_s + Temp_C + Flashnumber + LightLevel_ue + NaCl_mM, data=Cp_data, FUN=mean, keep.names = TRUE) %>%
+  splitBy(formula = ~ PulseSpace_s + Temp_C + LightLevel_ue + NaCl_mM) %>%
+  setNames(., paste0("Cp_", gsub("\\|", "_", names(.))))
+```
+
+```{r wavelet transformation Cp}
+Cp_wavelets <- wavelet(Cp_data)
+```
+
+```{r evaluate significance Cp}
+Cp_significant <- wt.significance(Cp_wavelets)
+#plot.wt.avg(Ci_wavelets)
+```
+
+```{r reconstruct waves Cp}
+Cp_reconstruction <- reconstructwave(Cp_wavelets)
+```
+
+```{r damping index Cp}
+Cp_damping <- damping(Cp_reconstruction)  %>%
+  mutate(damping.index = ifelse(!condition %in% Cp_significant, 0, damping.index)) %>%
+  rename(DampingIndex = damping.index) %>%
+  separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "LightLevel_ue", "NaCl_mM"), sep = "_") |>
+  mutate(Temp_C = as.numeric(Temp_C),
+         PulseSpace_s = as.numeric(PulseSpace_s),
+         NaCl_mM = as.numeric(NaCl_mM),
+         LightLevel_ue = as.numeric(LightLevel_ue)) |>
+  mutate(Strain = Cp, GrowthTemp_C = 4, 
+         TempDiff_C = Temp_C - GrowthTemp_C)
+  
+```
+
+# Cp TestPlot of damping index
+
+```{r Cp_dampingindex}
+Cp_damping |>
+  ggplot() +
+  geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain)) +
+  theme_bw()
+```
+
+### Ce
+```{r import Cm data }
+Ce_data <- readRDS(file.path(DataIn, "LOW_Ottawa_2025_SolFitsMeta.Rds")) |>
+  filter(Strain == "Chlamydomonas_euryale")
+
+Ce_data <- summaryBy(FvFmrunnorm ~ PulseSpace_s + Temp_C + Flashnumber + LightLevel_ue + NaCl_mM, data=Ce_data, FUN=mean, keep.names = TRUE) %>%
+  splitBy(formula = ~ PulseSpace_s + Temp_C + LightLevel_ue + NaCl_mM) %>%
+  setNames(., paste0("Ce_", gsub("\\|", "_", names(.))))
+```
+
+```{r wavelet transformation Ce}
+Ce_wavelets <- wavelet(Ce_data)
+```
+
+```{r evaluate significance Ce}
+Ce_significant <- wt.significance(Ce_wavelets)
+#plot.wt.avg(Ci_wavelets)
+```
+
+```{r reconstruct waves Ce}
+Ce_reconstruction <- reconstructwave(Ce_wavelets)
+```
+
+```{r damping index Ce}
+Ce_damping <- damping(Ce_reconstruction)  %>%
+  mutate(damping.index = ifelse(!condition %in% Ce_significant, 0, damping.index)) %>%
+  rename(DampingIndex = damping.index) %>%
+  separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "LightLevel_ue", "NaCl_mM"), sep = "_") |>
+  mutate(Temp_C = as.numeric(Temp_C),
+         PulseSpace_s = as.numeric(PulseSpace_s),
+         NaCl_mM = as.numeric(NaCl_mM),
+         LightLevel_ue = as.numeric(LightLevel_ue)) |>
+  mutate(Strain = Ce, GrowthTemp_C = 24, 
+         TempDiff_C = Temp_C - GrowthTemp_C)
+  
+```
+
+# Ce TestPlot of damping index
+
+```{r Ce_dampingindex}
+Ce_damping |>
+  ggplot() +
+  geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain)) +
+  theme_bw()
+```
+
+### Cr
+```{r import Cm data }
+Cr_data <- readRDS(file.path(DataIn, "LOW_Ottawa_2025_SolFitsMeta.Rds")) |>
+  filter(Strain == "Chlamydomonas_reinhardtii")
+
+Cr_data <- summaryBy(FvFmrunnorm ~ PulseSpace_s + Temp_C + Flashnumber + LightLevel_ue + NaCl_mM, data=Cr_data, FUN=mean, keep.names = TRUE) %>%
+  splitBy(formula = ~ PulseSpace_s + Temp_C + LightLevel_ue + NaCl_mM) %>%
+  setNames(., paste0("Cr_", gsub("\\|", "_", names(.))))
+```
+
+```{r wavelet transformation Cr}
+Cr_wavelets <- wavelet(Cr_data)
+```
+
+```{r evaluate significance Cr}
+Cr_significant <- wt.significance(Cr_wavelets)
+#plot.wt.avg(Ci_wavelets)
+```
+
+```{r reconstruct waves Cr}
+Cr_reconstruction <- reconstructwave(Cr_wavelets)
+```
+
+```{r damping index Cr}
+Cr_damping <- damping(Cr_reconstruction)  %>%
+  mutate(damping.index = ifelse(!condition %in% Cr_significant, 0, damping.index)) %>%
+  rename(DampingIndex = damping.index) %>%
+  separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "LightLevel_ue", "NaCl_mM"), sep = "_") |>
+  mutate(Temp_C = as.numeric(Temp_C),
+         PulseSpace_s = as.numeric(PulseSpace_s),
+         NaCl_mM = as.numeric(NaCl_mM),
+         LightLevel_ue = as.numeric(LightLevel_ue)) |>
+  mutate(Strain = Cr, GrowthTemp_C = 24, 
+         TempDiff_C = Temp_C - GrowthTemp_C)
+  
+```
+
+# Cr TestPlot of damping index
+
+```{r Cr_dampingindex}
+Cr_damping |>
   ggplot() +
   geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
   facet_grid(rows = vars(Temp_C), cols = vars(Strain)) +
