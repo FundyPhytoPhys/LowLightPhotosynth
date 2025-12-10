@@ -57,6 +57,13 @@ HeaderRows <- 0
 # us_s = 1000000
 photons_umol = 6.022E17
 A2_m2 = 1E20
+
+#set colours
+TempColours = c("black","violet",  "blue", "darkgreen", "green", "orange", "red", "darkred")
+
+names(TempColours) <- c(2, 4, 8, 12, 16, 20, 24, 28)
+
+TempColours
 ```
 
 
@@ -91,15 +98,25 @@ conversion <- function(data){
 
 ### Import
 ```{r list PSI files for file import}
-SolisenseFiles <- list.files(path = DataIn, pattern = FileID, full.names = TRUE)
-SolisenseFiles
+SolisenseFiles <- list.files(path = DataIn, pattern = FileID, full.names = TRUE, recursive = FALSE)
+
+SolisenseFiles 
 
 unique(duplicated(SolisenseFiles))
+
+SolisenseFilesExtra <- list.files(path = "../Data/RawData/ExtraPriscuii16C_2025", pattern = FileID, full.names = TRUE, recursive = FALSE)
+
+SolisenseFilesExtra
 ```
 
 ```{r read Solisense files}
 SolFits <- SolisenseFiles %>%
-  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows)) #purrr::map to read all files
+  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
+```
+
+```{r read Solisense files extra}
+SolFitsExtra <- SolisenseFilesExtra %>%
+  map_df(~read.delim_plus(flnm =., file_encode = FileEncode, delimiter = Delimiter, header_rows = HeaderRows))
 ```
 
 ### Tidy 
@@ -134,14 +151,50 @@ SolFitsTrim <-SolFitsTrim %>%
   ungroup()
 ```
 
+```{r tidy extra dataset}
+SolFitsTrimExtra <- SolFitsExtra %>%
+  filter(!grepl("----", DATE)) |>
+  select(-c("RFID_User_Data", "Barcode_Data","PIF", "Lon", "Lat", "GPS_stat", "LEDSel",  "Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6", "Dur.Wat", "X")) |>
+  mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) |>
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/ExtraPriscuii16C_2025/")) |>
+  separate(Filename, into=c("YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) |>
+  mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
+          TIME = as.character(TIME)) |>
+   rename(ObsDate = DATE,
+         ObsTime = TIME,
+         FvFm = "Fv.Fm") |>
+  mutate(Temp_C = str_remove(Temp_C, "C")) %>%
+  type_convert() %>%
+  mutate(PulseSpace_s = str_remove(PulseSpace_s, "s")) %>%
+  mutate(PulseSpace_s = as.numeric(PulseSpace_s)) %>%
+  mutate(ObsDateTime = lubridate::ymd_hms(paste(ObsDate, ObsTime))) %>%
+  relocate(ObsDateTime, .after = ObsTime) %>%
+  relocate(CultureID, .before = ObsDate) %>%
+  type_convert()
+
+SolFitsTrimExtra <-SolFitsTrimExtra %>%
+  group_by(Filename) %>%
+  mutate(Flashnumber = row_number()) %>%
+  relocate(Flashnumber, .before=p) %>%
+  mutate(Etime_s = (as.numeric(Time__mSec) - min(as.numeric(Time__mSec), na.rm = TRUE))/1000,
+         .before=Flashnumber) %>% #add col for time elapsed 
+  mutate(TimeDiff_s = c(NA, diff(Time__mSec)/1000)) %>%
+  ungroup()
+```
+
+
 ```{r test flash number}
-SolFitsTrimTest <- SolFitsTrim |>
-  filter(Flashnumber > 32)
+# SolFitsTrimTest <- SolFitsTrim |>
+#   filter(Flashnumber > 32)
 
 #Temporary Flashnumber Fix
 
 SolFitsTrim2 <- SolFitsTrim |>
-  filter(Flashnumber <= 32)
+  filter(Flashnumber <= 20)
+
+SolFitsTrimExtra2 <- SolFitsTrimExtra |>
+  filter(Flashnumber <= 20)
+
 ```
 
 
@@ -157,7 +210,7 @@ SolFitsTrim2 <- SolFitsTrim |>
 #   filter(Filename %in% c(ProblemFiles)) %>% 
 #   doBy::split_by("Filename") #creates list of problem files
 
-ProblemFiles
+#ProblemFiles
 ```
 
 ```{r}
@@ -197,7 +250,7 @@ ProblemFiles
 #Temporarily ignoring manual fixes above.
 ```{r}
 
-NormStartFlash = 9
+NormStartFlash = 12
 
 SolFitsTrim2 <- SolFitsTrim2 %>%
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
@@ -205,7 +258,11 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
                     Flashnumber %% 4 == 3 ~ 3, 
                     Flashnumber %% 4 == 0 ~ 4)) #add column for sstate
 
-
+SolFitsTrimExtra2 <- SolFitsTrimExtra2 %>%
+  mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
+                    Flashnumber %% 4 == 2 ~ 2,
+                    Flashnumber %% 4 == 3 ~ 3, 
+                    Flashnumber %% 4 == 0 ~ 4))
 #normalize values to final stretch of 10 values from 'randomized' PSII pool, done after cleaning to ensure the last 10 values are correct 
 # SolFitsTrim2 <- SolFitsTrim2 %>%
 #   filter(Filename != "20251121_MaPo2015_28C_4s") |>
@@ -228,11 +285,23 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
          FvFmrunnorm = FvFm/mean(FvFm[NormStartFlash]:FvFm[length(FvFm)], na.rm = TRUE)) %>%
   ungroup()
 
+SolFitsTrimExtra2 <- SolFitsTrimExtra2 %>%
+  filter(Filename != "20251121_MaPo2015_28C_4s") |>
+  group_by(Filename) %>%
+  mutate(FilenameLength = length(Sig),
+         Sigrunnorm =  Sig/mean(Sig[NormStartFlash]:Sig[length(Sig)], na.rm = TRUE),
+         Forunnorm = Fo/mean(Fo[NormStartFlash]:Fo[length(Fo)], na.rm = TRUE),
+         Fmrunnorm = Fm/mean(Fm[NormStartFlash]:Fm[length(Fm)], na.rm = TRUE),
+         FvFmrunnorm = FvFm/mean(FvFm[NormStartFlash]:FvFm[length(FvFm)], na.rm = TRUE)) %>%
+  ungroup()
+
 ```
 
 
 ```{r, metadata merge}
 SolFitsMeta <- left_join(SolFitsTrim2, OttawaMetadata, by = join_by(CultureID == ID))
+
+SolFitsMetaExtra <- left_join(SolFitsTrimExtra2, OttawaMetadata, by = join_by(CultureID == ID))
 ```
 
 
@@ -243,6 +312,9 @@ Add columns for growth temperature and difference between measurement & growth t
 SolFitsMeta <- SolFitsMeta %>%
   mutate(TempDiff_C = Temp_C - GrowthTemp_C)
 
+SolFitsMetaExtra <- SolFitsMetaExtra %>%
+  mutate(TempDiff_C = Temp_C - GrowthTemp_C)
+
 ```
 
 
@@ -250,6 +322,7 @@ SolFitsMeta <- SolFitsMeta %>%
 ```{r}
 # add column for light level (µmol photons/m2/s)
 SolFitsMeta <- conversion(SolFitsMeta) 
+SolFitsMetaExtra <- conversion(SolFitsMetaExtra) 
 
 ```
 
@@ -258,37 +331,33 @@ SolFitsMeta <- conversion(SolFitsMeta)
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_priscuii") |>
-  # filter(FvFmrunnorm < 1.5,
-  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.5) +
+  scale_colour_manual(values = TempColours) +
   facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_klinobasis") |>
-   #filter(FvFmrunnorm < 1.5,
-    #      FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  scale_colour_manual(values = TempColours) +
   facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_malina") |>
-  # filter(FvFmrunnorm < 1.5,
-  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  scale_colour_manual(values = TempColours) +
   facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_euryale") |>
-  # filter(FvFmrunnorm < 1.5,
-  #        FvFmrunnorm > 0.9) |># hack fix for odd runs from Chlamydomonas_klinobasis
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  scale_colour_manual(values = TempColours) +
   facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 
@@ -296,42 +365,57 @@ SolFitsMeta |>
   filter(Strain == "Chlamydomonas_reinhardtii") |>
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  scale_colour_manual(values = TempColours) +
+  facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
+  theme_bw()
+
+SolFitsMetaExtra |>
+  ggplot() +
+  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.1) +
+  scale_colour_manual(values = TempColours) +
   facet_grid(rows = vars(GrowthTemp_C,CultureID), cols = vars(Strain, PulseSpace_s)) +
   theme_bw()
 ```
 #Inspection of plots for Problem Runs
-Cr:
-MaPo2002_28C_1 s, another run appended? normalization?
+Filtered to 24 flashes
 
-Ce
-MaPo2020_16C_1s; another run appended?
+Cp
 
-Cm
-nothing obvious
-MaPo2010_4C_8s another run appended?
-
+Possibly MaPo2004_16C_1s, 2 odd points  21 & 23 
 Ck
 nothing obvious
 
-Cp
-some drift nothing obvious
+Cm
+Possibly MaPo2011_4C_16s, points 21-24?
+
+Ce
+MaPo2015_28C_1s; last point high 24
+
+Cr:
+MaPo2002_28C_1 s, another run appended? points 19-24
+
+SolFitsMetaExtra
+All fine
+
+Filtered to 20 flashes
+Cr:
+MaPo2002_28C_1 s, another run appended? points 19-24
+
 
 ```{r problemplot_filter}
 SolFitsMeta <- SolFitsMeta |>
-  filter(!grepl("MaPo2020_16C_1s", Filename)) |> #remove for now; better to truncate length
-  filter(!grepl("MaPo2002_28C_1s", Filename)) |>
-  filter(!grepl("MaPo2019_16C_2s", Filename)) |> #remove for now; better to truncate length
-  filter(!grepl("MaPo2010_4C_8s", Filename))
-
-#|>
- # filter(Strain != "Chlamydomonas_reinhardtii" & Temp_C != 12) #poor quality runs
+  filter(!grepl("MaPo2002_28C_1 s", Filename)) |> #remove for now
   
+```
+
+```{r merge extra plots}
+SolFitsMeta <- rbind(SolFitsMeta, SolFitsMetaExtra)
 ```
 
 
 ```{r test plots single flash space}
 
-PulseSpaceSet = 16
+PulseSpaceSet = 2
 
 SolFitsMeta |>
   filter(Strain == "Chlamydomonas_priscuii") |>
