@@ -89,37 +89,43 @@ OttawaMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1m8Pjwj4DL1
 
 OttawaMetadata <- OttawaMetadata |>
   filter(!is.na(PrimaryOperator))|>
-  select(-c(InnocDate,CultivatorTank, Tube, Notes, `...19`))
+  select(-c(InnocDate,CultivatorTank, Tube, Notes, `...19`)) |>
+  mutate(ExpDate = lubridate::ymd(ExpDate))
 ```
 
 
 ```{r read SolFitsMeta}
 #reconcile column names 2023 & 2025
 SolFitsMeta2025 <- readRDS(file.path(DataIn, "LOW_Ottawa_2025_SolFitsMeta.Rds", fsep = .Platform$file.sep)) |>
-  select(-c(FilenameLength))
+  select(-c(FilenameLength))      
 
 SolFitsICEMDV <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_ICEMDV_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
+  select(-c(GrowthTemp_C)) |>
+  rename(LightLevel_ue = Light_Level)
+
+
+
+SolFitsCm <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_malina_SolFitsTrim.Rds", fsep = .Platform$file.sep))  |>
   rename(LightLevel_ue = Light_Level)  |>
   select(-c(GrowthTemp_C))
 
-SolFitsCm <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_malina_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
- rename(LightLevel_ue = Light_Level)
-
 SolFitsCp <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_priscuii_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
-  rename(LightLevel_ue = Light_Level)
+  rename(LightLevel_ue = Light_Level)  |>
+  select(-c(GrowthTemp_C))
 
-SolFitsCr <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_reinhardtii_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>  rename(LightLevel_ue = Light_Level)
-
+SolFitsCr <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_reinhardtii_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
+  rename(LightLevel_ue = Light_Level)  |>
+  select(-c(GrowthTemp_C))
 
 ```
 
 ```{r leftjoin_metadata}
-SolFitsICEMDV <- left_join(SolFitsICEMDV, OttawaMetadata, by = join_by(CultureID == ID))
+SolFitsICEMDVMeta <- left_join(SolFitsICEMDV, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
 
-SolFitsCm <- left_join(SolFitsCm, OttawaMetadata, by = join_by(CultureID == ID))
+SolFitsCm <- left_join(SolFitsCm, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
 
-SolFitsCp 
+SolFitsCm <- left_join(SolFitsCm, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
 
-SolFitsCr 
+SolFitsCr <- left_join(SolFitsCr, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
 ```
 
