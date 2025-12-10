@@ -202,8 +202,9 @@ Ck_damping <- damping(Ck_reconstruction)  %>%
 ```{r Ck_dampingindex}
 Ck_damping |>
   ggplot() +
-  geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(Temp_C, TempDiff_C), cols = vars(Strain)) +
+  geom_tile(aes(y = PulseSpace_s, x = Temp_C, colour = DampingIndex, fill = DampingIndex), interpolate = TRUE) +
+  scale_y_reverse() + 
+  facet_grid(cols = vars(NaCl_mM),   rows = vars(Strain)) +
   theme_bw()
 ```
 
@@ -252,6 +253,13 @@ Cm_damping |>
   ggplot() +
   geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
   facet_grid(rows = vars(Temp_C), cols = vars(Strain)) +
+  theme_bw()
+
+Cm_damping |>
+ ggplot() +
+  geom_tile(aes(y = PulseSpace_s, x = Temp_C, colour = DampingIndex, fill = DampingIndex), interpolate = TRUE) +
+  scale_y_reverse() + 
+  facet_grid(cols = vars(NaCl_mM),   rows = vars(Strain)) +
   theme_bw()
 ```
 
@@ -392,6 +400,7 @@ Cr_damping <- damping(Cr_reconstruction)  %>%
 Cr_damping |>
   ggplot() +
   geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
+  scale_x_reverse() +
   facet_grid(rows = vars(Temp_C), cols = vars(Strain)) +
   theme_bw()
 ```

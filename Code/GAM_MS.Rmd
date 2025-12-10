@@ -38,8 +38,9 @@ library(broom)
 DataOut <- file.path("..", "Data", "ProcessedData")
 PlotsOut <- file.path("..", "Figures")
 ```
-# Damping Across Taxa
 
+# Damping Across Taxa
+#add new taxa
 ```{r import & wrangle data}
 sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>%
   mutate(Strain = factor(Strain), 
