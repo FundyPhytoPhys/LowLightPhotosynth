@@ -1,0 +1,125 @@
+---
+title: "OttawaImport"
+author:
+- Natasha Ryan
+- Douglas A. Campbell
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+    keep_md: yes
+    fig_caption: yes
+    toc: TRUE
+    toc_float: TRUE   
+csl: plos-one.csl
+editor_options: 
+  chunk_output_type: inline
+---
+
+*Some of the code used to create this R Notebook was refurbished from "PlateAbImport.Rmd" written by Maximilian Berthold, Douglas A. Campbell, Melissa L. Rioux, Sarah J Gore, and Alyson MacCormack.*
+
+```{r load libraries}
+library(tidyverse)
+library(lubridate)
+library(googlesheets4)
+library(googledrive)
+```
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE)
+knitr::opts_chunk$set(fig.path='Output/')
+```
+
+#Setup
+
+### Set Project Variables 
+```{r set project variables}
+Project <- "LOW"
+TargetData <- "Ottawa_2025"
+DataIn <- file.path("..","Data", "CleanData")
+CalibData <- file.path("..","Data", "CalibData")
+
+
+# DataIn <- file.path("..","Data", "RawData", TargetData, fsep = .Platform$file.sep)
+# #DataRefDecay <- file.path("..","Data", "RawData",TargetData, "DecayRef", fsep = .Platform$file.sep)
+# DataRLC <- file.path("..","Data", "RawData",TargetData, "RLC", fsep = .Platform$file.sep)
+
+FileID <- "fit"
+
+FileEncode <- "UTF-8" #guess_encoding says 'ASCII"
+
+Delimiter <- ","
+
+HeaderRows <- 0
+
+#conversions
+# us_s = 1000000
+photons_umol = 6.022E17
+A2_m2 = 1E20
+
+#set colours
+TempColours = c("black","violet",  "blue", "darkgreen", "green", "orange", "red", "darkred")
+
+names(TempColours) <- c(2, 4, 8, 12, 16, 20, 24, 28)
+
+TempColours
+```
+
+
+### Create Functions
+```{r warning=FALSE, message=FALSE, echo=FALSE}
+read.delim_plus <- function(flnm, file_encode, delimiter, header_rows){read.delim(flnm, fileEncoding = file_encode, sep = delimiter,  skip = header_rows, row.names = NULL) %>% mutate(Filename = flnm)
+}
+
+conversion <- function(data){
+  data %>%
+    group_by(Filename, PulseSpace_s, Temp_C) %>%
+    mutate(LightLevel_ue = (1/PulseSpace_s) / (mean(Sig) / A2_m2) / photons_umol) %>%
+    mutate(LightLevel_ue = round(LightLevel_ue, 5)) %>%
+    ungroup()
+}
+```
+
+### Metadata Import
+```{r import metadata}
+googlesheets4::gs4_deauth()
+
+OttawaMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1m8Pjwj4DL10AwdsQo2G3boymSWG1Oq-gJDzjU0csRKs/edit?usp=sharing")
+
+OttawaMetadata <- OttawaMetadata |>
+  filter(!is.na(PrimaryOperator))|>
+  select(-c(InnocDate,CultivatorTank, Tube, Notes, `...19`))
+```
+
+
+```{r read SolFitsMeta}
+#reconcile column names 2023 & 2025
+SolFitsMeta2025 <- readRDS(file.path(DataIn, "LOW_Ottawa_2025_SolFitsMeta.Rds", fsep = .Platform$file.sep)) |>
+  select(-c(FilenameLength))
+
+SolFitsICEMDV <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_ICEMDV_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
+  rename(LightLevel_ue = Light_Level)  |>
+  select(-c(GrowthTemp_C))
+
+SolFitsCm <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_malina_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
+ rename(LightLevel_ue = Light_Level)
+
+SolFitsCp <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_priscuii_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
+  rename(LightLevel_ue = Light_Level)
+
+SolFitsCr <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_reinhardtii_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>  rename(LightLevel_ue = Light_Level)
+
+
+```
+
+```{r leftjoin_metadata}
+SolFitsICEMDV <- left_join(SolFitsICEMDV, OttawaMetadata, by = join_by(CultureID == ID))
+
+SolFitsCm <- left_join(SolFitsCm, OttawaMetadata, by = join_by(CultureID == ID))
+
+SolFitsCp 
+
+SolFitsCr 
+```
+
