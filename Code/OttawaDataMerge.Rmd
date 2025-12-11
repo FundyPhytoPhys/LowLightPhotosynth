@@ -39,6 +39,7 @@ Project <- "LOW"
 TargetData <- "Ottawa_2025"
 DataIn <- file.path("..","Data", "CleanData")
 CalibData <- file.path("..","Data", "CalibData")
+DataOut <- file.path("..","Data", "CleanData")
 
 
 # DataIn <- file.path("..","Data", "RawData", TargetData, fsep = .Platform$file.sep)
@@ -90,20 +91,18 @@ OttawaMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1m8Pjwj4DL1
 OttawaMetadata <- OttawaMetadata |>
   filter(!is.na(PrimaryOperator))|>
   select(-c(InnocDate,CultivatorTank, Tube, Notes, `...19`)) |>
-  mutate(ExpDate = lubridate::ymd(ExpDate))
+  mutate(ExpDate = lubridate::ymd(ExpDate)) 
 ```
 
 
 ```{r read SolFitsMeta}
 #reconcile column names 2023 & 2025
 SolFitsMeta2025 <- readRDS(file.path(DataIn, "LOW_Ottawa_2025_SolFitsMeta.Rds", fsep = .Platform$file.sep)) |>
-  select(-c(FilenameLength))      
+  select(-c(ExpDate, FilenameLength))      
 
 SolFitsICEMDV <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_ICEMDV_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
   select(-c(GrowthTemp_C)) |>
   rename(LightLevel_ue = Light_Level)
-
-
 
 SolFitsCm <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_malina_SolFitsTrim.Rds", fsep = .Platform$file.sep))  |>
   rename(LightLevel_ue = Light_Level)  |>
@@ -119,13 +118,24 @@ SolFitsCr <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_reinhardtii_SolFitsTri
 
 ```
 
+
 ```{r leftjoin_metadata}
 SolFitsICEMDVMeta <- left_join(SolFitsICEMDV, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
 
-SolFitsCm <- left_join(SolFitsCm, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
+SolFitsCmMeta <- left_join(SolFitsCm, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
 
-SolFitsCm <- left_join(SolFitsCm, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
+SolFitsCpMeta <- left_join(SolFitsCp, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
 
-SolFitsCr <- left_join(SolFitsCr, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
+SolFitsCrMeta <- left_join(SolFitsCr, OttawaMetadata, by = join_by(CultureID == ID, ObsDate == ExpDate))
+```
+
+```{r append solfits}
+
+SolFitsChlamyMeta <- rbind(SolFitsMeta2025, SolFitsICEMDVMeta, SolFitsCmMeta, SolFitsCpMeta, SolFitsCrMeta)
+```
+
+
+```{r save SolFitsChlamyMeta}
+saveRDS(SolFitsChlamyMeta, file.path(DataOut, paste(Project, "SolFitsChlamyMeta.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
