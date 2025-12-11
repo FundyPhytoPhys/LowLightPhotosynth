@@ -214,74 +214,23 @@ Chlamy_damping |>
 ```
 
 
+```{r  save damping}
 
-
-```{r Ce_dampingindex}
-Ce_damping |>
-  ggplot() +
-  geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(Temp_C, TempDiff_C), cols = vars(Strain)) +
-  theme_bw()
-```
-
-### Cr
-```{r import Cm data }
-Cr_data <- readRDS(file.path(DataIn, "LOW_Ottawa_2025_SolFitsMeta.Rds")) |>
-  filter(Strain == "Chlamydomonas_reinhardtii")
-
-Cr_data <- summaryBy(FvFmrunnorm ~ PulseSpace_s + Temp_C + Flashnumber + LightLevel_ue + NaCl_mM, data=Cr_data, FUN=mean, keep.names = TRUE) %>%
-  splitBy(formula = ~ PulseSpace_s + Temp_C + LightLevel_ue + NaCl_mM) %>%
-  setNames(., paste0("Cr_", gsub("\\|", "_", names(.))))
-```
-
-```{r wavelet transformation Cr}
-Cr_wavelets <- wavelet(Cr_data)
-```
-
-```{r evaluate significance Cr}
-Cr_significant <- wt.significance(Cr_wavelets)
-#plot.wt.avg(Ci_wavelets)
-```
-
-```{r reconstruct waves Cr}
-Cr_reconstruction <- reconstructwave(Cr_wavelets)
-```
-
-```{r damping index Cr}
-Cr_damping <- damping(Cr_reconstruction)  %>%
-  mutate(damping.index = ifelse(!condition %in% Cr_significant, 0, damping.index)) %>%
-  rename(DampingIndex = damping.index) %>%
-  separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "LightLevel_ue", "NaCl_mM"), sep = "_") |>
-  mutate(Temp_C = as.numeric(Temp_C),
-         PulseSpace_s = as.numeric(PulseSpace_s),
-         NaCl_mM = as.numeric(NaCl_mM),
-         LightLevel_ue = as.numeric(LightLevel_ue)) |>
-  mutate(Strain = Cr, GrowthTemp_C = 24, 
-         TempDiff_C = Temp_C - GrowthTemp_C)
-  
-```
-
-
-
-```{r  sstate_damping}
-
-
-saveRDS(sstate_damping, file.path(DataOut, paste(Project, "SState_Damping_2025.RDS", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(Chlamy_damping, file.path(DataOut, paste(Project, "Chlamy_damping.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 ```{r}
 
-saveRDS(wavelets, file.path(DataOut, paste(Project, "Wavelets_2025.RDS", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(Chlamy_wavelets, file.path(DataOut, paste(Project, "Chlamy_wavelets.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 ```{r}
 
-
-saveRDS(reconstructions, file.path(DataOut, paste(Project, "Reconstructions_2025.RDS", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(Chlamy_reconstructions, file.path(DataOut, paste(Project, "Chlamy_reconstructions.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
+
 
 # Figures 
-
 
 ```{r heat map}
 #, labeller = labeller(Species=species.labs))

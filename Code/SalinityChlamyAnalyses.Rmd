@@ -1,5 +1,5 @@
 ---
-title: "OttawaImport"
+title: "ChlamyANOVA"
 author:
 - Natasha Ryan
 - Douglas A. Campbell
@@ -37,9 +37,9 @@ knitr::opts_chunk$set(fig.path='Output/')
 ```{r set project variables}
 Project <- "LOW"
 TargetData <- "Ottawa_2025"
-DataIn <- file.path("..","Data", "CleanData")
+DataIn <- file.path("..","Data", "ProcessedData")
 CalibData <- file.path("..","Data", "CalibData")
-DataOut <- file.path("..","Data", "CleanData")
+DataOut <- file.path("..","Data", "ProcessedData")
 
 FileID <- "fit"
 
@@ -64,8 +64,8 @@ TempColours
 ```
 
 
-```{r read SolFitsChlamyMeta}
-SolFitsChlamyMeta<- readRDS(file.path(DataIn, "LOW_SolFitsChlamyMeta.Rds", fsep = .Platform$file.sep)) 
+```{r read Chlamy_damping}
+Chlamy_damping <- readRDS(file.path(DataIn, "LOW_Chlamy_damping.Rds", fsep = .Platform$file.sep)) 
 
 ```
 
@@ -75,12 +75,12 @@ SolFitsChlamyMeta<- readRDS(file.path(DataIn, "LOW_SolFitsChlamyMeta.Rds", fsep 
 
 PulseSpaceSet = 2
 
-SolFitsChlamyMeta |>
+Chlamy_damping |>
   filter(Strain == "Chlamydomonas_ICEMDV") |>
   filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM, Year)) +
+  geom_point(aes(x = PulseSpace_s, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM, Year)) +
   theme_bw()
 
 SolFitsChlamyMeta |>
