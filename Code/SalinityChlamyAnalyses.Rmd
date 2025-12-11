@@ -71,115 +71,41 @@ Chlamy_damping <- readRDS(file.path(DataIn, "LOW_Chlamy_damping.Rds", fsep = .Pl
 
 
 
-```{r test plots single flash space}
-
-PulseSpaceSet = 2
+```{r plots_dampingindex}
 
 Chlamy_damping |>
-  filter(Strain == "Chlamydomonas_ICEMDV") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
-  geom_point(aes(x = PulseSpace_s, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM, Year)) +
+  geom_point(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(Temp_C), cols = vars(Strain)) +
   theme_bw()
 
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_priscuii") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
+Chlamy_damping |>
   ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM, Year)) +
+  geom_point(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(Strain), cols = vars(TempDiff_C)) +
   theme_bw()
 
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_klinobasis") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  ggplot() +
-  geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM, Year)) +
-  theme_bw()
+```
+```{r anova}
+Chlamy_aov <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  data = Chlamy_damping)
 
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_malina") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM, Year)) +
-  theme_bw()
+summary(Chlamy_aov)
+coefficients(Chlamy_aov)
 
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_euryale") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s,NaCl_mM, Year)) +
-  theme_bw()
+Cp_aov <- 
+  aov(DampingIndex ~ LightLevel_ue * TempDiff_C * NaCl_mM, data = Chlamy_damping |>
+  filter(Strain == "Chlamydomonas_priscuii"))
 
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_reinhardtii") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM, Year)) +
-  theme_bw()
+summary(Cp_aov)
+coefficients(Cp_aov)
+
+Cm_aov <- 
+  aov(DampingIndex ~ LightLevel_ue * TempDiff_C * NaCl_mM, data = Chlamy_damping |>
+  filter(Strain == "Chlamydomonas_malina"))
+
+summary(Cm_aov)
+coefficients(Cm_aov)
+
+
 ```
 
-
-```{r test plots single flash space SalOpt}
-
-PulseSpaceSet = 2
-
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_ICEMDV") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  filter(NaCl_mM == SalOpt) |>
-  ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
-  theme_bw()
-
- SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_priscuii") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  filter(NaCl_mM == SalOpt) |>
-  ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
-  theme_bw()
-
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_klinobasis") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  filter(NaCl_mM == SalOpt) |>
-  ggplot() +
-  geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
-  theme_bw()
-
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_malina") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  filter(NaCl_mM == SalOpt) |>
-  ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
-  theme_bw()
-
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_euryale") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  filter(NaCl_mM == SalOpt) |>
-  ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s,NaCl_mM)) +
-  theme_bw()
-
-SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_reinhardtii") |>
-  filter(PulseSpace_s == PulseSpaceSet) |>
-  filter(NaCl_mM == SalOpt) |>
-  ggplot() +
-  geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
-  facet_grid(rows = vars(TempDiff_C, Temp_C), cols = vars(Strain, PulseSpace_s, NaCl_mM)) +
-  theme_bw()
-```
