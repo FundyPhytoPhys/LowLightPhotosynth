@@ -1,0 +1,304 @@
+---
+title: "Wavelet Transformation"
+author:
+- Natasha Ryan
+- Maximilian Berthold
+- Douglas Campbell
+date: "`r format(Sys.Date())`"
+output:
+  html_document:
+    df_print: paged
+    code_folding: hide
+    keep_md: yes
+    fig_caption: yes
+    toc: TRUE
+    toc_float: TRUE   
+csl: plos-one.csl
+editor_options: 
+  chunk_output_type: inline
+---
+
+# Introduction
+This RMD computes a wave transformation and extracts the duration of fluorescence oscillations for the cleaned data generated from OttawaImport, TakuvikImport, and SackvilleImport. 
+
+```{r load libraries}
+library(tidyverse)
+library(doBy)
+library(WaveletComp)
+```
+
+
+# Set Project Variables
+```{r set project variables}
+Project <- "LOW"
+DataIn <- file.path("..","Data", "CleanData")
+DataOut <- file.path("..","Data", "ProcessedData")
+FileID <- "SolFitsChlamyMeta"
+siglvl <- 0.05 #specifies statistical significance level
+Fc <- "Fragilariopsis_cylindrus"
+Ci <- "Chlamydomonas_ICEMDV"
+Cm <- "Chlamydomonas_malina"
+Cp <- "Chlamydomonas_priscuii"
+Cr <- "Chlamydomonas_reinhardtii"
+Cv <- "Chlorella_vulgaris"
+Tp <- "Thalassiosira_pseudonana"
+Ce <- "Chlamydomonas_euryale"
+Ck <- "Chlamydomonas_klinobasis"
+```
+
+
+```{r create functions}
+#function for wavelet transformation 
+wavelet <- function(data_list){
+  wavelet_list <- lapply(data_list, function(data) {
+    WaveletComp::analyze.wavelet(data, "FvFmrunnorm",
+                                 method = "white.noise",
+                                 loess.span = 0.85, 
+                                 dt = 1, dj=1/500, 
+                                 n.sim = 100, 
+                                 verbose = FALSE)
+  })
+return(wavelet_list)
+}
+
+
+#function for wavelet reconstruction, applies reconstruct() function from WaveletComp to all wavelets in a list
+reconstructwave <- function(wavelet_list) {
+  reconstructed_list <- lapply(wavelet_list, function(wave) {
+    WaveletComp::reconstruct(wave, siglvl = siglvl, 
+                             #plot.waves = TRUE,
+                             plot.rec = FALSE,
+                             lwd = 1.5, 
+                             col=c("#0E1126","#429F78"), 
+                             legend.coords = "topright",
+                             legend.text = c("Original", "Reconstructed"),
+                             timelab = "Flash Number", 
+                             verbose = FALSE)
+ })
+  return(reconstructed_list) 
+}
+
+
+#function to extract the number of oscillating flashes from the reconstruction 
+damping <- function(reconstructed) {
+  result_list <- lapply(reconstructed, function(condition) {
+    return(condition$series)
+  }) #extract reconstructed wave data from 'reconstruct' objects 
+  result_df <- data.frame(condition = character(0), damping.index = integer(0), stringsAsFactors = FALSE)
+  
+  for (condition in names(result_list)) {
+    extract <- result_list[[condition]] 
+    
+    extract$difference <- c(NA, diff(extract$`FvFmrunnorm.r`)) #calculate difference in reconstructed FvFm values between successive rows 
+    
+    cycling.flashes <- which(extract$difference != 0) #extract row index where FvFm is oscillating
+    
+    damping.index <- max(cycling.flashes) #extract the highest row index (last row before FvFm damps)
+    
+    result_df <- rbind(result_df, data.frame(condition = condition, damping.index = damping.index))
+  }
+  return(result_df)
+}
+
+# Returns conditions with significant periodicity at 4 
+wt.significance <- function(wavelets) {
+  result_list <- lapply(names(wavelets), function(condition_name) {
+    condition <- wavelets[[condition_name]]
+    Power.avg <- condition$Power.avg
+    Power.avg.pval <- condition$Power.avg.pval
+    Period <- condition$Period
+    Condition <- rep(condition_name, length(Power.avg))  
+    df <- data.frame(Power.avg, Power.avg.pval, Period, Condition)
+    
+    return(df)
+  })
+
+  result_df <- bind_rows(result_list) %>%
+    filter(Power.avg.pval <= siglvl) %>%
+    filter(between(Period, 3.9, 4.1))
+  
+    significantconditions <- unique(result_df$Condition)
+  
+  return(significantconditions)
+}
+
+
+#plot of wavelet power averages across time, indicates which conditions show a significant periodicity of 4
+plot.wt.avg <- function(wavelet_list) {
+  
+  for (condition in names(wavelet_list)) {
+    extract <- wavelet_list[[condition]] 
+    
+    WaveletComp::wt.avg(extract, siglvl = siglvl,
+      sigcol = "#71CF61", 
+      maximum.level = 1,
+      averagelab = "Average Wavelet Power",
+      periodlab = "Period",
+      legend.coords = "topright",
+      main = condition)}
+}
+
+#image plot of the wavelet power spectrum of a time series
+plot.wt.image <- function(wavelet_list) {
+  
+  for (condition in names(wavelet_list)) {
+    extract <- wavelet_list[[condition]] 
+    
+    WaveletComp::wt.image(extract,
+         plot.coi = FALSE,
+         siglvl = siglvl,
+         color.key = "i",
+         color.palette = "rainbow(n.levels, start = 0, end = .7)",
+         timelab = "Flash Number",
+         spec.time.axis = list(at = c(4,8,12,16,20,24,28,32)),
+         periodlab = "Period",
+         main = condition)}
+}
+```
+
+
+
+# Chlamy 
+
+### Chlamy
+```{r import Chlamy data }
+SolFitsChlamyMeta <- readRDS(file.path(DataIn, "LOW_SolFitsChlamyMeta.Rds"))
+
+Chlamy_data <- summaryBy(FvFmrunnorm ~ Strain + PulseSpace_s + Temp_C + Flashnumber + LightLevel_ue + NaCl_mM, data=SolFitsChlamyMeta, FUN=mean, keep.names = TRUE) %>%
+  splitBy(formula = ~ Strain + PulseSpace_s + Temp_C + LightLevel_ue + NaCl_mM)
+
+
+
+# %>%
+#   setNames(., paste0(gsub("\\|", "_", names(.))))
+
+#Need to fix if going to run multiple strains simultaneously...
+```
+
+```{r wavelet transformation Chlamy}
+Chlamy_wavelets <- wavelet(Chlamy_data)
+```
+
+```{r evaluate significance Chlamy}
+Chlamy_significant <- wt.significance(Chlamy_wavelets)
+#plot.wt.avg(Ci_wavelets)
+```
+
+```{r reconstruct waves Chlamy}
+Chlamy_reconstruction <- reconstructwave(Chlamy_wavelets)
+```
+
+
+```{r damping index Chlamy}
+Chlamy_damping <- damping(Chlamy_reconstruction)  %>%
+  mutate(damping.index = ifelse(!condition %in% Chlamy_significant, 0, damping.index)) %>%
+  rename(DampingIndex = damping.index) %>%
+  separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "LightLevel_ue", "NaCl_mM"), sep = "\\|") |>
+  filter(!is.na(PulseSpace_s)) |>  # fix a  bad row C.priscuii; not working?
+  mutate(Temp_C = as.numeric(Temp_C),
+         PulseSpace_s = as.numeric(PulseSpace_s),
+         NaCl_mM = as.numeric(NaCl_mM),
+         LightLevel_ue = as.numeric(LightLevel_ue))
+  
+```
+
+# Chlamy TestPlots of damping index
+
+```{r Chlamy_dampingindex}
+Chlamy_damping |>
+  ggplot() +
+  geom_tile(aes(y = PulseSpace_s, x = Temp_C, colour = DampingIndex, fill = DampingIndex)) +
+  scale_y_reverse() + 
+  facet_grid(cols = vars(NaCl_mM),   rows = vars(Strain)) +
+  theme_bw()
+```
+
+
+
+
+```{r Ce_dampingindex}
+Ce_damping |>
+  ggplot() +
+  geom_line(aes(x = PulseSpace_s, y = DampingIndex, colour = as.factor(NaCl_mM))) +
+  facet_grid(rows = vars(Temp_C, TempDiff_C), cols = vars(Strain)) +
+  theme_bw()
+```
+
+### Cr
+```{r import Cm data }
+Cr_data <- readRDS(file.path(DataIn, "LOW_Ottawa_2025_SolFitsMeta.Rds")) |>
+  filter(Strain == "Chlamydomonas_reinhardtii")
+
+Cr_data <- summaryBy(FvFmrunnorm ~ PulseSpace_s + Temp_C + Flashnumber + LightLevel_ue + NaCl_mM, data=Cr_data, FUN=mean, keep.names = TRUE) %>%
+  splitBy(formula = ~ PulseSpace_s + Temp_C + LightLevel_ue + NaCl_mM) %>%
+  setNames(., paste0("Cr_", gsub("\\|", "_", names(.))))
+```
+
+```{r wavelet transformation Cr}
+Cr_wavelets <- wavelet(Cr_data)
+```
+
+```{r evaluate significance Cr}
+Cr_significant <- wt.significance(Cr_wavelets)
+#plot.wt.avg(Ci_wavelets)
+```
+
+```{r reconstruct waves Cr}
+Cr_reconstruction <- reconstructwave(Cr_wavelets)
+```
+
+```{r damping index Cr}
+Cr_damping <- damping(Cr_reconstruction)  %>%
+  mutate(damping.index = ifelse(!condition %in% Cr_significant, 0, damping.index)) %>%
+  rename(DampingIndex = damping.index) %>%
+  separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "LightLevel_ue", "NaCl_mM"), sep = "_") |>
+  mutate(Temp_C = as.numeric(Temp_C),
+         PulseSpace_s = as.numeric(PulseSpace_s),
+         NaCl_mM = as.numeric(NaCl_mM),
+         LightLevel_ue = as.numeric(LightLevel_ue)) |>
+  mutate(Strain = Cr, GrowthTemp_C = 24, 
+         TempDiff_C = Temp_C - GrowthTemp_C)
+  
+```
+
+
+
+```{r  sstate_damping}
+
+
+saveRDS(sstate_damping, file.path(DataOut, paste(Project, "SState_Damping_2025.RDS", sep = "_"), fsep = .Platform$file.sep))
+```
+
+```{r}
+
+saveRDS(wavelets, file.path(DataOut, paste(Project, "Wavelets_2025.RDS", sep = "_"), fsep = .Platform$file.sep))
+```
+
+```{r}
+
+
+saveRDS(reconstructions, file.path(DataOut, paste(Project, "Reconstructions_2025.RDS", sep = "_"), fsep = .Platform$file.sep))
+```
+
+# Figures 
+
+
+```{r heat map}
+#, labeller = labeller(Species=species.labs))
+
+Chlamy_damping %>%
+  ggplot() +
+  geom_tile(aes(x = Temp_C, y = PulseSpace_s, fill = DampingIndex)) +
+  viridis::scale_fill_viridis(option="mako", na.value="white") +
+  facet_wrap(vars(Strain), ncol=2, scales = "free") +
+  labs(x= "Measurement Temperature (°C)", y= "Spacing of Photon Delivery (s)", fill= "Duration of PSII Cycling") +
+  theme_linedraw() +
+  theme(text = element_text(family = "Palatino"),
+        strip.background =element_rect(fill="white"),
+        strip.text = element_text(colour= "black",face = "italic", size = 13),
+        axis.text=element_text(size=13), axis.title=element_text(size=14),
+        legend.text=element_text(size=13), legend.title=element_text(size=14),
+        legend.position = c(0.75, 0.1),
+        panel.grid.major = element_blank(), panel.grid.minor = element_blank())
+```
+
