@@ -42,17 +42,34 @@ PlotsOut <- file.path("..", "Figures")
 # Damping Across Taxa
 #add new taxa
 ```{r import & wrangle data}
-sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>%
+sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping_2025.Rds" ))
+
+sstate_damping_pre2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>% 
+  mutate(NaCl_mM = 1) %>% 
+  rename(LightLevel_ue = 'Light_Level')
+
+sstate_damping <- bind_rows (sstate_damping_pre2025, sstate_damping_2025)%>%
   mutate(Strain = factor(Strain), 
   ThermalTolerance = case_when(
-     Strain %in% c("Fragilariopsis_cylindrus", "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii",
-                   "Chlamydomonas_malina") ~ "Polar",
-     Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
+     Strain %in% c("Fragilariopsis_cylindrus",
+                   "Chlamydomonas_ICEMDV",
+                   "Chlamydomonas_priscuii",
+                   "Chlamydomonas_malina",
+                   "Chlamydomonas_klinobasis") ~ "Polar",
+     Strain %in% c("Chlamydomonas_reinhardtii",
+                   "Chlamydomonas_euryale",
+                   "Chlorella_vulgaris",
                    "Thalassiosira_pseudonana") ~ "Temperate"),  
   Type = case_when(
-     Strain %in% c("Fragilariopsis_cylindrus","Thalassiosira_pseudonana") ~ "Diatom", 
-     Strain %in% c("Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina",
-                   "Chlamydomonas_reinhardtii", "Chlorella_vulgaris") ~ "Green Algae"),
+     Strain %in% c("Fragilariopsis_cylindrus",
+                   "Thalassiosira_pseudonana") ~ "Diatom", 
+     Strain %in% c("Chlamydomonas_ICEMDV",
+                   "Chlamydomonas_priscuii", 
+                   "Chlamydomonas_malina", 
+                   "Chlamydomonas_reinhardtii", 
+                   "Chlamydomonas_euryale", 
+                   "Chlamydomonas_klinobasis", 
+                   "Chlorella_vulgaris") ~ "Green Algae"),
   l.strain = case_when(
     Strain == "Chlamydomonas_ICEMDV" ~ "~italic('C. ICEMDV')", 
     Strain == "Chlamydomonas_malina" ~"~italic('C. malina')",
@@ -60,7 +77,8 @@ sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_S
     Strain == "Chlamydomonas_reinhardtii" ~ "~italic('C. reinhardtii')",
     Strain == "Chlorella_vulgaris" ~ "~italic('C. vulgaris')",
     Strain == "Fragilariopsis_cylindrus" ~ "~italic('F. cylindrus')", 
-    Strain == "Thalassiosira_pseudonana" ~ "~italic('T. pseudonana')"),
+    Strain == "Thalassiosira_pseudonana" ~ "~italic('T. pseudonana')",
+    Strain == "Chlamydomonas_klinobasis" ~ "~italic('C. klinobasis')",            Strain == "Chlamydomonas_euryale" ~ "~italic('C. euryale')"),
   l.temp = paste0("Grown~at~", GrowthTemp_C,"*degree*C"),
   FacetLabel_temp = paste0("grown~at~", GrowthTemp_C,"*degree*C"),
   )
@@ -70,7 +88,7 @@ sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_S
 
 Run GAM on 'sstate_damping' dataframe
 Response variable 'DampingIndex'
-Predictors are 'Temp_C' and 'Light_Level'
+Predictors are 'Temp_C' and 'LightLevel_ue'
 Grouping variables are 'Strain' and GrowthTemp_C'
 ```{r DampingIndex GAM}
 
@@ -83,12 +101,12 @@ possibPRED = possibly(.f = mgcv::predict.gam, otherwise = NULL)
 # Build Temp_C vector 
 Temp_C_vals <- seq(0, 28, by = 0.05)
 
-# Same for Light_Level
+# Same for LightLevel_ue
 Light_vals <- seq(0.02, 1.0, by = 0.02)
 
 # Build the grid to fill in predicted data
 PAR_Temp_Model <- expand_grid(
-  Light_Level = Light_vals,
+  LightLevel_ue = Light_vals,
   Temp_C = Temp_C_vals
 ) %>% 
   as_tibble()
@@ -99,10 +117,10 @@ summary(PAR_Temp_Model)
 
 DampingIndex_Gam <- sstate_damping %>% 
    ungroup() %>%
-  group_by(Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
+  group_by(Strain, GrowthTemp_C, NaCl_mM, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
   nest() %>%
   mutate(
-    GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(Light_Level, k = 3) + s(Temp_C, k = 3) + ti(Temp_C, Light_Level, k = 3), data = .x,
+    GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(LightLevel_ue, k = 3) + s(Temp_C, k = 3) + ti(Temp_C, LightLevel_ue, k = 3), data = .x,
                                     family = "gaussian"(link = "log"), 
                                     method = "REML")),
     predicted = map(GamModel, ~possibPRED(.x, newdata = PAR_Temp_Model, type = "response", se.fit = TRUE)),
@@ -113,7 +131,7 @@ DampingIndex_Gam <- sstate_damping %>%
   ungroup()
 
 DampingIndex_Pred <- DampingIndex_Gam %>%
-  dplyr::select(predicted, Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
+  dplyr::select(predicted, Strain, GrowthTemp_C, NaCl_mM, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
   dplyr::filter(predicted != "NULL") %>%
   rowwise() %>%
   mutate(db = list(cbind(predicted, PAR_Temp_Model))) %>%
@@ -137,7 +155,7 @@ purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 
 # GAM CHECK RESULTS
 
-# in s(Light_Level, k = 3) , k is too low for F.c, C.ICEMDV and C.priscuii; however, k = 4 returns 'NULL' for all GAMs 
+# in s(LightLevel_ue, k = 3) , k is too low for F.c, C.ICEMDV and C.priscuii; however, k = 4 returns 'NULL' for all GAMs 
 # in s(CalcSal, k = 3) , k is good
 # in ti(CalcSal, par_ue, k = 3) k is too low for C.priscuii; however, k = 4 returns 'NULL' for all GAMs 
 ```
