@@ -65,22 +65,41 @@ theme_thesis <- function() {
 
 DampingIndex_Pred <- readRDS(file = file.path("..", "Data", "ProcessedData", "DampingIndex_GAMPred.Rds" )) 
 
+head(DampingIndex_Pred)
+
 ```
 
 # Damping Across Taxa
 
 ```{r import & wrangle sstate data}
-sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>%
+sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping_2025.Rds" ))
+
+sstate_damping_pre2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>% 
+  mutate(NaCl_mM = 1) %>% 
+  rename(LightLevel_ue = 'Light_Level')
+
+sstate_damping <- bind_rows (sstate_damping_pre2025, sstate_damping_2025)%>%
   mutate(Strain = factor(Strain), 
   ThermalTolerance = case_when(
-     Strain %in% c("Fragilariopsis_cylindrus", "Chlamydomonas_ICEMDV","Chlamydomonas_priscuii",
-                   "Chlamydomonas_malina") ~ "Polar",
-     Strain %in% c("Chlamydomonas_reinhardtii", "Chlorella_vulgaris",
+     Strain %in% c("Fragilariopsis_cylindrus",
+                   "Chlamydomonas_ICEMDV",
+                   "Chlamydomonas_priscuii",
+                   "Chlamydomonas_malina",
+                   "Chlamydomonas_klinobasis") ~ "Polar",
+     Strain %in% c("Chlamydomonas_reinhardtii",
+                   "Chlamydomonas_euryale",
+                   "Chlorella_vulgaris",
                    "Thalassiosira_pseudonana") ~ "Temperate"),  
   Type = case_when(
-     Strain %in% c("Fragilariopsis_cylindrus","Thalassiosira_pseudonana") ~ "Diatom", 
-     Strain %in% c("Chlamydomonas_ICEMDV","Chlamydomonas_priscuii", "Chlamydomonas_malina",
-                   "Chlamydomonas_reinhardtii", "Chlorella_vulgaris") ~ "Green Algae"),
+     Strain %in% c("Fragilariopsis_cylindrus",
+                   "Thalassiosira_pseudonana") ~ "Diatom", 
+     Strain %in% c("Chlamydomonas_ICEMDV",
+                   "Chlamydomonas_priscuii", 
+                   "Chlamydomonas_malina", 
+                   "Chlamydomonas_reinhardtii", 
+                   "Chlamydomonas_euryale", 
+                   "Chlamydomonas_klinobasis", 
+                   "Chlorella_vulgaris") ~ "Green Algae"),
   l.strain = case_when(
     Strain == "Chlamydomonas_ICEMDV" ~ "~italic('C. ICEMDV')", 
     Strain == "Chlamydomonas_malina" ~"~italic('C. malina')",
@@ -88,7 +107,8 @@ sstate_damping <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_S
     Strain == "Chlamydomonas_reinhardtii" ~ "~italic('C. reinhardtii')",
     Strain == "Chlorella_vulgaris" ~ "~italic('C. vulgaris')",
     Strain == "Fragilariopsis_cylindrus" ~ "~italic('F. cylindrus')", 
-    Strain == "Thalassiosira_pseudonana" ~ "~italic('T. pseudonana')"),
+    Strain == "Thalassiosira_pseudonana" ~ "~italic('T. pseudonana')",
+    Strain == "Chlamydomonas_klinobasis" ~ "~italic('C. klinobasis')",            Strain == "Chlamydomonas_euryale" ~ "~italic('C. euryale')"),
   l.temp = paste0("Grown~at~", GrowthTemp_C,"*degree*C"),
   FacetLabel_temp = paste0("grown~at~", GrowthTemp_C,"*degree*C"),
   )
@@ -103,8 +123,8 @@ spacing.algae <- sstate_damping %>%
   filter(Type == "Green Algae") %>%
   group_by(PulseSpace_s) %>%
   summarise(
-    Light_Level.mean = mean(Light_Level, na.rm = TRUE),
-    Light_Level.sd = sd(Light_Level, na.rm = TRUE),
+    LightLevel_ue.mean = mean(LightLevel_ue, na.rm = TRUE),
+    LightLevel_ue.sd = sd(LightLevel_ue, na.rm = TRUE),
     .groups = "drop"
   )
 
@@ -113,8 +133,8 @@ spacing.diatom <- sstate_damping %>%
   filter(Type == "Diatom") %>%
   group_by(PulseSpace_s) %>%
   summarise(
-    Light_Level.mean = mean(Light_Level, na.rm = TRUE),
-    Light_Level.sd = sd(Light_Level, na.rm = TRUE),
+    LightLevel_ue.mean = mean(LightLevel_ue, na.rm = TRUE),
+    LightLevel_ue.sd = sd(LightLevel_ue, na.rm = TRUE),
     .groups = "drop"
   )
 ```
@@ -127,19 +147,21 @@ spacing.diatom <- sstate_damping %>%
 # Example scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris 
 
 # plotting all strains and adding a facet-wrap does not work as each strain has different x-axis ranges.
-GamStrain = "Chlorella_vulgaris"
+GamStrain = "Chlamydomonas_euryale"
 #Chlamydomonas_ICEMDV                     #remember to change scale_x_continuous
 #Chlamydomonas_malina                     #remember to change scale_x_continuous                  
 #Chlamydomonas_priscuii                   #remember to change scale_x_continuous
 #Chlorella_vulgaris                       #remember to change scale_x_continuous
 #Chlamydomonas_reinhardtii                #remember to change scale_x_continuous
+#Chlamydomonas_klinobasis                 #remember to change scale_x_continuous
+#Chlamydomonas_euryale                    #remember to change scale_x_continuous
 
 ErrorTol = 170
 
 
 DampingIndex_Hyper <- DampingIndex_Pred %>% 
   filter(Strain %in% GamStrain) %>%
-  group_by(Strain, GrowthTemp_C) %>% 
+  group_by(Strain, GrowthTemp_C, NaCl_mM) %>% 
   mutate(IsFitGood = case_when(se.fit/fit*100 < ErrorTol ~ (1),#Assigns '0' to faulty data where Standarderror larger +/- Errortolerance
                     TRUE ~ (0))) %>% 
   filter(IsFitGood == 1) %>%  # filters faulty data where Standarderror larger +/- Errortolerance
@@ -182,7 +204,7 @@ ContourBreaks <- DampingIndex_Hyper %>%
 ContourLines <- ContourBreaks 
 ContourLines <- ContourLines$quantileValue 
 
-(ContourDI <- ggplot(na.omit(DampingIndex_Hyper,spacing.algae), aes(Temp_C, Light_Level, z = fit, fill = fit)) +
+(ContourDI <- ggplot(na.omit(DampingIndex_Hyper,spacing.algae), aes(Temp_C, LightLevel_ue, z = fit, fill = fit)) +
   geom_tile() +
  scale_fill_gradientn(name = expression(atop("Damping", "Index")), colors = pals::ocean.matter(14), limits  = range(0, 16.5), na.value = "pink") +  # Range is the damping index range plotted. 
     metR::geom_contour2(aes(label = stat(level)),
@@ -196,11 +218,13 @@ ContourLines <- ContourLines$quantileValue
                         label.placer = label_placer_fraction(frac = 0.4)) +
     # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
     #               label.placer = label_placer_fraction(frac = 0.4)) +
-    scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris
+    # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris
    # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 4), expand = c(0, 0)) + # For C.ICE, C.malina & C.priscuii
        # scale_x_continuous(limits = c(12, 24), breaks = seq(12, 24, by = 4), expand = c(0, 0)) + # For C.reinhardtii
+      # scale_x_continuous(limits = c(0, 12), breaks = seq(0, 12, by = 4), expand = c(0, 0)) + # For C.klinobasis
+     scale_x_continuous(limits = c(16, 28), breaks = seq(16, 28, by = 4), expand = c(0, 0)) + #  For Chlamydomonas_euryale
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
-                       sec.axis = dup_axis(breaks = c(spacing.algae$Light_Level.mean), 
+                       sec.axis = dup_axis(breaks = c(spacing.algae$LightLevel_ue.mean), 
                                            labels = c(spacing.algae$PulseSpace_s),
                                            name = sym("Flash Spacing (s)"))) +
     coord_cartesian(expand = FALSE, clip = "on") +
@@ -208,7 +232,7 @@ ContourLines <- ContourLines$quantileValue
     xlab("Measurement Temperature (°C)") +
     ylab("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")") +
     # ylab(NULL) +
-  ggh4x::facet_nested_wrap(vars(l.strain), nrow=1, scales="free_x",
+  ggh4x::facet_nested_wrap(vars(l.strain, NaCl_mM), nrow=1, scales="free_x",
                              labeller = label_parsed) +
   geom_vline(aes(xintercept = GrowthTemp_C + 0.025), 
              col= "black", linetype = 2, linewidth = 1.7)  +
@@ -369,7 +393,7 @@ ContourBreaks <- DampingIndex_Hyper %>%
 ContourLines <- ContourBreaks 
 ContourLines <- ContourLines$quantileValue 
 
-(ContourDI <- ggplot(na.omit(DampingIndex_Hyper, spacing.diatom), aes(Temp_C, Light_Level, z = fit, fill = fit)) +
+(ContourDI <- ggplot(na.omit(DampingIndex_Hyper, spacing.diatom), aes(Temp_C, LightLevel_ue, z = fit, fill = fit)) +
   geom_tile() +
   scale_fill_gradientn(name = expression(atop("Damping", "Index")), colors = pals::ocean.matter(14), limits  = range(0, 16.5), na.value = "pink") +  # Range is the damping index range plotted. 
     metR::geom_contour2(aes(label = stat(level)),
@@ -386,7 +410,7 @@ ContourLines <- ContourLines$quantileValue
     # scale_x_continuous(limits = c(10, 28), breaks = seq(10, 28, by = 4), expand = c(0, 0)) + # For T.pseudonana
     scale_x_continuous(limits = c(0, 10), breaks = seq(2, 10, by = 4), expand = c(0, 0)) + # For F.c
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
-                       sec.axis = dup_axis(breaks = c(spacing.diatom$Light_Level.mean), 
+                       sec.axis = dup_axis(breaks = c(spacing.diatom$LightLevel_ue.mean), 
                                            labels = c(spacing.diatom$PulseSpace_s),
                                            name = sym("Flash Spacing (s)"))) +
  coord_cartesian(expand = FALSE, clip = "on") +
