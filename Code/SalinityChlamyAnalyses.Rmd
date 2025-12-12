@@ -25,6 +25,7 @@ library(tidyverse)
 library(googlesheets4)
 library(googledrive)
 library(broom)
+library(kableExtra)
 ```
 
 ```{r setup, include = FALSE}
@@ -87,35 +88,39 @@ Chlamy_damping |>
   theme_bw()
 
 ```
-```{r anova}
+```{r aov}
 Chlamy_aov <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  data = Chlamy_damping)
-
 summary(Chlamy_aov)
-coefficients(Chlamy_aov)
+
+Chlamy_aovinteract <- aov(DampingIndex ~ Strain * LightLevel_ue + Temp_C + NaCl_mM,  data = Chlamy_damping)
+summary(Chlamy_aovinteract)
 
 
-ChlamyStrains_aov <- Chlamy_damping |>
-  nest(data = -c("Strain")) |>
-  mutate(Strains_aov = map(data, ~aov(DampingIndex ~ LightLevel_ue + Temp_C + NaCl_mM, data = .))
-         ) |>
-   mutate(Strains_aov_Param = map(Strains_aov, tidy)) |>
- # unnest(Strains_aov_Param,  names_sep = "_") |>      
+ChlamyStrains_aovinteract <-  Chlamy_damping |>
+  nest(data = -c("Strain")) |>    
   mutate(Strains_aovinteract = map(data, ~aov(DampingIndex ~ LightLevel_ue * Temp_C * NaCl_mM, data = .))
   ) |>
   mutate(Strains_aovinteract_Param = map(Strains_aovinteract, tidy)) |>
   unnest(Strains_aovinteract_Param, names_sep = "_") |>
   filter(Strains_aovinteract_Param_p.value <= 0.05)
 
-  # CompareAOV = anova(ChlamyStrains_aov$Strains_aov[1], ChlamyStrains_aov$Strains_aovinteract[1])
-  #     
-         
-   
-         
-         ) 
+#Only interaction terms significant:
+#Chlamydomonas_euryale  LightLevel_ue:Temp_C
+#Chlamydomonas_reinhardtii Temp_C:NaCl_mM
 
-ChlamyStrains_aov_p <- ChlamyStrains_aov |>
-  filter(p.value <= 0.05)
+ChlamyStrains_aov <- Chlamy_damping |>
+  nest(data = -c("Strain")) |>
+  mutate(Strains_aov = map(data, ~aov(DampingIndex ~ LightLevel_ue + Temp_C + NaCl_mM, data = .))
+         ) |>
+   mutate(Strains_aov_Param = map(Strains_aov, tidy)) |>
+  unnest(Strains_aov_Param,  names_sep = "_") |>
+  filter(Strains_aov_Param_p.value <= 0.05) |>
+  select(!matches("Strains_aovinteract")) |>
+  select(!c(data, Strains_aov)) |>
+  rename_with(~str_remove(., "Strains_aov_")) |>
+  rename_with(~str_remove(., "Param_"))
 
-
+kable(ChlamyStrains_aov)
+ 
 ```
 
