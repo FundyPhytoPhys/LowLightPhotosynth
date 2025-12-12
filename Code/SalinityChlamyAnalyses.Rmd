@@ -21,9 +21,10 @@ editor_options:
 
 ```{r load libraries}
 library(tidyverse)
-library(lubridate)
+#library(lubridate)
 library(googlesheets4)
 library(googledrive)
+library(broom)
 ```
 
 ```{r setup, include = FALSE}
@@ -92,19 +93,28 @@ Chlamy_aov <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  dat
 summary(Chlamy_aov)
 coefficients(Chlamy_aov)
 
-Cp_aov <- 
-  aov(DampingIndex ~ LightLevel_ue * TempDiff_C * NaCl_mM, data = Chlamy_damping |>
-  filter(Strain == "Chlamydomonas_priscuii"))
 
-summary(Cp_aov)
-coefficients(Cp_aov)
+ChlamyStrains_aov <- Chlamy_damping |>
+  nest(data = -c("Strain")) |>
+  mutate(Strains_aov = map(data, ~aov(DampingIndex ~ LightLevel_ue + Temp_C + NaCl_mM, data = .))
+         ) |>
+   mutate(Strains_aov_Param = map(Strains_aov, tidy)) |>
+ # unnest(Strains_aov_Param,  names_sep = "_") |>      
+  mutate(Strains_aovinteract = map(data, ~aov(DampingIndex ~ LightLevel_ue * Temp_C * NaCl_mM, data = .))
+  ) |>
+  mutate(Strains_aovinteract_Param = map(Strains_aovinteract, tidy)) |>
+  unnest(Strains_aovinteract_Param, names_sep = "_") |>
+  filter(Strains_aovinteract_Param_p.value <= 0.05)
 
-Cm_aov <- 
-  aov(DampingIndex ~ LightLevel_ue * TempDiff_C * NaCl_mM, data = Chlamy_damping |>
-  filter(Strain == "Chlamydomonas_malina"))
+  # CompareAOV = anova(ChlamyStrains_aov$Strains_aov[1], ChlamyStrains_aov$Strains_aovinteract[1])
+  #     
+         
+   
+         
+         ) 
 
-summary(Cm_aov)
-coefficients(Cm_aov)
+ChlamyStrains_aov_p <- ChlamyStrains_aov |>
+  filter(p.value <= 0.05)
 
 
 ```
