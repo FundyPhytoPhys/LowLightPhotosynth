@@ -274,6 +274,8 @@ p5 <- ti_plot_Chlorella_vulgaris + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
 
+
+
 # Extract vertical legend from p1
 legend_grob <- get_legend(
   p1 + theme(legend.position = "right", legend.direction = "vertical")
