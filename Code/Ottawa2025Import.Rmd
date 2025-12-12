@@ -104,7 +104,7 @@ SolisenseFiles
 
 unique(duplicated(SolisenseFiles))
 
-SolisenseFilesExtra <- list.files(path = "../Data/RawData/ExtraPriscuii16C_2025", pattern = FileID, full.names = TRUE, recursive = FALSE)
+SolisenseFilesExtra <- list.files(path = "../Data/RawData/Extrapriscui16C_2025", pattern = FileID, full.names = TRUE, recursive = FALSE)
 
 SolisenseFilesExtra
 ```
@@ -156,7 +156,7 @@ SolFitsTrimExtra <- SolFitsExtra %>%
   filter(!grepl("----", DATE)) |>
   select(-c("RFID_User_Data", "Barcode_Data","PIF", "Lon", "Lat", "GPS_stat", "LEDSel",  "Light_1", "Light_2", "Light_3","Light_4","Light_5","Light_6", "Dur.Wat", "X")) |>
   mutate(Filename = str_remove(string = Filename, pattern = "_fit.csv")) |>
-  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/ExtraPriscuii16C_2025/")) |>
+  mutate(Filename = str_remove(string = Filename, pattern = "../Data/RawData/Extrapriscui16C_2025/")) |>
   separate(Filename, into=c("YYYYMMDD", "CultureID", "Temp_C", "PulseSpace_s"), sep = "([\\/\\_])", remove = FALSE) |>
   mutate(YYYYMMDD = lubridate::ymd(YYYYMMDD),
           TIME = as.character(TIME)) |>
@@ -330,7 +330,7 @@ SolFitsMetaExtra <- conversion(SolFitsMetaExtra)
 ```{r test plots}
 
 SolFitsMeta |>
-  filter(Strain == "Chlamydomonas_priscuii") |>
+  filter(Strain == "Chlamydomonas_priscui") |>
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(Temp_C)), size = 0.5) +
   scale_colour_manual(values = TempColours) +
@@ -418,7 +418,7 @@ SolFitsMeta <- rbind(SolFitsMeta, SolFitsMetaExtra)
 PulseSpaceSet = 2
 
 SolFitsMeta |>
-  filter(Strain == "Chlamydomonas_priscuii") |>
+  filter(Strain == "Chlamydomonas_priscui") |>
   filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_line(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
@@ -549,7 +549,7 @@ RLCFitsMeta |>
 
 RLCFitsMeta |>
   filter(Dark1s == 0) |>
-  filter(Strain == "Chlamydomonas_priscuii") |>
+  filter(Strain == "Chlamydomonas_priscui") |>
   ggplot() +
   geom_point(aes(x = PAR_ue, y = FvFm)) +
   facet_grid(rows = vars(Temp_C), cols = vars(Strain, NaCl_mM)) +

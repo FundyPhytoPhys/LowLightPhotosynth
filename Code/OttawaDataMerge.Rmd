@@ -108,7 +108,7 @@ SolFitsCm <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_malina_SolFitsTrim.Rds
   rename(LightLevel_ue = Light_Level)  |>
   select(-c(GrowthTemp_C))
 
-SolFitsCp <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_priscuii_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
+SolFitsCp <- readRDS(file.path(DataIn, "LOW_Chlamydomonas_priscui_SolFitsTrim.Rds", fsep = .Platform$file.sep)) |>
   rename(LightLevel_ue = Light_Level)  |>
   select(-c(GrowthTemp_C))
 
@@ -149,7 +149,7 @@ SolFitsChlamyMeta |>
   theme_bw()
 
 SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_priscuii") |>
+  filter(Strain == "Chlamydomonas_priscui") |>
   filter(PulseSpace_s == PulseSpaceSet) |>
   ggplot() +
   geom_point(aes(x = Flashnumber, y = FvFmrunnorm, colour = as.factor(NaCl_mM))) +
@@ -195,7 +195,7 @@ SolFitsChlamyMeta <- SolFitsChlamyMeta |>
   mutate(Year = lubridate:: year(ObsDate)) |>
   mutate(Sal_ppt = NaCl_mM * 58.443 * (1/1000)) |>
   mutate(SalOpt = case_when(Strain == "Chlamydomonas_reinhardtii" ~ 0.43,
-                            Strain =="Chlamydomonas_priscuii" ~  70 ,
+                            Strain =="Chlamydomonas_priscui" ~  70 ,
                             Strain =="Chlamydomonas_klinobasis" ~ 10,
                             Strain =="Chlamydomonas_malina"   ~ 70, 
                             Strain =="Chlamydomonas_euryale" ~ 70,
@@ -218,7 +218,7 @@ SolFitsChlamyMeta |>
   theme_bw()
 
  SolFitsChlamyMeta |>
-  filter(Strain == "Chlamydomonas_priscuii") |>
+  filter(Strain == "Chlamydomonas_priscui") |>
   filter(PulseSpace_s == PulseSpaceSet) |>
   filter(NaCl_mM == SalOpt) |>
   ggplot() +
