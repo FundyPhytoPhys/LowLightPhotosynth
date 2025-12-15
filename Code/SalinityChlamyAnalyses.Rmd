@@ -67,7 +67,9 @@ TempColours
 
 
 ```{r read Chlamy_damping}
-Chlamy_damping <- readRDS(file.path(DataIn, "LOW_Chlamy_damping.Rds", fsep = .Platform$file.sep)) 
+Chlamy_damping <- readRDS(file.path(DataIn, "LOW_Chlamy_damping.Rds", fsep = .Platform$file.sep)) |>
+  mutate(NaCl_opt = as.numeric(NaCl_opt)
+  )
 
 ```
 
@@ -95,6 +97,17 @@ Chlamy_damping |>
   theme_bw()
 
 ```
+
+```{r NaCl_opt_growth tag}
+Chlamy_damping <- Chlamy_damping |>
+  mutate(NaCl_opt_growth = case_when(NaCl_mM == NaCl_opt ~ 1,
+                                     NaCl_mM == 700 ~ 1,
+                                     .default = 0)
+  )
+```
+
+
+
 ```{r aov}
 Chlamy_aov <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  data = Chlamy_damping)
 summary(Chlamy_aov)
@@ -128,6 +141,20 @@ ChlamyStrains_aov <- Chlamy_damping |>
   rename_with(~str_remove(., "Param_"))
 
 kable(ChlamyStrains_aov)
+
+ChlamyStrainsNaCl_opt_aov <- Chlamy_damping |>
+  nest(data = -c("Strain")) |>
+  mutate(Strains_aov = map(data, ~aov(DampingIndex ~ LightLevel_ue + Temp_C + NaCl_opt_growth, data = .))
+         ) |>
+   mutate(Strains_aov_Param = map(Strains_aov, tidy)) |>
+  unnest(Strains_aov_Param,  names_sep = "_") |>
+  filter(Strains_aov_Param_p.value <= 0.05) |>
+  select(!matches("Strains_aovinteract")) |>
+  select(!c(data, Strains_aov)) |>
+  rename_with(~str_remove(., "Strains_aov_")) |>
+  rename_with(~str_remove(., "Param_"))
+
+kable(ChlamyStrainsNaCl_opt_aov)
  
 ```
 
