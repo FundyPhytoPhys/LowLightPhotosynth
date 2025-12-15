@@ -42,11 +42,21 @@ PlotsOut <- file.path("..", "Figures")
 # Damping Across Taxa
 #add new taxa
 ```{r import & wrangle data}
-sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Chlamy_Damping.Rds" ))
+sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Chlamy_Damping.Rds" )) %>%
+  mutate(NaCl_opt = as.numeric(NaCl_opt)) %>% 
+  filter(NaCl_opt == NaCl_mM) %>%  
+  select((-c(NaCl_opt, NaCl_mM)))
 
+glimpse(sstate_damping_2025)
+
+# C.ICEMDV is filtered out- ##########
 sstate_damping_pre2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>% 
-  filter(!grepl("Chlamydomonas",Strain)) %>% 
-  rename(LightLevel_ue = 'Light_Level')
+  filter(!grepl("Chlamydomonas", Strain)) %>% 
+  rename(LightLevel_ue = 'Light_Level') 
+
+# %>% 
+#   mutate(NaCl_mM = 0.43,
+#          NaCl_opt = 0.43)
 
 sstate_damping <- bind_rows (sstate_damping_pre2025, sstate_damping_2025)%>%
   mutate(Strain = factor(Strain), 
@@ -118,7 +128,7 @@ summary(PAR_Temp_Model)
 
 DampingIndex_Gam <- sstate_damping %>% 
    ungroup() %>%
-  group_by(Strain, GrowthTemp_C, NaCl_mM, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
+  group_by(Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
   nest() %>%
   mutate(
     GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(LightLevel_ue, k = 3) + s(Temp_C, k = 3) + ti(Temp_C, LightLevel_ue, k = 3), data = .x,
@@ -132,7 +142,7 @@ DampingIndex_Gam <- sstate_damping %>%
   ungroup()
 
 DampingIndex_Pred <- DampingIndex_Gam %>%
-  dplyr::select(predicted, Strain, GrowthTemp_C, NaCl_mM, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
+  dplyr::select(predicted, Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
   dplyr::filter(predicted != "NULL") %>%
   rowwise() %>%
   mutate(db = list(cbind(predicted, PAR_Temp_Model))) %>%

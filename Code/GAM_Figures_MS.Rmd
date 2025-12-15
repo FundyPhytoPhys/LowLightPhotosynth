@@ -72,18 +72,25 @@ head(DampingIndex_Pred)
 # Damping Across Taxa
 
 ```{r import & wrangle sstate data}
-sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping_2025.Rds" ))
+sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Chlamy_Damping.Rds" )) %>%
+  mutate(NaCl_opt = as.numeric(NaCl_opt)) %>% 
+  filter(NaCl_opt == NaCl_mM) %>%  
+  select((-c(NaCl_opt, NaCl_mM)))
 
+glimpse(sstate_damping_2025)
+
+# C.ICEMDV is filtered out- ##########
 sstate_damping_pre2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>% 
-  mutate(NaCl_mM = 1) %>% 
-  rename(LightLevel_ue = 'Light_Level')
+  filter(!grepl("Chlamydomonas", Strain)) %>% 
+  rename(LightLevel_ue = 'Light_Level') 
+
 
 sstate_damping <- bind_rows (sstate_damping_pre2025, sstate_damping_2025)%>%
   mutate(Strain = factor(Strain), 
   ThermalTolerance = case_when(
      Strain %in% c("Fragilariopsis_cylindrus",
                    "Chlamydomonas_ICEMDV",
-                   "Chlamydomonas_priscuii",
+                   "Chlamydomonas_priscui",
                    "Chlamydomonas_malina",
                    "Chlamydomonas_klinobasis") ~ "Polar",
      Strain %in% c("Chlamydomonas_reinhardtii",
@@ -94,7 +101,7 @@ sstate_damping <- bind_rows (sstate_damping_pre2025, sstate_damping_2025)%>%
      Strain %in% c("Fragilariopsis_cylindrus",
                    "Thalassiosira_pseudonana") ~ "Diatom", 
      Strain %in% c("Chlamydomonas_ICEMDV",
-                   "Chlamydomonas_priscuii", 
+                   "Chlamydomonas_priscui", 
                    "Chlamydomonas_malina", 
                    "Chlamydomonas_reinhardtii", 
                    "Chlamydomonas_euryale", 
@@ -103,15 +110,17 @@ sstate_damping <- bind_rows (sstate_damping_pre2025, sstate_damping_2025)%>%
   l.strain = case_when(
     Strain == "Chlamydomonas_ICEMDV" ~ "~italic('C. ICEMDV')", 
     Strain == "Chlamydomonas_malina" ~"~italic('C. malina')",
-    Strain == "Chlamydomonas_priscuii" ~ "~italic('C. priscuii')",
+    Strain == "Chlamydomonas_priscui" ~ "~italic('C. priscui')",
     Strain == "Chlamydomonas_reinhardtii" ~ "~italic('C. reinhardtii')",
     Strain == "Chlorella_vulgaris" ~ "~italic('C. vulgaris')",
     Strain == "Fragilariopsis_cylindrus" ~ "~italic('F. cylindrus')", 
     Strain == "Thalassiosira_pseudonana" ~ "~italic('T. pseudonana')",
-    Strain == "Chlamydomonas_klinobasis" ~ "~italic('C. klinobasis')",            Strain == "Chlamydomonas_euryale" ~ "~italic('C. euryale')"),
+    Strain == "Chlamydomonas_klinobasis" ~ "~italic('C. klinobasis')",            
+    Strain == "Chlamydomonas_euryale" ~ "~italic('C. euryale')"),
   l.temp = paste0("Grown~at~", GrowthTemp_C,"*degree*C"),
   FacetLabel_temp = paste0("grown~at~", GrowthTemp_C,"*degree*C"),
   )
+
 
 ```
 
@@ -147,10 +156,10 @@ spacing.diatom <- sstate_damping %>%
 # Example scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris 
 
 # plotting all strains and adding a facet-wrap does not work as each strain has different x-axis ranges.
-GamStrain = "Chlamydomonas_euryale"
+GamStrain = "Chlamydomonas_klinobasis"
 #Chlamydomonas_ICEMDV                     #remember to change scale_x_continuous
 #Chlamydomonas_malina                     #remember to change scale_x_continuous                  
-#Chlamydomonas_priscuii                   #remember to change scale_x_continuous
+#Chlamydomonas_priscui                   #remember to change scale_x_continuous
 #Chlorella_vulgaris                       #remember to change scale_x_continuous
 #Chlamydomonas_reinhardtii                #remember to change scale_x_continuous
 #Chlamydomonas_klinobasis                 #remember to change scale_x_continuous
@@ -161,7 +170,7 @@ ErrorTol = 170
 
 DampingIndex_Hyper <- DampingIndex_Pred %>% 
   filter(Strain %in% GamStrain) %>%
-  group_by(Strain, GrowthTemp_C, NaCl_mM) %>% 
+  group_by(Strain, GrowthTemp_C) %>% 
   mutate(IsFitGood = case_when(se.fit/fit*100 < ErrorTol ~ (1),#Assigns '0' to faulty data where Standarderror larger +/- Errortolerance
                     TRUE ~ (0))) %>% 
   filter(IsFitGood == 1) %>%  # filters faulty data where Standarderror larger +/- Errortolerance
@@ -219,10 +228,10 @@ ContourLines <- ContourLines$quantileValue
     # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
     #               label.placer = label_placer_fraction(frac = 0.4)) +
     # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris
-   # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 4), expand = c(0, 0)) + # For C.ICE, C.malina & C.priscuii
-       # scale_x_continuous(limits = c(12, 24), breaks = seq(12, 24, by = 4), expand = c(0, 0)) + # For C.reinhardtii
-      # scale_x_continuous(limits = c(0, 12), breaks = seq(0, 12, by = 4), expand = c(0, 0)) + # For C.klinobasis
-     scale_x_continuous(limits = c(16, 28), breaks = seq(16, 28, by = 4), expand = c(0, 0)) + #  For Chlamydomonas_euryale
+    # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 4), expand = c(0, 0)) + # For C.ICE, C.malina & C.priscui
+        # scale_x_continuous(limits = c(12, 24), breaks = seq(12, 24, by = 4), expand = c(0, 0)) + # For C.reinhardtii
+       scale_x_continuous(limits = c(0, 12), breaks = seq(0, 12, by = 4), expand = c(0, 0)) + # For C.klinobasis
+     # scale_x_continuous(limits = c(16, 28), breaks = seq(16, 28, by = 4), expand = c(0, 0)) + #  For Chlamydomonas_euryale
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
                        sec.axis = dup_axis(breaks = c(spacing.algae$LightLevel_ue.mean), 
                                            labels = c(spacing.algae$PulseSpace_s),
@@ -232,7 +241,7 @@ ContourLines <- ContourLines$quantileValue
     xlab("Measurement Temperature (°C)") +
     ylab("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")") +
     # ylab(NULL) +
-  ggh4x::facet_nested_wrap(vars(l.strain, NaCl_mM), nrow=1, scales="free_x",
+  ggh4x::facet_nested_wrap(vars(l.strain), nrow=1, scales="free_x",
                              labeller = label_parsed) +
   geom_vline(aes(xintercept = GrowthTemp_C + 0.025), 
              col= "black", linetype = 2, linewidth = 1.7)  +
@@ -258,19 +267,22 @@ Filename <- "AlgaeGAM"
 
 
 # Remove individual legends and axes titles
-p1 <- ti_plot_Chlamydomonas_ICEMDV + theme(legend.position = "none",
+p1 <- ti_plot_Chlamydomonas_klinobasis + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
 p2 <- ti_plot_Chlamydomonas_malina + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
-p3 <- ti_plot_Chlamydomonas_priscuii+ theme(legend.position = "none",
+p3 <- ti_plot_Chlamydomonas_priscui+ theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
 p4 <- ti_plot_Chlamydomonas_reinhardtii + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL) 
 p5 <- ti_plot_Chlorella_vulgaris + theme(legend.position = "none",
+    axis.title.y.right = element_blank()) +
+  labs(x = NULL, y = NULL)
+p6 <- ti_plot_Chlamydomonas_euryale + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
 
@@ -284,16 +296,18 @@ legend_grob <- get_legend(
 legend_only <- gridExtra::arrangeGrob(legend_grob)
 
 # Define width of each plot based on °C span
-temp_widths <- c(8, 8, 8, 12, 16)
+temp_widths <- c(12, 8, 8, 12, 16, 12)
 
 # Normalize widths
-rel_widths <- c(1, 1, 1, 1.5, 2)
+rel_widths <- c(1.5, 1, 1, 1.5, 2, 1.5)
 
-top_row <- cowplot::plot_grid(p1, p2, p3, nrow = 1, rel_widths = rel_widths[1:3])
+top_row <- cowplot::plot_grid(p1, p2, p3, nrow = 1)
+                              # , rel_widths = rel_widths[1:3])
 bottom_row <- cowplot::plot_grid(
-  p4, p5, legend_only,
-  nrow = 1,
-  rel_widths = c(rel_widths[4], rel_widths[5], 0.1)  # Adjust legend width if needed to get bottom row x-axis to near same scale as top row x-axis
+  p4, p5, p6,
+  nrow = 1
+  # ,
+  # rel_widths = c(rel_widths[4], rel_widths[5], 0.1)  # Adjust legend width if needed to get bottom row x-axis to near same scale as top row x-axis
 )
 
 CombineAlgae <- cowplot::plot_grid(
@@ -317,7 +331,7 @@ AlgaeGAM
 
 # must use cowplot to save as x and y axis are lost using ggsave
 cowplot::save_plot(
-  filename = file.path(PlotsOut, paste0(Filename, ".png")),
+  filename = file.path(PlotsOut, paste0(Filename,"_new", ".png")),
   plot = AlgaeGAM,
   base_height = 10,
   base_width = 15,
