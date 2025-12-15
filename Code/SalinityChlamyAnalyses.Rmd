@@ -87,6 +87,13 @@ Chlamy_damping |>
   facet_grid(rows = vars(Strain), cols = vars(TempDiff_C)) +
   theme_bw()
 
+Chlamy_damping |>
+  filter(PulseSpace_s == 4) |>
+  ggplot() +
+  geom_point(aes(x = NaCl_mM, y = DampingIndex)) +
+  facet_grid(rows = vars(Strain), cols = vars(TempDiff_C)) +
+  theme_bw()
+
 ```
 ```{r aov}
 Chlamy_aov <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  data = Chlamy_damping)
