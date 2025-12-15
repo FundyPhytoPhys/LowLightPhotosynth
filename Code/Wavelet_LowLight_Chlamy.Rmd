@@ -19,7 +19,9 @@ editor_options:
 ---
 
 # Introduction
-This RMD computes a wave transformation and extracts the duration of fluorescence oscillations for the cleaned data generated from OttawaImport, TakuvikImport, and SackvilleImport. 
+This RMD computes a wave transformation and extracts the duration of fluorescence oscillations for the cleaned data generated from OttawaImport.
+
+It generates outputs from all growth salinities, and at growth salinities filtered for optimal growth.
 
 ```{r load libraries}
 library(tidyverse)
@@ -35,13 +37,11 @@ DataIn <- file.path("..","Data", "CleanData")
 DataOut <- file.path("..","Data", "ProcessedData")
 FileID <- "SolFitsChlamyMeta"
 siglvl <- 0.05 #specifies statistical significance level
-Fc <- "Fragilariopsis_cylindrus"
+
 Ci <- "Chlamydomonas_ICEMDV"
 Cm <- "Chlamydomonas_malina"
 Cp <- "Chlamydomonas_priscui"
 Cr <- "Chlamydomonas_reinhardtii"
-Cv <- "Chlorella_vulgaris"
-Tp <- "Thalassiosira_pseudonana"
 Ce <- "Chlamydomonas_euryale"
 Ck <- "Chlamydomonas_klinobasis"
 ```
