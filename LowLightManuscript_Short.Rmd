@@ -247,7 +247,7 @@ By evaluating the oscillations in ChlF (Fig \@ref(fig:reposc)), we tracked S-Sta
 
 Increasing the spacing between sequential flashes decreases the repeat rate for excitations arriving at PSII, thereby approximating a decrease in excitations delivered to PSII per second under a decrease in continuous irradiance (Fig \@ref(fig:reposc)).  Our instrument control limited our minimum flash spacing to 1 s, so cultures were evaluated at flash spacings of 1, 2, 4, 8, and 16 seconds (\@ref(tab:fluormeas)). The equivalent effective light levels were then estimated using the σ~PSII~ determined for each culture as follows: 
 
-
+XXXFix EquationXXX
 \begin{equation}
 Light (µmol~photons~m^{-2}~s^{-1}) = \frac{1}{flash~spacing (s)|}
 \end{equation}
