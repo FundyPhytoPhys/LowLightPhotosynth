@@ -75,7 +75,7 @@ OttawaMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1m8Pjwj4DL1
 
 OttawaMetadata <- OttawaMetadata |>
   filter(!is.na(PrimaryOperator))|>
-  select(-c(InnocDate,CultivatorTank, Tube, Notes, `...19`))
+  select(-c(InnocDate, Notes, `...19`))
 ```
 
 
@@ -198,56 +198,8 @@ SolFitsTrimExtra2 <- SolFitsTrimExtra |>
 ```
 
 
-```{r correct file issues}
-# ProblemFits <- SolFitsTrim %>% 
-#   na.omit() %>%
-#   mutate(TimeDev = abs(PulseSpace_s - TimeDiff_s)) %>%
-#   filter(TimeDev > 1)
-# 
-# ProblemFiles <- unique(ProblemFits$Filename)
-# 
-# ProblemList <- SolFitsTrim %>% 
-#   filter(Filename %in% c(ProblemFiles)) %>% 
-#   doBy::split_by("Filename") #creates list of problem files
-
-#ProblemFiles
-```
-
-```{r}
-# manualtrim <- c("20230918_MaPo1001_4C_1s", "20230920_MaPo1005_24C_16s", "20230919_MaPo1004_4C_16s", "20230920_MaPo1006_12C_16s", "20230918_MaPo1001_12C_16s")
-```
-
-```{r manually trim data}
-# last32 <- SolFitsTrim %>%
-#   filter(!Filename %in% c(manualtrim)) %>%
-#   group_by(Filename) %>%
-#   slice(tail(row_number(),32)) %>% 
-#   mutate(Flashnumber = row_number()) %>%
-#   ungroup()
-# 
-# last31 <- SolFitsTrim %>%
-#   filter(Filename %in% c("20230919_MaPo1004_4C_16s", "20230920_MaPo1006_12C_16s",
-#                          "20230918_MaPo1001_12C_16s")) %>%
-#   group_by(Filename) %>%
-#   slice(tail(row_number(),31)) %>% 
-#   mutate(Flashnumber = row_number()) %>%
-#   ungroup()
-#   
-# MaPo1001_4C_1s <- SolFitsTrim %>%
-#   filter(Filename== "20230918_MaPo1001_4C_1s") %>%
-#   filter(Flashnumber <= 32)
-# 
-# MaPo1005_24C_16s <- SolFitsTrim %>%
-#   filter(Filename== "20230920_MaPo1005_24C_16s") %>%
-#   filter(Flashnumber %in% c(3:33)) %>%
-#   mutate(Flashnumber = row_number())
-# 
-# SolFitsTrim2 <- rbind(last32, last31, MaPo1001_4C_1s, MaPo1005_24C_16s)
-```
-
-
 ### Normalize Fluorescence & Add Temperature Differential Column 
-#Temporarily ignoring manual fixes above.
+
 ```{r}
 
 NormStartFlash = 12
@@ -404,7 +356,7 @@ MaPo2002_28C_1 s, another run appended? points 19-24
 
 ```{r problemplot_filter}
 SolFitsMeta <- SolFitsMeta |>
-  filter(!grepl("MaPo2002_28C_1 s", Filename)) |> #remove for now
+  filter(!grepl("MaPo2002_28C_1 s", Filename)) #remove for now
   
 ```
 
