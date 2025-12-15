@@ -174,39 +174,78 @@ S-State cycling in a phytoplankton sample can be tracked by applications of sequ
 ## Study Strains and Culturing Conditions {.unnumbered}
 The nine study taxa, including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxacultures). 
 
-XXXREDO SUmmary TABLE TO INCLUDE SALINITYXXXX
+```{r, include=FALSE}
+googlesheets4::gs4_deauth()
+
+OttawaMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1m8Pjwj4DL10AwdsQo2G3boymSWG1Oq-gJDzjU0csRKs/edit?usp=sharing")
+
+OttawaMetadata <- OttawaMetadata |>
+  filter(!is.na(PrimaryOperator))|>
+  select(-c(InnocDate, Notes, `...19`)) |>
+  mutate(ExpDate = lubridate::ymd(ExpDate)) 
+
+ChlamyCultures <- OttawaMetadata |>
+  select(-c(PrimaryOperator, Project, ID, ExpDil, ExpDate, O2_Category, WL, Chl_ugmL)) |>
+  mutate(Lineage = "Green") |>
+  rename(Taxa = Strain,
+         GrowthPAR = Par_ue) |>
+  summarize(.by = c(Taxa, Lineage, GrowthPAR, Photoperiod, GrowthTemp_C, Habitat, NaCl_mM, NaCl_opt, Media))
+
+TakuvikMetaData <-  read_sheet("https://docs.google.com/spreadsheets/d/13QHnV0dcfZxCvLJFc_q2q5NkSuVahRPu_8CEMJMC6nQ/edit?gid=723161828#gid=723161828")
+
+TakuvikCultures <- TakuvikMetaData |>
+  select(c(Species, PAR_ue, Temp_C)) |>
+  rename(Taxa = Species,
+         GrowthTemp_C = Temp_C,
+         GrowthPAR = PAR_ue) |>
+  mutate(Photoperiod = 24, 
+         Habitat = "Polar", 
+         NaCl_mM = 500,
+         NaCl_opt = 500,
+         Media = "F2",
+         Lineage = "Diatom")  |>
+  summarize(.by = c(Taxa, Lineage, GrowthPAR, Photoperiod, GrowthTemp_C, Habitat, NaCl_mM, NaCl_opt, Media)) |>
+  filter(!is.na(Taxa))
+
+
+SackvilleTaxa <- c("Thalassiosira pseudonana", "Chlorella vulgaris", "Chlorella vulgaris")
+SackvilleLineage <- c("Diatom", "Green", "Green")
+SackvilleHabitat <- c(rep("Temperate", 3))
+SackvilleGrowthTemp_C <- c(rep(22, 3))
+SackvilleGrowthPAR <- c(50,50,50)
+SackvillePhotoperiod <- c(rep(12, 3))
+SackvilleMedia <- c(rep("F2",2), "BG11")
+
+SackvilleCultures <- tibble(SackvilleTaxa, SackvilleLineage, SackvilleHabitat, SackvilleGrowthTemp_C, SackvilleGrowthPAR, SackvillePhotoperiod, SackvilleMedia) |>
+  rename_with(~str_remove(., "Sackville")) |>
+  mutate(NaCl_mM = 500, 500, 0.43, 
+         NaCl_opt = 500, 0.43, 0.43) |> 
+  summarize(.by = c(Taxa, Lineage, GrowthPAR, Photoperiod, GrowthTemp_C, Habitat, NaCl_mM, NaCl_opt, Media))
+
+Cultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
+  mutate(Taxa = str_replace_all(Taxa, "_", " ")) |>
+  arrange(Lineage, Habitat, Taxa, NaCl_mM)
+
+Cultures  
+```
+
+
 ```{r taxacultures, echo = FALSE}
-Taxa <- c("Thalassiosira pseudonana", "Thalassiosira pseudonana", "Chlorella vulgaris", "Chlorella vulgaris",  "Chlamydomonas reinhardtii", "Chlamydomonas euryale",  "Fragilariopsis cylindrus",  "Chlamydomonas priscui", "Chlamydomonas sp. ICE-MDV", "Chlamydomonas malina", "Chlamydomonas klinobasis")
-
-Lineage <- c(rep("Diatom", 2), rep("Green", 4), rep("Diatom", 1), rep("Green", 4))
-
-Origin <- c(rep("Temperate", 6), rep("Polar", 5))
-Growth_C <- c(rep(22, 4), 24, 24, 6, rep(4,3))
-
-Growth_PAR <- c(50, 70, rep(50, 3), 70, rep(10, 7))
-
-Growth_Photoperiod <- c(rep(12, 4), rep(24, 7))
-
-Media <- c(rep("F2",2), rep("BG11", 2), "BBM", rep("F2", 3), rep("BBM",4))
-
-Salinity_ppt <- c()
-
-TaxaCultures <- tibble(Taxa, Lineage, Origin, Growth_C, Growth_PAR, Growth_Photoperiod, Media)
-                            
- if (knitr::is_html_output()) { 
-  knitr::kable(TaxaCultures,
-    caption ="Study taxa and culture growth conditions.",
-    col.names = c("Taxa", "Lineage", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")
-    ) |>
-    kableExtra::column_spec(1, italic = TRUE) |>
-    kableExtra::kable_classic()
- } else {
-   knitr::kable(TaxaCultures,
-    format = "pipe",
-    caption ="Study taxa and culture growth conditions.",
-    col.names = c("Taxa", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")
-   ) 
-   } 
+ #                     
+ # if (knitr::is_html_output()) { 
+ #  knitr::kable(TaxaCultures,
+ #    caption ="Study taxa and culture growth conditions.",
+ #    col.names = c("Taxa", "Lineage", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")
+ #    ) |>
+ #    kableExtra::column_spec(1, italic = TRUE) |>
+ #    kableExtra::kable_classic()
+ # } else {
+ #   knitr::kable(TaxaCultures,
+ #    format = "pipe",
+ #    caption ="Study taxa and culture growth conditions.",
+ #    col.names = c("Taxa", "Origin", "Growth °C", "PAR (µE)", "Photoperiod (h)", "Media")
+ #   ) 
+ #  } 
 ```
 
 
