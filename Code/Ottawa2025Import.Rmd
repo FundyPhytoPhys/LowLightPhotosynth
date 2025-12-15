@@ -360,7 +360,7 @@ SolFitsMeta <- SolFitsMeta |>
   
 ```
 
-```{r merge extra plots}
+```{r merge extra}
 SolFitsMeta <- rbind(SolFitsMeta, SolFitsMetaExtra)
 ```
 
