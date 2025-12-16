@@ -72,20 +72,29 @@ head(DampingIndex_Pred)
 # Damping Across Taxa
 
 ```{r import & wrangle sstate data}
-sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Chlamy_Damping.Rds" )) %>%
+`%notin%` <- negate(`%in%`)
+
+sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Chlamy_dampingYear.Rds" )) %>%
   mutate(NaCl_opt = as.numeric(NaCl_opt)) %>% 
   filter(NaCl_opt == NaCl_mM) %>%  
-  select((-c(NaCl_opt, NaCl_mM)))
+  select((-c(NaCl_opt, NaCl_mM))) %>% 
+  filter(Strain %notin% c("Chlamydomonas_euryale"))
 
 glimpse(sstate_damping_2025)
 
-# C.ICEMDV is filtered out- ##########
-sstate_damping_pre2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>% 
-  filter(!grepl("Chlamydomonas", Strain)) %>% 
+
+sstate_damping_2023 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>% 
+  # filter(!grepl("Chlamydomonas", Strain)) %>% 
+   dplyr::filter(Strain %in% c("Fragilariopsis_cylindrus",
+                                "Chlamydomonas_ICEMDV",
+                                "Chlorella_vulgaris", 
+                                "Thalassiosira_pseudonana")) %>% 
+  mutate(Year = as.character(2023)) %>% 
   rename(LightLevel_ue = 'Light_Level') 
 
+glimpse(sstate_damping_2023)
 
-sstate_damping <- bind_rows (sstate_damping_pre2025, sstate_damping_2025)%>%
+sstate_damping <- bind_rows (sstate_damping_2023, sstate_damping_2025)%>%
   mutate(Strain = factor(Strain), 
   ThermalTolerance = case_when(
      Strain %in% c("Fragilariopsis_cylindrus",
@@ -153,10 +162,13 @@ spacing.diatom <- sstate_damping %>%
 ```{r Plot Algae DampingIndex GAM}
 
 # Run this chunk each time for each strain to generate strain specific hypervolume by changing the value for Gamstrain and selecting the corresponding "scale_x_continuous" in ggplot below. 
-# Example scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris 
+# Example scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 2), expand = c(0, 0)) + # For C.vulgaris 
+
+#Separate Gams were generated for each experiment year. Chose which year to plot here. 
+GamYear = "2023" #"2023" "2025"
 
 # plotting all strains and adding a facet-wrap does not work as each strain has different x-axis ranges.
-GamStrain = "Chlamydomonas_klinobasis"
+GamStrain = "Chlamydomonas_malina"
 #Chlamydomonas_ICEMDV                     #remember to change scale_x_continuous
 #Chlamydomonas_malina                     #remember to change scale_x_continuous                  
 #Chlamydomonas_priscui                   #remember to change scale_x_continuous
@@ -169,7 +181,8 @@ ErrorTol = 170
 
 
 DampingIndex_Hyper <- DampingIndex_Pred %>% 
-  filter(Strain %in% GamStrain) %>%
+  filter(Strain %in% GamStrain,
+         Year %in% GamYear) %>%
   group_by(Strain, GrowthTemp_C) %>% 
   mutate(IsFitGood = case_when(se.fit/fit*100 < ErrorTol ~ (1),#Assigns '0' to faulty data where Standarderror larger +/- Errortolerance
                     TRUE ~ (0))) %>% 
@@ -227,11 +240,12 @@ ContourLines <- ContourLines$quantileValue
                         label.placer = label_placer_fraction(frac = 0.4)) +
     # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
     #               label.placer = label_placer_fraction(frac = 0.4)) +
-    # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 4), expand = c(0, 0)) + # For C.vulgaris
-    # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 4), expand = c(0, 0)) + # For C.ICE, C.malina & C.priscui
-        # scale_x_continuous(limits = c(12, 24), breaks = seq(12, 24, by = 4), expand = c(0, 0)) + # For C.reinhardtii
-       scale_x_continuous(limits = c(0, 12), breaks = seq(0, 12, by = 4), expand = c(0, 0)) + # For C.klinobasis
-     # scale_x_continuous(limits = c(16, 28), breaks = seq(16, 28, by = 4), expand = c(0, 0)) + #  For Chlamydomonas_euryale
+    # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 2), expand = c(0, 0)) + # For C.vulgaris
+    # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 2), expand = c(0, 0)) + # For C.ICE
+         # scale_x_continuous(limits = c(12, 28), breaks = seq(12, 24, by = 2), expand = c(0, 0)) + # For C.reinhardtii
+    # scale_x_continuous(limits = c(2, 16), breaks = seq(12, 24, by = 2), expand = c(0, 0)) + # For C.priscui
+       scale_x_continuous(limits = c(2, 12), breaks = seq(2, 12, by = 2), expand = c(0, 0)) + # For C.klinobasis ,  For C.malina
+     # scale_x_continuous(limits = c(16, 28), breaks = seq(16, 28, by = 2), expand = c(0, 0)) + #  For Chlamydomonas_euryale
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
                        sec.axis = dup_axis(breaks = c(spacing.algae$LightLevel_ue.mean), 
                                            labels = c(spacing.algae$PulseSpace_s),
@@ -241,7 +255,7 @@ ContourLines <- ContourLines$quantileValue
     xlab("Measurement Temperature (°C)") +
     ylab("Light Level (µmol photons"~ m^-2~ ~s^-1~ ")") +
     # ylab(NULL) +
-  ggh4x::facet_nested_wrap(vars(l.strain), nrow=1, scales="free_x",
+  ggh4x::facet_nested_wrap(vars(l.strain, Year), nrow=1, scales="free_x",
                              labeller = label_parsed) +
   geom_vline(aes(xintercept = GrowthTemp_C + 0.025), 
              col= "black", linetype = 2, linewidth = 1.7)  +
@@ -273,7 +287,7 @@ p1 <- ti_plot_Chlamydomonas_klinobasis + theme(legend.position = "none",
 p2 <- ti_plot_Chlamydomonas_malina + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
-p3 <- ti_plot_Chlamydomonas_priscui+ theme(legend.position = "none",
+p3 <- ti_plot_Chlamydomonas_priscui + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
 p4 <- ti_plot_Chlamydomonas_reinhardtii + theme(legend.position = "none",
@@ -282,7 +296,7 @@ p4 <- ti_plot_Chlamydomonas_reinhardtii + theme(legend.position = "none",
 p5 <- ti_plot_Chlorella_vulgaris + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
-p6 <- ti_plot_Chlamydomonas_euryale + theme(legend.position = "none",
+p6 <- ti_plot_Chlamydomonas_ICEMDV + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
 
@@ -296,10 +310,10 @@ legend_grob <- get_legend(
 legend_only <- gridExtra::arrangeGrob(legend_grob)
 
 # Define width of each plot based on °C span
-temp_widths <- c(12, 8, 8, 12, 16, 12)
+temp_widths <- c(10, 10, 14, 12, 16, 8)
 
 # Normalize widths
-rel_widths <- c(1.5, 1, 1, 1.5, 2, 1.5)
+rel_widths <- c(1.25, 1.25, 1.75, 1.5, 2, 1)
 
 top_row <- cowplot::plot_grid(p1, p2, p3, nrow = 1)
                               # , rel_widths = rel_widths[1:3])
@@ -331,7 +345,7 @@ AlgaeGAM
 
 # must use cowplot to save as x and y axis are lost using ggsave
 cowplot::save_plot(
-  filename = file.path(PlotsOut, paste0(Filename,"_new", ".png")),
+  filename = file.path(PlotsOut, paste0(Filename,GamYear, ".png")),
   plot = AlgaeGAM,
   base_height = 10,
   base_width = 15,
@@ -345,7 +359,7 @@ cowplot::save_plot(
 ```{r Plot Diatoms DampingIndex GAM}
 
 # Run this chunk each time for each strain to generate strain specific hypervolume by changing the value for Gamstrain, selecting the corresponding "scale_x_continuous" in ggplot below and selecting the growth temp in GamTemp. 
-#Example scale_x_continuous(limits = c(10, 28), breaks = seq(10, 28, by = 4), expand = c(0, 0)) + # For T.pseudonana GamTemp = 22
+#Example scale_x_continuous(limits = c(10, 28), breaks = seq(10, 28, by = 2), expand = c(0, 0)) + # For T.pseudonana GamTemp = 22
 
 # select growth temp; F.c was grown at 0 and 6°C and T.p was grown at 22°C
 
@@ -423,8 +437,8 @@ ContourLines <- ContourLines$quantileValue
                         label.placer = label_placer_fraction(frac = 0.4)) +
     # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
     #               label.placer = label_placer_fraction(frac = 0.4)) +
-    # scale_x_continuous(limits = c(10, 28), breaks = seq(10, 28, by = 4), expand = c(0, 0)) + # For T.pseudonana
-    scale_x_continuous(limits = c(0, 10), breaks = seq(2, 10, by = 4), expand = c(0, 0)) + # For F.c
+    # scale_x_continuous(limits = c(10, 28), breaks = seq(10, 28, by = 2), expand = c(0, 0)) + # For T.pseudonana
+    scale_x_continuous(limits = c(0, 10), breaks = seq(2, 10, by = 2), expand = c(0, 0)) + # For F.c
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
                        sec.axis = dup_axis(breaks = c(spacing.diatom$LightLevel_ue.mean), 
                                            labels = c(spacing.diatom$PulseSpace_s),
