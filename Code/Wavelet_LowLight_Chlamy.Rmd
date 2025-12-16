@@ -164,8 +164,8 @@ plot.wt.image <- function(wavelet_list) {
 ```{r import Chlamy data }
 SolFitsChlamyMeta <- readRDS(file.path(DataIn, "LOW_SolFitsChlamyMeta.Rds"))
 
-Chlamy_data <- summaryBy(FvFmrunnorm ~ Strain + PulseSpace_s + Temp_C + TempDiff_C +  Flashnumber + LightLevel_ue + NaCl_mM + NaCl_opt + GrowthTemp_C, data=SolFitsChlamyMeta, FUN=mean, keep.names = TRUE) %>%
-  splitBy(formula = ~ Strain + PulseSpace_s + Temp_C + TempDiff_C + LightLevel_ue + NaCl_mM + NaCl_opt + GrowthTemp_C)
+Chlamy_data <- summaryBy(FvFmrunnorm ~ Strain + PulseSpace_s + Temp_C + TempDiff_C +  Flashnumber + LightLevel_ue + NaCl_mM + NaCl_opt + GrowthTemp_C + Year, data=SolFitsChlamyMeta, FUN=mean, keep.names = TRUE) %>%
+  splitBy(formula = ~ Strain + PulseSpace_s + Temp_C + TempDiff_C + LightLevel_ue + NaCl_mM + NaCl_opt + GrowthTemp_C + Year)
 
 
 ```
@@ -188,7 +188,7 @@ Chlamy_reconstruction <- reconstructwave(Chlamy_wavelets)
 Chlamy_damping <- damping(Chlamy_reconstruction)  %>%
   mutate(damping.index = ifelse(!condition %in% Chlamy_significant, 0, damping.index)) %>%
   rename(DampingIndex = damping.index) %>%
-  separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "TempDiff_C", "LightLevel_ue", "NaCl_mM", "NaCl_opt", "GrowthTemp_C"), sep = "\\|") |>
+  separate(condition, into=c("Strain", "PulseSpace_s", "Temp_C", "TempDiff_C", "LightLevel_ue", "NaCl_mM", "NaCl_opt", "GrowthTemp_C", "Year"), sep = "\\|") |>
   filter(!is.na(PulseSpace_s)) |>  # fix a  bad row C.priscui; not working?
   mutate(Temp_C = as.numeric(Temp_C),
          TempDiff_C = as.numeric(TempDiff_C),
@@ -214,17 +214,17 @@ Chlamy_damping |>
 
 ```{r  save damping}
 
-saveRDS(Chlamy_damping, file.path(DataOut, paste(Project, "Chlamy_damping.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(Chlamy_damping, file.path(DataOut, paste(Project, "Chlamy_dampingYear.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 ```{r}
 
-saveRDS(Chlamy_wavelets, file.path(DataOut, paste(Project, "Chlamy_wavelets.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(Chlamy_wavelets, file.path(DataOut, paste(Project, "Chlamy_waveletsYear.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 ```{r}
 
-saveRDS(Chlamy_reconstruction, file.path(DataOut, paste(Project, "Chlamy_reconstructions.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(Chlamy_reconstruction, file.path(DataOut, paste(Project, "Chlamy_reconstructionsYear.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
 
 
