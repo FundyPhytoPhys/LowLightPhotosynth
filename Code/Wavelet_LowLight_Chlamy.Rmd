@@ -209,6 +209,13 @@ Chlamy_damping |>
   scale_y_reverse() + 
   facet_grid(cols = vars(NaCl_mM),   rows = vars(Strain)) +
   theme_bw()
+
+Chlamy_damping |>
+  ggplot() +
+  geom_tile(aes(y = PulseSpace_s, x = Temp_C, colour = DampingIndex, fill = DampingIndex)) +
+  scale_y_reverse() + 
+  facet_grid(cols = vars(NaCl_mM),   rows = vars(Strain, Year)) +
+  theme_bw()
 ```
 
 
