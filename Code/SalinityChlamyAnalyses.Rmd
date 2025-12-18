@@ -38,7 +38,6 @@ knitr::opts_chunk$set(fig.path='Output/')
 ### Set Project Variables 
 ```{r set project variables}
 Project <- "LOW"
-TargetData <- "Ottawa_2025"
 DataIn <- file.path("..","Data", "ProcessedData")
 CalibData <- file.path("..","Data", "CalibData")
 DataOut <- file.path("..","Data", "ProcessedData")
@@ -67,7 +66,7 @@ TempColours
 
 
 ```{r read Chlamy_damping}
-Chlamy_damping <- readRDS(file.path(DataIn, "LOW_Chlamy_damping.Rds", fsep = .Platform$file.sep)) |>
+Chlamy_damping <- readRDS(file.path(DataIn, "LOW_Chlamy_dampingYear.Rds", fsep = .Platform$file.sep)) |>
   mutate(NaCl_opt = as.numeric(NaCl_opt)
   )
 
@@ -109,11 +108,14 @@ Chlamy_damping <- Chlamy_damping |>
 
 
 ```{r aov}
-Chlamy_aov <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  data = Chlamy_damping)
-summary(Chlamy_aov)
 
-Chlamy_aovinteract <- aov(DampingIndex ~ Strain * LightLevel_ue + Temp_C + NaCl_mM,  data = Chlamy_damping)
-summary(Chlamy_aovinteract)
+
+Chlamy_aovfullinteract <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  data = Chlamy_damping)
+
+summary(Chlamy_aovfullinteract)
+
+# Chlamy_aovinteract <- aov(DampingIndex ~ Strain * LightLevel_ue + Temp_C + NaCl_mM,  data = Chlamy_damping)
+# summary(Chlamy_aovinteract)
 
 
 ChlamyStrains_aovinteract <-  Chlamy_damping |>
@@ -122,25 +124,25 @@ ChlamyStrains_aovinteract <-  Chlamy_damping |>
   ) |>
   mutate(Strains_aovinteract_Param = map(Strains_aovinteract, tidy)) |>
   unnest(Strains_aovinteract_Param, names_sep = "_") |>
-  filter(Strains_aovinteract_Param_p.value <= 0.05)
+  filter(Strains_aovinteract_Param_p.value <= 0.05) |>
+  select(-c(data, Strains_aovinteract ))
 
-#Only interaction terms significant:
-#Chlamydomonas_euryale  LightLevel_ue:Temp_C
-#Chlamydomonas_reinhardtii Temp_C:NaCl_mM
+kable(ChlamyStrains_aovinteract)
 
-ChlamyStrains_aov <- Chlamy_damping |>
-  nest(data = -c("Strain")) |>
-  mutate(Strains_aov = map(data, ~aov(DampingIndex ~ LightLevel_ue + Temp_C + NaCl_mM, data = .))
-         ) |>
-   mutate(Strains_aov_Param = map(Strains_aov, tidy)) |>
-  unnest(Strains_aov_Param,  names_sep = "_") |>
-  filter(Strains_aov_Param_p.value <= 0.05) |>
-  select(!matches("Strains_aovinteract")) |>
-  select(!c(data, Strains_aov)) |>
-  rename_with(~str_remove(., "Strains_aov_")) |>
-  rename_with(~str_remove(., "Param_"))
 
-kable(ChlamyStrains_aov)
+# ChlamyStrains_aov <- Chlamy_damping |>
+#   nest(data = -c("Strain")) |>
+#   mutate(Strains_aov = map(data, ~aov(DampingIndex ~ LightLevel_ue + Temp_C + NaCl_mM, data = .))
+#          ) |>
+#    mutate(Strains_aov_Param = map(Strains_aov, tidy)) |>
+#   unnest(Strains_aov_Param,  names_sep = "_") |>
+#   filter(Strains_aov_Param_p.value <= 0.05) |>
+#   select(!matches("Strains_aovinteract")) |>
+#   select(!c(data, Strains_aov)) |>
+#   rename_with(~str_remove(., "Strains_aov_")) |>
+#   rename_with(~str_remove(., "Param_"))
+
+# kable(ChlamyStrains_aov)
 
 ChlamyStrainsNaCl_opt_aov <- Chlamy_damping |>
   nest(data = -c("Strain")) |>
