@@ -63,6 +63,9 @@ convert damping index to relative probability of desynchronization
 process & plot tau data to track how long PSII is closed after flash
 
 ## Manu Prep:
+
+Decide on ICE-MDV inclusion
+
 Fix R package citation bibtex; only citations in main .bib on Zotero are showing up
 
 Fix figure & table citation issue
