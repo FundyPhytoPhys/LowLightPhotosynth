@@ -44,23 +44,24 @@ PlotsOut <- file.path("..", "Figures")
 ```{r import & wrangle data}
 `%notin%` <- negate(`%in%`)
 
-sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Chlamy_dampingYear.Rds" )) %>%
+# Remove Chlamydomonas_ICEMDV, Chlamydomonas_malina and Chlamydomonas_priscui grown at salinities not at or near optimal salinity of 500mM
+# Remove Chlamydomonas_euryale as GAM generated very high error tolerance based on predicted damping index across most of the measured temperature
+sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Chlamy_dampingYear.Rds")) %>%
   mutate(NaCl_opt = as.numeric(NaCl_opt)) %>%
  filter(Year != 2025 | NaCl_opt == NaCl_mM) %>% 
- filter(!(Strain == "Chlamydomonas_priscui" & NaCl_mM == 70)) %>% 
+ filter(!(Strain == "Chlamydomonas_priscui" & NaCl_mM == 70),
+         !(Strain =="Chlamydomonas_ICEMDV" & NaCl_mM == 70)) %>% 
+   filter(!(Strain == "Chlamydomonas_malina" & NaCl_mM == 70)) %>% 
  mutate(IsOptSalinity = case_when(NaCl_opt == NaCl_mM ~ 1,
                                   TRUE ~ 0)) %>% 
-  select((-c(NaCl_opt, NaCl_mM))) %>% 
+   select((-c(NaCl_opt, NaCl_mM))) %>% 
   filter(Strain %notin% c("Chlamydomonas_euryale")) 
 
 glimpse(sstate_damping_2025)
 
-
+# Remove all Chlamydomonas from this data frame as the same data are included in the 2025 dataset
 sstate_damping_2023 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_SState_Damping.Rds" )) %>% 
   filter(!grepl("Chlamydomonas", Strain)) %>% 
-   # dplyr::filter(Strain %in% c("Fragilariopsis_cylindrus",
-   #                              "Chlorella_vulgaris", 
-   #                              "Thalassiosira_pseudonana")) %>% 
   mutate(Year = as.character(2023)) %>% 
   rename(LightLevel_ue = 'Light_Level') %>% 
   mutate(IsOptSalinity = 1)
@@ -137,7 +138,7 @@ summary(PAR_Temp_Model)
 
 DampingIndex_Gam <- sstate_damping %>% 
    ungroup() %>%
-  group_by(Strain, Year, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp, IsOptSalinity) %>%
+  group_by(Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
   nest() %>%
   mutate(
     GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(LightLevel_ue, k = 3) + s(Temp_C, k = 3) + ti(Temp_C, LightLevel_ue, k = 3), data = .x,
@@ -151,7 +152,7 @@ DampingIndex_Gam <- sstate_damping %>%
   ungroup()
 
 DampingIndex_Pred <- DampingIndex_Gam %>%
-  dplyr::select(predicted, Strain, Year, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp, IsOptSalinity) %>%
+  dplyr::select(predicted, Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
   dplyr::filter(predicted != "NULL") %>%
   rowwise() %>%
   mutate(db = list(cbind(predicted, PAR_Temp_Model))) %>%
@@ -160,7 +161,7 @@ DampingIndex_Pred <- DampingIndex_Gam %>%
 
 # GAM model results into table
 kable(DampingIndex_Gam %>% 
-  dplyr::select(Strain, Year, tidied) %>% 
+  dplyr::select(Strain, tidied) %>% 
   unnest(tidied), 
   digits = 3)
 
@@ -175,7 +176,7 @@ purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 
 # GAM CHECK RESULTS
 
-# in s(LightLevel_ue, k = 3) , k is too low for F.c, C.ICEMDV and C.priscui; however, k = 4 returns 'NULL' for all GAMs 
+# in s(LightLevel_ue, k = 3) , k is too low for F.c, and C.priscui; however, k = 4 returns 'NULL' for all GAMs 
 # in s(CalcSal, k = 3) , k is good
 # in ti(CalcSal, par_ue, k = 3) k is too low for C.priscui; however, k = 4 returns 'NULL' for all GAMs 
 ```
