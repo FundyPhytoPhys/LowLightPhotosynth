@@ -173,7 +173,7 @@ spacing.diatom <- sstate_damping %>%
 # GamYear = "2023" #"2023" "2025"
 
 # plotting all strains and adding a facet-wrap does not work as each strain has different x-axis ranges.
-GamStrain = "Chlamydomonas_malina"
+GamStrain = "Chlamydomonas_reinhardtii"
 #Chlamydomonas_ICEMDV                     #remember to change scale_x_continuous
 #Chlamydomonas_malina                     #remember to change scale_x_continuous                  
 #Chlamydomonas_priscui                   #remember to change scale_x_continuous
@@ -182,7 +182,7 @@ GamStrain = "Chlamydomonas_malina"
 #Chlamydomonas_klinobasis                 #remember to change scale_x_continuous
 #Chlamydomonas_euryale                    #remember to change scale_x_continuous
 
-ErrorTol = 170
+ErrorTol = 320
 
 
 DampingIndex_Hyper <- DampingIndex_Pred %>% 
@@ -246,9 +246,9 @@ ContourLines <- ContourLines$quantileValue
     #               label.placer = label_placer_fraction(frac = 0.4)) +
      # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 2), expand = c(0, 0)) + # For C.vulgaris
     # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 2), expand = c(0, 0)) + # For C.ICE
-     # scale_x_continuous(limits = c(12, 28), breaks = seq(12, 28, by = 2), expand = c(0, 0)) + # For C.reinhardtii
-    # scale_x_continuous(limits = c(2, 16), breaks = seq(2, 16, by = 2), expand = c(0, 0)) + # For C.priscui
-       scale_x_continuous(limits = c(2, 12), breaks = seq(2, 12, by = 2), expand = c(0, 0)) + # For C.klinobasis ,  For C.malina
+      scale_x_continuous(limits = c(12, 28), breaks = seq(12, 28, by = 2), expand = c(0, 0)) + # For C.reinhardtii
+     # scale_x_continuous(limits = c(2, 16), breaks = seq(2, 16, by = 2), expand = c(0, 0)) + # For C.priscui
+       # scale_x_continuous(limits = c(2, 12), breaks = seq(2, 12, by = 2), expand = c(0, 0)) + # For C.klinobasis ,  For C.malina
      # scale_x_continuous(limits = c(16, 28), breaks = seq(16, 28, by = 2), expand = c(0, 0)) + #  For Chlamydomonas_euryale
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
                        sec.axis = dup_axis(breaks = c(spacing.algae$LightLevel_ue.mean), 
