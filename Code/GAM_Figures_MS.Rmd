@@ -368,7 +368,7 @@ AlgaeGAM
 
 # must use cowplot to save as x and y axis are lost using ggsave
 cowplot::save_plot(
-  filename = file.path(PlotsOut, paste0(Filename,"OptSal_all", ".png")),
+  filename = file.path(PlotsOut, paste0(Filename,"OptSal", ".png")),
   plot = AlgaeGAM,
   base_height = 10,
   base_width = 15,
