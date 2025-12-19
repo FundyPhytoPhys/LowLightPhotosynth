@@ -436,7 +436,7 @@ knitr::include_graphics(file.path("Figures","AlgaeGAMOptSal.png"))
 
 Within, and across, species of *Chlamydomonas* XXXXCITE Pomona PaperXXXX growth under higher salinities increases maintenance of F~V~/F~M~ and photosynthetic capacity during stress.  We therefore grew each *Chlamydomonas* strain across three growth-permissive salinities \@ref(tab:taxacultures)  and performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors \@ref(tab:chlamyaovfullinteract).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with a significant interaction with effective equivalent light level.
 
-```{r chlamyaovfullinteract}
+```{r chlamyaovfullinteract, fig.cap = "Analyses of Variation of damping indices testing effects of taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors. ", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 summary(readRDS(file = file.path("Data", "ProcessedData", "Chlamy_aovfullinteract.Rds"))
         )
 
@@ -445,9 +445,10 @@ summary(readRDS(file = file.path("Data", "ProcessedData", "Chlamy_aovfullinterac
 
 We then ran the ANOVA for each taxa separately \@ref(tab:chlamystrains_aovinteract).  Within a taxa only *Chlamydomonas priscui* showed a significant effect of NaCl on damping indices, suggesting the statistical influence of NaCl detected across taxa derives from different taxa growing at different salinites and showing different responses of damping indices, rather than a direct effect of NaCl on damping indices in most strains.
 
-```{r chlamystrains_aovinteract}
+```{r chlamystrains_aovinteract,  fig.cap = "Analyses of Variation for each *Chlamydomonas* species testing effects upon damping indices of effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors. ", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}}
 readRDS(file = file.path("Data", "ProcessedData", "ChlamyStrains_aovinteract.Rds")
         )
+
 ```
 
 # Discussion {.unnumbered}
@@ -473,7 +474,7 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 # Supporting information {.unnumbered}
 
 
-```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). ", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 purrr::iwalk(
   DampingIndex_Gam$GamModel,
