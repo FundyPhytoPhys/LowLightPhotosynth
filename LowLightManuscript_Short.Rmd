@@ -260,7 +260,7 @@ The sample was then exposed to a series of 32 short, high irradiance evenly spac
 XXXFix equationXXX
 
 \begin{equation}
-\frac{F{_V}}{F{_M}} = \frac{F{_M}-F{_O}}{F{_M}}
+\frac{F_{V}}{F_{M}} = \frac{F_{M}-F_{O}}{F_{M}}
   (\#eq:FV_FM)
 \end{equation}
 
@@ -364,9 +364,10 @@ Statistical significance of the wavelet power at a periodicity of four indicates
 
 ## Generalized Additive Modelling {.unnumbered} 
 
-The patterns in the persistence of S-State cycling within taxa were then modelled using the nonparametric method of generalized additive modelling (GAM). GAMs fit a model to predict the damping index based on a tensor product smooth of the two predictors, measurement temperature, and equivalent effective light level. The response variable is linked to the independent variables using a smoothing function, where many localized polynomials are joined to form a piecewise function called a spline [@pinillaNonParametricGeneralizedAdditive2021]. For each strain, GAM models were fit to the data using the restricted maximum likelihood method (REML).
+The patterns in the persistence of S-State cycling within taxa were then modeled using the nonparametric method of generalized additive modelling (GAM). GAMs fit a model to predict the damping index based on a tensor product smooth of the two predictors, measurement temperature, and equivalent effective light level. The response variable is linked to the independent variables using a smoothing function, where many localized polynomials are joined to form a piecewise function called a spline [@pinillaNonParametricGeneralizedAdditive2021]. For each strain, GAM models were fit to the data using the restricted maximum likelihood method (REML).
  
-The GAM model (Table \@ref(tab:gammodeltemp)) examines the response of S-State damping to the measurement temperature (°C) and the equivalent effective light level (µmol photons m^-2^ s^-1^) for the measurement flash spacing. Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [@schoenigWorkshopGeneralizedAdditive2023]. Based on the fitted models, the damping index can then be predicted for other combinations of temperature and light [@woodGeneralizedAdditiveModels2017], represented with a contour plot.
+The GAM model (Table \@ref(tab:gammodeltemp)) examines the response of S-State damping to the measurement temperature (°C) and the equivalent effective light level (µmol photons m^-2^ s^-1^) for the measurement flash spacing. The generalized additive models were fitted using the R-package *`mgcv`* [@R-mgcv].  Only S-State damping estimates for which the amplitude of standard error was smaller than 320% of the fitted
+S-State damping were included in the GAM. Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [@schoenigWorkshopGeneralizedAdditive2023] using gam.check() from the R-package *`mgcv`* [@R-mgcv] (Table \@ref(tab:gammodeldiagnostic)). Based on the fitted models, the damping index can then be predicted for other combinations of temperature and light [@woodGeneralizedAdditiveModels2017], represented with a contour plot.
 
 ## Analyses of Variance {.unnumbered} 
 Analyses of Variance (ANOVA) were run using the aov function [@rcoreteamLanguageEnvironmentStatistical2023] to detect effects of taxa , measurement equivalent effective light levels (derived from flash spacing), measurement temperature, and growth salinity, upon the Damping Index.
@@ -410,26 +411,11 @@ Similarly the GAM outputs varied  among the green algae tested (Table \@ref(tab:
 (Fig \@ref(fig:greensgamtemp)). The polar freshwater **Chlamydomonas klinobasis* also showed maximum damping indices at lower temperatures, across a range of effective light levels.  Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *Chlamydomonas klinobasis* did not generate a statistically significant GAM model, consistent with limited evidence for periodic oscillations from *Chlamydomonas klinobasis*.
 
 
-```{r gammodeltemp}
+```{r gammodeltemp,  fig.cap = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of S-State-induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^).", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
 GAMStats
-# TaxaGAM <- c("Thalassiosira pseudonana", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus growth @ O°C", "Fragilariopsis cylindrus growth @ 6°C", "Chlamydomonas priscui", "Chlamydomonas sp. ICE-MDV", "Chlamydomonas malina")
-# 
-# EDF <-
-# F_ratio <-
-# P_value <- 
-# Adjusted_R2 <-
-# DevianceExplained <- 
-# 
-# GAMModel_temp <- tibble(TaxaFluor, EDF,  F_ratio, P_value, Adjusted_R2, DevianceExplained)
-#                             
-# GAMModel_temp |>
-#   kable(caption ="Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of S-State-induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^).",         col.names = c("Taxa", "EDF", "F-ratio", "P-value", "Adjusted R^2^", "Variation Explained")
 
-#         ) |>
-#   kableExtra::column_spec(1, italic = TRUE) |>
-#   kableExtra::kable_classic()
 ```
 
 
@@ -500,6 +486,22 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 # Acknowledgements {.unnumbered}
 
 # Supporting information {.unnumbered}
+
+
+```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). ", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+
+purrr::iwalk(
+  DampingIndex_Gam$GamModel,
+  ~ {
+    cat("\n\n### GAM diagnostics:", .y, "\n\n")
+    gam.check(.x)
+  }
+)
+
+```
+
+
+
 
 # References {.unnumbered}
 
