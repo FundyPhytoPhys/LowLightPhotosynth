@@ -49,8 +49,7 @@ PlotsOut <- file.path("..", "Figures")
 sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Chlamy_dampingYear.Rds")) %>%
   mutate(NaCl_opt = as.numeric(NaCl_opt)) %>%
  filter(Year != 2025 | NaCl_opt == NaCl_mM) %>% 
- filter(!(Strain == "Chlamydomonas_priscui" & NaCl_mM == 70),
-         !(Strain =="Chlamydomonas_ICEMDV" & NaCl_mM == 70)) %>% 
+ filter(!(Strain == "Chlamydomonas_priscui" & NaCl_mM == 70)) %>% 
    filter(!(Strain == "Chlamydomonas_malina" & NaCl_mM == 70)) %>% 
  mutate(IsOptSalinity = case_when(NaCl_opt == NaCl_mM ~ 1,
                                   TRUE ~ 0)) %>% 
