@@ -14,6 +14,8 @@ author:
 - Marcel Babin:
     institute: takuvik  
 - Maximilian Berthold:
+    institute: mta  
+- Mireille Savoie:
     institute: mta     
 - Marina Cvetkovska:
     institute: ottawa 
