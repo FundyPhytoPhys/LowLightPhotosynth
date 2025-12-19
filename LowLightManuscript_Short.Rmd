@@ -11,13 +11,13 @@ author:
     institute: takuvik
 - Sébastien Guérin:
     institute: takuvik
-- Marina Cvetkovska:
-    institute: ottawa 
-    correspondence: TRUE
 - Marcel Babin:
     institute: takuvik  
 - Maximilian Berthold:
     institute: mta     
+- Marina Cvetkovska:
+    institute: ottawa 
+    correspondence: TRUE
 - Douglas A. Campbell:
     institute: mta     
     email: dcampbel@mta.ca     
@@ -54,20 +54,17 @@ editor_options:
 # To Do {.unnumbered}
 
 ## Substantial:
-convert damping index to relative probability of desynchronization
+convert damping index to relative probability of desynchronization?
 
-?do math or cite literature to estimate probability of double hits contributing to desynchronization and whether that probability varies with flash spacing or temperature
+do math or cite literature to estimate probability of double hits contributing to desynchronization and whether that probability varies with flash spacing or temperature?
 
 process & plot tau data to track how long PSII is closed after flash
 
 ## Manu Prep:
 
 Fix figure & table citation issue
-Fix table output
 
 Scan recent literature; Gates?
-
-
 
 
 
@@ -83,12 +80,12 @@ library(googlesheets4)
 #library(gridExtra)
 #required for density plots
 library(ggpubr)
-library(broom)
+#library(broom)
 ```
 
 ```{r, save package citations, include = FALSE}
 
-knitr:: write_bib(c("knitr", "tidyverse", "datastreamr", "lutz", "ggbreak", "gridExtra", "kableExtra", "googlesheets4", "lubridate", "viridis", "stats", "broom","sf", "doBy", "WaveletComp", "mgcv", "mgcViz", "ggplot2", "ggh4x" , "metR"), 'packages.bib')
+# knitr:: write_bib(c("knitr", "tidyverse", "datastreamr", "lutz", "ggbreak", "gridExtra", "kableExtra", "googlesheets4", "lubridate", "viridis", "stats", "broom","sf", "doBy", "WaveletComp", "mgcv", "mgcViz", "ggplot2", "ggh4x" , "metR"), 'packages.bib')
 
 ```
 
@@ -110,28 +107,28 @@ knitr:: write_bib(c("knitr", "tidyverse", "datastreamr", "lutz", "ggbreak", "gri
 
 ```{r ScientificTen, include=FALSE}
 # Sourced from FundyPhytoPhysCodeChunks
-ScientificTen <- function(x, sf = 2) {
-  x <- as.numeric(x)
-  if (is.na(x)) {
-    return("NA")
-  }
-  
-  y <- format(signif(x, sf), scientific = TRUE) %>% as.character()
-  z <- str_split(y, pattern = "e")[[1]]
-  
-  base <- z[1]
-  exponent <- as.numeric(z[2])
-  
-  if (is.na(exponent)) {
-    return("NA")
-  }
-  
-  if (abs(exponent) > 3) {
-    return(paste(base, "× 10^", exponent, "^", sep = ""))
-  } else {
-    return(signif(x, sf))
-  }
-}
+# ScientificTen <- function(x, sf = 2) {
+#   x <- as.numeric(x)
+#   if (is.na(x)) {
+#     return("NA")
+#   }
+#   
+#   y <- format(signif(x, sf), scientific = TRUE) %>% as.character()
+#   z <- str_split(y, pattern = "e")[[1]]
+#   
+#   base <- z[1]
+#   exponent <- as.numeric(z[2])
+#   
+#   if (is.na(exponent)) {
+#     return("NA")
+#   }
+#   
+#   if (abs(exponent) > 3) {
+#     return(paste(base, "× 10^", exponent, "^", sep = ""))
+#   } else {
+#     return(signif(x, sf))
+#   }
+# }
 ```
 
 # Introduction {.unnumbered} 
@@ -246,7 +243,6 @@ TaxaCultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
 ```
 
 
-
 *Fragilariopsis cylindrus* is a psychrophilic [@fialaLighttemperatureInteractionsGrowth1990] pennate diatom measuring 15-55 µm which forms large blooms in the high salinity and subzero temperatures of Arctic and Antarctic sea-ice systems [@otteDiatomFragilariopsisCylindrus2023; @cefarelliDiversityDiatomGenus2010], and is a keystone species for polar ecosystems [@vonquillfeldt:hal-03218115; @otteDiatomFragilariopsisCylindrus2023; @kangFragilariopsisCylindrusGrunow1992].  Sequenced in 2017, *Fragilariopsis cylindrus* has since become the model psychrophilic diatom species for investigating molecular and physiological mechanisms of cold adaptation [@mockEvolutionaryGenomicsColdadapted2017]. Conversely, *Thalassiosira pseudonana* (*Cyclotella nana*) is a centric diatom (2.5-15 μm) found in diverse freshwater, coastal, brackish, and marine habitats [@poulsenThalassiosiraPseudonanaCyclotella2023], across a range of salinities and temperatures (4–25°C) [@poulsenThalassiosiraPseudonanaCyclotella2023].
 *Chlamydomonas* sp. ICE-MDV and *Chlamydomonas priscui* are halotolerant algae isolated from the perennially ice-covered hypersaline Lake Bonney, in McMurdo Dry Valleys, Antarctica [@cookAntarcticPsychrophilesChlamydomonas2019; @stahl-rommelCyclicElectronFlow2022]. With 15 to 20 μm biflagellate cells, *Chlamydomonas* sp. ICE-MDV dominates the shallow photic zone, where it experiences relatively higher irradiance, extreme nutrient limitation, and lower salinity [@cookAntarcticPsychrophilesChlamydomonas2019; @liUltrastructuralSingleCellLevelCharacterization2016]. The smaller *Chlamydomonas priscui* dominates the deep photic zone, characterized by permanent low temperatures, low irradiance, and high salinity [@cvetkovskaTemperatureStressPsychrophilic2022; @hunerPhotosyntheticAdaptationMulticellularity2023]. *Chlamydomonas malina* is a marine microalga isolated from the Arctic Beaufort Sea, around 10 μm in length and 5 μm in width, growing optimally at 4°C [@balzanoDiversityCulturedPhotosynthetic2012; @morales-sanchezTemperatureDependentLipidAccumulation2020].   *Chlamydomonas klinobasis* is a freshwater microalga isolated from XXXX, around XX μm in length and YY μm in width, growing optimally at 4°C [CITATIONS MACKENZIE?].
 The temperate *Chlamydomonas reinhardtii* is a model green alga approximately 10 μm in diamter, found in freshwater soil and aquatic environments with an optimal temperature range of 20-32°C [@sassoMolecularManipulationDomesticated2018; @xieChlamydomonasReinhardtiiThermal2013]. The temperate *Chlamydomonas euryale* is approximately 10 μm in diameter, isolated from ZZZZ[MacKenzieCITATION], with an optimal temperature  of ~24°C [CITATIONSXXX].
@@ -296,7 +292,6 @@ $$
 
 Since the population of PSII starts predominantly from S1 in the dark acclimated state, the population of PSII will initially cycle synchronously through S States, reflected by an oscillation in chlorophyll fluorescence with a period of four (Fig \@ref(fig:reposc))[@dewijnSstateDependenceMiss2002]. Photochemical misses, including wasteful recombination reactions causing loss of a charge separation in a PSII, will cause a missed step in the S-State cycling of an individual PSII. As more photochemical misses occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence [@dewijnSstateDependenceMiss2002; @hanMolecularBasisTurnover2022]. Prolonged four-step synchronous cycling of PSII fluorescence thus reflects a lower probability of desynchronization at each excitation, and thus a lower probability of losses through photochemical misses.  Photochemical double hits also contribute to desynchronization [@hanMolecularBasisTurnover2022;  @hanDirectQuantificationFour2008], but should not vary strongly across changes in flash spacing nor measurement temperature within a sample.
 
-#Move to Supplemental Data
 ```{r fluormeas}
 ChlamyMeasurements <- readRDS(file = file.path("Data", "ProcessedData", "Low_Chlamy_dampingYear.Rds")) |>
   select(-c(DampingIndex, TempDiff_C, Year, NaCl_opt)) |>
@@ -366,7 +361,7 @@ Analyses of Variance (ANOVA) were run using the aov function [@rcoreteamLanguage
 
 ## Single Turnover Variable Chlorophyll Fluorescence {.unnumbered}
 
-Exposing phytoplankton cultures to a series of 20-32 successive single turnover, saturating flashes produced oscillations in the maximum quantum yield of photochemistry of PSII, as estimated through the secondary chlorophyll fluorescence parameter F~V~/F~M~. Initially, the majority of the dark-adapted population of PSII is at S1, with a smaller fraction at S0 [@gatesRealtimeKineticsLight2020; @dewijnSstateDependenceMiss2002]. As shown in representative data from polar *C. priscui* Fig \@ref(fig:reposc) and temperate *C. rheinhardtii* Fig \@ref(fig:reprecon), each grown at respective optimal salinities,  the time series of F~V~/F~M~ over successive flashes reveals consistent variations in fluorescence yield as the predominant S-States, with different yields for ChlF, follow each other across the PSII within the population. The amplitudes of the ChlF oscillations, however, decline progressively over successive flashes.  The persistence of oscillations decreases with wider spacing between sequential flashes, equivalent to decreasing effective light levels, and at higher measurement temperatures.  The full set of S-State time courses captured across taxa and growth salinities are in Supplemental Data. XXX
+Exposing phytoplankton cultures to a series of 20-32 successive single turnover, saturating flashes produced oscillations in the maximum quantum yield of photochemistry of PSII, as estimated through the secondary chlorophyll fluorescence parameter F~V~/F~M~. Initially, the majority of the dark-adapted population of PSII is at S1, with a smaller fraction at S0 [@gatesRealtimeKineticsLight2020; @dewijnSstateDependenceMiss2002]. As shown in representative data from polar *Chlamydomonas priscui* Fig \@ref(fig:reposc) and temperate *Chlamydomonas rheinhardtii* Fig \@ref(fig:reprecon), each grown at respective optimal salinities,  the time series of F~V~/F~M~ over successive flashes reveals consistent variations in fluorescence yield as the predominant S-States, with different yields for ChlF, follow each other across the PSII within the population. The amplitudes of the ChlF oscillations, however, decline progressively over successive flashes.  The persistence of oscillations decreases with wider spacing between sequential flashes, equivalent to decreasing effective light levels, and at higher measurement temperatures.  The full set of S-State time courses captured across taxa and growth salinities are in Supplemental Data. XXX
 
 
 Photochemical misses, including recombination reactions causing loss of charge separation in a PSII, will cause a missed step in the S-State cycling of an individual PSII. As more photochemical misses occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence (de Wijn and van Gorkom, 2002; Han et al., 2022). Prolonged synchronous cycling thus reflects a lower probability of desynchronization at each excitation, and thus a lower probability of losses through photochemical misses. Photochemical double hits also contribute to desynchronization (Han et al., 2022; Han et al., 2008), but should not vary strongly across changes in flash spacing nor temperature within a sample.
@@ -395,14 +390,12 @@ knitr::include_graphics(file.path("Figures","Creinhardtii_waveletpower.png"))
 
 ## Generalized Additive Modelling of Damping of 4-step oscillations By Measurement Temperature {.unnumbered}
 
-Predictions from generalized additive modelling were generated for the damping of S-State-induced chlorophyll fluorescence oscillations, as predicted by the tensor product smooth of the temperature during measurements (°C) and the equivalent effective light level (µmol photons m^-2^s^-1^; ((Table \@ref(tab:gammodeltemp)), Table (\@ref(tab:fluormeas))) set by flash spacing, for each strain. For *Thalassiosira pseudonana*, *Chlamydomonas sp. ICE-MDV*, *Chlamydomonas priscui*, *Chlamydomonas malina*, *Chlamydomonas reinhardtii*, and *Chlorella vulgaris*, all replicate cultures of each taxa were grown at the same temperature (Table \@ref(tab:gammodeltemp)).  All of the model fits explained over 50% of the variation in the response variable, damping index. Both diatom taxa exhibited the longest predicted periodic oscillations in ChlF at higher effective light levels and lower temperatures. Notably, the polar *Fragilariopsis cylindrus* sustained cycling longer than its temperate counterpart, *Thalassiosira pseudonana*, under comparable conditions. This disparity was particularly prevalent at measurements taken above the growth temperature and when longer spacing between flashes produced lower effective light levels (Fig \@ref(fig:diatomsgamtemp)), where *Thalassiosira pseudonana* cultures did not retain the significant 4-step oscillation in ChlF indicative of synchronized S-State cycling. 
+Predictions from generalized additive modelling were generated for the damping of S-State-induced chlorophyll fluorescence oscillations, as predicted by the tensor product smooth of the temperature during measurements (°C) and the equivalent effective light level (µmol photons m^-2^s^-1^; ((Table \@ref(tab:gammodeltemp)), Table (\@ref(tab:fluormeas))) set by flash spacing, for each strain (Table \@ref(tab:gammodeltemp)).  All of the model fits explained over 50% of the variation in the response variable, damping index, except the GAM fits for *C. euryale*, which failed. Both diatom taxa exhibited the longest predicted periodic oscillations in ChlF at higher effective light levels and lower temperatures. Notably, the polar *Fragilariopsis cylindrus* sustained cycling longer than its temperate counterpart, *Thalassiosira pseudonana*, under comparable conditions. This disparity was particularly prevalent at measurements taken above the growth temperature and when longer spacing between flashes produced lower effective light levels (Fig \@ref(fig:diatomsgamtemp)), where *Thalassiosira pseudonana* cultures did not retain the significant 4-step oscillation in ChlF indicative of synchronized S-State cycling. 
 
-Similarly the GAM outputs varied  among the green algae tested (Table \@ref(tab:gammodeltemp)). XXXXX *Chlamydomonas priscui* the three measurement temperatures, limiting the number of basis dimensions used to create the smooth function (k) to 3 [@schoenigWorkshopGeneralizedAdditive2023], proved insufficient to capture the underlying relationship between the predictors and the response variable (Table A2). *Chlamydomonas malina* showed a significant outlier (measurement temperature of 12 °C and a 2-second interval between flashes) in the model training data (see model training dataset at XXX GitHub: S-State Damping), as evaluated by Cook’s distances [@yagerDetectingInfluentialObservations1998]. Removing this outlier point increases the variation explained by the model from 60.2 to 75.2 % and produces a significant smooth term (F = 4.544, p = 0.0255). XXXX
+Similarly the GAM outputs varied  among the green algae tested (Table \@ref(tab:gammodeltemp)). The polar, saline strains *Chlamydomonas* ICEMDV, *Chlamydomonas malina* and *Chlamydomonas priscui* showed GAM model predictions of maximum damping indices of ~ 10-11 flashes, centred at lower temperatures  but extending over a wide range of effective light levels
+(Fig \@ref(fig:greensgamtemp)). The polar freshwater **Chlamydomonas klinobasis* also showed maximum damping indices at lower temperatures, across a range of effective light levels.  Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *Chlamydomonas klinobasis* did not generate a statistically significant GAM model, consistent with limited evidence for periodic oscillations from *Chlamydomonas klinobasis*.
 
-Overall, model predictions for green algal strains exhibited a similar pattern to the diatoms, with the longest predicted oscillations in ChlF at measurement conditions with higher effective light levels, derived from shorter spacing between flashes,  and lower measurement temperatures, relative to growth temperature (Fig \@ref(fig:greensgamtemp)). The trends shown by the three strains of polar green algae, the freshwater *C. klinobasis* and the saline water *C. maline* & *C. priscuii* are generally consistent, under comparable measurement conditions (Fig \@ref(fig:greensgamtemp)). Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *C. klinobasis* did not generate a statistically significant GAM model (data not shown), consistent with limited periodic oscillations from *C. klinobasis*.
 
-
-do this as output of model not retyped
 ```{r gammodeltemp}
 # TaxaGAM <- c("Thalassiosira pseudonana", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus growth @ O°C", "Fragilariopsis cylindrus growth @ 6°C", "Chlamydomonas priscui", "Chlamydomonas sp. ICE-MDV", "Chlamydomonas malina")
 # 
@@ -435,9 +428,9 @@ knitr::include_graphics(file.path("Figures","DiatomsGAMOptSal.png"))
 knitr::include_graphics(file.path("Figures","AlgaeGAMOptSal.png"))
 ```
 
-Within, and across, species of *Chlamydomonas* XXXXCITE Pomona PaperXXXX growth under higher salinities increases maintenance of F~V~/F~M~ and photosynthetic capacity during stress.  We therefore grew each *Chlamydomonas* strain across three growth-permissive salinities (TABLEXXX) and performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors (Supp. Table XXXX).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with a significant interaction with effective equivalent light level.
+Within, and across, species of *Chlamydomonas* XXXXCITE Pomona PaperXXXX growth under higher salinities increases maintenance of F~V~/F~M~ and photosynthetic capacity during stress.  We therefore grew each *Chlamydomonas* strain across three growth-permissive salinities \@ref(tab:taxacultures))  and performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors (Supp. Table XXXX).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with a significant interaction with effective equivalent light level.
 
-We then ran the ANOVA for each taxa separately (Supp. Table XXX).  Within a taxa only *C. priscui* showed a significant effect of NaCl on damping indices, suggesting the statistical influence of NaCl detected across taxa derives from different taxa growing at different salinites and showing different responses of damping indices, rather than a direct effect of NaCl on damping indices in most strains.
+We then ran the ANOVA for each taxa separately (Supp. Table XXX).  Within a taxa only *Chlamydomonas priscui* showed a significant effect of NaCl on damping indices, suggesting the statistical influence of NaCl detected across taxa derives from different taxa growing at different salinites and showing different responses of damping indices, rather than a direct effect of NaCl on damping indices in most strains.
 
                                      Df Sum Sq Mean Sq F value   Pr(>F)    
 Strain                                4 2128.0   532.0  78.485  < 2e-16 ***
@@ -477,13 +470,12 @@ The desynchronization of S-State cycling among the PSII in a population indicate
 
 These results are consistent with previous literature evaluating the responses of photochemical misses to light conditions. As light levels decline, there are longer intervals between successive PSII excitations, pushing fewer electrons through the electron transport chain [@kerenMechanismPhotosystemII1997]. Consequently, the probability of energetically wasteful charge recombinations is higher over the longer intervals between excitations, leading to weaker maintenance of S-State cycling [@kerenMechanismPhotosystemII1997; @dewijnSstateDependenceMiss2002]. These findings are consistent with recombination reactions decreasing with temperature [@ivanovAcclimationTemperatureIrradiance2006] as ambient temperature falls below the activation temperatures of the recombinations.  In contrast, in PSII-enriched membrane fractions isolated from spinach, the average miss probability of S-State transitions was highest at -10 °C and lowest at 10 °C [@hanMolecularBasisTurnover2022].
 
-XXXXdelete ICE-MDV?
-Even though both *Chlamydomonas* sp. ICE-MDV and *C. priscui* originate from Lake Bonney in Antarctica, previous work has indicated differential responses to light between the strains. Indeed, our results demonstrate that while *C. priscui* and *C. malina* exhibit similar damping patterns (Fig XX), *Chlamydomonas* sp. ICE-MDV shows a different response, particularly evident during measurements at 12°C.  Unlike the obligately shade-adapted *C. priscui* that is only present in the deep photic zone, *Chlamydomonas* sp. ICE-MDV has been isolated from various depths within the lake (@liInfluenceEnvironmentalDrivers2019) including shallow and seasonally open waters (@sherwellAntarcticLakePhytoplankton2022) where it encounters a wider range of light conditions. Thus, in contrast with *C. priscui* that has a “locked” physiology, *Chlamydomonas* sp. ICE-MDV has retained the ability to balance excitation pressure through state transitions (@kalraHighSaltinducedPSIsupercomplex2023), can modify its photosynthetic apparatus due to nutrient availability (@cookAntarcticPsychrophilesChlamydomonas2019), exhibits phototactic motility in response to light signals (@poirierAberrantLightSensing) and can successfully acclimate to a range of wavelengths and light intensities (@poirierLightQualityAffects2025). It is evident that physiological differences exist among polar species, likely as a result of life in comparably cold, but otherwise differing environments. 
+*Chlamydomonas* sp. ICE-MDV, *Chlamydomonas malina* and  *Chlamydomonas priscui* originate from Lake Bonney in Antarctica, but previous work found differential responses to light among the strains.  Unlike the obligately shade-adapted *Chlamydomonas priscui* that is only present in the deep photic zone, *Chlamydomonas* sp. ICE-MDV has been isolated from various depths within the lake (@liInfluenceEnvironmentalDrivers2019) including shallow and seasonally open waters (@sherwellAntarcticLakePhytoplankton2022) where it encounters a wider range of light conditions. Thus, in contrast with *Chlamydomonas priscui* that has a “locked” physiology, *Chlamydomonas* sp. ICE-MDV has retained the ability to balance excitation pressure through state transitions (@kalraHighSaltinducedPSIsupercomplex2023), can modify its photosynthetic apparatus due to nutrient availability (@cookAntarcticPsychrophilesChlamydomonas2019), exhibits phototactic motility in response to light signals (@poirierAberrantLightSensing) and can successfully acclimate to a range of wavelengths and light intensities (@poirierLightQualityAffects2025). It is evident that physiological differences exist among polar species, likely as a result of life in comparably cold, but otherwise differing environments. 
 
-Polar strains of diatoms and green algae nevertheless consistently demonstrated a stronger periodicity in ChlF emissions (Figures \@ref(fig:cpriscuiwaveletpower);  \@ref(fig:creinhardtiiiwaveletpower);   SupplementalFigures). Further, they exhibited significant 4-step ChlF oscillations under a broader range of measurement conditions around their growth temperatures (Figure \@ref(fig:periodicitymtrx)) than did their temperate counterparts. These findings illustrate that polar phytoplankton species, at and around their lower growth temperatures, show higher capacity to maintain synchronized S-State cycling than do temperate strains around higher growth temperatures.  The rates of photochemical misses, notably through charge recombinations, relative to productive photochemistry, increase under lower light and higher temperatures [@kerenMechanismPhotosystemII1997; @ivanovAcclimationTemperatureIrradiance2006]. Thus, sustained synchronized S-State cycling reflects suppression of energetically wasteful photochemical misses in the polar strains, measured at lower growth temperatures. Stable S-State cycling and minimizing energy losses through charge recombination support electron flow, sustaining ATP and NADPH production, and minimizing the risk of photodamage to the photosynthetic machinery [@rappaportChargeRecombinationThermoluminescence2005; @kerenMechanismPhotosystemII1997]. Thus, sustaining PSII function even under widely spaced excitations appears integral for the productivity of polar phytoplankton under the ice during the polar night. 
+Nevertheless, strong, sustained periodicity of ChlF emissions is a common trait across the diverse polar strains of diatoms and green algae  (Figures \@ref(fig:cpriscuiwaveletpower);  \@ref(fig:creinhardtiiiwaveletpower);  \@ref(fig:diatomsgamtemp);  \@ref(fig:greensgamtemp). Further, the polar exhibited significant 4-step ChlF oscillations under a broader range of measurement conditions around their growth temperatures than did their temperate counterparts. These findings illustrate that polar phytoplankton species, at and around their lower growth temperatures, show higher capacity to maintain synchronized S-State cycling than do temperate strains around their higher growth temperatures.  The rates of photochemical misses, notably through charge recombinations, relative to productive photochemistry, increase under lower light and higher temperatures [@kerenMechanismPhotosystemII1997; @ivanovAcclimationTemperatureIrradiance2006]. Thus, sustained synchronized S-State cycling reflects suppression of energetically wasteful photochemical misses in the polar strains, measured at the lower growth temperatures possible for poalr strains. Stable S-State cycling and minimizing energy losses through charge recombination support electron flow, sustaining ATP and NADPH production, and minimizing the risk of photodamage to the photosynthetic machinery [@rappaportChargeRecombinationThermoluminescence2005; @kerenMechanismPhotosystemII1997]. Thus, sustaining PSII function even under widely spaced excitations appears as an emergent property for the productivity of polar phytoplankton under the ice during the polar night. 
 
 Salinities vary widely across the habitats of the tested strains, and fluctuate within some habitats during ice formation and melting XXXMACKENZIE CITATIONSXXXX.  Higher salinity stabilizes PSII function under stress across strains of *Chlamydomonas* XXXXPOMONA CITATIONXXX. 
-NaCl concentration showed an influence on dampening indices when analyzed across all tested *Chlamydomonas* taxa, but when tested within taxa, NaCl only showed an influence within *C. priscui*.  It is important to note that faster desynchronization of S-State cycling does not indicate a loss nor instability of PSII function *per se*. Instad, desynchronization reflects randomization of the S-States of the PSII population. Prolonged synchronization under low effective light levels is thus an indicator of the capacity of PSII to exploit widely spaced photons under low light, not the stability of PSII function.
+NaCl concentration showed an influence on dampening indices when analyzed across all tested *Chlamydomonas* taxa, but when tested within taxa, NaCl only showed an influence within *Chlamydomonas priscui*.  It is important to note that faster desynchronization of S-State cycling does not indicate a loss nor instability of PSII function *per se*. Instad, desynchronization reflects randomization of the S-States of the PSII population. Prolonged synchronization under low effective light levels is thus an indicator of the capacity of PSII to exploit widely spaced photons under low light, not the stability of PSII function.
 
 Understanding and detecting mechanisms enabling polar phytoplankton to sustain slow, but significant, productivity under the ice in the winter can help predict the changing dynamics of spring phytoplankton blooms, in the face of rapid warming [@ardynaPhytoplanktonDynamicsChanging2020]. Beyond direct temperature changes, polar aquatic ecosystems are experiencing declines in sea ice extent and thickness, escalating freshwater inputs, acidification, and increased winds and storms [@ardynaPhytoplanktonDynamicsChanging2020; @cvetkovskaTemperatureStressPsychrophilic2022]. These pressures are altering the productivity and seasonal peaks of phytoplankton blooms [@ardynaPhytoplanktonDynamicsChanging2020]. Maintaining photosynthetic energy conversion over winter is crucial for the timing and speed of spring bloom initiation [@hanckeExtremeLowLight2018]. Our findings indicate that low growth temperature is a factor enabling phytoplankton to exploit extreme low light. Taxa with this capacity then possess a competitive advantage in quickly initiating spring growth, giving them first access to the nutrients required to form an extensive bloom and in turn, exert bottom-up effects on changing polar ecosystems [@ardynaPhytoplanktonDynamicsChanging2020]. 
 
