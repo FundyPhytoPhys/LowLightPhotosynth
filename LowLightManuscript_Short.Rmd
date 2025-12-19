@@ -45,7 +45,7 @@ output:
       - '--lua-filter=author-info-blocks.lua'  
 keywords: "Photosystem II, Polar Phytoplankton, Low Light Photosynthesis"
 abstract: "Polar phytoplankton achieve slow, but ecologically significant, productivity under exceptionally low light, where sequential arrivals of photons at Photosystem II complexes are widely spaced in time. We hypothesized that maintaining photosynthesis under such low light involves suppression of energetically wasteful photochemical 'misses' in Photosystem II. Under full darkness Photosystem II relaxes predominantly to the S1 oxidation state of the oxygen evolving complex.  After such dark relaxation we applied series of single turnover, saturating, flashes to advance Photosystem II through sequential photochemical charge separations,  progressively oxidizing the oxygen evolving complex, resulting in four step changes in Photosystem II chlorophyll fluorescence yield. We tracked these oscillations in chlorophyll fluorescence to measure the persistence of synchronized Photosystem II photochemistry across the Photosystem II populations in diatoms and green algae, in response to changing measurement temperatures and a range of extremely low light, emulated by increasing spacing of photon deliveries. Prolonged synchronous cycling indicates fewer desynchronizations from wasteful photochemical misses and, thus, potentially more efficient photosynthetic energy conversion under low light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa, even under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton can suppress energetically wasteful photochemical misses under low temperature, to help sustain photosynthesis even under extremely low light. Therefore ambient temperature interacts with low light limitations on photosynthesis."
-bibliography: [LowLightPhotosynthesis.bib]
+bibliography: [LowLightPhotosynthesis.bib, packages.bib]
 csl: frontiers.csl
 always_allow_html: true
 editor_options: 
@@ -87,7 +87,7 @@ library(ggpubr)
 
 ```{r, save package citations, include = FALSE}
 
-# knitr:: write_bib(c("knitr", "tidyverse", "datastreamr", "lutz", "ggbreak", "gridExtra", "kableExtra", "googlesheets4", "lubridate", "viridis", "stats", "broom","sf", "doBy", "WaveletComp", "mgcv", "mgcViz", "ggplot2", "ggh4x" , "metR"), 'packages.bib')
+knitr:: write_bib(c("knitr", "tidyverse", "datastreamr", "lutz", "ggbreak", "gridExtra", "kableExtra", "googlesheets4", "lubridate", "viridis", "stats", "broom","sf", "doBy", "WaveletComp", "mgcv", "mgcViz", "ggplot2", "ggh4x" , "metR"), 'packages.bib')
 
 ```
 
@@ -308,42 +308,6 @@ $$
 
 Since the population of PSII starts predominantly from S1 in the dark acclimated state, the population of PSII will initially cycle synchronously through S States, reflected by an oscillation in chlorophyll fluorescence with a period of four (Fig \@ref(fig:reposc))[@dewijnSstateDependenceMiss2002]. Photochemical misses, including wasteful recombination reactions causing loss of a charge separation in a PSII, will cause a missed step in the S-State cycling of an individual PSII. As more photochemical misses occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence [@dewijnSstateDependenceMiss2002; @hanMolecularBasisTurnover2022]. Prolonged four-step synchronous cycling of PSII fluorescence thus reflects a lower probability of desynchronization at each excitation, and thus a lower probability of losses through photochemical misses.  Photochemical double hits also contribute to desynchronization [@hanMolecularBasisTurnover2022;  @hanDirectQuantificationFour2008], but should not vary strongly across changes in flash spacing nor measurement temperature within a sample.
 
-```{r fluormeas}
-ChlamyMeasurements <- readRDS(file = file.path("Data", "ProcessedData", "Low_Chlamy_dampingYear.Rds")) |>
-  select(-c(DampingIndex, TempDiff_C, Year, NaCl_opt)) |>
-  relocate(GrowthTemp_C, .after = LightLevel_ue)
-
-TakuvikSackvilleMeasurements <- readRDS(file = file.path("Data", "ProcessedData", "Low_SState_Damping.Rds")) |>
-  select(-c(DampingIndex, TempDiff_C)) |>
-  filter(!grepl("Chlamydomonas", Strain)) |>
-  mutate(NaCl_mm = case_when(Strain == "Fragilariopsis_cylindrus" ~ 500,
-                             Strain == "Thalassiosira_pseudonana" ~ 0.43,
-                             Strain == "Chlorella_vulgaris" ~ 0.43)
-  ) |>
-  rename(LightLevel_ue = Light_Level,
-         NaCl_mM = NaCl_mm)
-         
-
-FluorMeas <- rbind(ChlamyMeasurements, TakuvikSackvilleMeasurements)
-
-# FluorMeasures |>
-if (knitr::is_html_output()) {
-  kable(FluorMeas,
-        caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
-        col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"  )
-        ) |>
-  kableExtra::column_spec(1, italic = TRUE) |>
-  kableExtra::kable_classic()
-} else {
-  kable(FluorMeas,
-        format = "pipe",
-        caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
-   col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"  )
-        )
-}
-```
-
-
 
 ## Analytical Methods {.unnumbered}  
 
@@ -368,7 +332,7 @@ Statistical significance of the wavelet power at a periodicity of four indicates
 
 The patterns in the persistence of S-State cycling within taxa were then modeled using the nonparametric method of generalized additive modelling (GAM). GAMs fit a model to predict the damping index based on a tensor product smooth of the two predictors, measurement temperature, and equivalent effective light level. The response variable is linked to the independent variables using a smoothing function, where many localized polynomials are joined to form a piecewise function called a spline [@pinillaNonParametricGeneralizedAdditive2021]. For each strain, GAM models were fit to the data using the restricted maximum likelihood method (REML).
  
-The GAM model (Table \@ref(tab:gammodeltemp)) examines the response of S-State damping to the measurement temperature (°C) and the equivalent effective light level (µmol photons m^-2^ s^-1^) for the measurement flash spacing. The generalized additive models were fitted using the R-package *`mgcv`* [@R-mgcv].  Only S-State damping estimates for which the amplitude of standard error was smaller than 320% of the fitted
+The GAM model examines the response of S-State damping to the measurement temperature (°C) and the equivalent effective light level (µmol photons m^-2^ s^-1^) for the measurement flash spacing. The generalized additive models were fitted using the R-package *`mgcv`* [@R-mgcv].  Only S-State damping estimates for which the amplitude of standard error was smaller than 320% of the fitted
 S-State damping were included in the GAM. Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [@schoenigWorkshopGeneralizedAdditive2023] using gam.check() from the R-package *`mgcv`* [@R-mgcv] (Table \@ref(tab:gammodeldiagnostic)). Based on the fitted models, the damping index can then be predicted for other combinations of temperature and light [@woodGeneralizedAdditiveModels2017], represented with a contour plot.
 
 ## Analyses of Variance {.unnumbered} 
@@ -408,35 +372,33 @@ knitr::include_graphics(file.path("Figures","Creinhardtii_waveletpower.png"))
 
 ## Generalized Additive Modelling of Damping of 4-step oscillations By Measurement Temperature {.unnumbered}
 
-Predictions from generalized additive modelling were generated for the damping of S-State-induced chlorophyll fluorescence oscillations, as predicted by the tensor product smooth of the temperature during measurements (°C) and the equivalent effective light level (µmol photons m^-2^s^-1^; ((Table \@ref(tab:gammodeltemp)), Table (\@ref(tab:fluormeas))) set by flash spacing, for each strain (Table \@ref(tab:gammodeltemp)).  All of the model fits explained over 50% of the variation in the response variable, damping index, except the GAM fits for *C. euryale*, which failed. Both diatom taxa exhibited the longest predicted periodic oscillations in ChlF at higher effective light levels and lower temperatures. Notably, the polar *Fragilariopsis cylindrus* sustained cycling longer than its temperate counterpart, *Thalassiosira pseudonana*, under comparable conditions. This disparity was particularly prevalent at measurements taken above the growth temperature and when longer spacing between flashes produced lower effective light levels (Fig \@ref(fig:diatomsgamtemp)), where *Thalassiosira pseudonana* cultures did not retain the significant 4-step oscillation in ChlF indicative of synchronized S-State cycling. 
+Predictions from generalized additive modelling were generated for the damping of S-State-induced chlorophyll fluorescence oscillations, as predicted by the tensor product smooth of the temperature during measurements (°C) and the equivalent effective light level (µmol photons m^-2^s^-1^) set by flash spacing, for each strain; Table \@ref(tab:fluormeas); Table \@ref(tab:gammodeltemp).  All of the model fits explained over 50% of the variation in the response variable, damping index, except the GAM fits for *C. euryale*, which failed to fit. Both diatom taxa exhibited the longest predicted periodic oscillations in ChlF at higher effective light levels and lower temperatures. Notably, the polar *Fragilariopsis cylindrus* sustained cycling longer than its temperate counterpart, *Thalassiosira pseudonana*, under comparable conditions. This disparity was particularly prevalent at measurements taken above the growth temperature and when longer spacing between flashes produced lower effective light levels (Fig \@ref(fig:diatomsgamtemp)), where *Thalassiosira pseudonana* cultures did not retain the significant 4-step oscillation in ChlF indicative of synchronized S-State cycling. 
 
 Similarly the GAM outputs varied  among the green algae tested (Table \@ref(tab:gammodeltemp)). The polar, saline strains *Chlamydomonas* ICEMDV, *Chlamydomonas malina* and *Chlamydomonas priscui* showed GAM model predictions of maximum damping indices of ~ 10-11 flashes, centred at lower temperatures  but extending over a wide range of effective light levels
 (Fig \@ref(fig:greensgamtemp)). The polar freshwater **Chlamydomonas klinobasis* also showed maximum damping indices at lower temperatures, across a range of effective light levels.  Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *Chlamydomonas klinobasis* did not generate a statistically significant GAM model, consistent with limited evidence for periodic oscillations from *Chlamydomonas klinobasis*.
 
-
-```{r gammodeltemp,  fig.cap = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of S-State-induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^).", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r gammodeltemp, fig.cap = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of SState induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^).", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
 GAMStats
-
 ```
 
 
-```{r diatomsgamtemp, fig.cap = "GAM models for polar and temperate diatoms, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r diatomsgamtemp, fig.cap = "GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","DiatomsGAMOptSal.png"))
 ```
 
-(Fig \@ref(fig:greensgamtemp)).
 
-```{r greensgamtemp, fig.cap = "GAM models for polar and temperate green algae, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the difference from growth temperature (\u0394°C) during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+
+```{r greensgamtemp, fig.cap = "GAM models for polar and temperate green algae, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the difference from growth temperature (\u0394°C) during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","AlgaeGAMOptSal.png"))
 ```
 
 Within, and across, species of *Chlamydomonas* XXXXCITE Pomona PaperXXXX growth under higher salinities increases maintenance of F~V~/F~M~ and photosynthetic capacity during stress.  We therefore grew each *Chlamydomonas* strain across three growth-permissive salinities \@ref(tab:taxacultures)  and performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors \@ref(tab:chlamyaovfullinteract).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with a significant interaction with effective equivalent light level.
 
-```{r chlamyaovfullinteract, fig.cap = "Analyses of Variation of damping indices testing effects of taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors. ", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r chlamyaovfullinteract, fig.cap = "Analyses of Variation of damping indices testing effects of taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 
 summary(readRDS(file = file.path("Data", "ProcessedData", "Chlamy_aovfullinteract.Rds"))
@@ -445,9 +407,9 @@ summary(readRDS(file = file.path("Data", "ProcessedData", "Chlamy_aovfullinterac
 ```
 
 
-We then ran the ANOVA for each taxa separately \@ref(tab:chlamystrains_aovinteract).  Within a taxa only *Chlamydomonas priscui* showed a significant effect of NaCl on damping indices, suggesting the statistical influence of NaCl detected across taxa derives from different taxa growing at different salinites and showing different responses of damping indices, rather than a direct effect of NaCl on damping indices in most strains.
+We then ran the ANOVA for each taxa separately \@ref(tab:chlamystrainsaovinteract).  Within a taxa only *Chlamydomonas priscui* showed a significant effect of NaCl on damping indices, suggesting the statistical influence of NaCl detected across taxa derives from different taxa growing at different salinites and showing different responses of damping indices, rather than a direct effect of NaCl on damping indices in most strains.
 
-```{r chlamystrains_aovinteract,  fig.cap = "Analyses of Variation for each *Chlamydomonas* species testing effects upon damping indices of effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors. ", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}}
+```{r chlamystrainsaovinteract,  fig.cap = "Analyses of Variation for each *Chlamydomonas* species testing effects upon damping indices of effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 readRDS(file = file.path("Data", "ProcessedData", "ChlamyStrains_aovinteract.Rds")
         )
 
@@ -455,7 +417,7 @@ readRDS(file = file.path("Data", "ProcessedData", "ChlamyStrains_aovinteract.Rds
 
 # Discussion {.unnumbered}
 
-Across all study strains ChlF oscillations, provoked by a series of single turnover saturating flashes, showed wavelet power at a period of four, that declined with increasing measurement temperatures and increasing spacing of flashes, equivalent to decreasing light. Thus sustained synchronized S-State cycling of PSII decayed faster under higher temperatures and lower equivalent light (Figures \@ref(fig:cpriscuiwaveletpower),  \@ref(fig:periodicitymtrx)) [@dewijnSstateDependenceMiss2002]. While light absorption and excitation energy transfer within PSII are not temperature-sensitive, the redox reactions associated with downstream electron transport are highly temperature-dependent [@hunerPhotosyntheticAdaptationMulticellularity2023]. Furthermore, the probabilities of charge recombinations decrease as temperature drops below the activation energies for recombination paths, 21 - 29 °C for recombination to S2 from Q~A~^-^, or  35 - 41 for recombination to S2 from Q~B~^-^ [@ivanovAcclimationTemperatureIrradiance2006; ]. This temperature dependence may interact with acclimatory mechanisms to regulate photosynthetic electron flow, S-State transitions, and energy partitioning [@hunerPhotosyntheticAdaptationMulticellularity2023].
+Across all study strains ChlF oscillations, provoked by a series of single turnover saturating flashes, showed wavelet power at a period of four, that declined with increasing measurement temperatures and increasing spacing of flashes, equivalent to decreasing light. Thus sustained synchronized S-State cycling of PSII decayed faster under higher temperatures and lower equivalent light (Figures \@ref(fig:cpriscuiwaveletpower)) [@dewijnSstateDependenceMiss2002]. While light absorption and excitation energy transfer within PSII are not temperature-sensitive, the redox reactions associated with downstream electron transport are highly temperature-dependent [@hunerPhotosyntheticAdaptationMulticellularity2023]. Furthermore, the probabilities of charge recombinations decrease as temperature drops below the activation energies for recombination paths, 21 - 29 °C for recombination to S2 from Q~A~^-^, or  35 - 41 for recombination to S2 from Q~B~^-^ [@ivanovAcclimationTemperatureIrradiance2006; ]. This temperature dependence may interact with acclimatory mechanisms to regulate photosynthetic electron flow, S-State transitions, and energy partitioning [@hunerPhotosyntheticAdaptationMulticellularity2023].
 
 The desynchronization of S-State cycling among the PSII in a population indicates that sufficient photochemical misses, including charge recombinations, have taken place to create a PSII population with a randomized distribution of S-States. Thus, if this desynchronization occurs after fewer consecutive flashes, it signifies an increased proportion of PSII undergoing photochemical misses for each flash. By inference, PSII populations with increased incidence of energetically wasteful misses, including charge recombinations, such as those under high temperatures and low light levels, are less efficient in their photosynthetic energy conversion [@rappaportChargeRecombinationThermoluminescence2005], which becomes a critical factor for maintaining photosynthesis under low light, with wide spacings between sequential excitations of each PSII.  While light absorption and excitation energy transfer within PSII are not temperature-sensitive, the redox reactions associated with downstream electron transport are highly temperature-dependent [@hunerPhotosyntheticAdaptationMulticellularity2023]. Furthermore, the probability of charge recombinations decrease below room temperature [@ivanovAcclimationTemperatureIrradiance2006; @hanDirectQuantificationFour2008], as temperature drops below the activation energies for recombination paths. This temperature dependence may interact with acclimatory mechanisms to regulate photosynthetic electron flow, S-State transitions, and energy partitioning [@hunerPhotosyntheticAdaptationMulticellularity2023].
 
@@ -475,11 +437,46 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 
 # Supporting information {.unnumbered}
 
+```{r fluormeas}
+ChlamyMeasurements <- readRDS(file = file.path("Data", "ProcessedData", "Low_Chlamy_dampingYear.Rds")) |>
+  select(-c(DampingIndex, TempDiff_C, Year, NaCl_opt)) |>
+  relocate(GrowthTemp_C, .after = LightLevel_ue)
+
+TakuvikSackvilleMeasurements <- readRDS(file = file.path("Data", "ProcessedData", "Low_SState_Damping.Rds")) |>
+  select(-c(DampingIndex, TempDiff_C)) |>
+  filter(!grepl("Chlamydomonas", Strain)) |>
+  mutate(NaCl_mm = case_when(Strain == "Fragilariopsis_cylindrus" ~ 500,
+                             Strain == "Thalassiosira_pseudonana" ~ 0.43,
+                             Strain == "Chlorella_vulgaris" ~ 0.43)
+  ) |>
+  rename(LightLevel_ue = Light_Level,
+         NaCl_mM = NaCl_mm)
+         
+
+FluorMeas <- rbind(ChlamyMeasurements, TakuvikSackvilleMeasurements)
+
+# FluorMeasures |>
+if (knitr::is_html_output()) {
+  kable(FluorMeas,
+        caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
+        col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"  )
+        ) |>
+  kableExtra::column_spec(1, italic = TRUE) |>
+  kableExtra::kable_classic()
+} else {
+  kable(FluorMeas,
+        format = "pipe",
+        caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
+   col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"  )
+        )
+}
+```
+
 ```{r load_DampingIndex_GAM, include = FALSE}
 DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIndex_Gam.RDS"))
 ```
 
-```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 purrr::iwalk(
   DampingIndex_Gam$GamModel,
