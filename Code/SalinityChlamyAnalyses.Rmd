@@ -109,10 +109,12 @@ Chlamy_damping <- Chlamy_damping |>
 
 ```{r aov}
 
-
 Chlamy_aovfullinteract <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  data = Chlamy_damping |> filter(Year == 2025))
 
 summary(Chlamy_aovfullinteract)
+
+saveRDS(Chlamy_aovfullinteract, file = file.path(DataOut, "Chlamy_aovfullinteract.Rds")
+        )
 
 # Chlamy_aovinteract <- aov(DampingIndex ~ Strain * LightLevel_ue + Temp_C + NaCl_mM,  data = Chlamy_damping)
 # summary(Chlamy_aovinteract)
@@ -130,21 +132,7 @@ ChlamyStrains_aovinteract <-  Chlamy_damping |>
 
 kable(ChlamyStrains_aovinteract)
 
-
-# ChlamyStrains_aov <- Chlamy_damping |>
-#   nest(data = -c("Strain")) |>
-#   mutate(Strains_aov = map(data, ~aov(DampingIndex ~ LightLevel_ue + Temp_C + NaCl_mM, data = .))
-#          ) |>
-#    mutate(Strains_aov_Param = map(Strains_aov, tidy)) |>
-#   unnest(Strains_aov_Param,  names_sep = "_") |>
-#   filter(Strains_aov_Param_p.value <= 0.05) |>
-#   select(!matches("Strains_aovinteract")) |>
-#   select(!c(data, Strains_aov)) |>
-#   rename_with(~str_remove(., "Strains_aov_")) |>
-#   rename_with(~str_remove(., "Param_"))
-
-# kable(ChlamyStrains_aov)
-
-
+saveRDS(ChlamyStrains_aovinteract, file = file.path(DataOut, "ChlamyStrains_aovinteract.Rds")
+        )
 ```
 
