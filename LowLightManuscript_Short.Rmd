@@ -29,13 +29,6 @@ institute:
 - ottawa: 'Department of Biology, University of Ottawa, Ottawa, ON, Canada'
 date: "`r Sys.Date()`"
 output:
-  bookdown::word_document2:
-    code_folding: show
-    reference_docx: KnitTemplate.docx
-    fig_caption: yes
-    pandoc_args:
-      - '--lua-filter=scholarly-metadata.lua'
-      - '--lua-filter=author-info-blocks.lua'  
   bookdown::html_document2:
     code_folding: show
     keep_md: yes
@@ -43,6 +36,13 @@ output:
     pandoc_args:
       - '--lua-filter=scholarly-metadata.lua'
       - '--lua-filter=author-info-blocks.lua'
+  bookdown::word_document2:
+    code_folding: show
+    reference_docx: KnitTemplate.docx
+    fig_caption: yes
+    pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'  
 keywords: "Photosystem II, Polar Phytoplankton, Low Light Photosynthesis"
 abstract: "Polar phytoplankton achieve slow, but ecologically significant, productivity under exceptionally low light, where sequential arrivals of photons at Photosystem II complexes are widely spaced in time. We hypothesized that maintaining photosynthesis under such low light involves suppression of energetically wasteful photochemical 'misses' in Photosystem II. Under full darkness Photosystem II relaxes predominantly to the S1 oxidation state of the oxygen evolving complex.  After such dark relaxation we applied series of single turnover, saturating, flashes to advance Photosystem II through sequential photochemical charge separations,  progressively oxidizing the oxygen evolving complex, resulting in four step changes in Photosystem II chlorophyll fluorescence yield. We tracked these oscillations in chlorophyll fluorescence to measure the persistence of synchronized Photosystem II photochemistry across the Photosystem II populations in diatoms and green algae, in response to changing measurement temperatures and a range of extremely low light, emulated by increasing spacing of photon deliveries. Prolonged synchronous cycling indicates fewer desynchronizations from wasteful photochemical misses and, thus, potentially more efficient photosynthetic energy conversion under low light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa, even under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton can suppress energetically wasteful photochemical misses under low temperature, to help sustain photosynthesis even under extremely low light. Therefore ambient temperature interacts with low light limitations on photosynthesis."
 bibliography: [LowLightPhotosynthesis.bib]
@@ -437,6 +437,8 @@ knitr::include_graphics(file.path("Figures","AlgaeGAMOptSal.png"))
 Within, and across, species of *Chlamydomonas* XXXXCITE Pomona PaperXXXX growth under higher salinities increases maintenance of F~V~/F~M~ and photosynthetic capacity during stress.  We therefore grew each *Chlamydomonas* strain across three growth-permissive salinities \@ref(tab:taxacultures)  and performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors \@ref(tab:chlamyaovfullinteract).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with a significant interaction with effective equivalent light level.
 
 ```{r chlamyaovfullinteract, fig.cap = "Analyses of Variation of damping indices testing effects of taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors. ", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+
+
 summary(readRDS(file = file.path("Data", "ProcessedData", "Chlamy_aovfullinteract.Rds"))
         )
 
@@ -473,6 +475,9 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 
 # Supporting information {.unnumbered}
 
+```{r load_DampingIndex_GAM, include = FALSE}
+DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIndex_Gam.RDS"))
+```
 
 ```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of S-State-induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE}
 
@@ -480,7 +485,7 @@ purrr::iwalk(
   DampingIndex_Gam$GamModel,
   ~ {
     cat("\n\n### GAM diagnostics:", .y, "\n\n")
-    gam.check(.x)
+    mgcv::gam.check(.x)
   }
 )
 
