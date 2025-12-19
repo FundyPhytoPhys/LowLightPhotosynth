@@ -160,10 +160,12 @@ DampingIndex_Pred <- DampingIndex_Gam %>%
   unnest(col = db) 
 
 # GAM model results into table
-kable(DampingIndex_Gam %>% 
+GAMStats<- kable(DampingIndex_Gam %>% 
   dplyr::select(Strain, tidied) %>% 
   unnest(tidied), 
   digits = 3)
+
+saveRDS(object = GAMStats, file = file.path(DataOut, "GAMStats.Rds"), ascii = FALSE, version = NULL, refhook = NULL)
 
 ```
 
