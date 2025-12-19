@@ -53,8 +53,9 @@ sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "
    filter(!(Strain == "Chlamydomonas_malina" & NaCl_mM == 70)) %>% 
  mutate(IsOptSalinity = case_when(NaCl_opt == NaCl_mM ~ 1,
                                   TRUE ~ 0)) %>% 
-   select((-c(NaCl_opt, NaCl_mM))) %>% 
-  filter(Strain %notin% c("Chlamydomonas_euryale")) 
+   select((-c(NaCl_opt, NaCl_mM))) 
+# %>% 
+#   filter(Strain %notin% c("Chlamydomonas_euryale")) 
 
 glimpse(sstate_damping_2025)
 

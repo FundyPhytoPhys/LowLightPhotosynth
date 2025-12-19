@@ -83,8 +83,9 @@ sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "
    filter(!(Strain == "Chlamydomonas_malina" & NaCl_mM == 70)) %>% 
  mutate(IsOptSalinity = case_when(NaCl_opt == NaCl_mM ~ 1,
                                   TRUE ~ 0)) %>% 
-   select((-c(NaCl_opt, NaCl_mM))) %>% 
-  filter(Strain %notin% c("Chlamydomonas_euryale")) 
+   select((-c(NaCl_opt, NaCl_mM))) 
+# %>% 
+#   filter(Strain %notin% c("Chlamydomonas_euryale")) 
 
 glimpse(sstate_damping_2025)
 
@@ -172,7 +173,7 @@ spacing.diatom <- sstate_damping %>%
 # GamYear = "2023" #"2023" "2025"
 
 # plotting all strains and adding a facet-wrap does not work as each strain has different x-axis ranges.
-GamStrain = "Chlamydomonas_reinhardtii"
+GamStrain = "Chlamydomonas_ICEMDV"
 #Chlamydomonas_ICEMDV                     #remember to change scale_x_continuous
 #Chlamydomonas_malina                     #remember to change scale_x_continuous                  
 #Chlamydomonas_priscui                   #remember to change scale_x_continuous
@@ -243,10 +244,10 @@ ContourLines <- ContourLines$quantileValue
                         label.placer = label_placer_fraction(frac = 0.4)) +
     # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
     #               label.placer = label_placer_fraction(frac = 0.4)) +
-     # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 2), expand = c(0, 0)) + # For C.vulgaris
-    # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 2), expand = c(0, 0)) + # For C.ICE
-      scale_x_continuous(limits = c(12, 28), breaks = seq(12, 28, by = 2), expand = c(0, 0)) + # For C.reinhardtii
-     # scale_x_continuous(limits = c(2, 16), breaks = seq(2, 16, by = 2), expand = c(0, 0)) + # For C.priscui
+      # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 2), expand = c(0, 0)) + # For C.vulgaris
+    scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 2), expand = c(0, 0)) + # For C.ICE
+      # scale_x_continuous(limits = c(12, 28), breaks = seq(12, 28, by = 2), expand = c(0, 0)) + # For C.reinhardtii
+      # scale_x_continuous(limits = c(2, 16), breaks = seq(2, 16, by = 2), expand = c(0, 0)) + # For C.priscui
        # scale_x_continuous(limits = c(2, 12), breaks = seq(2, 12, by = 2), expand = c(0, 0)) + # For C.klinobasis ,  For C.malina
      # scale_x_continuous(limits = c(16, 28), breaks = seq(16, 28, by = 2), expand = c(0, 0)) + #  For Chlamydomonas_euryale
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
@@ -284,7 +285,9 @@ Filename <- "AlgaeGAM"
 
 
 # Remove individual legends and axes titles
-p1 <- ti_plot_Chlamydomonas_klinobasis + theme(legend.position = "none",
+# Top row cold water, salt strains
+
+p1 <- ti_plot_Chlamydomonas_ICEMDV + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
 p2 <- ti_plot_Chlamydomonas_malina + theme(legend.position = "none",
@@ -293,16 +296,25 @@ p2 <- ti_plot_Chlamydomonas_malina + theme(legend.position = "none",
 p3 <- ti_plot_Chlamydomonas_priscui + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
-p4 <- ti_plot_Chlamydomonas_reinhardtii + theme(legend.position = "none",
-    axis.title.y.right = element_blank()) +
-  labs(x = NULL, y = NULL) 
-p5 <- ti_plot_Chlorella_vulgaris + theme(legend.position = "none",
+
+# Middle row row
+p4 <- ti_plot_Chlamydomonas_klinobasis + theme(legend.position = "none",
     axis.title.y.right = element_blank()) +
   labs(x = NULL, y = NULL)
-# p6 <- ti_plot_Chlamydomonas_ICEMDV + theme(legend.position = "none",
-  #   axis.title.y.right = element_blank()) +
-  # labs(x = NULL, y = NULL)
+p5 <- ti_plot_Chlamydomonas_euryale + theme(legend.position = "none",
+    axis.title.y.right = element_blank()) +
+  labs(x = NULL, y = NULL)
 
+
+# Bottom row warm water, freshwater strains
+p6 <- ti_plot_Chlamydomonas_reinhardtii + theme(legend.position = "none",
+    axis.title.y.right = element_blank()) +
+  labs(x = NULL, y = NULL) 
+p7 <- ti_plot_Chlorella_vulgaris + theme(legend.position = "none",
+    axis.title.y.right = element_blank()) +
+  labs(x = NULL, y = NULL)
+
+ 
 
 
 # Extract vertical legend from p1
@@ -313,21 +325,30 @@ legend_grob <- get_legend(
 legend_only <- gridExtra::arrangeGrob(legend_grob)
 
 # Define width of each plot based on °C span
-temp_widths <- c(10, 10, 14, 16, 16, 8)
+temp_widths <- c(8, 10, 14, 10, 12, 16, 16)
 
 # Normalize widths
-rel_widths <- c(1.25, 1.25, 1.75, 2, 2, 1)
+# note, ICEMDV is the first index, setting the relative width to 1 made the spacing between 2 degrees C smaller than the other plots. Adding 0.05 to the C. ICEMDV and C.malina width  improves the scaling slightly
+rel_widths <- c(1.05, 1.30, 1.75, 1.25, 1.5, 2, 2)
 
 top_row <- cowplot::plot_grid(p1, p2, p3, nrow = 1,
                               rel_widths = rel_widths[1:3])
-bottom_row <- cowplot::plot_grid(
+
+middle_row <- cowplot::plot_grid(
   p4, p5, legend_only,
   nrow = 1,
-  rel_widths = c(rel_widths[4], rel_widths[5], 0.2)  # Adjust legend width if needed to get bottom row x-axis to near same scale as top row x-axis
+  rel_widths = c(rel_widths[4], rel_widths[5], 1)  # Adjust legend width if needed to get bottom row x-axis to near same scale as top row x-axis
+)
+
+bottom_row <- cowplot::plot_grid(
+  p6, p7,
+  nrow = 1,
+  rel_widths = c(rel_widths[6], rel_widths[7])
 )
 
 CombineAlgae <- cowplot::plot_grid(
   top_row,
+  middle_row,
   bottom_row,
   ncol = 1,
   rel_heights = c(1, 1)
