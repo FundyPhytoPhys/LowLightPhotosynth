@@ -167,6 +167,8 @@ GAMStats<- kable(DampingIndex_Gam %>%
 
 saveRDS(object = GAMStats, file = file.path(DataOut, "GAMStats.Rds"), ascii = FALSE, version = NULL, refhook = NULL)
 
+saveRDS(object = DampingIndex_Gam, file = file.path(DataOut, "DampingIndex_Gam.Rds"), ascii = FALSE, version = NULL, refhook = NULL)
+
 ```
 
 
@@ -175,6 +177,8 @@ saveRDS(object = GAMStats, file = file.path(DataOut, "GAMStats.Rds"), ascii = FA
 #check that EDF (Effective Degrees of Freedom)
 # Note: Low p-value in gam.check() for a smooth term means k may be too small not that the term is statistically significant, but that it may be under fitting.
 purrr::walk(DampingIndex_Gam$GamModel, gam.check)
+
+
 
 # GAM CHECK RESULTS
 
