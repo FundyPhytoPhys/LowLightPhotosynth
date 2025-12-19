@@ -411,6 +411,9 @@ Similarly the GAM outputs varied  among the green algae tested (Table \@ref(tab:
 
 
 ```{r gammodeltemp}
+
+GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
+GAMStats
 # TaxaGAM <- c("Thalassiosira pseudonana", "Chlorella vulgaris",  "Chlamydomonas reinhardtii",  "Fragilariopsis cylindrus growth @ O°C", "Fragilariopsis cylindrus growth @ 6°C", "Chlamydomonas priscui", "Chlamydomonas sp. ICE-MDV", "Chlamydomonas malina")
 # 
 # EDF <-
