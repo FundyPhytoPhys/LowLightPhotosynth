@@ -119,7 +119,7 @@ The nine study taxa, including polar and temperate strains of diatoms and green 
 
 
 <table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
-<caption>(\#tab:taxacultures)Study taxa and culture growth conditions.</caption>
+<caption>(\#tab:taxacultures)(\#tab:taxacultures)Study taxa and culture growth conditions.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Taxa </th>
@@ -832,27 +832,27 @@ We then ran the ANOVA for each taxa separately \@ref(tab:chlamystrainsaovinterac
 
 
 ```
-## # A tibble: 8 x 7
-##   Strain    Strains_aovinteract_~1 Strains_aovinteract_~2 Strains_aovinteract_~3
+## # A tibble: 8 × 7
+##   Strain    Strains_aovinteract_…¹ Strains_aovinteract_…² Strains_aovinteract_…³
 ##   <chr>     <chr>                                   <dbl>                  <dbl>
-## 1 Chlamydo~ LightLevel_ue                               1                   30.5
-## 2 Chlamydo~ LightLevel_ue                               1                  550. 
-## 3 Chlamydo~ Temp_C                                      1                  137. 
-## 4 Chlamydo~ LightLevel_ue                               1                  140. 
-## 5 Chlamydo~ LightLevel_ue                               1                  255. 
-## 6 Chlamydo~ Temp_C                                      1                  476. 
-## 7 Chlamydo~ NaCl_mM                                     1                   39.6
-## 8 Chlamydo~ Temp_C                                      1                   18.5
-## # i abbreviated names: 1: Strains_aovinteract_Param_term,
-## #   2: Strains_aovinteract_Param_df, 3: Strains_aovinteract_Param_sumsq
-## # i 3 more variables: Strains_aovinteract_Param_meansq <dbl>,
+## 1 Chlamydo… LightLevel_ue                               1                   30.5
+## 2 Chlamydo… LightLevel_ue                               1                  550. 
+## 3 Chlamydo… Temp_C                                      1                  137. 
+## 4 Chlamydo… LightLevel_ue                               1                  140. 
+## 5 Chlamydo… LightLevel_ue                               1                  255. 
+## 6 Chlamydo… Temp_C                                      1                  476. 
+## 7 Chlamydo… NaCl_mM                                     1                   39.6
+## 8 Chlamydo… Temp_C                                      1                   18.5
+## # ℹ abbreviated names: ¹​Strains_aovinteract_Param_term,
+## #   ²​Strains_aovinteract_Param_df, ³​Strains_aovinteract_Param_sumsq
+## # ℹ 3 more variables: Strains_aovinteract_Param_meansq <dbl>,
 ## #   Strains_aovinteract_Param_statistic <dbl>,
 ## #   Strains_aovinteract_Param_p.value <dbl>
 ```
 
 # Discussion {.unnumbered}
 
-Across all study strains ChlF oscillations, provoked by a series of single turnover saturating flashes, showed wavelet power at a period of four, that declined with increasing measurement temperatures and increasing spacing of flashes, equivalent to decreasing light. Thus sustained synchronized S-State cycling of PSII decayed faster under higher temperatures and lower equivalent light (Figures \@ref(fig:cpriscuiwaveletpower)) [@dewijnSstateDependenceMiss2002]. While light absorption and excitation energy transfer within PSII are not temperature-sensitive, the redox reactions associated with downstream electron transport are highly temperature-dependent [@hunerPhotosyntheticAdaptationMulticellularity2023]. Furthermore, the probabilities of charge recombinations decrease as temperature drops below the activation energies for recombination paths, 21 - 29 °C for recombination to S2 from Q~A~^-^, or  35 - 41 for recombination to S2 from Q~B~^-^ [@ivanovAcclimationTemperatureIrradiance2006; ]. This temperature dependence may interact with acclimatory mechanisms to regulate photosynthetic electron flow, S-State transitions, and energy partitioning [@hunerPhotosyntheticAdaptationMulticellularity2023].
+Across all study strains ChlF oscillations, provoked by a series of single turnover saturating flashes, showed wavelet power at a period of four, that declined with increasing measurement temperatures and increasing spacing of flashes, equivalent to decreasing light. Thus sustained synchronized S-State cycling of PSII decayed faster under higher temperatures and lower equivalent light (Figure \@ref(fig:cpriscuiwaveletpower)) [@dewijnSstateDependenceMiss2002]. While light absorption and excitation energy transfer within PSII are not temperature-sensitive, the redox reactions associated with downstream electron transport are highly temperature-dependent [@hunerPhotosyntheticAdaptationMulticellularity2023]. Furthermore, the probabilities of charge recombinations decrease as temperature drops below the activation energies for recombination paths, 21 - 29 °C for recombination to S2 from Q~A~^-^, or  35 - 41 for recombination to S2 from Q~B~^-^ [@ivanovAcclimationTemperatureIrradiance2006]. This temperature dependence may interact with acclimatory mechanisms to regulate photosynthetic electron flow, S-State transitions, and energy partitioning [@hunerPhotosyntheticAdaptationMulticellularity2023].
 
 The desynchronization of S-State cycling among the PSII in a population indicates that sufficient photochemical misses, including charge recombinations, have taken place to create a PSII population with a randomized distribution of S-States. Thus, if this desynchronization occurs after fewer consecutive flashes, it signifies an increased proportion of PSII undergoing photochemical misses for each flash. By inference, PSII populations with increased incidence of energetically wasteful misses, including charge recombinations, such as those under high temperatures and low light levels, are less efficient in their photosynthetic energy conversion [@rappaportChargeRecombinationThermoluminescence2005], which becomes a critical factor for maintaining photosynthesis under low light, with wide spacings between sequential excitations of each PSII.  While light absorption and excitation energy transfer within PSII are not temperature-sensitive, the redox reactions associated with downstream electron transport are highly temperature-dependent [@hunerPhotosyntheticAdaptationMulticellularity2023]. Furthermore, the probability of charge recombinations decrease below room temperature [@ivanovAcclimationTemperatureIrradiance2006; @hanDirectQuantificationFour2008], as temperature drops below the activation energies for recombination paths. This temperature dependence may interact with acclimatory mechanisms to regulate photosynthetic electron flow, S-State transitions, and energy partitioning [@hunerPhotosyntheticAdaptationMulticellularity2023].
 
@@ -873,7 +873,7 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 # Supporting information {.unnumbered}
 
 <table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
-<caption>(\#tab:fluormeas)Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).</caption>
+<caption>(\#tab:fluormeas)(\#tab:fluormeas)Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Taxa </th>
@@ -4946,8 +4946,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-1.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-1)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-1.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-1)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -4964,7 +4964,7 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## 
 ##                            k'  edf k-index p-value    
 ## s(LightLevel_ue)         2.00 1.83    0.26  <2e-16 ***
-## s(Temp_C)                2.00 1.00    0.81    0.15    
+## s(Temp_C)                2.00 1.00    0.81    0.12    
 ## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.55  <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -4974,8 +4974,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-2.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-2)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-2.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-2)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -4990,20 +4990,18 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## Basis dimension (k) checking results. Low p-value (k-index<1) may
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
-##                            k'  edf k-index p-value  
-## s(LightLevel_ue)         2.00 1.10    0.76   0.065 .
-## s(Temp_C)                2.00 1.00    0.93   0.235  
-## ti(Temp_C,LightLevel_ue) 4.00 1.46    0.89   0.125  
-## ---
-## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+##                            k'  edf k-index p-value
+## s(LightLevel_ue)         2.00 1.10    0.76    0.10
+## s(Temp_C)                2.00 1.00    0.93    0.26
+## ti(Temp_C,LightLevel_ue) 4.00 1.46    0.89    0.12
 ## 
 ## 
 ## ### GAM diagnostics: 3
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-3.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-3)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-3.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-3)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -5019,17 +5017,17 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value
-## s(LightLevel_ue)         2.00 1.94    1.23    0.86
-## s(Temp_C)                2.00 1.89    1.37    0.99
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.97    0.46
+## s(LightLevel_ue)         2.00 1.94    1.23    0.91
+## s(Temp_C)                2.00 1.89    1.37    0.98
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.97    0.35
 ## 
 ## 
 ## ### GAM diagnostics: 4
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-4.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-4)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-4.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-4)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -5046,16 +5044,16 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## 
 ##                            k'  edf k-index p-value
 ## s(LightLevel_ue)         2.00 1.96    1.60    1.00
-## s(Temp_C)                2.00 1.00    1.02    0.47
-## ti(Temp_C,LightLevel_ue) 4.00 2.17    1.48    0.99
+## s(Temp_C)                2.00 1.00    1.02    0.45
+## ti(Temp_C,LightLevel_ue) 4.00 2.17    1.48    1.00
 ## 
 ## 
 ## ### GAM diagnostics: 5
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-5.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-5)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-5.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-5)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -5072,8 +5070,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## 
 ##                            k'  edf k-index p-value   
 ## s(LightLevel_ue)         2.00 1.00    0.29   0.010 **
-## s(Temp_C)                2.00 1.96    0.75   0.140   
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.67   0.095 . 
+## s(Temp_C)                2.00 1.96    0.75   0.165   
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.67   0.085 . 
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -5082,8 +5080,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-6.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-6)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-6.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-6)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -5099,17 +5097,17 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value
-## s(LightLevel_ue)         2.00 1.74    1.00    0.46
-## s(Temp_C)                2.00 1.00    0.99    0.40
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    1.02    0.33
+## s(LightLevel_ue)         2.00 1.74    1.00    0.42
+## s(Temp_C)                2.00 1.00    0.99    0.34
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    1.02    0.37
 ## 
 ## 
 ## ### GAM diagnostics: 7
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-7.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-7)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-7.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-7)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -5125,9 +5123,9 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value  
-## s(LightLevel_ue)         2.00 1.85    0.70   0.055 .
-## s(Temp_C)                2.00 1.25    1.14   0.670  
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.77   0.055 .
+## s(LightLevel_ue)         2.00 1.85    0.70    0.03 *
+## s(Temp_C)                2.00 1.25    1.14    0.65  
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.77    0.05 *
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -5136,8 +5134,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-8.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-8)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-8.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-8)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -5153,17 +5151,17 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value
-## s(LightLevel_ue)         2.00 1.84    1.04    0.46
-## s(Temp_C)                2.00 1.00    1.06    0.46
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    1.04    0.49
+## s(LightLevel_ue)         2.00 1.84    1.04    0.49
+## s(Temp_C)                2.00 1.00    1.06    0.48
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    1.04    0.40
 ## 
 ## 
 ## ### GAM diagnostics: 9
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-9.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-9)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-9.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-9)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -5178,10 +5176,10 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## Basis dimension (k) checking results. Low p-value (k-index<1) may
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
-##                            k'  edf k-index p-value   
-## s(LightLevel_ue)         2.00 1.90    0.72   0.035 * 
-## s(Temp_C)                2.00 1.77    1.06   0.640   
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.62   0.005 **
+##                            k'  edf k-index p-value    
+## s(LightLevel_ue)         2.00 1.90    0.72    0.03 *  
+## s(Temp_C)                2.00 1.77    1.06    0.58    
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.62  <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -5190,8 +5188,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-10.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-10)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-10.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-10)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
 </div>
 
 ```
@@ -5207,9 +5205,9 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value  
-## s(LightLevel_ue)         2.00 1.87    1.01    0.45  
-## s(Temp_C)                2.00 1.00    1.27    0.95  
-## ti(Temp_C,LightLevel_ue) 4.00 2.19    0.85    0.09 .
+## s(LightLevel_ue)         2.00 1.87    1.01   0.465  
+## s(Temp_C)                2.00 1.00    1.27   0.960  
+## ti(Temp_C,LightLevel_ue) 4.00 2.19    0.85   0.075 .
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

@@ -29,13 +29,6 @@ institute:
 - ottawa: 'Department of Biology, University of Ottawa, Ottawa, ON, Canada'
 date: "`r Sys.Date()`"
 output:
-  bookdown::html_document2:
-    code_folding: show
-    keep_md: yes
-    fig_caption: yes
-    pandoc_args:
-      - '--lua-filter=scholarly-metadata.lua'
-      - '--lua-filter=author-info-blocks.lua'
   bookdown::word_document2:
     code_folding: show
     reference_docx: KnitTemplate.docx
@@ -43,6 +36,13 @@ output:
     pandoc_args:
       - '--lua-filter=scholarly-metadata.lua'
       - '--lua-filter=author-info-blocks.lua'  
+  bookdown::html_document2:
+    code_folding: show
+    keep_md: yes
+    fig_caption: yes
+    pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'
 keywords: "Photosystem II, Polar Phytoplankton, Low Light Photosynthesis"
 abstract: "Polar phytoplankton achieve slow, but ecologically significant, productivity under exceptionally low light, where sequential arrivals of photons at Photosystem II complexes are widely spaced in time. We hypothesized that maintaining photosynthesis under such low light involves suppression of energetically wasteful photochemical 'misses' in Photosystem II. Under full darkness Photosystem II relaxes predominantly to the S1 oxidation state of the oxygen evolving complex.  After such dark relaxation we applied series of single turnover, saturating, flashes to advance Photosystem II through sequential photochemical charge separations,  progressively oxidizing the oxygen evolving complex, resulting in four step changes in Photosystem II chlorophyll fluorescence yield. We tracked these oscillations in chlorophyll fluorescence to measure the persistence of synchronized Photosystem II photochemistry across the Photosystem II populations in diatoms and green algae, in response to changing measurement temperatures and a range of extremely low light, emulated by increasing spacing of photon deliveries. Prolonged synchronous cycling indicates fewer desynchronizations from wasteful photochemical misses and, thus, potentially more efficient photosynthetic energy conversion under low light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa, even under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton can suppress energetically wasteful photochemical misses under low temperature, to help sustain photosynthesis even under extremely low light. Therefore ambient temperature interacts with low light limitations on photosynthesis."
 bibliography: [LowLightPhotosynthesis.bib, packages.bib]
@@ -74,7 +74,7 @@ Scan recent literature; Gates?
 knitr::opts_chunk$set(echo = FALSE, fig.path = "Figures/")
 ```
 
-```{r, import libraries, include = FALSE}
+```{r libraries, include = FALSE}
 library(tidyverse)
 library(knitr)
 library(kableExtra)
@@ -85,7 +85,7 @@ library(ggpubr)
 #library(broom)
 ```
 
-```{r, save package citations, include = FALSE}
+```{r packages, include = FALSE}
 
 knitr:: write_bib(c("knitr", "tidyverse", "datastreamr", "lutz", "ggbreak", "gridExtra", "kableExtra", "googlesheets4", "lubridate", "viridis", "stats", "broom","sf", "doBy", "WaveletComp", "mgcv", "mgcViz", "ggplot2", "ggh4x" , "metR"), 'packages.bib')
 
@@ -165,7 +165,7 @@ S-State cycling in a phytoplankton sample can be tracked by applications of sequ
 ## Study Strains and Culturing Conditions {.unnumbered}
 The nine study taxa, including polar and temperate strains of diatoms and green algae, and their respective culturing conditions are summarized in Table \@ref(tab:taxacultures). 
 
-```{r, include=FALSE}
+```{r metadata, include=FALSE}
 googlesheets4::gs4_deauth()
 
 OttawaMetadata <- read_sheet("https://docs.google.com/spreadsheets/d/1m8Pjwj4DL10AwdsQo2G3boymSWG1Oq-gJDzjU0csRKs/edit?usp=sharing")
@@ -410,8 +410,11 @@ summary(readRDS(file = file.path("Data", "ProcessedData", "Chlamy_aovfullinterac
 We then ran the ANOVA for each taxa separately \@ref(tab:chlamystrainsaovinteract).  Within a taxa only *Chlamydomonas priscui* showed a significant effect of NaCl on damping indices, suggesting the statistical influence of NaCl detected across taxa derives from different taxa growing at different salinites and showing different responses of damping indices, rather than a direct effect of NaCl on damping indices in most strains.
 
 ```{r chlamystrainsaovinteract,  fig.cap = "Analyses of Variation for each *Chlamydomonas* species testing effects upon damping indices of effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
-readRDS(file = file.path("Data", "ProcessedData", "ChlamyStrains_aovinteract.Rds")
+
+ChlamyStrains_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "ChlamyStrains_aovinteract.Rds")
         )
+
+kable(ChlamyStrains_aovinteract)
 
 ```
 
