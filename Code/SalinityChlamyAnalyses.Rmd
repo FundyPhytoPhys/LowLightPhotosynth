@@ -110,7 +110,7 @@ Chlamy_damping <- Chlamy_damping |>
 ```{r aov}
 
 
-Chlamy_aovfullinteract <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  data = Chlamy_damping)
+Chlamy_aovfullinteract <- aov(DampingIndex ~ Strain * LightLevel_ue * Temp_C * NaCl_mM,  data = Chlamy_damping |> filter(Year == 2025))
 
 summary(Chlamy_aovfullinteract)
 
@@ -119,6 +119,7 @@ summary(Chlamy_aovfullinteract)
 
 
 ChlamyStrains_aovinteract <-  Chlamy_damping |>
+  filter(Year == 2025) |>
   nest(data = -c("Strain")) |>    
   mutate(Strains_aovinteract = map(data, ~aov(DampingIndex ~ LightLevel_ue * Temp_C * NaCl_mM, data = .))
   ) |>
