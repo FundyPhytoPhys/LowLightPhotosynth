@@ -284,20 +284,21 @@ By evaluating the oscillations in ChlF (Fig \@ref(fig:reposc)), we tracked S-Sta
 
 Increasing the spacing between sequential flashes decreases the repeat rate for excitations arriving at PSII, thereby approximating a decrease in excitations delivered to PSII per second under a decrease in continuous irradiance (Fig \@ref(fig:reposc)).  Our instrument control limited our minimum flash spacing to 1 s, so cultures were evaluated at flash spacings of 1, 2, 4, 8, and 16 seconds (\@ref(tab:fluormeas)). The equivalent effective light levels were then estimated using the σ~PSII~ determined for each culture as follows: 
 
-XXXFix EquationXXX
+XXXFix EquationXXX - Test this knit
 
 \begin{equation}
-Light (µmol~photons~m^{-2}~s^{-1}) = \frac{{1}{flash~spacing (s)} X \frac{{1}{\sigma_{PSII} (A^{2})}} X \frac{1 m^{2}}{1E20A^{2}}  X  \frac{{\mu mol}{6.022E17}}
-  (\#eq:EffectiveLight)
+\text{Light }(\mu\text{mol photons m}^{-2}\text{ s}^{-1}) =
+\frac{
+1\,\text{m}^{2}
+\times \mu\text{mol}
+}{
+\text{flash spacing (s)}
+\times \sigma_{\text{PSII}}\,(\text{A}^{2})
+\times 1 \times 10^{20}\,\text{A}^{2}
+\times 6.022 \times 10^{17}
+}
+(\#eq:EffectiveLight)
 \end{equation}
-
-OR
-
-\begin{equation}
-Light (µmol~photons~m^{-2}~s^{-1}) = \frac{{1 m^{2} X \mu mol}{flash~spacing (s) X \sigma_{PSII} (A^{2}) X 1E20A^{2}  X  6.022E17}
-  (\#eq:EffectiveLight)
-\end{equation}
-
 
 
 
