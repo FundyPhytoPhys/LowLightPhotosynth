@@ -259,11 +259,10 @@ XXXXMacKenzie add origins & citations for C. euryale, C.klinobasis?
 We used series of single turnover, saturating, flashes to induce variable chlorophyll fluorescence (ChlF) [@kolberMeasurementsVariableChlorophyll1998], and evaluate progressive desynchronization of the S-State cycle in several polar and temperate phytoplankton species acclimated to a range of growth temperatures. We loaded a 3 mL sample of culture into a temperature-controlled water-jacketed quartz cuvette (Cafferty's Scientific Glassblowing, Anola, Manitoba, Canada),  placed within the measurement chamber of a Soliense fluorometer (Version LIFT-REM 1.0, Soliense Inc., Shoreham NY, USA). The apparatus was covered to block out incident light, for a minimum of 30 seconds prior to measurements. In the dark PSII reaction centres relax to ground state, and are open for photochemistry upon receipt of an absorbed photon, with a low fluorescence yield [@schubackSingleTurnoverVariableChlorophyll2021]. In parallel the oxygen evolving complex (OEC) relaxes primarily to S1 [@hanDirectQuantificationFour2008], so the S-States of the population of PSII largely synchronize.
 The sample was then exposed to a series of 32 short, high irradiance evenly spaced flashes centred at 445 nm. Each flash comprised a rapid series of 50-70 sub-saturating flashlets of 1.6 µs and ~ 30000 µmol photons m^-2^ s^-1^, , delivered every 4.1 µs, over a total 205 - 287 µs per flash [@schubackSingleTurnoverVariableChlorophyll2021]. These flashlets cumulatively deliver a photon to each PSII in the population, with each PSII ideally undergoing a single round of photochemistry and passing an electron downstream to Q~A~-, closing PSII for photochemistry for ~1000 µs, the lifetime (𝛕) for re-opening by downstream electron transport [@dauTimeresolvedXraySpectroscopy2007; @schubackSingleTurnoverVariableChlorophyll2021]. Closing the photochemistry pathway transiently redirects a greater proportion of additional incoming excitation to ChlF, driving ChlF progressively from minimum (F~O~) towards a maximum (F~M~) as the PSII centres close [@schubackSingleTurnoverVariableChlorophyll2021]. For each flash-induced fluorescence rise, F~O~ and F~M~ were extracted using a fitting model (LIFT software version 22.11.11, Solisense Inc) [@kolberMeasurementsVariableChlorophyll1998]. F~O~ and F~M~ were then used to derive the maximum quantum yield of photochemistry for open PSII [@schubackSingleTurnoverVariableChlorophyll2021], a secondary ChlF parameter calculated as:
 
-XXXFix equationXXX
 
 \begin{equation}
 \frac{F_{V}}{F_{M}} = \frac{F_{M}-F_{O}}{F_{M}}
-  (\#eq:FV_FM)
+  (\#eq:fvfm)
 \end{equation}
 
 
@@ -284,27 +283,14 @@ By evaluating the oscillations in ChlF (Fig \@ref(fig:reposc)), we tracked S-Sta
 
 Increasing the spacing between sequential flashes decreases the repeat rate for excitations arriving at PSII, thereby approximating a decrease in excitations delivered to PSII per second under a decrease in continuous irradiance (Fig \@ref(fig:reposc)).  Our instrument control limited our minimum flash spacing to 1 s, so cultures were evaluated at flash spacings of 1, 2, 4, 8, and 16 seconds (\@ref(tab:fluormeas)). The equivalent effective light levels were then estimated using the σ~PSII~ determined for each culture as follows: 
 
-XXXFix EquationXXX
 
 \begin{equation}
-Light (µmol~photons~m^{-2}~s^{-1}) = \frac{{1}{flash~spacing (s)} X \frac{{1}{\sigma_{PSII} (A^{2})}} X \frac{1 m^{2}}{1E20A^{2}}  X  \frac{{\mu mol}{6.022E17}}
-  (\#eq:EffectiveLight)
-\end{equation}
-
-OR
-
-\begin{equation}
-Light (µmol~photons~m^{-2}~s^{-1}) = \frac{{1 m^{2} X \mu mol}{flash~spacing (s) X \sigma_{PSII} (A^{2}) X 1E20A^{2}  X  6.022E17}
+\mathrm{Light}(\mathrm{photons \:m}^{-2}\mathrm{\:s}^{-1}) = \frac{1}{\mathrm{flash \:spacing \:(s)}}\times \frac{1}{\sigma_{PSII} \:(\mathrm{m}^{2}\:\mathrm{photons}^{-1})}
   (\#eq:EffectiveLight)
 \end{equation}
 
 
-
-
-$$
-Light (\mu mol \photon m^{-2} s^{-1}) = \frac{1}{flash spacing (s)} * {\frac{1}{\sigma_{PSII} (A^{2})} * \frac{1 m^{2}}{1E20A^{2}} * \frac{\mu mol}{6.022E17}
-$$
-1/σPSII is multiplied by flash spacing (s) to convert the probability that an individual incident photon is absorbed by PSII, into an equivalent photon flux density, i.e. to estimate effective light availability serving PSII photochemistry.
+1/σ~PSII~ is multiplied by flash spacing (s) to convert the probability that an individual incident photon is absorbed by PSII, into an equivalent photon flux density, i.e. to estimate effective light availability serving PSII photochemistry.
 
 Since the population of PSII starts predominantly from S1 in the dark acclimated state, the population of PSII will initially cycle synchronously through S States, reflected by an oscillation in chlorophyll fluorescence with a period of four (Fig \@ref(fig:reposc))[@dewijnSstateDependenceMiss2002]. Photochemical misses, including wasteful recombination reactions causing loss of a charge separation in a PSII, will cause a missed step in the S-State cycling of an individual PSII. As more photochemical misses occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence [@dewijnSstateDependenceMiss2002; @hanMolecularBasisTurnover2022]. Prolonged four-step synchronous cycling of PSII fluorescence thus reflects a lower probability of desynchronization at each excitation, and thus a lower probability of losses through photochemical misses.  Photochemical double hits also contribute to desynchronization [@hanMolecularBasisTurnover2022;  @hanDirectQuantificationFour2008], but should not vary strongly across changes in flash spacing nor measurement temperature within a sample.
 
