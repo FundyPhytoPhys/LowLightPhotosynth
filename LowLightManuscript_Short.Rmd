@@ -367,21 +367,21 @@ GAMStats
 ```
 
 
-```{r diatomsgamtemp, fig.cap = "GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r diatomsgamtemp, fig.cap = "GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature scaling ranges are comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","DiatomsGAMOptSal.png"))
 ```
 
 
 
-```{r greensgamtemp, fig.cap = "GAM models for polar and temperate green algae, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the difference from growth temperature (\u0394°C) during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r greensgamtemp, fig.cap = "GAM models for polar and temperate green algae, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (\u0394°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature scaling ranges are comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","AlgaeGAMOptSal.png"))
 ```
 
 Within, and across, species of *Chlamydomonas* XXXXCITE Pomona PaperXXXX growth under higher salinities increases maintenance of F~V~/F~M~ and photosynthetic capacity during stress.  We therefore grew each *Chlamydomonas* strain across three growth-permissive salinities \@ref(tab:taxacultures)  and performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors \@ref(tab:chlamyaovfullinteract).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with a significant interaction with effective equivalent light level.
 
-```{r chlamyaovfullinteract, fig.cap = "Analyses of Variation of damping indices testing effects of taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r chlamyaovfullinteract, fig.cap = "Analyses of Variation of damping indices testing effects of *Chlamydomonas* taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 
 summary(readRDS(file = file.path("Data", "ProcessedData", "Chlamy_aovfullinteract.Rds"))
