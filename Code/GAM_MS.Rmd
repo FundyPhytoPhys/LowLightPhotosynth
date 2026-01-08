@@ -44,8 +44,7 @@ PlotsOut <- file.path("..", "Figures")
 ```{r import & wrangle data}
 `%notin%` <- negate(`%in%`)
 
-# Remove Chlamydomonas_ICEMDV, Chlamydomonas_malina and Chlamydomonas_priscui grown at salinities not at or near optimal salinity of 500mM
-# Remove Chlamydomonas_euryale as GAM generated very high error tolerance based on predicted damping index across most of the measured temperature
+# Remove Chlamydomonas_malina and Chlamydomonas_priscui grown at salinities not at or near optimal salinity of 500mM. Note: Chlamydomonas_ICEMDV optimal salinity is in theory 500mM but cultures did not grow at time of experiments; therefore culture maintenance salinity of 70 mM is considered optimal 
 sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "LOW_Chlamy_dampingYear.Rds")) %>%
   mutate(NaCl_opt = as.numeric(NaCl_opt)) %>%
  filter(Year != 2025 | NaCl_opt == NaCl_mM) %>% 
@@ -54,8 +53,6 @@ sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "
  mutate(IsOptSalinity = case_when(NaCl_opt == NaCl_mM ~ 1,
                                   TRUE ~ 0)) %>% 
    select((-c(NaCl_opt, NaCl_mM))) 
-# %>% 
-#   filter(Strain %notin% c("Chlamydomonas_euryale")) 
 
 glimpse(sstate_damping_2025)
 
@@ -160,10 +157,13 @@ DampingIndex_Pred <- DampingIndex_Gam %>%
   unnest(col = db) 
 
 # GAM model results into table
-GAMStats<- kable(DampingIndex_Gam %>% 
+GAMStats<- DampingIndex_Gam %>% 
   dplyr::select(Strain, tidied) %>% 
-  unnest(tidied), 
-  digits = 3)
+  unnest(tidied) %>% 
+  mutate(edf = round(edf, digit = 4),
+         ref.df = round(ref.df, digit = 4),
+         statistic = round(statistic, digit = 4),
+         p.value = round(p.value, digit = 4))
 
 saveRDS(object = GAMStats, file = file.path(DataOut, "GAMStats.Rds"), ascii = FALSE, version = NULL, refhook = NULL)
 
