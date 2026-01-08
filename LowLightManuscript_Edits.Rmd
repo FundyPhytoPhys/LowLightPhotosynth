@@ -367,18 +367,6 @@ Similarly, the GAM outputs varied among the green algae tested (Table \@ref(tab:
 (Fig \@ref(fig:greensgamtemp)). The polar freshwater *Chlamydomonas klinobasis* also showed maximum damping indices at lower temperatures, across a range of effective light levels.  Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *Chlamydomonas euryale* did not generate a statistically significant GAM model, consistent with limited evidence for periodic oscillations from *Chlamydomonas euryale*.
 
 
-```{r gammodeltemp, echo = FALSE}
-
-GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
-
-
-knitr::kable(GAMStats,
-  caption = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of SState induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^)."
-)
-
-```
-
-
 ```{r diatomsgamtemp, fig.cap = "GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature scaling ranges are comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","DiatomsGAMOptSal.png"))
@@ -481,6 +469,19 @@ if (knitr::is_html_output()) {
 ```{r load_DampingIndex_GAM, include = FALSE}
 DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIndex_Gam.RDS"))
 ```
+
+
+```{r gammodeltemp, echo = FALSE}
+
+GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
+
+
+knitr::kable(GAMStats,
+  caption = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of SState induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^)."
+)
+
+```
+
 
 ```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE}
 
