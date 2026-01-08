@@ -27,7 +27,7 @@ institute:
 - mta: 'Department of Biology, Mount Allison University, Sackville NB, Canada, E4L1G7'
 - takuvik: 'Takuvik Joint International Laboratory, Université Laval (Canada) - CNRS (France)'
 - ottawa: 'Department of Biology, University of Ottawa, Ottawa, ON, Canada'
-date: "2025-12-19"
+date: "2026-01-07"
 output:
   bookdown::html_document2:
     code_folding: show
@@ -44,7 +44,7 @@ output:
       - '--lua-filter=scholarly-metadata.lua'
       - '--lua-filter=author-info-blocks.lua'  
 keywords: "Photosystem II, Polar Phytoplankton, Low Light Photosynthesis"
-abstract: "Polar phytoplankton achieve slow, but ecologically significant, productivity under exceptionally low light, where sequential arrivals of photons at Photosystem II complexes are widely spaced in time. We hypothesized that maintaining photosynthesis under such low light involves suppression of energetically wasteful photochemical 'misses' in Photosystem II. Under full darkness Photosystem II relaxes predominantly to the S1 oxidation state of the oxygen evolving complex.  After such dark relaxation we applied series of single turnover, saturating, flashes to advance Photosystem II through sequential photochemical charge separations,  progressively oxidizing the oxygen evolving complex, resulting in four step changes in Photosystem II chlorophyll fluorescence yield. We tracked these oscillations in chlorophyll fluorescence to measure the persistence of synchronized Photosystem II photochemistry across the Photosystem II populations in diatoms and green algae, in response to changing measurement temperatures and a range of extremely low light, emulated by increasing spacing of photon deliveries. Prolonged synchronous cycling indicates fewer desynchronizations from wasteful photochemical misses and, thus, potentially more efficient photosynthetic energy conversion under low light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa, even under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton can suppress energetically wasteful photochemical misses under low temperature, to help sustain photosynthesis even under extremely low light. Therefore ambient temperature interacts with low light limitations on photosynthesis."
+abstract: "Polar phytoplankton achieve slow, but ecologically significant, productivity under exceptionally low light, where the sequential arrivals of photons at Photosystem II complexes are widely spaced in time. We hypothesized that maintaining photosynthesis under such low light involves suppression of energetically wasteful photochemical 'misses' in Photosystem II. Under full darkness Photosystem II relaxes predominantly to the S1 oxidation state of the oxygen evolving complex.  After such dark relaxation we applied series of single turnover, saturating, flashes to advance Photosystem II through sequential photochemical charge separations, progressively oxidizing the oxygen evolving complex through sequential increments through the S-States, resulting in four-step changes in Photosystem II chlorophyll fluorescence yield. We tracked these oscillations in chlorophyll fluorescence to measure the persistence of synchronized S-States across the Photosystem II populations in diatoms and green algae, in response to changing measurement temperatures and a range of extremely low light, which we emulated by increasing the spacing between photon deliveries. Prolonged synchronous S-State cycling indicates fewer desynchronizations from wasteful photochemical misses and, thus, potentially more efficient photosynthetic energy conversion under low light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa, even under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton can suppress energetically wasteful photochemical misses under low temperature, to help sustain photosynthesis even under extremely low light. Therefore ambient temperature interacts with the lower-light limitation on photosynthesis."
 bibliography: [LowLightPhotosynthesis.bib, packages.bib]
 csl: frontiers.csl
 always_allow_html: true
@@ -82,31 +82,30 @@ Scan recent literature; Gates?
 
 
 
-
 # Introduction {.unnumbered} 
 
-Phytoplankton are a functional grouping of photosynthetic microorganisms, of diverse lineages and ecologies [@pierellakarlusichPhytoplanktonTaraOcean2020]. Phytoplankters share photolithotrophic growth, using highly conserved protein complexes [@falkowskiMicrobialEnginesThat2008] to harness energy from Photosynthetically Active Radiation (PAR), to drive reduction and assimilation of inorganic carbon, nitrogen, phosphorus, sulphur, and other essential micronutrients [@ravenPutOutLight2000]. PAR, however, decreases with depth, as light passing through the water column is scattered and absorbed [@kirkLightPhotosynthesisAquatic2011]. Therefore, with photons as an energy input, phytoplankton growth is constrained to the photic zone, the region of water receiving sufficient light for photosynthesis, operationally defined in past as extending down to a limit receiving 1% of surface irradiance, thus 2-20 µmol photons m^-2^ s^-1^  [@ravenPutOutLight2000].  
+Phytoplankton are a functional grouping of photosynthetic microorganisms, of diverse lineages and ecologies [@pierellakarlusichPhytoplanktonTaraOcean2020]. Phytoplankters share photolithotrophic growth, using a set of highly conserved protein complexes [@falkowskiMicrobialEnginesThat2008] to harness energy from Photosynthetically Active Radiation (PAR), to drive reduction and assimilation of inorganic carbon, nitrogen, phosphorus, sulphur, and other essential micronutrients [@ravenPutOutLight2000]. PAR, however, decreases with depth, as light passing through the water column is scattered and absorbed [@kirkLightPhotosynthesisAquatic2011]. Therefore, with photons as an energy input, phytoplankton growth is constrained to the photic zone, the region of water receiving sufficient light for photosynthesis, operationally defined in past as extending down to a limit receiving 1% of surface irradiance, thus 2-20 µmol photons m^-2^ s^-1^  [@ravenPutOutLight2000].  
 
-Light availability is further constrained in polar aquatic habitats, with light penetration of the water limited by seasonally low solar angles, ice cover, and snow cover [@cohenLightPolarNight2020; @leuArcticSpringAwakening2015; @hanckeExtremeLowLight2018], thereby presenting challenges for phytoplankton growth [@hanckeExtremeLowLight2018; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024]. Indeed the lower limit of the photic zone was reconsidered when benthic microalgae in the Antarctic were reported as photosynthetically active at light levels less than 1 µmol photons m^-2^ s^-1^ [@robinsonMicroalgalLightHarvestingExtreme1995; @mcminnDiurnalChangesPhotosynthesis2003]. Some polar psychrophile phytoplankton further demonstrate slow, but ecologically significant, productivity in the winter through photosynthesis below 0.17 µmol photons m^-2^ s^-1^  [@randelhoffArcticMidwinterPhytoplankton2020; @hanckeExtremeLowLight2018; ; @morgan-kissPhotoadaptationPolarNight2016; @hoppePhotosyntheticLightRequirement2024], with implications for the responses of polar phytoplankton communities to climate change [@ardynaPhytoplanktonDynamicsChanging2020].
+Light availability is further constrained in polar aquatic habitats, with light penetration of the water limited by seasonally low solar angles, ice cover, and snow cover [@cohenLightPolarNight2020; @leuArcticSpringAwakening2015; @hanckeExtremeLowLight2018], thereby presenting challenges for phytoplankton growth [@hanckeExtremeLowLight2018; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024]. Indeed the lower limit of the photic zone was reconsidered when benthic microalgae in the Antarctic were reported as photosynthetically active at light levels less than 1 µmol photons m^-2^ s^-1^ [@robinsonMicroalgalLightHarvestingExtreme1995; @mcminnDiurnalChangesPhotosynthesis2003]. Some polar psychrophile phytoplankton further demonstrate slow, but ecologically significant, photosynthetic productivity in the winter at PAR below 0.17 µmol photons m^-2^ s^-1^  [@randelhoffArcticMidwinterPhytoplankton2020; @hanckeExtremeLowLight2018; ; @morgan-kissPhotoadaptationPolarNight2016; @hoppePhotosyntheticLightRequirement2024], with implications for the responses of polar phytoplankton communities to climate change [@ardynaPhytoplanktonDynamicsChanging2020].
 
-This slow but, but potentially significant, phytoplankton photosynthesis during polar winters underscores the ability of psychrophilic phytoplankton to maintain functional photosystems throughout the polar night [@morgan-kissPhotoadaptationPolarNight2016; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024], and supports a theoretical minimum light level for phytoplankton photosynthesis of 0.01 µmol photons m^-2^ s^-1^ [@ravenPutOutLight2000]. Such low-light phytoplankton photosynthesis and growth could mitigate cell mortality in the extended darkness of winter, maintaining seeding populations for the spring bloom [@randelhoffArcticMidwinterPhytoplankton2020]. These spring blooms, in turn, are a major source of annual net primary production in polar regions [@ardynaPhytoplanktonDynamicsChanging2020].  
+This slow, but potentially significant, phytoplankton photosynthesis during polar winters underscores the ability of psychrophilic phytoplankton to maintain functional photosystems throughout the polar night [@morgan-kissPhotoadaptationPolarNight2016; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024], and supports a theoretical minimum light level for phytoplankton photosynthesis of 0.01 µmol photons m^-2^ s^-1^ [@ravenPutOutLight2000]. Such low-light phytoplankton photosynthesis could mitigate cell mortality in the extended darkness of winter, maintaining seeding populations for the spring bloom [@randelhoffArcticMidwinterPhytoplankton2020]. These spring blooms, in turn, are a major source of annual net primary production in polar regions [@ardynaPhytoplanktonDynamicsChanging2020].  
 
-In parallel with seasonally low light, psychrophile phytoplankton contend with cold temperature constraints on water viscosity, solute diffusion rates, membrane fluidity, enzyme kinetics and macromolecule interactions [@lyonPolarMicroalgaeNew2014]. In parallel salinities vary across polar habitats  [REFERENCES MACKENZIE ET AL], along with shorter-tem local salinity fluctuations driven by freezing and thawing of ice [REFERENCES MACKENZIE ET AL].  XXXPOMONA ARTICLE(S) on SALINITY RESPONSES?XXX.
+In parallel with seasonally low light, psychrophile phytoplankton contend with cold temperature constraints on water viscosity, solute diffusion rates, membrane fluidity, enzyme kinetics and macromolecule interactions [@lyonPolarMicroalgaeNew2014]. In parallel, salinities vary across polar habitats  [REFERENCES MACKENZIE ET AL], along with shorter-tem local salinity fluctuations driven by freezing and thawing of ice [REFERENCES MACKENZIE ET AL].  XXXPOMONA ARTICLE(S) on SALINITY RESPONSES?XXX.
 
 Such extreme abiotic constraints probably act as powerful ecological filters, by imposing niche-driven speciation processes among phytoplankton lineages adapted to polar environments [@ibarbalzPanArcticPlanktonCommunity2023]. Some psychrophilic phytoplankton indeed exhibit high genetic divergence from related temperate species. The polar diatom *Fragilariopsis cylindrus* shows divergent alleles compared to their mesophilic relatives [@mockEvolutionaryGenomicsColdadapted2017], with changes in protein structure, including amino acid substitutions, H-bonds, and salt bridges [@lyonPolarMicroalgaeNew2014], cold shock proteins [@lyonPolarMicroalgaeNew2014] and anti-freeze proteins [@bayer-giraldiCharacterizationAntifreezeProtein2011]. Similarly, the polar green algae *Chlamydomonas priscui* and *Chlamydomonas* sp. ICE-L harbour large genomes enriched in genes families encoding for ice-binding proteins, molecular chaperones, light harvesting proteins and core histones (@zhangDraftGenomeSequence2021). Polar microbes use cellular-compatible solutes, including sugars, polyols, amino acids, betaine, and DMSP, which lower intracellular freezing points and maintain enzyme hydration spheres, stabilizing catalytic activity [@lyonPolarMicroalgaeNew2014; @zhangAdaptationExtremeAntarctic2020]. Additionally, they exhibit high levels of polyunsaturated fatty acids (PUFAs) in their lipid membranes [@lyonPolarMicroalgaeNew2014; @cvetkovskaTemperatureStressPsychrophilic2022] contributing to maintenance of membrane fluidity at cold temperatures. 
 
 Oxygenic photosynthesis in eukaryotic phytoplankton occurs in chloroplasts, bounded by a two- to four-membrane envelope, depending upon taxa [@kirkLightPhotosynthesisAquatic2011]. Thylakoid membranes, containing pigments and electron carriers, traverse the chloroplast stroma. Photosystem II (PSII), a multi-subunit protein complex embedded in the thylakoid membranes [@shevelaSolarEnergyConversion2023], catalyzes the photooxidation of water, releasing O~2~ and H^+^, and passing reductant into the photosynthetic electron transport chain.  
 
-In PSII, photons are captured by light-harvesting chlorophyll molecules [@kirkLightPhotosynthesisAquatic2011], initiating a transition from the ground state to an electronically excited state. Energy absorbed by light harvesting complexes undergoes rounds of inductive resonance transfer among multiple pigments before eventually reaching the photochemical reaction center of PSII,  P~680~ [@kirkLightPhotosynthesisAquatic2011], composed of a Chl a heterodimer [@shenPhotosynthesisPhotosystemII2021; @vassRoleChargeRecombination2011]. The excitation energy is then distributed, in variable proportions, to i) photochemistry; ii) dissipation as heat; or iii) re-emission as fluorescence (ChlF) [@schubackSingleTurnoverVariableChlorophyll2021]. When P~680~ is raised to its excited state, P~680~*, it shifts to a lower reduction potential, allowing photooxidation to P~680~+ through transfer of an electron to an initial phaeophytin (Phe) acceptor molecule [@vassRoleChargeRecombination2011; @shevelaSolarEnergyConversion2023]. In productive electron transport the electron from reduced Phe- is transferred to plastoquinone A (Q~A~), followed by transfer to plastoquinone B (Q~B~) [@shenPhotosynthesisPhotosystemII2021]. Q~B~, once fully reduced by receiving two electrons, is released, carrying the electrons into the mobile plastoquinone pool in the lipid phase of the thylakoid membrane [@kirkLightPhotosynthesisAquatic2011]. P~680~+  is reduced back to P~680~ by taking an electron from a tyrosine residue D1-Tyr-161 (Yz). Yz, in turn, extracts an electron from a manganese cluster on the thylakoid lumenal side of PSII [@shenPhotosynthesisPhotosystemII2021; @mukhopadhyayManganeseClustersRelevance2004].
+Photons are captured by light-harvesting chlorophyll molecules [@kirkLightPhotosynthesisAquatic2011], initiating a transition from the ground state to an electronically excited state. Energy absorbed by light harvesting complexes undergoes rounds of inductive resonance transfer among multiple pigments before eventually reaching the photochemical reaction center of PSII,  P~680~ [@kirkLightPhotosynthesisAquatic2011], composed of a Chl a heterodimer [@shenPhotosynthesisPhotosystemII2021; @vassRoleChargeRecombination2011]. The excitation energy is then distributed, in variable proportions, to i) photochemistry; ii) dissipation as heat; or iii) re-emission as fluorescence (ChlF) [@schubackSingleTurnoverVariableChlorophyll2021]. When P~680~ is raised to its excited state, P~680~*, it shifts to a lower reduction potential, allowing photooxidation to P~680~+ through transfer of an electron to a phaeophytin (Phe) initial acceptor molecule [@vassRoleChargeRecombination2011; @shevelaSolarEnergyConversion2023]. In productive electron transport the electron from reduced Phe- is transferred to plastoquinone A (Q~A~), followed by transfer to plastoquinone B (Q~B~) [@shenPhotosynthesisPhotosystemII2021]. Q~B~, once fully reduced after receiving two electrons, is released, carrying the electrons into the mobile plastoquinone pool in the lipid phase of the thylakoid membrane [@kirkLightPhotosynthesisAquatic2011]. P~680~+  is reduced back to P~680~ by taking an electron from a tyrosine residue D1-Tyr-161 (Yz). Yz, in turn, extracts an electron from a manganese cluster on the thylakoid lumenal side of PSII [@shenPhotosynthesisPhotosystemII2021; @mukhopadhyayManganeseClustersRelevance2004].
 
 During photosynthesis, electron transfers thus sequentially stabilize the photochemical charge separations [@vassRoleChargeRecombination2011]. These charge separations are, however, reversible through recombination reactions [@vassJanusfacedChargeRecombinations2009; @hanMissesWaterOxidation2012], which are futile cycles of photochemistry [@rappaportKineticsPathwaysCharge2002; @rappaportChargeRecombinationThermoluminescence2005; @laloiGeneticApproachElucidating2006] forming one category of photochemical 'miss' [@hanMissesWaterOxidation2012; @hanMolecularBasisTurnover2022].  Recombinations can generate chlorophyll triplets which react with ground-state molecular oxygen to produce singlet oxygen (^1^O~2~), a highly damaging, photoinhibitory reactive oxygen species (ROS) [@rappaportChargeRecombinationThermoluminescence2005]. Conversely, these non-radiative charge recombinations act as a mechanism of photoprotection under excess excitation [@vassRoleChargeRecombination2011], enabling direct recombination from the singlet P~680~+Phe- or P~680~+Q~A~- states [@rutherfordBackreactionsShortcircuitsLeaks2012],  to help suppress the formation of harmful ROS [@vassJanusfacedChargeRecombinations2009].  Since these recombinations have characteristic activation energies  [@rappaportKineticsPathwaysCharge2002], the probabilities of recombinations vary with temperature, [@ivanovAcclimationTemperatureIrradiance2006; @hanDirectQuantificationFour2008; @hanMissesWaterOxidation2012; @hanMolecularBasisTurnover2022]. Both plants and cyanobacteria furthermore show acclimatory modulations [@quiggPhotoacclimationInvolvesModulation2003] of the reduction potentials of electron transfer intermediates, thereby changing the probabilities and temperature dependencies of recombinations [@ivanovAcclimationTemperatureIrradiance2006; @saneChangesRedoxPotential2003; @saneTransientExchangePhotosystem2002; @ivanovLowtemperatureModulationRedox2003].
 
 
 Beyond their roles in photodamage and photoprotection, charge recombination reactions are wasteful 'miss' processes that lower photosynthetic energy conversion efficiency [@rappaportChargeRecombinationThermoluminescence2005; @hanMissesWaterOxidation2012] by competing with linear electron transport. Shifting reduction potentials of downstream electron acceptors, leading to changes in energy gaps for recombinations, may represent evolutionary adaptations aimed at maximizing photoprotection and minimizing losses through back-reactions under light-limited conditions [@vinyardPhotosystemIIReaction2013]. 
 
-The oxygen-evolving complex (OEC) of PSII consists of a manganese-oxo cluster (Mn~4~CaO~5~) where water is oxidized, releasing oxygen and protons [@gatesRealtimeKineticsLight2020]. Four consecutive charge separations at P~680~ induce four increasingly oxidized states of the Mn cluster, known as S-States [@zaharievaEnergeticsKineticsSState2019], denoted, from most reduced to most oxidized, as S0, S1, S2, and S3, followed by a transient S4 state, which rapidly decays to S0. Once the Mn cluster has progressively lost four electrons, it oxidizes two water molecules, releasing one molecule of O~2~. Therefore, a complete water oxidation cycle during oxygenic photosynthesis requires four sequential photon excitations of a single PSII, with the progressive accumulation of four oxidizing equivalents in the OEC [@dauTimeresolvedXraySpectroscopy2007; @gatesRealtimeKineticsLight2020; @zaharievaEnergeticsKineticsSState2019].  
+The oxygen-evolving complex (OEC) of PSII consists of a manganese-oxo cluster (Mn~4~CaO~5~) where water is oxidized, releasing oxygen and protons [@gatesRealtimeKineticsLight2020]. Four consecutive charge separations at P~680~ induce four increasingly oxidized states of the Mn cluster, known as S-States [@zaharievaEnergeticsKineticsSState2019], denoted, from most reduced to most oxidized, as S0, S1, S2, and S3, followed by a transient S4 state, which rapidly decays to S0. Once the Mn cluster has progressively lost four electrons, it oxidizes two water molecules, releasing one molecule of O~2~. Therefore, a complete water oxidation cycle during oxygenic photosynthesis requires four sequential photon excitations of a single PSII, with the progressive accumulation of four oxidizing equivalents in the OEC [@dauTimeresolvedXraySpectroscopy2007; @gatesRealtimeKineticsLight2020; @zaharievaEnergeticsKineticsSState2019], and the reduction of two Q~B~.  
 
-Under light limitation, the arrivals of excitations of P~680~ in each PSII are widely spaced in time.  Thus in order to maintain productive electron transport, the electron transfer intermediates must persist for long periods of time, elevating the probabilities of energetically wasteful recombination reactions, which represent a step backward in the S-State cycle [@kerenMechanismPhotosystemII1997; @dewijnSstateDependenceMiss2002; @hanDirectQuantificationFour2008]. Stable and progressive S-State cycling under low light, in contrast, sustains electron flow for ATP and NADPH production, while minimizing risks of low-light photodamage to PSII [@rappaportChargeRecombinationThermoluminescence2005; @kerenMechanismPhotosystemII1997]. 
+Under light limitation, the excitations of P~680~ in each PSII are widely spaced in time.  Thus in order to maintain productive electron transport, the electron transfer intermediates must persist for long periods of time, elevating the probabilities of energetically wasteful recombination reactions, which represent a step backward in the S-State cycle [@kerenMechanismPhotosystemII1997; @dewijnSstateDependenceMiss2002; @hanDirectQuantificationFour2008]. Stable and progressive S-State cycling under low light, in contrast, sustains electron flow for ATP and NADPH production, while minimizing risks of low-light photodamage to PSII [@rappaportChargeRecombinationThermoluminescence2005; @kerenMechanismPhotosystemII1997]. 
 
 S-State cycling in a phytoplankton sample can be tracked by applications of sequences of short, single-turnover saturating light flashes, bright enough to deliver a photon to each PSII. In darkness the PSII population relaxes primarily to S1 [@hanDirectQuantificationFour2008]. As sequential light flashes are applied, the population of PSII complexes is driven through the S-State cycle [@dauTimeresolvedXraySpectroscopy2007]. The S-States have different intrinsic PSII fluorescence yields [@gatesRealtimeKineticsLight2020; @zaharievaEnergeticsKineticsSState2019], so in an idealized sample, the four sequential S-States will be reflected by an ongoing periodic oscillation in ChlF. Recombination reactions, however,  contribute to wasteful misses in the S-State cycling of individual PSII [@hanMissesWaterOxidation2012]. As misses occur, they progressively desynchronize S-State cycling across the PSII population, dampening the observed ChlF oscillation [@dewijnSstateDependenceMiss2002] towards an averaged ChlF for the PSII population distributed across the S-States. An organism exhibiting synchronized S-State cycling sustained over more flash cycles indicates fewer photochemical misses, and thus higher conversion of sequentially spaced excitations to photosynthetic electron transport. By comparing the S-State cycling over flash cycles, of psychrophilic and temperate phytoplankton taxa, we sought to determine if psychrophilic diatoms and green algae show higher maintenance of progressive PSII function under extreme low light,thereby supporting stable extraction of electrons from water to support productive photosynthesis. 
 
@@ -119,7 +118,7 @@ The nine study taxa, including polar and temperate strains of diatoms and green 
 
 
 <table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
-<caption>(\#tab:taxacultures)(\#tab:taxacultures)Study taxa and culture growth conditions.</caption>
+<caption>(\#tab:taxacultures)Study taxa and culture growth conditions.</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Taxa </th>
@@ -416,11 +415,10 @@ XXXXMacKenzie add origins & citations for C. euryale, C.klinobasis?
 We used series of single turnover, saturating, flashes to induce variable chlorophyll fluorescence (ChlF) [@kolberMeasurementsVariableChlorophyll1998], and evaluate progressive desynchronization of the S-State cycle in several polar and temperate phytoplankton species acclimated to a range of growth temperatures. We loaded a 3 mL sample of culture into a temperature-controlled water-jacketed quartz cuvette (Cafferty's Scientific Glassblowing, Anola, Manitoba, Canada),  placed within the measurement chamber of a Soliense fluorometer (Version LIFT-REM 1.0, Soliense Inc., Shoreham NY, USA). The apparatus was covered to block out incident light, for a minimum of 30 seconds prior to measurements. In the dark PSII reaction centres relax to ground state, and are open for photochemistry upon receipt of an absorbed photon, with a low fluorescence yield [@schubackSingleTurnoverVariableChlorophyll2021]. In parallel the oxygen evolving complex (OEC) relaxes primarily to S1 [@hanDirectQuantificationFour2008], so the S-States of the population of PSII largely synchronize.
 The sample was then exposed to a series of 32 short, high irradiance evenly spaced flashes centred at 445 nm. Each flash comprised a rapid series of 50-70 sub-saturating flashlets of 1.6 µs and ~ 30000 µmol photons m^-2^ s^-1^, , delivered every 4.1 µs, over a total 205 - 287 µs per flash [@schubackSingleTurnoverVariableChlorophyll2021]. These flashlets cumulatively deliver a photon to each PSII in the population, with each PSII ideally undergoing a single round of photochemistry and passing an electron downstream to Q~A~-, closing PSII for photochemistry for ~1000 µs, the lifetime (𝛕) for re-opening by downstream electron transport [@dauTimeresolvedXraySpectroscopy2007; @schubackSingleTurnoverVariableChlorophyll2021]. Closing the photochemistry pathway transiently redirects a greater proportion of additional incoming excitation to ChlF, driving ChlF progressively from minimum (F~O~) towards a maximum (F~M~) as the PSII centres close [@schubackSingleTurnoverVariableChlorophyll2021]. For each flash-induced fluorescence rise, F~O~ and F~M~ were extracted using a fitting model (LIFT software version 22.11.11, Solisense Inc) [@kolberMeasurementsVariableChlorophyll1998]. F~O~ and F~M~ were then used to derive the maximum quantum yield of photochemistry for open PSII [@schubackSingleTurnoverVariableChlorophyll2021], a secondary ChlF parameter calculated as:
 
-XXXFix equationXXX
 
 \begin{equation}
 \frac{F_{V}}{F_{M}} = \frac{F_{M}-F_{O}}{F_{M}}
-  (\#eq:FV_FM)
+  (\#eq:fvfm)
 \end{equation}
 
 
@@ -441,30 +439,15 @@ By evaluating the oscillations in ChlF (Fig \@ref(fig:reposc)), we tracked S-Sta
 
 Increasing the spacing between sequential flashes decreases the repeat rate for excitations arriving at PSII, thereby approximating a decrease in excitations delivered to PSII per second under a decrease in continuous irradiance (Fig \@ref(fig:reposc)).  Our instrument control limited our minimum flash spacing to 1 s, so cultures were evaluated at flash spacings of 1, 2, 4, 8, and 16 seconds (\@ref(tab:fluormeas)). The equivalent effective light levels were then estimated using the σ~PSII~ determined for each culture as follows: 
 
-XXXFix EquationXXX
-
 \begin{equation}
-Light (µmol~photons~m^{-2}~s^{-1}) = \frac{{1}{flash~spacing (s)} X \frac{{1}{\sigma_{PSII} (A^{2})}} X \frac{1 m^{2}}{1E20A^{2}}  X  \frac{{\mu mol}{6.022E17}}
-  (\#eq:EffectiveLight)
-\end{equation}
-
-OR
-
-\begin{equation}
-Light (µmol~photons~m^{-2}~s^{-1}) = \frac{{1 m^{2} X \mu mol}{flash~spacing (s) X \sigma_{PSII} (A^{2}) X 1E20A^{2}  X  6.022E17}
+\mathrm{Light}(\mathrm{photons \:m}^{-2}\mathrm{\:s}^{-1}) = \frac{1}{\mathrm{flash \:spacing \:(s)}}\times \frac{1}{\sigma_{PSII} \:(\mathrm{m}^{2}\:\mathrm{photons}^{-1})}
   (\#eq:EffectiveLight)
 \end{equation}
 
 
-
-
-$$
-Light (\mu mol \photon m^{-2} s^{-1}) = \frac{1}{flash spacing (s)} * {\frac{1}{\sigma_{PSII} (A^{2})} * \frac{1 m^{2}}{1E20A^{2}} * \frac{\mu mol}{6.022E17}
-$$
-1/σPSII is multiplied by flash spacing (s) to convert the probability that an individual incident photon is absorbed by PSII, into an equivalent photon flux density, i.e. to estimate effective light availability serving PSII photochemistry.
+1/σ~PSII~ is multiplied by flash spacing (s) to convert the probability that an individual incident photon is absorbed by PSII, into an equivalent photon flux density, i.e. to estimate effective light availability serving PSII photochemistry.
 
 Since the population of PSII starts predominantly from S1 in the dark acclimated state, the population of PSII will initially cycle synchronously through S States, reflected by an oscillation in chlorophyll fluorescence with a period of four (Fig \@ref(fig:reposc))[@dewijnSstateDependenceMiss2002]. Photochemical misses, including wasteful recombination reactions causing loss of a charge separation in a PSII, will cause a missed step in the S-State cycling of an individual PSII. As more photochemical misses occur, desynchronization of S-State cycling among the population of PSII will scramble the periodic changes in ChlF, dampening the observed oscillation of the population-level fluorescence [@dewijnSstateDependenceMiss2002; @hanMolecularBasisTurnover2022]. Prolonged four-step synchronous cycling of PSII fluorescence thus reflects a lower probability of desynchronization at each excitation, and thus a lower probability of losses through photochemical misses.  Photochemical double hits also contribute to desynchronization [@hanMolecularBasisTurnover2022;  @hanDirectQuantificationFour2008], but should not vary strongly across changes in flash spacing nor measurement temperature within a sample.
-
 
 ## Analytical Methods {.unnumbered}  
 
@@ -529,10 +512,11 @@ In contrast, in the temperate green algae *Chlamydomonas reinhardtii* (Figure \@
 
 ## Generalized Additive Modelling of Damping of 4-step oscillations By Measurement Temperature {.unnumbered}
 
-Predictions from generalized additive modelling were generated for the damping of S-State-induced chlorophyll fluorescence oscillations, as predicted by the tensor product smooth of the temperature during measurements (°C) and the equivalent effective light level (µmol photons m^-2^s^-1^) set by flash spacing, for each strain; Table \@ref(tab:fluormeas); Table \@ref(tab:gammodeltemp).  All of the model fits explained over 50% of the variation in the response variable, damping index, except the GAM fits for *C. euryale*, which failed to fit. Both diatom taxa exhibited the longest predicted periodic oscillations in ChlF at higher effective light levels and lower temperatures. Notably, the polar *Fragilariopsis cylindrus* sustained cycling longer than its temperate counterpart, *Thalassiosira pseudonana*, under comparable conditions. This disparity was particularly prevalent at measurements taken above the growth temperature and when longer spacing between flashes produced lower effective light levels (Fig \@ref(fig:diatomsgamtemp)), where *Thalassiosira pseudonana* cultures did not retain the significant 4-step oscillation in ChlF indicative of synchronized S-State cycling. 
+Predictions from generalized additive modelling were generated for the damping of S-State-induced chlorophyll fluorescence oscillations, as predicted by the tensor product smooth of the temperature during measurements (°C) and the equivalent effective light level (µmol photons m^-2^s^-1^) set by flash spacing, for each strain; Table \@ref(tab:fluormeas); Table \@ref(tab:TestCap).  All of the model fits explained over 50% of the variation in the response variable, damping index, except the GAM fits for *C. euryale*, which failed to fit. Both diatom taxa exhibited the longest predicted periodic oscillations in ChlF at higher effective light levels and lower temperatures. Notably, the polar *Fragilariopsis cylindrus* sustained cycling longer than its temperate counterpart, *Thalassiosira pseudonana*, under comparable conditions. This disparity was particularly prevalent at measurements taken above the growth temperature and when longer spacing between flashes produced lower effective light levels (Fig \@ref(fig:diatomsgamtemp)), where *Thalassiosira pseudonana* cultures did not retain the significant 4-step oscillation in ChlF indicative of synchronized S-State cycling. 
 
 Similarly the GAM outputs varied  among the green algae tested (Table \@ref(tab:gammodeltemp)). The polar, saline strains *Chlamydomonas* ICEMDV, *Chlamydomonas malina* and *Chlamydomonas priscui* showed GAM model predictions of maximum damping indices of ~ 10-11 flashes, centred at lower temperatures  but extending over a wide range of effective light levels
 (Fig \@ref(fig:greensgamtemp)). The polar freshwater **Chlamydomonas klinobasis* also showed maximum damping indices at lower temperatures, across a range of effective light levels.  Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *Chlamydomonas klinobasis* did not generate a statistically significant GAM model, consistent with limited evidence for periodic oscillations from *Chlamydomonas klinobasis*.
+
 
 <table>
  <thead>
@@ -790,16 +774,25 @@ Similarly the GAM outputs varied  among the green algae tested (Table \@ref(tab:
 </table>
 
 
+<!-- ```{r gammodeltemp, fig.cap = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of SState induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^).", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE} -->
+
+<!-- GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds")) -->
+
+<!-- GAMStats -->
+
+<!-- ``` -->
+
+
 <div class="figure">
-<img src="Figures/DiatomsGAMOptSal.png" alt="GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots." width="100%" height="100%" />
-<p class="caption">(\#fig:diatomsgamtemp)GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots.</p>
+<img src="Figures/DiatomsGAMOptSal.png" alt="GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature scaling ranges are comparable across plots." width="100%" height="100%" />
+<p class="caption">(\#fig:diatomsgamtemp)GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature scaling ranges are comparable across plots.</p>
 </div>
 
 
 
 <div class="figure">
-<img src="Figures/AlgaeGAMOptSal.png" alt="GAM models for polar and temperate green algae, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the difference from growth temperature (Δ°C) during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots." width="100%" height="100%" />
-<p class="caption">(\#fig:greensgamtemp)GAM models for polar and temperate green algae, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the difference from growth temperature (Δ°C) during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Black dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature scaling range is comparable across plots.</p>
+<img src="Figures/AlgaeGAMOptSal.png" alt="GAM models for polar and temperate green algae, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (Δ°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature scaling ranges are comparable across plots." width="100%" height="100%" />
+<p class="caption">(\#fig:greensgamtemp)GAM models for polar and temperate green algae, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (Δ°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds). Dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature scaling ranges are comparable across plots.</p>
 </div>
 
 Within, and across, species of *Chlamydomonas* XXXXCITE Pomona PaperXXXX growth under higher salinities increases maintenance of F~V~/F~M~ and photosynthetic capacity during stress.  We therefore grew each *Chlamydomonas* strain across three growth-permissive salinities \@ref(tab:taxacultures)  and performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors \@ref(tab:chlamyaovfullinteract).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with a significant interaction with effective equivalent light level.
@@ -830,25 +823,93 @@ Within, and across, species of *Chlamydomonas* XXXXCITE Pomona PaperXXXX growth 
 
 We then ran the ANOVA for each taxa separately \@ref(tab:chlamystrainsaovinteract).  Within a taxa only *Chlamydomonas priscui* showed a significant effect of NaCl on damping indices, suggesting the statistical influence of NaCl detected across taxa derives from different taxa growing at different salinites and showing different responses of damping indices, rather than a direct effect of NaCl on damping indices in most strains.
 
-
-```
-## # A tibble: 8 × 7
-##   Strain    Strains_aovinteract_…¹ Strains_aovinteract_…² Strains_aovinteract_…³
-##   <chr>     <chr>                                   <dbl>                  <dbl>
-## 1 Chlamydo… LightLevel_ue                               1                   30.5
-## 2 Chlamydo… LightLevel_ue                               1                  550. 
-## 3 Chlamydo… Temp_C                                      1                  137. 
-## 4 Chlamydo… LightLevel_ue                               1                  140. 
-## 5 Chlamydo… LightLevel_ue                               1                  255. 
-## 6 Chlamydo… Temp_C                                      1                  476. 
-## 7 Chlamydo… NaCl_mM                                     1                   39.6
-## 8 Chlamydo… Temp_C                                      1                   18.5
-## # ℹ abbreviated names: ¹​Strains_aovinteract_Param_term,
-## #   ²​Strains_aovinteract_Param_df, ³​Strains_aovinteract_Param_sumsq
-## # ℹ 3 more variables: Strains_aovinteract_Param_meansq <dbl>,
-## #   Strains_aovinteract_Param_statistic <dbl>,
-## #   Strains_aovinteract_Param_p.value <dbl>
-```
+<table>
+ <thead>
+  <tr>
+   <th style="text-align:left;"> Strain </th>
+   <th style="text-align:left;"> Strains_aovinteract_Param_term </th>
+   <th style="text-align:right;"> Strains_aovinteract_Param_df </th>
+   <th style="text-align:right;"> Strains_aovinteract_Param_sumsq </th>
+   <th style="text-align:right;"> Strains_aovinteract_Param_meansq </th>
+   <th style="text-align:right;"> Strains_aovinteract_Param_statistic </th>
+   <th style="text-align:right;"> Strains_aovinteract_Param_p.value </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:left;"> Chlamydomonas_euryale </td>
+   <td style="text-align:left;"> LightLevel_ue </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 30.46160 </td>
+   <td style="text-align:right;"> 30.46160 </td>
+   <td style="text-align:right;"> 5.136345 </td>
+   <td style="text-align:right;"> 0.0277899 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chlamydomonas_klinobasis </td>
+   <td style="text-align:left;"> LightLevel_ue </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 550.11063 </td>
+   <td style="text-align:right;"> 550.11063 </td>
+   <td style="text-align:right;"> 77.519111 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chlamydomonas_klinobasis </td>
+   <td style="text-align:left;"> Temp_C </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 136.58520 </td>
+   <td style="text-align:right;"> 136.58520 </td>
+   <td style="text-align:right;"> 19.246971 </td>
+   <td style="text-align:right;"> 0.0000550 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chlamydomonas_malina </td>
+   <td style="text-align:left;"> LightLevel_ue </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 140.11121 </td>
+   <td style="text-align:right;"> 140.11121 </td>
+   <td style="text-align:right;"> 14.462098 </td>
+   <td style="text-align:right;"> 0.0004041 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chlamydomonas_priscui </td>
+   <td style="text-align:left;"> LightLevel_ue </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 254.82592 </td>
+   <td style="text-align:right;"> 254.82592 </td>
+   <td style="text-align:right;"> 31.347386 </td>
+   <td style="text-align:right;"> 0.0000004 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chlamydomonas_priscui </td>
+   <td style="text-align:left;"> Temp_C </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 475.80733 </td>
+   <td style="text-align:right;"> 475.80733 </td>
+   <td style="text-align:right;"> 58.531394 </td>
+   <td style="text-align:right;"> 0.0000000 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chlamydomonas_priscui </td>
+   <td style="text-align:left;"> NaCl_mM </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 39.56866 </td>
+   <td style="text-align:right;"> 39.56866 </td>
+   <td style="text-align:right;"> 4.867535 </td>
+   <td style="text-align:right;"> 0.0306984 </td>
+  </tr>
+  <tr>
+   <td style="text-align:left;"> Chlamydomonas_reinhardtii </td>
+   <td style="text-align:left;"> Temp_C </td>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 18.49120 </td>
+   <td style="text-align:right;"> 18.49120 </td>
+   <td style="text-align:right;"> 5.152300 </td>
+   <td style="text-align:right;"> 0.0265393 </td>
+  </tr>
+</tbody>
+</table>
 
 # Discussion {.unnumbered}
 
@@ -873,7 +934,7 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 # Supporting information {.unnumbered}
 
 <table class=" lightable-classic" style='font-family: "Arial Narrow", "Source Sans Pro", sans-serif; margin-left: auto; margin-right: auto;'>
-<caption>(\#tab:fluormeas)(\#tab:fluormeas)Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).</caption>
+<caption>(\#tab:fluormeas)Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).</caption>
  <thead>
   <tr>
    <th style="text-align:left;"> Taxa </th>
@@ -4946,8 +5007,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-1.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-1)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-1.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-1)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -4964,7 +5025,7 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## 
 ##                            k'  edf k-index p-value    
 ## s(LightLevel_ue)         2.00 1.83    0.26  <2e-16 ***
-## s(Temp_C)                2.00 1.00    0.81    0.12    
+## s(Temp_C)                2.00 1.00    0.81    0.11    
 ## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.55  <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -4974,8 +5035,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-2.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-2)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-2.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-2)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -4992,7 +5053,7 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## 
 ##                            k'  edf k-index p-value
 ## s(LightLevel_ue)         2.00 1.10    0.76    0.10
-## s(Temp_C)                2.00 1.00    0.93    0.26
+## s(Temp_C)                2.00 1.00    0.93    0.24
 ## ti(Temp_C,LightLevel_ue) 4.00 1.46    0.89    0.12
 ## 
 ## 
@@ -5000,8 +5061,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-3.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-3)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-3.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-3)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -5017,17 +5078,17 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value
-## s(LightLevel_ue)         2.00 1.94    1.23    0.91
-## s(Temp_C)                2.00 1.89    1.37    0.98
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.97    0.35
+## s(LightLevel_ue)         2.00 1.94    1.23    0.87
+## s(Temp_C)                2.00 1.89    1.37    0.99
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.97    0.44
 ## 
 ## 
 ## ### GAM diagnostics: 4
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-4.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-4)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-4.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-4)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -5044,16 +5105,16 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## 
 ##                            k'  edf k-index p-value
 ## s(LightLevel_ue)         2.00 1.96    1.60    1.00
-## s(Temp_C)                2.00 1.00    1.02    0.45
-## ti(Temp_C,LightLevel_ue) 4.00 2.17    1.48    1.00
+## s(Temp_C)                2.00 1.00    1.02    0.52
+## ti(Temp_C,LightLevel_ue) 4.00 2.17    1.48    0.99
 ## 
 ## 
 ## ### GAM diagnostics: 5
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-5.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-5)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-5.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-5)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -5068,10 +5129,10 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## Basis dimension (k) checking results. Low p-value (k-index<1) may
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
-##                            k'  edf k-index p-value   
-## s(LightLevel_ue)         2.00 1.00    0.29   0.010 **
-## s(Temp_C)                2.00 1.96    0.75   0.165   
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.67   0.085 . 
+##                            k'  edf k-index p-value    
+## s(LightLevel_ue)         2.00 1.00    0.29  <2e-16 ***
+## s(Temp_C)                2.00 1.96    0.75    0.15    
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.67    0.08 .  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -5080,8 +5141,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-6.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-6)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-6.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-6)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -5097,17 +5158,17 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value
-## s(LightLevel_ue)         2.00 1.74    1.00    0.42
-## s(Temp_C)                2.00 1.00    0.99    0.34
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    1.02    0.37
+## s(LightLevel_ue)         2.00 1.74    1.00    0.38
+## s(Temp_C)                2.00 1.00    0.99    0.35
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    1.02    0.38
 ## 
 ## 
 ## ### GAM diagnostics: 7
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-7.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-7)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-7.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-7)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -5123,9 +5184,9 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value  
-## s(LightLevel_ue)         2.00 1.85    0.70    0.03 *
-## s(Temp_C)                2.00 1.25    1.14    0.65  
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.77    0.05 *
+## s(LightLevel_ue)         2.00 1.85    0.70   0.070 .
+## s(Temp_C)                2.00 1.25    1.14   0.625  
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.77   0.065 .
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -5134,8 +5195,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-8.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-8)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-8.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-8)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -5151,17 +5212,17 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value
-## s(LightLevel_ue)         2.00 1.84    1.04    0.49
-## s(Temp_C)                2.00 1.00    1.06    0.48
-## ti(Temp_C,LightLevel_ue) 4.00 1.00    1.04    0.40
+## s(LightLevel_ue)         2.00 1.84    1.04    0.48
+## s(Temp_C)                2.00 1.00    1.06    0.52
+## ti(Temp_C,LightLevel_ue) 4.00 1.00    1.04    0.46
 ## 
 ## 
 ## ### GAM diagnostics: 9
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-9.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-9)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-9.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-9)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -5177,8 +5238,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value    
-## s(LightLevel_ue)         2.00 1.90    0.72    0.03 *  
-## s(Temp_C)                2.00 1.77    1.06    0.58    
+## s(LightLevel_ue)         2.00 1.90    0.72   0.035 *  
+## s(Temp_C)                2.00 1.77    1.06   0.660    
 ## ti(Temp_C,LightLevel_ue) 4.00 1.00    0.62  <2e-16 ***
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -5188,8 +5249,8 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ```
 
 <div class="figure">
-<img src="Figures/gammodeldiagnostic-10.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~)." width="100%" height="100%" />
-<p class="caption">(\#fig:gammodeldiagnostic-10)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).</p>
+<img src="Figures/gammodeldiagnostic-10.png" alt="GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and &lt;U+0001D6D4&gt;~PSII~)." width="100%" height="100%" />
+<p class="caption">(\#fig:gammodeldiagnostic-10)GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and <U+0001D6D4>~PSII~).</p>
 </div>
 
 ```
@@ -5205,9 +5266,9 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 ## indicate that k is too low, especially if edf is close to k'.
 ## 
 ##                            k'  edf k-index p-value  
-## s(LightLevel_ue)         2.00 1.87    1.01   0.465  
-## s(Temp_C)                2.00 1.00    1.27   0.960  
-## ti(Temp_C,LightLevel_ue) 4.00 2.19    0.85   0.075 .
+## s(LightLevel_ue)         2.00 1.87    1.01    0.49  
+## s(Temp_C)                2.00 1.00    1.27    0.94  
+## ti(Temp_C,LightLevel_ue) 4.00 2.19    0.85    0.09 .
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```

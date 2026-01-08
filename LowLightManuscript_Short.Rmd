@@ -29,13 +29,6 @@ institute:
 - ottawa: 'Department of Biology, University of Ottawa, Ottawa, ON, Canada'
 date: "`r Sys.Date()`"
 output:
-  bookdown::word_document2:
-    code_folding: show
-    reference_docx: KnitTemplate.docx
-    fig_caption: yes
-    pandoc_args:
-      - '--lua-filter=scholarly-metadata.lua'
-      - '--lua-filter=author-info-blocks.lua'  
   bookdown::html_document2:
     code_folding: show
     keep_md: yes
@@ -43,6 +36,13 @@ output:
     pandoc_args:
       - '--lua-filter=scholarly-metadata.lua'
       - '--lua-filter=author-info-blocks.lua'
+  bookdown::word_document2:
+    code_folding: show
+    reference_docx: KnitTemplate.docx
+    fig_caption: yes
+    pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'  
 keywords: "Photosystem II, Polar Phytoplankton, Low Light Photosynthesis"
 abstract: "Polar phytoplankton achieve slow, but ecologically significant, productivity under exceptionally low light, where the sequential arrivals of photons at Photosystem II complexes are widely spaced in time. We hypothesized that maintaining photosynthesis under such low light involves suppression of energetically wasteful photochemical 'misses' in Photosystem II. Under full darkness Photosystem II relaxes predominantly to the S1 oxidation state of the oxygen evolving complex.  After such dark relaxation we applied series of single turnover, saturating, flashes to advance Photosystem II through sequential photochemical charge separations, progressively oxidizing the oxygen evolving complex through sequential increments through the S-States, resulting in four-step changes in Photosystem II chlorophyll fluorescence yield. We tracked these oscillations in chlorophyll fluorescence to measure the persistence of synchronized S-States across the Photosystem II populations in diatoms and green algae, in response to changing measurement temperatures and a range of extremely low light, which we emulated by increasing the spacing between photon deliveries. Prolonged synchronous S-State cycling indicates fewer desynchronizations from wasteful photochemical misses and, thus, potentially more efficient photosynthetic energy conversion under low light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa, even under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton can suppress energetically wasteful photochemical misses under low temperature, to help sustain photosynthesis even under extremely low light. Therefore ambient temperature interacts with the lower-light limitation on photosynthesis."
 bibliography: [LowLightPhotosynthesis.bib, packages.bib]
@@ -360,10 +360,19 @@ Predictions from generalized additive modelling were generated for the damping o
 Similarly the GAM outputs varied  among the green algae tested (Table \@ref(tab:gammodeltemp)). The polar, saline strains *Chlamydomonas* ICEMDV, *Chlamydomonas malina* and *Chlamydomonas priscui* showed GAM model predictions of maximum damping indices of ~ 10-11 flashes, centred at lower temperatures  but extending over a wide range of effective light levels
 (Fig \@ref(fig:greensgamtemp)). The polar freshwater **Chlamydomonas klinobasis* also showed maximum damping indices at lower temperatures, across a range of effective light levels.  Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *Chlamydomonas klinobasis* did not generate a statistically significant GAM model, consistent with limited evidence for periodic oscillations from *Chlamydomonas klinobasis*.
 
+
+
+
 ```{r gammodeltemp, fig.cap = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of SState induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^).", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
+
 GAMStats
+
+# knitr::kable(GAMStats,
+#   caption = "Summary statistics by strain."
+# )
+
 ```
 
 
