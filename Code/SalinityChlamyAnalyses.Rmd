@@ -117,8 +117,10 @@ ChlamyFull_aovinteract <- Chlamy_damping |>
   mutate(Full_aovinteract_Param = map(Full_aovinteract, tidy)) |>
   unnest(Full_aovinteract_Param, names_sep = "_") |>
   filter(Full_aovinteract_Param_p.value <= 0.05) |>
-  select(-c(data, Full_aovinteract))
-
+  select(-c(data, Full_aovinteract)) |>
+  rename_with(~str_remove(., "Full_aovinteract_Param_"))
+  
+kable(ChlamyStrains_aovinteract)
 
 saveRDS(ChlamyFull_aovinteract, file = file.path(DataOut, "ChlamyFull_aovinteract.Rds")
         )
@@ -135,7 +137,8 @@ ChlamyStrains_aovinteract <-  Chlamy_damping |>
   mutate(Strains_aovinteract_Param = map(Strains_aovinteract, tidy)) |>
   unnest(Strains_aovinteract_Param, names_sep = "_") |>
   filter(Strains_aovinteract_Param_p.value <= 0.05) |>
-  select(-c(data, Strains_aovinteract ))
+  select(-c(data, Strains_aovinteract))  |>
+  rename_with(~str_remove(., "Strains_aovinteract_Param_"))
 
 kable(ChlamyStrains_aovinteract)
 
