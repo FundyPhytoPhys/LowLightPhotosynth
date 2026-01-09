@@ -488,15 +488,22 @@ DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIn
 ```
 
 
-```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the measurement temperature (°C)  and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE, warnings = FALSE, comment = NA, results='asis'}
 
-purrr::iwalk(
-  DampingIndex_Gam$GamModel,
-  ~ {
-    cat("\n\n### GAM diagnostics:", .y, "\n\n")
+
+DampingIndex_Gam$GamModel |>
+  rlang::set_names(
+    paste0(
+      "*", DampingIndex_Gam$Strain, "*",
+      ", GrowthTemp (°C): ",
+      DampingIndex_Gam$GrowthTemp_C
+    )
+  ) |>
+  purrr::iwalk(~ {
+    cat("\n\n**Strain:** ", .y, "°C", sep = "")
     mgcv::gam.check(.x)
-  }
-)
+  })
+
 
 ```
 
