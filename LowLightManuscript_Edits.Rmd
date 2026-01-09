@@ -236,7 +236,8 @@ TaxaCultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
  if (knitr::is_html_output()) {
   knitr::kable(TaxaCultures,
     caption ="Study taxa and culture growth conditions.",
-    col.names = c("Taxa", "Lineage", "Origin", "Growth °C", "NaCl (mM)", "NaCl (opt)", "PAR (µE)", "Photoperiod (h)", "Media")
+    col.names = c("Taxa", "Lineage", "Origin", "Growth °C", "NaCl (mM)", "NaCl (opt)", "PAR (µE)", "Photoperiod (h)", "Media"),
+    digits = 0
     ) |>
     kableExtra::column_spec(1, italic = TRUE) |>
     kableExtra::kable_classic()
@@ -244,7 +245,8 @@ TaxaCultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
    knitr::kable(TaxaCultures,
     format = "pipe",
     caption ="Study taxa and culture growth conditions.",
-    col.names = c("Taxa", "Lineage", "Origin", "Growth °C", "NaCl (mM)", "NaCl (opt)", "PAR (µE)", "Photoperiod (h)", "Media")
+    col.names = c("Taxa", "Lineage", "Origin", "Growth °C", "NaCl (mM)", "NaCl (opt)", "PAR (µE)", "Photoperiod (h)", "Media"),
+    digits = 0
    )
   }
 ```
@@ -383,7 +385,9 @@ The *Chlamydomonas* strains we used can survive under a range of salinities. Fur
 
 ChlamyFull_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "ChlamyFull_aovinteract.Rds"))
  
- knitr::kable(ChlamyFull_aovinteract,  caption = "Analyses of Variation of damping indices testing effects of *Chlamydomonas* taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.")
+ knitr::kable(ChlamyFull_aovinteract,  caption = "Analyses of Variation of damping indices testing effects of *Chlamydomonas* taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.",
+    digits = c(0,0,0,0,1,2)
+ )
 
 ```
 
@@ -399,7 +403,9 @@ We then ran the ANOVA for each taxa separately (Table \@ref(tab:chlamystrainsaov
 ChlamyStrains_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "ChlamyStrains_aovinteract.Rds"))
 
  knitr::kable(ChlamyStrains_aovinteract,
-  caption = "Analyses of Variation for each *Chlamydomonas* species testing effects upon damping indices of effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.")
+  caption = "Analyses of Variation for each *Chlamydomonas* species testing effects upon damping indices of effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.",
+    digits = c(0,0,0,0,0,1,2)
+  )
 
 
 ```
@@ -447,7 +453,8 @@ FluorMeas <- rbind(ChlamyMeasurements, TakuvikSackvilleMeasurements)
 if (knitr::is_html_output()) {
   kable(FluorMeas,
         caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
-        col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"  )
+        col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"),
+        digits = c(1, 0, 0, 2, 0, 0)
         ) |>
   kableExtra::column_spec(1, italic = TRUE) |>
   kableExtra::kable_classic()
@@ -455,15 +462,11 @@ if (knitr::is_html_output()) {
   kable(FluorMeas,
         format = "pipe",
         caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
-   col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"  )
+   col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"),
+        digits = c(1, 0, 0, 2, 0, 0)
         )
 }
 ```
-
-```{r load_DampingIndex_GAM, include = FALSE}
-DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIndex_Gam.RDS"))
-```
-
 
 ```{r gammodeltemp, echo = FALSE}
 
@@ -471,9 +474,15 @@ GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
 
 
 knitr::kable(GAMStats,
-  caption = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of SState induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^)."
+  caption = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of SState induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^).",
+    digits = c(0,0,2,2,2,2)
 )
 
+```
+
+
+```{r load_DampingIndex_GAM, include = FALSE}
+DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIndex_Gam.RDS"))
 ```
 
 
