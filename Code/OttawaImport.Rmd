@@ -220,12 +220,15 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
 #normalize values to final stretch of 10 values from 'randomized' PSII pool, done after cleaning to ensure the last 10 values are correct 
 SolFitsTrim2 <- SolFitsTrim2 %>%
   group_by(Filename) %>%
-  mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
-         Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
-         Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
-         FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
+  mutate(Sigmean = mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
+         Fomean = mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
+         Fmmean = mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
+         FvFmmean = (Fmmean - Fomean)/Fmmean,
+         Sigrunnorm =  Sig/Sigmean,
+         Forunnorm = Fo/Fomean,
+         Fmrunnorm = Fm/Fmmean,
+         FvFmrunnorm = FvFm/FvFmmean) %>%
   ungroup()
-
 
 # Add columns for growth temperature and difference between measurement & growth temps
 SolFitsTrim2 <- SolFitsTrim2 %>%
