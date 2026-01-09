@@ -310,7 +310,7 @@ Analyses of Variance (ANOVA) were run using the aov function [@rcoreteamLanguage
 
 ## Single Turnover Variable Chlorophyll Fluorescence {.unnumbered}
 
-Exposing phytoplankton cultures to a series of 20-32 successive single turnover, saturating flashes produced oscillations in the maximum quantum yield of photochemistry of PSII, as estimated through the secondary chlorophyll fluorescence parameter F~V~/F~M~. Initially, the majority of the dark-adapted population of PSII is at S1, with a smaller fraction at S0 [@gatesRealtimeKineticsLight2020; @dewijnSstateDependenceMiss2002]. As shown in representative data from polar *Chlamydomonas priscui* (Figures \@ref(fig:reposc),  \@ref(fig:reprecon)), grown at optimal salinity,  the time series of F~V~/F~M~ over successive flashes reveals consistent variations in fluorescence yield as the predominant S-States, with different yields for ChlF, follow each other across the PSII within the population. The amplitudes of the ChlF oscillations, however, decline progressively over successive flashes.  The persistence of oscillations decreases with wider spacing between sequential flashes, equivalent to decreasing effective light levels, and at higher measurement temperatures.  The full set of S-State time courses captured across taxa and growth salinities are in Supplemental Data. 
+Exposing phytoplankton cultures to a series of 20-32 successive single turnover, saturating flashes produced oscillations in the maximum quantum yield of photochemistry of PSII, as estimated through the secondary chlorophyll fluorescence parameter F~V~/F~M~, normalized to 1 for each run by dividing by the averaged value for each measurement run, after oscillations damped out (Table \@ref(tab:fluormeas)). Initially, the majority of the dark-adapted population of PSII is at S1, with a smaller fraction at S0 [@gatesRealtimeKineticsLight2020; @dewijnSstateDependenceMiss2002]. As shown in representative data from polar *Chlamydomonas priscui* (Figures \@ref(fig:reposc),  \@ref(fig:reprecon)), grown at optimal salinity,  the time series of F~V~/F~M~ over successive flashes reveals consistent variations in fluorescence yield as the predominant S-States, with different yields for ChlF, follow each other across the PSII within the population. The amplitudes of the ChlF oscillations, however, decline progressively over successive flashes.  The persistence of oscillations decreases with wider spacing between sequential flashes, equivalent to decreasing effective light levels, and at higher measurement temperatures.  The full set of S-State time courses captured across taxa and growth salinities are in Supplemental Data. 
 
 The conversions of flash spacing to equivalent effective light levels gave similar ranges of effective light levels applied to each strain (Table \@ref(tab:fluormeas)). For comparison, full sunlight at the sea surface is ~ 2000 µmol photons m^-2^s^-1^, while the threshold for the bottom of the photic zone supporting photosynthetic productivity in the oceans is conventionally defined as ~ 20 µmol photons m^-2^s^-1^ [@ravenPutOutLight2000]. Therefore, our measurement light ranges are ~ 5 orders of magnitude lower than full sunlight, and ~ 2-3 orders of magnitude below the traditional minimum photic zone threshold, but nevertheless span light ranges found to support phytoplankton productivity in field studies [@hanckeExtremeLowLight2018; @randelhoffArcticMidwinterPhytoplankton2020; @hoppePhotosyntheticLightRequirement2024].
 
@@ -339,7 +339,7 @@ knitr::include_graphics(file.path("Figures","Creinhardtii_waveletpower.png"))
 Predictions from generalized additive modelling were generated for the damping of S-State-induced chlorophyll fluorescence oscillations, as predicted by the tensor product smooth of the measurement temperature (°C) and the equivalent effective light level (µmol photons m^-2^s^-1^) set by flash spacing, for each strain; Table \@ref(tab:fluormeas); Table \@ref(tab:gammodeltemp).  All of the model fits explained over 50% of the variation in the response variable, damping index, except the GAM fits for *C. euryale*, which failed to fit. Both diatom taxa exhibited the longest predicted periodic oscillations in ChlF at higher effective light levels and lower measurement temperatures. Notably, the polar *Fragilariopsis cylindrus* sustained cycling longer than its temperate counterpart, *Thalassiosira pseudonana*, under comparable conditions. This disparity was particularly prevalent at measurements taken above the growth temperature and when longer spacing between flashes produced lower effective light levels (Fig \@ref(fig:diatomsgamtemp)), where *Thalassiosira pseudonana* cultures did not retain the significant 4-step oscillation in ChlF indicative of synchronized S-State cycling. 
 
 Similarly, the GAM outputs varied among the green algae tested (Table \@ref(tab:gammodeltemp)). The polar, saline strains *Chlamydomonas* ICE-MDV, *Chlamydomonas malina* and *Chlamydomonas priscui* showed GAM model predictions of maximum damping indices of ~ 10-11 flashes, centred at lower measurement temperatures  but extending over a wide range of effective light levels
-(Fig \@ref(fig:greensgamtemp)). The polar freshwater *Chlamydomonas klinobasis* also showed maximum damping indices at lower measurement temperatures, across a range of effective light levels.  Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *Chlamydomonas euryale* did not generate a statistically significant GAM model, consistent with limited evidence for periodic oscillations from *Chlamydomonas euryale*.
+(Fig \@ref(fig:greensgamtemp)). The polar freshwater *Chlamydomonas klinobasis* also showed maximum damping indices at lower measurement temperatures, across a range of effective light levels.  Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *Chlamydomonas euryale* did not generate a statistically significant GAM model, consistent with limited evidence for periodic oscillations from *Chlamydomonas euryale*, which, also showed F~V~F~M~ somewhat lower than other *Chlamydomonas* (Table \@ref(tab:fluormeas)).
 
 
 ```{r diatomsgamtemp, fig.cap = "GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and σ~PSII~). Dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature axis scalings are comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
@@ -410,11 +410,49 @@ Understanding and detecting mechanisms enabling polar phytoplankton to sustain s
 
 # Supporting information {.unnumbered}
 
-```{r fluormeas}
+```{r fvfmsigmadata}
+ChlamyFunction <- readRDS(file = file.path("Data", "CleanData", "Low_SolFitsChlamyMeta.Rds")) |>
+  group_by(Filename) |>
+  slice_head(n = 1) |>
+  select(-c(Source.DataFile,Time__mSec, ChiSq, QARredMax, Sig, Fo, Fm, FvFm, Etime_s, Flashnumber, p, Tau1QA, Alp1QA, SState, Sigrunnorm))
+
+ChlorellaFunction <- readRDS(file = file.path("Data", "CleanData", "Low_Chlorella_vulgaris_SolFitsTrim.Rds"))  |>
+  group_by(Filename) |>
+  slice_head(n = 1) |>
+  select(-c(Source.DataFile,Time__mSec, ChiSq, QARredMax, Sig, Fo, Fm, FvFm, Etime_s, Flashnumber,SState, Sigrunnorm)) |>
+  mutate(Strain = "Chlorella_vulgaris") |>
+   rename(LightLevel_ue = Light_Level)
+
+ThalassiosiraFunction <- readRDS(file = file.path("Data", "CleanData", "Low_Thalassiosira_pseudonana_SolFitsTrim.Rds")) |>
+  group_by(Filename) |>
+  slice_head(n = 1) |>
+  select(-c(Source.DataFile,Time__mSec, ChiSq, QARredMax, Sig, Fo, Fm, FvFm, Etime_s, Flashnumber, SState, Sigrunnorm)) |>
+  mutate(Strain = "Thalassiosira_pseudonana") |>
+   rename(LightLevel_ue = Light_Level)
+
+FragilariopsisFunction <- readRDS(file = file.path("Data", "CleanData", "Low_Fragilariopsis_cylindrus_SolFitsTrim.Rds"))  |>
+  group_by(Filename) |>
+  slice_head(n = 1) |>
+  select(-c(Source.DataFile,Time__mSec, ChiSq, QARredMax, Sig, Fo, Fm, FvFm, Etime_s, Flashnumber, SState, Sigrunnorm)) |>
+  mutate(Strain = "Fragilariopsis_cylindrus") |>
+   rename(LightLevel_ue = Light_Level)
+
+TakuvikSackvilleFunction <- rbind(FragilariopsisFunction, ThalassiosiraFunction, ChlorellaFunction) |>
+  select(-c(LightLevel_ue))
+
+
+```
+
+
+```{r fluormeas, echo = FALSE}
 ChlamyMeasurements <- readRDS(file = file.path("Data", "ProcessedData", "Low_Chlamy_dampingYear.Rds")) |>
   select(-c(DampingIndex, TempDiff_C, Year, NaCl_opt)) |>
   relocate(GrowthTemp_C, .after = LightLevel_ue)
 
+ChlamyMeasurements <- left_join(ChlamyMeasurements, ChlamyFunction, by = join_by(Strain, PulseSpace_s, Temp_C, LightLevel_ue, GrowthTemp_C, NaCl_mM)) |>
+  select(c(Strain, PulseSpace_s, Temp_C, LightLevel_ue, GrowthTemp_C, NaCl_mM, Sigmean, FvFmmean))
+         
+         
 TakuvikSackvilleMeasurements <- readRDS(file = file.path("Data", "ProcessedData", "Low_SState_Damping.Rds")) |>
   select(-c(DampingIndex, TempDiff_C)) |>
   filter(!grepl("Chlamydomonas", Strain)) |>
@@ -424,16 +462,19 @@ TakuvikSackvilleMeasurements <- readRDS(file = file.path("Data", "ProcessedData"
   ) |>
   rename(LightLevel_ue = Light_Level,
          NaCl_mM = NaCl_mm)
-         
+
+TakuvikSackvilleMeasurements <-  
+  left_join(TakuvikSackvilleMeasurements, TakuvikSackvilleFunction, by = join_by(Strain, PulseSpace_s, Temp_C, GrowthTemp_C)) |>
+  select(c(Strain,PulseSpace_s, Temp_C, LightLevel_ue, GrowthTemp_C, NaCl_mM, Sigmean, FvFmmean))
+
 
 FluorMeas <- rbind(ChlamyMeasurements, TakuvikSackvilleMeasurements)
 
-# FluorMeasures |>
 if (knitr::is_html_output()) {
   kable(FluorMeas,
         caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
-        col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"),
-        digits = c(1, 0, 0, 2, 0, 0)
+        col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
+        digits = c(1, 0, 0, 2, 0, 0, 2, 2)
         ) |>
   kableExtra::column_spec(1, italic = TRUE) |>
   kableExtra::kable_classic()
@@ -441,8 +482,8 @@ if (knitr::is_html_output()) {
   kable(FluorMeas,
         format = "pipe",
         caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
-   col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)"),
-        digits = c(1, 0, 0, 2, 0, 0)
+  col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
+        digits = c(1, 0, 0, 2, 0, 0, 2, 2)
         )
 }
 ```
