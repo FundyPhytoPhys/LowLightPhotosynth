@@ -204,6 +204,8 @@ SolFitsTrimExtra2 <- SolFitsTrimExtra |>
 
 NormStartFlash = 12
 
+#Ottawa_2025 did not run all captures for 32 flashes, so using last 10 points average may be problematic.  Normalize to flashes from 9 to end of flash train.
+
 SolFitsTrim2 <- SolFitsTrim2 %>%
   mutate(SState = case_when(Flashnumber %% 4 == 1 ~ 1,
                     Flashnumber %% 4 == 2 ~ 2,
@@ -215,36 +217,36 @@ SolFitsTrimExtra2 <- SolFitsTrimExtra2 %>%
                     Flashnumber %% 4 == 2 ~ 2,
                     Flashnumber %% 4 == 3 ~ 3, 
                     Flashnumber %% 4 == 0 ~ 4))
-#normalize values to final stretch of 10 values from 'randomized' PSII pool, done after cleaning to ensure the last 10 values are correct 
-# SolFitsTrim2 <- SolFitsTrim2 %>%
-#   filter(Filename != "20251121_MaPo2015_28C_4s") |>
-#   group_by(Filename) %>%
-#   mutate(Sigrunnorm =  Sig/mean(Sig[(length(Sig) - 10):length(Sig)], na.rm = TRUE),
-#          Forunnorm = Fo/mean(Fo[(length(Fo) - 10):length(Fo)], na.rm = TRUE),
-#          Fmrunnorm = Fm/mean(Fm[(length(Fm) - 10):length(Fm)], na.rm = TRUE),
-#          FvFmrunnorm = FvFm/mean(FvFm[(length(FvFm) - 10):length(FvFm)], na.rm = TRUE)) %>%
-#   ungroup()
 
-#Ottawa_2025 did not run all captures for 32 flashes, so using last 10 points average may be problematic.  Normalize to flashes from 9 to end of flash train.
 
 SolFitsTrim2 <- SolFitsTrim2 %>%
   filter(Filename != "20251121_MaPo2015_28C_4s") |>
   group_by(Filename) %>%
   mutate(FilenameLength = length(Sig),
-         Sigrunnorm =  Sig/mean(Sig[NormStartFlash]:Sig[length(Sig)], na.rm = TRUE),
-         Forunnorm = Fo/mean(Fo[NormStartFlash]:Fo[length(Fo)], na.rm = TRUE),
-         Fmrunnorm = Fm/mean(Fm[NormStartFlash]:Fm[length(Fm)], na.rm = TRUE),
-         FvFmrunnorm = FvFm/mean(FvFm[NormStartFlash]:FvFm[length(FvFm)], na.rm = TRUE)) %>%
-  ungroup()
+         Sigmean = mean(Sig[NormStartFlash]:Sig[length(Sig)], na.rm = TRUE),
+         Fomean = mean(Fo[NormStartFlash]:Fo[length(Fo)], na.rm = TRUE),
+         Fmmean = mean(Fm[NormStartFlash]:Fm[length(Fm)], na.rm = TRUE),
+         FvFmmean = (Fmmean - Fomean)/Fmmean,
+         Sigrunnorm =  Sig/Sigmean,
+         Forunnorm = Fo/Fomean,
+         Fmrunnorm = Fm/Fmmean,
+         FvFmrunnorm = FvFm/FvFmmean
+  ) %>%
+    ungroup()
 
 SolFitsTrimExtra2 <- SolFitsTrimExtra2 %>%
   filter(Filename != "20251121_MaPo2015_28C_4s") |>
-  group_by(Filename) %>%
+   group_by(Filename) %>%
   mutate(FilenameLength = length(Sig),
-         Sigrunnorm =  Sig/mean(Sig[NormStartFlash]:Sig[length(Sig)], na.rm = TRUE),
-         Forunnorm = Fo/mean(Fo[NormStartFlash]:Fo[length(Fo)], na.rm = TRUE),
-         Fmrunnorm = Fm/mean(Fm[NormStartFlash]:Fm[length(Fm)], na.rm = TRUE),
-         FvFmrunnorm = FvFm/mean(FvFm[NormStartFlash]:FvFm[length(FvFm)], na.rm = TRUE)) %>%
+         Sigmean = mean(Sig[NormStartFlash]:Sig[length(Sig)], na.rm = TRUE),
+         Fomean = mean(Fo[NormStartFlash]:Fo[length(Fo)], na.rm = TRUE),
+         Fmmean = mean(Fm[NormStartFlash]:Fm[length(Fm)], na.rm = TRUE),
+         FvFmmean = (Fmmean - Fomean)/Fmmean,
+         Sigrunnorm =  Sig/Sigmean,
+         Forunnorm = Fo/Fomean,
+         Fmrunnorm = Fm/Fmmean,
+         FvFmrunnorm = FvFm/FvFmmean
+  ) %>%
   ungroup()
 
 ```
@@ -480,6 +482,13 @@ RLCFitsTrim |>
   filter(Dark1s == 0) |>
   ggplot() +
   geom_point(aes(x = PAR_ue, y = FvFm)) +
+  facet_grid(rows = vars(Temp_C)) +
+  theme_bw()
+
+RLCFitsTrim |>
+  filter(Dark1s == 0) |>
+  ggplot() +
+  geom_point(aes(x = PAR_ue, y = Tau1QA)) +
   facet_grid(rows = vars(Temp_C)) +
   theme_bw()
 ```
