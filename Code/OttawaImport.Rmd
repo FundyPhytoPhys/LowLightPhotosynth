@@ -244,7 +244,7 @@ SolFitsTrim2 <- SolFitsTrim2 %>%
 
 ### Group by Taxon 
 ```{r}
-SolFitsPriscuii <- SolFitsTrim2 %>%
+SolFitsPriscui <- SolFitsTrim2 %>%
   filter(CultureID %in% c("MaPo1001", "MaPo1004"))
 
 SolFitsICEMDV <- SolFitsTrim2 %>%
@@ -261,7 +261,7 @@ SolFitsReinhardtii <- SolFitsTrim2 %>%
 ### Calculate Light Levels
 ```{r}
 # add column for light level (µmol photons/m2/s)
-SolFitsPriscuii <- conversion(SolFitsPriscuii) 
+SolFitsPriscui <- conversion(SolFitsPriscui) 
 SolFitsICEMDV <- conversion(SolFitsICEMDV) 
 SolFitsMalina <- conversion(SolFitsMalina) 
 SolFitsReinhardtii <- conversion(SolFitsReinhardtii) 
@@ -285,7 +285,7 @@ SolFitsMalina %>%
   theme_bw() +
   theme(legend.position = "none")
 
-SolFitsPriscuii %>%
+SolFitsPriscui %>%
   ggplot()+
   geom_line(aes(x=Flashnumber, y=FvFmrunnorm, colour = as.factor(Filename))) +
   facet_grid(rows = vars(PulseSpace_s), cols = vars(TempDiff_C)) +
@@ -306,7 +306,7 @@ saveRDS(SolFitsICEMDV, file.path(DataOut, paste(Project, "Chlamydomonas", "ICEMD
 
 saveRDS(SolFitsMalina, file.path(DataOut, paste(Project, "Chlamydomonas", "malina", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 
-saveRDS(SolFitsPriscuii, file.path(DataOut, paste(Project, "Chlamydomonas", "priscuii", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
+saveRDS(SolFitsPriscui, file.path(DataOut, paste(Project, "Chlamydomonas", "priscui", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 
 saveRDS(SolFitsReinhardtii, file.path(DataOut, paste(Project, "Chlamydomonas", "reinhardtii", "SolFitsTrim.Rds", sep = "_"), fsep = .Platform$file.sep))
 ```
