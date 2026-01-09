@@ -54,29 +54,6 @@ editor_options:
     wrap: 72
 ---
 
-# To Do {.unnumbered}
-
-## Substantial:
-convert damping index to relative probability of desynchronization?
-
-do math or cite literature to estimate probability of double hits contributing to desynchronization and whether that probability varies with flash spacing or temperature?
-
-process & plot tau data to track how long PSII is closed after flash
-
-## Manu Prep:
-
-Arthur:
-Differences in pigment composition and implications for light absorption in vivo : The green lineage has antenna complexes (LHCs) composed mainly of chlorophyll a and b, while diatoms have FCPs (fucoxanthin-chlorophyll a/c-binding proteins) composed of chlorophyll a and fucoxanthin (Fx). This difference in composition gives diatoms much more efficient blue-green light absorption in the 500-560 nm region (see Oka et al., 2020 for Phaeodactylum, https://doi.org/10.1007/s11120-018-0523-y), compared to the green lineage, where absorption drops dramatically in this region of the spectrum (see Ueno et al., 2019 for Chlamydomonas, https://doi.org/10.1007/s11120-018-0523-y). As you now.  Here, excitation occurs only at 445 nm, which mainly excites chlorophyll a and b in green algae organisms, and also the beginning of the fucoxanthin absorption spectrum in diatoms. However, this does not cover the entire possible absorption spectrum of accessory pigments in vivo. We saw that, for Fragilariopsis acclimatized to low light, chlorophyll a represents only 50% of the total pigment pool, and we observe a slight increase in the fucoxanthin pool compared to chlorophyll a (see figure). Do you think that exciting all pigments (across the entire absorption spectrum of the species) would have an impact on the “dumping index”? In other words, could using excitation at 445 nm alone bias our assessment, particularly in diatoms where accessory pigments (such as fucoxanthin) play a major role in light capture in vivo, or is there actually greater photon capture capacity for diatoms? Perhaps the evaluators could be asked to discuss this.
-
-Question of curiosity/opinion: The putative role of cyclic electron flux : we know that there are cyclic electron flows around the PSI mediated by the PGR5/PGRL1 pair and type I NADH dehydrogenase (NDH) in the green lineage, mainly active under stress conditions for photoprotection and balancing the ATP/NADPH ratio (Croteau et al., 2024; see also Chapter 1, Section 1.4.1). These mechanisms involve the plastoquinone (PQ) pool and remain putative in diatoms, although the PGR5/PGRL1 genes are present in these organisms, and NDH is specifically found in F. cylindrus (absent in Phaeodactylum and Thalassiosira). Furthermore, it is now established that in the green lineage, a cyclic electron flow may also exist around PSII (Zourmas et al., 2023, https://doi.org/10.1007/s11120-023-00997-0 ; Ananyev et al., 2017, https://doi.org/10.1016/j.bbabio.2017.07.001). In their study on Chlorella ohadii, Ananyev et al. (2017) associate the loss of Fv/Fm oscillations following more widely spaced flashes with the establishment of a cyclic electron flow around PSII (see their Figure 7 and paragraph 4.3). In their section 4.5 entitled “The mechanism(s) of PSII-CEF,” the authors seem to directly link the loss of the fluorescence oscillation signal with the induction of the cyclic flow of PSII. They write: "It is likely that CEF is an energy-conservative pathway generating proton motive force (pmf) from electrons in the reduced PQH₂ pool that equilibrate with QB. This mechanism for CEF would achieve two goals: 1) lower the redox poise, PQH₂/PQ, of the pool, thus lowering potentially dangerous levels of upstream redox-active molecules, preventing generation of reactive oxygen species or singlet oxygen (Scheme 1), and 2) conserve photonic energy by generating pmf" (I recommend reading the rest of this section as it raises some excellent questions). This mechanism is described for cells in response to high light (HL), but could it also play a role in explaining the faster loss of oscillations observed in temperate taxa (phenotype usually cultivated in HL)? Do you think that cyclic flows around PSI or those of PSII could play a role in QB equilibration?
-
-I wonder to what extent you could cite our upcoming paper on LL and F. cyl (experiments from my master's thesis as a preliminary to DIM). I will submit it as a preprint in a few days. In broad terms:
-- Cell division stops at 0.18 +-0.11 µE 
-- Photosynthesis (raw Pb - 20 minutes of incubation, 14C detectable). In new DIM experiments, I started 24-hour incubations with 14C and I have a detectable signal of net Pb up to 0.03µE. 
-- These two pieces of information point to a decoupling between growth (cell division and photosynthesis.
-
- - Metabolism different from that described by Joli et al., 2024 (hypometabolism). The active central metabolic pathways are the same for dividing cells as for vegetative (non-dividing) cells, but they do not exhibit the same metabolism as cells kept in the dark for 1 month. We also do not observe a decrease in the organic carbon and nitrogen pool even at 0.1µE (unlike in the dark, where there is a 20% decrease after one month), confirming the idea of active photosynthetic activity that supports the cell's minimal needs. 
--Paradoxically, we highlight the induction of strong photoprotection when cells stop dividing (0.1µE). To explain this, I have hypothesized that cells paradoxically find themselves in a state of energy surplus when cell division stops (energy supplied exceeds the energy required for cell maintenance).
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, fig.path = "Figures/")
