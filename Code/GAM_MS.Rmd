@@ -1,9 +1,10 @@
 ---
 title: "GAM and Figures"
 author: "Mireille Savoie, Natasha Ryan"
-output: 
+output:
+  word_document: default
   html_document: default
-editor_options: 
+editor_options:
   chunk_output_type: inline
 ---
 
@@ -185,6 +186,28 @@ purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 # in s(LightLevel_ue, k = 3) , k is too low for F.c, and C.priscui; however, k = 4 returns 'NULL' for all GAMs 
 # in s(CalcSal, k = 3) , k is good
 # in ti(CalcSal, par_ue, k = 3) k is too low for C.priscui; however, k = 4 returns 'NULL' for all GAMs 
+```
+
+```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE, warnings = FALSE, comment = NA, results='asis'}
+
+DampingIndex_Gam <- readRDS(file = file.path("..", "Data", "ProcessedData", "DampingIndex_Gam.RDS"))
+
+
+DampingIndex_Gam$GamModel |>
+  rlang::set_names(
+    paste0(
+      "*", DampingIndex_Gam$Strain, "*",
+      ", GrowthTemp (°C): ",
+      DampingIndex_Gam$GrowthTemp_C
+    )
+  ) |>
+  purrr::iwalk(~ {
+    cat("\n\n**Strain:** ", .y, "°C", sep = "")
+    mgcv::gam.check(.x)
+  })
+
+
+
 ```
 
 
