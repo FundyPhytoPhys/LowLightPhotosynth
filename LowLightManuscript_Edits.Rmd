@@ -472,18 +472,18 @@ FluorMeas <- rbind(ChlamyMeasurements, TakuvikSackvilleMeasurements)
 
 if (knitr::is_html_output()) {
   kable(FluorMeas,
-        caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
-        col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
-        digits = c(1, 0, 0, 2, 0, 0, 2, 2)
+        caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^), mean σ~PSII~ (A^2^) and mean F~V~F~M~ for each measurement",         
+        col.names = c("Taxa", "Flash Spacing (s)", "Measurement Temp (°C)", "Equivalent Light", "Growth Temp (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
+        digits = c(1, 0, 0, 2, 0, 0, 0, 2)
         ) |>
   kableExtra::column_spec(1, italic = TRUE) |>
   kableExtra::kable_classic()
 } else {
   kable(FluorMeas,
         format = "pipe",
-        caption ="Study taxa and single turnover saturating flash measurement conditions, with equivalent effective light levels (µmol photons m^-2^s^-1^).",         
-  col.names = c("Taxa", "Flash Spacings (s)", "Measurement Temperatures (°C)", "Equivalent Light (µE)", "Growth Temperatures (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
-        digits = c(1, 0, 0, 2, 0, 0, 2, 2)
+       caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^), mean σ~PSII~ (A^2^) and mean F~V~F~M~ for each measurement",         
+        col.names = c("Taxa", "Flash Spacing (s)", "Measurement Temp (°C)", "Equivalent Light", "Growth Temp (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
+        digits = c(1, 0, 0, 2, 0, 0, 0, 2)
         )
 }
 ```
