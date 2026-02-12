@@ -17,7 +17,7 @@ GamParaMod : is the response variable input for the GAM. It is assigned at the s
 s(CalcSal) and s(par_ue): main effects
 ti(CalcSal, par_ue, k = 3): Tensor product smooth for modeling interaction between CalcSal and par_ue.
 
-Unlike te(), ti() includes only the interaction term (not the main effects), which is appropriate here because main effects are already modeled separately using s(CalcSal) and s(par_ue).
+Unlike te() (main effects and interactions), ti() includes only the interaction term (not the main effects), which is appropriate here because main effects are already modeled separately using s(CalcSal) and s(par_ue).
 This avoids redundancy and helps reduce overfitting.
 The k parameter limits the flexibility of the interaction term. High k = more flexibility for more complex patterns, low k = simple curves.
 
@@ -53,7 +53,7 @@ sstate_damping_2025 <- readRDS(file = file.path("..", "Data", "ProcessedData", "
    filter(!(Strain == "Chlamydomonas_malina" & NaCl_mM == 70)) %>% 
  mutate(IsOptSalinity = case_when(NaCl_opt == NaCl_mM ~ 1,
                                   TRUE ~ 0)) %>% 
-   select((-c(NaCl_opt, NaCl_mM))) 
+   select((-c(NaCl_mM))) 
 
 glimpse(sstate_damping_2025)
 
@@ -62,12 +62,16 @@ sstate_damping_2023 <- readRDS(file = file.path("..", "Data", "ProcessedData", "
   filter(!grepl("Chlamydomonas", Strain)) %>% 
   mutate(Year = as.character(2023)) %>% 
   rename(LightLevel_ue = 'Light_Level') %>% 
-  mutate(IsOptSalinity = 1)
+  mutate(IsOptSalinity = 1,
+         NaCl_opt = case_when(Strain == "Thalassiosira_pseudonana" ~ 0,
+                              Strain == "Chlorella_vulgaris" ~ 0,
+                              Strain == "Fragilariopsis_cylindrus" ~ 500))
 
 glimpse(sstate_damping_2023)
 
 sstate_damping <- bind_rows (sstate_damping_2023, sstate_damping_2025)%>%
-  mutate(Strain = factor(Strain), 
+  mutate(Strain = factor(Strain),
+         NaCl_opt = round(NaCl_opt, 0),
   ThermalTolerance = case_when(
      Strain %in% c("Fragilariopsis_cylindrus",
                    "Chlamydomonas_ICEMDV",
@@ -136,7 +140,7 @@ summary(PAR_Temp_Model)
 
 DampingIndex_Gam <- sstate_damping %>% 
    ungroup() %>%
-  group_by(Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
+  group_by(Strain, GrowthTemp_C, NaCl_opt, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
   nest() %>%
   mutate(
     GamModel = map(data, ~possibGAM(!!sym(GamParaMod) ~  s(LightLevel_ue, k = 3) + s(Temp_C, k = 3) + ti(Temp_C, LightLevel_ue, k = 3), data = .x,
@@ -147,10 +151,20 @@ DampingIndex_Gam <- sstate_damping %>%
     augmented = map(GamModel, ~augment(.x)),
     glance = map(GamModel, ~glance(.x))
   ) %>% 
-  ungroup()
+  ungroup() %>% 
+  mutate(StrainLabel = case_when(
+    Strain == "Chlamydomonas_ICEMDV" ~ "C. ICEMDV", 
+    Strain == "Chlamydomonas_malina" ~"C. malina",
+    Strain == "Chlamydomonas_priscui" ~ "C. priscui",
+    Strain == "Chlamydomonas_reinhardtii" ~ "C. reinhardtii",
+    Strain == "Chlorella_vulgaris" ~ "C. vulgaris",
+    Strain == "Fragilariopsis_cylindrus" ~ "F. cylindrus", 
+    Strain == "Thalassiosira_pseudonana" ~ "T. pseudonana",
+    Strain == "Chlamydomonas_klinobasis" ~ "C. klinobasis",            
+    Strain == "Chlamydomonas_euryale" ~ "C. euryale"))
 
 DampingIndex_Pred <- DampingIndex_Gam %>%
-  dplyr::select(predicted, Strain, GrowthTemp_C, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
+  dplyr::select(predicted, Strain, GrowthTemp_C, NaCl_opt, ThermalTolerance, Type, l.strain, l.temp, FacetLabel_temp) %>%
   dplyr::filter(predicted != "NULL") %>%
   rowwise() %>%
   mutate(db = list(cbind(predicted, PAR_Temp_Model))) %>%
@@ -186,6 +200,11 @@ purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 # in s(LightLevel_ue, k = 3) , k is too low for F.c, and C.priscui; however, k = 4 returns 'NULL' for all GAMs 
 # in s(CalcSal, k = 3) , k is good
 # in ti(CalcSal, par_ue, k = 3) k is too low for C.priscui; however, k = 4 returns 'NULL' for all GAMs 
+
+
+# explanation for manuscript:
+
+# Basis dimensions (k) were intentionally kept low to ensure stable model fitting across all strains, given limited sample sizes within some strain subsets. Although gam.check() suggested that higher basis dimensions may be warranted for some smooth terms in some strains (low k-index and significant p.values), increasing k resulted in non-convergence or unstable fits for the majority of strains. Therefore, low k values were used to prioritize model stability and comparability among strains.
 ```
 
 ```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE, warnings = FALSE, comment = NA, results='asis'}
@@ -196,13 +215,15 @@ DampingIndex_Gam <- readRDS(file = file.path("..", "Data", "ProcessedData", "Dam
 DampingIndex_Gam$GamModel |>
   rlang::set_names(
     paste0(
-      "*", DampingIndex_Gam$Strain, "*",
-      ", GrowthTemp (°C): ",
-      DampingIndex_Gam$GrowthTemp_C
+      "*", DampingIndex_Gam$StrainLabel, "*",
+      ", Growth Temperature ",
+      DampingIndex_Gam$GrowthTemp_C, " °C",
+      ", Salinity ",
+      DampingIndex_Gam$NaCl_opt, " mM"
     )
   ) |>
   purrr::iwalk(~ {
-    cat("\n\n**Strain:** ", .y, "°C", sep = "")
+    cat("\n\n**Strain:** ", .y, sep = "")
     mgcv::gam.check(.x)
   })
 
