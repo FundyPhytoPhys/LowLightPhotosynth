@@ -519,6 +519,7 @@ DampingIndex_Gam$GamModel |>
   purrr::iwalk(~ {
     cat("\n\n**Strain:** ", .y, sep = "")
     mgcv::gam.check(.x)
+    cat("\n\\pagebreak\n") # add a pagebreak between strain outputs when knit to WORD
   })
 
 
