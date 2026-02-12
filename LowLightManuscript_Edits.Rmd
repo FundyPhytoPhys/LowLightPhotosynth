@@ -494,7 +494,6 @@ if (knitr::is_html_output()) {
 
 GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
 
-
 knitr::kable(GAMStats,
   caption = "Summary statistics by phytoplankton strain of Generalized Additive Models (GAM) using the restricted maximum likelihood (REML) method to model the response of the damping of S-State induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^). GAM were fit at the optimal growth salinity for each strain, and separate models were fit for strains with multiple growth temperatures. The GAM terms indicate main effect smooth (s) and interaction-only tensor product (ti); the edf (effective degrees of freedom) of the smooth;  ref.df (reference degrees of freedom); statistic and p.value",
     digits = c(0,0,2,2,2,2))
