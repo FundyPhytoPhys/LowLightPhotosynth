@@ -24,10 +24,10 @@ author:
     institute: mta     
     email: dcampbel@mta.ca     
 institute:  
+- ottawa: 'Department of Biology, University of Ottawa, Ottawa, ON, Canada'
 - mta: 'Department of Biology, Mount Allison University, Sackville NB, Canada, E4L1G7'
 - takuvik: 'Takuvik Joint International Laboratory, Université Laval (Canada) - CNRS (France)'
-- ottawa: 'Department of Biology, University of Ottawa, Ottawa, ON, Canada'
-- ens: 'Institut de Biologie de lEcole Normale Superieure (IBENS), CNRS, INSERM, PSL Universite Paris, 75005, Paris, France'
+- ens: 'Institut de Biologie de l Ecole Normale Superieure (IBENS), CNRS, INSERM, PSL Universite Paris, 75005, Paris, France'
 date: "`r Sys.Date()`"
 output:
   bookdown::word_document2:
@@ -193,8 +193,8 @@ SackvilleMedia <- c(rep("F2",2), "BG11")
 
 SackvilleCultures <- tibble(SackvilleTaxa, SackvilleLineage, SackvilleOrigin, SackvilleGrowthTemp_C, SackvilleGrowthPAR, SackvillePhotoperiod, SackvilleMedia) |>
   rename_with(~str_remove(., "Sackville")) |>
-  mutate(NaCl_mM = 500, 500, 0.43, 
-         NaCl_opt = 500, 0.43, 0.43) |> 
+  mutate(NaCl_mM = c(500, 500, 0.43), 
+         NaCl_opt = c(500, 0.43, 0.43)) |> 
   summarize(.by = c(Taxa, Lineage, Origin, GrowthPAR, Photoperiod, GrowthTemp_C, NaCl_mM, NaCl_opt, Media))
 
 TaxaCultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
@@ -212,7 +212,7 @@ TaxaCultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
 
  if (knitr::is_html_output()) {
   knitr::kable(TaxaCultures,
-    caption ="Study taxa and culture growth conditions.",
+    caption ="Study taxa and culture growth conditions, including media salinity (NaCl (mM)); approximate optimal salinity for the taxa (NaCl (opt);  Photosynthetically Active Radiation for growth, µmol photons m-2 s-1,  (PAR (uE)); and growth media.",
     col.names = c("Taxa", "Lineage", "Origin", "Growth °C", "NaCl (mM)", "NaCl (opt)", "PAR (µE)", "Photoperiod (h)", "Media"),
     digits = 0
     ) |>
@@ -221,7 +221,7 @@ TaxaCultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
  } else {
    knitr::kable(TaxaCultures,
     format = "pipe",
-    caption ="Study taxa and culture growth conditions.",
+    caption ="Study taxa and culture growth conditions, including media salinity (NaCl (mM)); approximate optimal salinity for the taxa (NaCl (opt);  Photosynthetically Active Radiation for growth, µmol photons m-2 s-1,  (PAR (uE)); and growth media.",
     col.names = c("Taxa", "Lineage", "Origin", "Growth °C", "NaCl (mM)", "NaCl (opt)", "PAR (µE)", "Photoperiod (h)", "Media"),
     digits = 0
    )
@@ -255,7 +255,7 @@ We kept the single turnover excitation flash train as short as feasible, to avoi
 As sequential flashes are applied to the culture, each individual PSII is ideally driven through the four S-States (Fig \@ref(fig:reposc)) [@dauTimeresolvedXraySpectroscopy2007]. As the OEC of PSII moves between S-States, it alters the system kinetics and free energy [@vinyardPhotosystemIIReaction2013], so the yield of ChlF varies between S-States [@gatesRealtimeKineticsLight2020], and we can use ChlF to monitor S-State progression, until the PSII population desynchronizes to a distribution of S-States with an averaged ChlF. 
 
 
-```{r reposc, fig.cap = "**Representative oscillations of the maximum quantum yield of PSII photochemistry over a Series of Single Turnover Saturating Flashes applied to *Chlamydomonas priscui***. F~V~/F~M~ was normalized to the average value over the series, measured at 4 or 12 °C, with spacing of 1, 4, or 16 s between sequential flashes, excitation rates equivalent to irradiance with 0.708, 0.177 or 0.044 µmol photons m^-2^ s^-1^. Symbol colour indicates inferred majority S-State,  based upon relaxation to S1 during the dark incubation preceding the flash sequence.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r reposc, fig.cap = "**Representative oscillations of normalized maximum quantum yield of PSII photochemistry (F~V~/F~M~) over a Series of Single Turnover Saturating Flashes applied to Antarctic green algae *Chlamydomonas priscui***. F~V~/F~M~ was normalized to the average value over the series, measured at 4 or 12 °C, with spacings of 1, 4, or 16 s between sequential flashes, equivalent to photon delivery rates to PSII achieved under effective light levels from 0.708, 0.177 or 0.044 µmol photons m^-2^ s^-1^, estimated from flash spacing (s) and effective absorption cross section of photosystem II, σ~PSII~ (A^2^). Symbol colour indicates the inferred majority S-State,  based upon assumption of relaxation to S1 during the dark incubation preceding the flash sequence.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path( "Figures","Rep_osc.png"))
 ```
@@ -286,7 +286,7 @@ Data was processed using R version 4.3.2 [@rcoreteamLanguageEnvironmentStatistic
 The fluorescence data yields a time series of F~V~/F~M~ over 32 sequentially applied flashes,  for each flash spacing, and each measurement temperature, for each culture sample. The F~V~/F~M~ time series were analyzed for each combination of strain, growth conditions, measurement temperature, and flash spacing, using wavelet transformations [@theisSpectralTransformations2010], as exemplified in (Fig \@ref(fig:reprecon)). Unlike traditional methods, wavelet analysis does not assume that the statistical properties of a time series are constant. Instead, wavelet transformations locally decompose the signal across different time scales and estimate spectral characteristics as a function of time [@cazellesWaveletAnalysisEcological2008]. By examining the frequency and wavelet power spectra, we can uncover the dominant patterns in the data [@theisSpectralTransformations2010]. 
 
 
-```{r reprecon, fig.cap = "Representative wavelet transformations of Antarctic *Chlamydomonas priscui* variable chlorophyll fluorescence (F~V~/F~M~) measured at 4, 8 or 12°C, over 32 consecutive single turnover saturating flashes, applied at spacings of 1, 2, 4, 8, 16 s, equivalent to photon delivery rates to PSII achieved under effective light levels from 0.708 down to 0.045 µmol photons m^-2^ s^-1^.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r reprecon, fig.cap = "Representative wavelet transformations of normalized maximum quantum yield of PSII photochemistry (F~V~/F~M~) over a Series of Single Turnover Saturating Flashes applied to Antarctic green algae *Chlamydomonas priscui***. F~V~/F~M~ was normalized to the average value over the series, measured at 4, 8 or 12°C, over 32 consecutive single turnover saturating flashes, applied at spacings of 1, 2, 4, 8, 16 s, equivalent to photon delivery rates to PSII achieved under effective light levels from 0.708 down to 0.044 µmol photons m^-2^ s^-1^, estimated from flash spacing (s) and effective absorption cross section of photosystem II, σ~PSII~ (A^2^).", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","Rep_recon.png"))
 ```
@@ -320,16 +320,17 @@ The conversions of flash spacing to equivalent effective light levels gave simil
 Wavelet transformations were computed for the fluorescence time series of each unique combination of measurement temperature, flash spacing (and thus equivalent effective light), growth temperature, and species or strain. Assessing the wavelet power of a 4-step periodicity across conditions, key trends emerge. As exemplified by the Antarctic green alga *Chlamydomonas priscui* (Figure \@ref(fig:cpriscuiwaveletpower)), the average wavelet power declines with increasing flash spacings, equivalent to decreasing effective light levels, and also declines with increasing measurement temperatures. 
 
 
-```{r cpriscuiwaveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry Antarctic green algae *Chlamydomonas priscui*, grown at 4°C and 500 mM NaCl, and measured across a range of measurement temperatures and flash spacings, with the equivalent effective light levels. Regions where wavelet power reached statistical significance (p < 0.05) are shaded in blue.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r cpriscuiwaveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry in the Antarctic green algae *Chlamydomonas priscui*, grown at 4°C and 500 mM NaCl, and measured across a range of measurement temperatures and flash spacings, with the equivalent effective light levels (μmol photons m^-2^ s^-1^), estimated from flash spacing (s) and effective absorption cross section of photosystem II, σ~PSII (A^2^). Regions where wavelet power reached statistical significance (p < 0.05) are shaded in blue.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","Cpriscui_waveletpower.png"))
 ```
 
 In contrast, in the temperate green algae *Chlamydomonas reinhardtii* (Figure \@ref(fig:creinhardtiiiwaveletpower)) both grown, and measured, at warmer temperatures, the wavelet power is consistently lower, showing a weaker 4-step periodicity of ChlF in the temperate taxa, which only reaches statistical significance at shorter flash spacings, with higher equivalent effective light levels. Note that at a common measurement temperature of 12°C *Chlamydomonas reinhardtii* and *Chlamydomonas priscuii* show similar wavelet power patterns.
 
-```{r creinhardtiiiwaveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry in the temperate green algae *Chlamydomonas reinhardtii*, grown at 24°C and 0.43 mM NaCl, and measured across a range of measurement temperatures and flash spacings, with the equivalent effective light levels. Regions where wavelet power reached statistical significance (p < 0.05) shaded in blue.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r creinhardtiiiwaveletpower, fig.cap = "Sample plot of wavelet powers by period of oscillations in the maximum quantum yield of photochemistry in the temperate green algae *Chlamydomonas reinhardtii*, grown at 24°C and 0.43 mM NaCl, and measured across a range of measurement temperatures and flash spacings, with the equivalent effective light levels (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II, σ~PSII~ (A^2^). Regions where wavelet power reached statistical significance (p < 0.05) shaded in blue.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","Creinhardtii_waveletpower.png"))
+
 ```
 
 
@@ -342,29 +343,27 @@ Similarly, the GAM outputs varied among the green algae tested (Table \@ref(tab:
 (Fig \@ref(fig:greensgamtemp)). The polar freshwater *Chlamydomonas klinobasis* also showed maximum damping indices at lower measurement temperatures, across a range of effective light levels.  Further, much like the temperate diatoms, the freshwater temperate algae *Chlamydomonas reinhardtii* and *Chlorella vulgaris* did not exhibit significant periodic oscillations in ChlF at measurement temperatures near or above their growth temperature, under longer flash spacings equivalent to lower light. The marine temperate *Chlamydomonas euryale* did not generate a statistically significant GAM model, consistent with limited evidence for periodic oscillations from *Chlamydomonas euryale*, which, also showed F~V~F~M~ somewhat lower than other *Chlamydomonas* (Table \@ref(tab:fluormeas)).
 
 
-```{r diatomsgamtemp, fig.cap = "GAM models for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and σ~PSII~). Dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature axis scalings are comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r diatomsgamtemp, fig.cap = "Generalized Additive Models (GAM) for polar and temperate diatoms, of consecutive flashes before damping of SState induced oscillations in maximum quantum yield of photosystem II (F~V~F~M~). GAM predicted by the measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II, σ~PSII~ (A^2^)). Dashed vertical lines represent the growth temperatures.  Measurement temperatures varied across taxa but the temperature axis scalings are comparable across plots.  Data for GAM was taken from cultures grown and measured near their respective optimal salinities.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
 
 knitr::include_graphics(file.path("Figures","DiatomsGAMOptSal.png"))
 ```
 
 
 
-```{r greensgamtemp, fig.cap = "GAM models for polar and temperate green algae, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the measurement temperature (\u0394°C) and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and σ~PSII~). Dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature axis scalings are comparable across plots.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+```{r greensgamtemp, fig.cap = "Generalized Additive Models (GAM) for polar and temperate green algae, of consecutive flashes before damping of SState induced oscillations in maximum quantum yield of photosystem II (F~V~F~M~). GAM predicted by the measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II, σ~PSII~, (A^2^)). Dashed vertical lines represent the growth temperatures. Measurement temperatures varied across taxa but the temperature axis scalings are comparable across plots. Data for GAM was taken from cultures grown and measured near their respective optimal salinities.", out.height = "100%", out.width = "100%", align = 'c', echo = FALSE}
+
 
 knitr::include_graphics(file.path("Figures","AlgaeGAMOptSal.png"))
 ```
 
 
-The *Chlamydomonas* strains we used can survive under a range of salinities. Furthermore, across several species of *Chlamydomonas* growth under higher salinities increases photosynthetic resilience during stress [@kalraChlamydomonasSpUWO2020; @kalraHighSaltinducedPSIsupercomplex2023;  @stahl-rommelCyclicElectronFlow2022]. Therefore, to test for effects of salinity acclimation upon the performance of PSII under extreme low light, we grew each *Chlamydomonas* strain across three growth-permissive salinities (Table \@ref(tab:taxacultures))  and then performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors (Table \@ref(tab:chlamyaovfullinteract)).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with significant interaction between NaCl and effective equivalent light level.
+The *Chlamydomonas* strains we used can survive under a range of salinities. Furthermore, across several species of *Chlamydomonas* growth under higher salinities increases photosynthetic resilience during stress [@kalraChlamydomonasSpUWO2020; @kalraHighSaltinducedPSIsupercomplex2023;  @stahl-rommelCyclicElectronFlow2022]. Therefore, to test for effects of salinity acclimation upon the performance of PSII under extreme low light, we grew each *Chlamydomonas* strain across three growth-permissive salinities (Table \@ref(tab:taxacultures))  and then performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and σ~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors (Table \@ref(tab:chlamyaovfullinteract)).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with significant interaction between NaCl and effective equivalent light level.
 
 ```{r chlamyfullaovinteract, echo = FALSE}
 
- # fig.cap = "Analyses of Variation of damping indices testing effects of *Chlamydomonas* taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.", out.height = "100%", out.width = "100%", align = 'c',
-
-
 ChlamyFull_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "ChlamyFull_aovinteract.Rds"))
  
- knitr::kable(ChlamyFull_aovinteract,  caption = "Analyses of Variation of damping indices testing effects of *Chlamydomonas* taxa, effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.",
+ knitr::kable(ChlamyFull_aovinteract,  caption = "Analyses of Variation of damping indices, testing effects of *Chlamydomonas* taxa, effective equivalent light level (LightLevel_ue, µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II, σ~PSII~, (A^2^)), measurement temperature (Temp_C), and the growth media concentration of NaCl (NaCl_mM), with interactions among all factors.  Degrees of freedom (df);	Sum of Squares of Residuals (sumsq);	Mean of Sum of Squares of Residuals (meansq);	F statistic (statistic); P Value (p.value)",
     digits = c(0,0,0,0,1,2)
  )
 
@@ -377,12 +376,10 @@ We then ran the ANOVA for each taxa separately (Table \@ref(tab:chlamystrainsaov
 
 #, out.height = "100%", out.width = "100%", align = 'c'
 
- # fig.cap = "Analyses of Variation for each *Chlamydomonas* species testing effects upon damping indices of effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.", 
-
 ChlamyStrains_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "ChlamyStrains_aovinteract.Rds"))
 
  knitr::kable(ChlamyStrains_aovinteract,
-  caption = "Analyses of Variation for each *Chlamydomonas* species testing effects upon damping indices of effective equivalent light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors.",
+  caption = "Analyses of Variation for each *Chlamydomonas* species, testing effects upon damping indices of effective equivalent light level (LightLevel_ue, µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II,σ~PSII~, (A^2^)), measurement temperature (Temp_C), and the growth media concentration of NaCl (NaCl_mM), with interactions among all factors.  Degrees of freedom (df);	Sum of Squares of Residuals (sumsq);	Mean of Sum of Squares of Residuals (meansq);	F statistic (statistic); P Value (p.value)",
     digits = c(0,0,0,0,0,1,2)
   )
 
@@ -472,7 +469,7 @@ FluorMeas <- rbind(ChlamyMeasurements, TakuvikSackvilleMeasurements)
 
 if (knitr::is_html_output()) {
   kable(FluorMeas,
-        caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^), mean σ~PSII~ (A^2^) and mean F~V~F~M~ for each measurement",         
+        caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and σ~PSII~), mean effective absorption cross-section of photosystem II, σ~PSII~ (A^2^) and mean photochemical yield of photosystem II, F~V~F~M~, for each measurement",         
         col.names = c("Taxa", "Flash Spacing (s)", "Measurement Temp (°C)", "Equivalent Light", "Growth Temp (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
         digits = c(1, 0, 0, 2, 0, 0, 0, 2)
         ) |>
@@ -481,11 +478,12 @@ if (knitr::is_html_output()) {
 } else {
   kable(FluorMeas,
         format = "pipe",
-       caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^), mean σ~PSII~ (A^2^) and mean F~V~F~M~ for each measurement",         
+       caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and σ~PSII~), mean effective absorption cross section of photosystem II, σ~PSII~ (A^2^) and mean photochemical yield of photosystem II, F~V~F~M~, for each measurement",         
         col.names = c("Taxa", "Flash Spacing (s)", "Measurement Temp (°C)", "Equivalent Light", "Growth Temp (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
         digits = c(1, 0, 0, 2, 0, 0, 0, 2)
         )
 }
+
 ```
 
 ```{r gammodeltemp, echo = FALSE}
@@ -495,8 +493,7 @@ GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
 
 knitr::kable(GAMStats,
   caption = "Summary statistics by phytoplankton strain of GAM models using the restricted maximum likelihood method to model the response of the damping of SState induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^).",
-    digits = c(0,0,2,2,2,2)
-)
+    digits = c(0,0,2,2,2,2))
 
 ```
 
@@ -506,7 +503,7 @@ DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIn
 ```
 
 
-```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings in seconds and 𝛔~PSII~).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE, warnings = FALSE, comment = NA, results='asis'}
+```{r gammodeldiagnostic,  fig.cap = "GAM model diagnostic summary for polar and temperate diatoms, of consecutive flashes before damping of SState induced chlorophyll fluorescence oscillations. GAM model predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II, σ~PSII~ (A^2^)).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE, warnings = FALSE, comment = NA, results='asis'}
 
 
 DampingIndex_Gam$GamModel |>
