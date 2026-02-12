@@ -30,13 +30,6 @@ institute:
 - ens: 'Institut de Biologie de l Ecole Normale Superieure (IBENS), CNRS, INSERM, PSL Universite Paris, 75005, Paris, France'
 date: "`r Sys.Date()`"
 output:
-  bookdown::word_document2:
-    code_folding: show
-    reference_docx: KnitTemplate.docx
-    fig_caption: yes
-    pandoc_args:
-      - '--lua-filter=scholarly-metadata.lua'
-      - '--lua-filter=author-info-blocks.lua'  
   bookdown::html_document2:
     code_folding: show
     keep_md: yes
@@ -44,6 +37,13 @@ output:
     pandoc_args:
       - '--lua-filter=scholarly-metadata.lua'
       - '--lua-filter=author-info-blocks.lua'
+  bookdown::word_document2:
+    code_folding: show
+    reference_docx: KnitTemplate.docx
+    fig_caption: yes
+    pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'  
 keywords: "Photosystem II, Polar Phytoplankton, Low Light Photosynthesis"
 abstract: "Polar phytoplankton achieve slow, but ecologically significant, productivity under exceptionally low light, where the sequential arrivals of photons at Photosystem II complexes are widely spaced in time. We hypothesized that maintaining photosynthesis under such low growth light involves suppression of energetically wasteful photochemical 'misses' in Photosystem II. Under full darkness Photosystem II relaxes predominantly to the S1 oxidation state of the oxygen evolving complex.  After such dark relaxation we applied series of single turnover, saturating, flashes to advance Photosystem II through sequential photochemical charge separations, progressively oxidizing the oxygen evolving complex through sequential increments through the S-States, resulting in four-step changes in Photosystem II chlorophyll fluorescence yield. We tracked these oscillations in chlorophyll fluorescence to measure the persistence of synchronized S-States across the Photosystem II populations in diatoms and green algae, in response to changing measurement temperatures and extremely low effective light levels, which we emulated by increasing the spacing between photon deliveries. Prolonged synchronous S-State cycling indicates fewer desynchronizations from wasteful photochemical misses and, thus, potentially more efficient photosynthetic energy conversion under low growth light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa, even under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton can suppress energetically wasteful photochemical misses under low temperature, to help sustain photosynthesis even under extremely low growth light. Therefore, ambient temperature interacts with the lower-light limitation on photosynthesis."
 bibliography: [LowLightPhotosynthesis.bib, packages.bib]
@@ -380,12 +380,25 @@ We then ran the ANOVA for each taxa separately (Table \@ref(tab:chlamystrainsaov
 
 #, out.height = "100%", out.width = "100%", align = 'c'
 
-ChlamyStrains_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "ChlamyStrains_aovinteract.Rds"))
+ChlamyStrains_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "ChlamyStrains_aovinteract.Rds")) |>
+  mutate(Strain = case_when(
+    Strain == "Chlamydomonas_ICEMDV" ~ "C. ICEMDV", 
+    Strain == "Chlamydomonas_malina" ~"C. malina",
+    Strain == "Chlamydomonas_priscui" ~ "C. priscui",
+    Strain == "Chlamydomonas_reinhardtii" ~ "C. reinhardtii",
+    Strain == "Chlorella_vulgaris" ~ "C. vulgaris",
+    Strain == "Fragilariopsis_cylindrus" ~ "F. cylindrus", 
+    Strain == "Thalassiosira_pseudonana" ~ "T. pseudonana",
+    Strain == "Chlamydomonas_klinobasis" ~ "C. klinobasis",            
+    Strain == "Chlamydomonas_euryale" ~ "C. euryale"))
 
  knitr::kable(ChlamyStrains_aovinteract,
-  caption = "Analyses of Variation for each *Chlamydomonas* species, testing effects upon damping indices of effective equivalent light level (LightLevel_ue, µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II,σ~PSII~, (A^2^)), measurement temperature (Temp_C), and the growth media concentration of NaCl (NaCl_mM), with interactions among all factors.  Degrees of freedom (df);	Sum of Squares of Residuals (sumsq);	Mean of Sum of Squares of Residuals (meansq);	F statistic (statistic); P Value (p.value)",
+  caption = "Analyses of Variation for each *Chlamydomonas* species, testing effects upon damping indices of effective equivalent light level (LightLevel_ue, µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II,σ~PSII~, (A^2^)), measurement temperature (Temp_C), and the growth media concentration of NaCl (NaCl_mM), with interactions among all factors.  Degrees of freedom (df);	Sum of Squares of Residuals (sumsq);	Mean of Sum of Squares of Residuals (meansq);	F statistic (statistic); P Value (p.value)", 
+    col.names = c("Strain", "term", "df", "sumsq", "meansq", "statistic", "p.value"),  
     digits = c(0,0,0,0,0,1,2)
-  )
+  )  |>
+  kableExtra::column_spec(1, italic = TRUE) |>
+  kableExtra::kable_classic()
 
 
 ```
@@ -468,12 +481,23 @@ TakuvikSackvilleMeasurements <-
   select(c(Strain,PulseSpace_s, Temp_C, LightLevel_ue, GrowthTemp_C, NaCl_mM, Sigmean, FvFmmean))
 
 
-FluorMeas <- rbind(ChlamyMeasurements, TakuvikSackvilleMeasurements)
+FluorMeas <- rbind(ChlamyMeasurements, TakuvikSackvilleMeasurements) |>
+  mutate(Strain = case_when(
+    Strain == "Chlamydomonas_ICEMDV" ~ "C. ICEMDV", 
+    Strain == "Chlamydomonas_malina" ~"C. malina",
+    Strain == "Chlamydomonas_priscui" ~ "C. priscui",
+    Strain == "Chlamydomonas_reinhardtii" ~ "C. reinhardtii",
+    Strain == "Chlorella_vulgaris" ~ "C. vulgaris",
+    Strain == "Fragilariopsis_cylindrus" ~ "F. cylindrus", 
+    Strain == "Thalassiosira_pseudonana" ~ "T. pseudonana",
+    Strain == "Chlamydomonas_klinobasis" ~ "C. klinobasis",            
+    Strain == "Chlamydomonas_euryale" ~ "C. euryale"))
+  
 
 if (knitr::is_html_output()) {
   kable(FluorMeas,
         caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and σ~PSII~), mean effective absorption cross-section of photosystem II, σ~PSII~ (A^2^) and mean photochemical yield of photosystem II, F~V~F~M~, for each measurement",         
-        col.names = c("Taxa", "Flash Spacing (s)", "Measurement Temp (°C)", "Equivalent Light", "Growth Temp (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
+        col.names = c("Taxa", "Flash Spacing (s)", "Temp (°C)", "Light", "Growth Temp (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
         digits = c(1, 0, 0, 2, 0, 0, 0, 2)
         ) |>
   kableExtra::column_spec(1, italic = TRUE) |>
@@ -485,19 +509,37 @@ if (knitr::is_html_output()) {
         col.names = c("Taxa", "Flash Spacing (s)", " Temp (°C)", "Light", "Growth Temp (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
         digits = c(1, 0, 0, 2, 0, 0, 0, 2)
         )
+  kableExtra::column_spec(1, italic = TRUE) |>
+  kableExtra::kable_classic()
 }
 
 ```
 
+\newpage
+
 ```{r gammodeltemp, echo = FALSE}
 
-GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
+GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))|>
+  mutate(Strain = case_when(
+    Strain == "Chlamydomonas_ICEMDV" ~ "C. ICEMDV", 
+    Strain == "Chlamydomonas_malina" ~"C. malina",
+    Strain == "Chlamydomonas_priscui" ~ "C. priscui",
+    Strain == "Chlamydomonas_reinhardtii" ~ "C. reinhardtii",
+    Strain == "Chlorella_vulgaris" ~ "C. vulgaris",
+    Strain == "Fragilariopsis_cylindrus" ~ "F. cylindrus", 
+    Strain == "Thalassiosira_pseudonana" ~ "T. pseudonana",
+    Strain == "Chlamydomonas_klinobasis" ~ "C. klinobasis",            
+    Strain == "Chlamydomonas_euryale" ~ "C. euryale"))
 
 knitr::kable(GAMStats,
   caption = "Summary statistics by phytoplankton strain of Generalized Additive Models (GAM) using the restricted maximum likelihood (REML) method to model the response of the damping of S-State induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^). GAM were fit at the optimal growth salinity for each strain, and separate models were fit for strains with multiple growth temperatures. The GAM terms indicate main effect smooth (s) and interaction-only tensor product (ti); the edf (effective degrees of freedom) of the smooth;  ref.df (reference degrees of freedom); statistic and p.value",
-    digits = c(0,0,2,2,2,2))
+    digits = c(0,0,2,2,2,2))|>
+  kableExtra::column_spec(1, italic = TRUE) |>
+  kableExtra::kable_classic()
+
 ```
 
+\newpage
 
 ```{r load_DampingIndex_GAM, include = FALSE}
 DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIndex_Gam.RDS"))
@@ -506,6 +548,7 @@ DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIn
 
 ```{r gammodeldiagnostic,  fig.cap = "Generalized Additive Model (GAM) diagnostic outputs from mgcv::gam.check() for polar and temperate diatoms, of consecutive flashes before damping of S-State induced chlorophyll fluorescence oscillations. GAM predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II, σ~PSII~ (A^2^)).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE, warnings = FALSE, comment = NA, results='asis'}
 
+# original code
 
 DampingIndex_Gam$GamModel |>
   rlang::set_names(
@@ -522,6 +565,29 @@ DampingIndex_Gam$GamModel |>
     mgcv::gam.check(.x)
     cat("\n\\pagebreak\n") # add a pagebreak between strain outputs when knit to WORD
   })
+
+
+# fix for diagnostic output text alignment
+# DampingIndex_Gam$GamModel |>
+#   rlang::set_names(
+#     paste0(
+#       "*", DampingIndex_Gam$StrainLabel, "*",
+#       ", Growth Temperature ",
+#       DampingIndex_Gam$GrowthTemp_C, " °C",
+#       ", Salinity ",
+#       DampingIndex_Gam$NaCl_opt, " mM"
+#     )
+#   ) |>
+#   purrr::iwalk(~ {
+#     cat("\n\n **Strain:** ", .y, sep = "")  #\n adds lines
+#     mgcv::gam.check(.x)  # plots
+#     out <- capture.output(mgcv::gam.check(.x, rep = 0)) # diagnostic table is captured rep= 0 does not capture the plot
+# 
+#     # print in a verbatim block so Word keeps alignment
+#     cat("\n\n```Diagnostic data\n", paste(out, collapse = "\n"), "\n```\n", sep = "") #  code inside ``` are executed 
+#     cat("\n\\pagebreak\n") # add a pagebreak between strain outputs when knit to WORD
+#   })
+
 
 
 ```
