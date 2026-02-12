@@ -173,7 +173,7 @@ DampingIndex_Pred <- DampingIndex_Gam %>%
 
 # GAM model results into table
 GAMStats<- DampingIndex_Gam %>% 
-  dplyr::select(Strain, tidied) %>% 
+  dplyr::select(Strain, GrowthTemp_C, NaCl_opt, tidied) %>% 
   unnest(tidied) %>% 
   mutate(edf = round(edf, digit = 4),
          ref.df = round(ref.df, digit = 4),
