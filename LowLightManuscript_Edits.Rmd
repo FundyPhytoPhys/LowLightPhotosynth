@@ -524,18 +524,21 @@ if (knitr::is_html_output()) {
         caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and σ~PSII~), mean effective absorption cross-section of photosystem II, σ~PSII~ (A^2^) and mean photochemical yield of photosystem II, F~V~F~M~, for each measurement",         
         col.names = c("Taxa", "Flash Spacing (s)", "Temp (°C)", "Light", "Growth Temp (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
         digits = c(1, 0, 0, 2, 0, 0, 0, 2)
-        ) |>
-  kableExtra::column_spec(1, italic = TRUE) |>
-  kableExtra::kable_classic()
+        ) 
+  # |>
+  # kableExtra::column_spec(1, italic = TRUE) |>
+  # kableExtra::kable_classic()
 } else {
   kable(FluorMeas,
-        format = "pipe",
-       caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and σ~PSII~), mean effective absorption cross section of photosystem II, σ~PSII~ (A^2^) and mean photochemical yield of photosystem II, F~V~F~M~, for each measurement",         
+        # format = "pipe",
+       caption ="Single turnover saturating flash measurement conditions, with key growth conditions, equivalent effective light levels (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and σ~PSII~), mean effective absorption cross section of photosystem II, σ~PSII~ (A^2^) and mean photochemical yield of photosystem II, F~V~F~M~, for each measurement",
+        format = "pandoc",
         col.names = c("Taxa", "Flash Spacing (s)", " Temp (°C)", "Light", "Growth Temp (°C)", "NaCl (mM)", "σ~PSII~", "F~V~F~M~"),  
         digits = c(1, 0, 0, 2, 0, 0, 0, 2)
-        ) |>
-  kableExtra::column_spec(1, italic = TRUE) |>
-  kableExtra::kable_classic()
+        ) 
+  # |>
+  # kableExtra::column_spec(1, italic = TRUE) |>
+  # kableExtra::kable_classic()
 }
 
 ```
