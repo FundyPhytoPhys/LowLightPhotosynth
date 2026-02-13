@@ -148,6 +148,7 @@ We hypothesized that psychrophilic phytoplankton, growing at low temperatures, s
 The nine study taxa, including polar and temperate strains of diatoms and green algae, and their respective culturing conditions, are summarized in Table \@ref(tab:taxacultures). All tested cultures were grown at their respective near-optimal temperatures and light levels, to provoke relatively consistent growth, and limit subsequent measurements to healthy cultures. The polar diatom *Fragilariopsis cylindricus* was grown at two temperatures and two light levels. We did not impose different growth light or temperature levels on any other individual taxa, although both growth light and temperature are potentially relevant factors for future research. Previous research showed impacts of salinity on photosynthetic performance in some psychrophile strains [@kalraChlamydomonasSpUWO2020; @kalraHighSaltinducedPSIsupercomplex2023;  @stahl-rommelCyclicElectronFlow2022], so we chose a range of polar and temperate taxa from both freshwater and saline environments, grown at their respective near-optimal salinities. Since polar *Chlamydomonas* taxa grow under both low temperature and high salinity, we used a range of growth-permissive salinities for some *Chlamydomonas*, to detect whether growth salinity would influence our results. Most taxa and growth combinations were grown in two culture replicates, measured on different days. Some *Chlamydomonas* cultures under non-optimal salinities were grown only once, although sampled for measurements over multiple days.
 
 
+
 ```{r metadata, include=FALSE}
 googlesheets4::gs4_deauth()
 
@@ -203,13 +204,26 @@ TaxaCultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
   arrange(Lineage, Origin, Taxa, GrowthTemp_C, NaCl_mM) |>
   relocate(GrowthTemp_C, .after = Origin) |>
   relocate(NaCl_mM, .after = GrowthTemp_C) |>
-  relocate(NaCl_opt, .after = NaCl_mM)
+  relocate(NaCl_opt, .after = NaCl_mM)|>
+  mutate(Taxa = case_when(
+    Taxa == "Chlamydomonas ICEMDV" ~ "C. ICEMDV",
+    Taxa == "Chlamydomonas malina" ~"C. malina",
+    Taxa == "Chlamydomonas priscui" ~ "C. priscui",
+    Taxa == "Chlamydomonas reinhardtii" ~ "C. reinhardtii",
+    Taxa == "Chlorella vulgaris" ~ "C. vulgaris",
+    Taxa == "Fragilariopsis cylindrus" ~ "F. cylindrus",
+    Taxa == "Thalassiosira pseudonana" ~ "T. pseudonana",
+    Taxa == "Chlamydomonas klinobasis" ~ "C. klinobasis",
+    Taxa == "Chlamydomonas euryale" ~ "C. euryale")) |>
+   mutate(Taxa = paste0("*", Taxa, "*"))
   
 
 ```
 
 
-```{r taxacultures, echo = FALSE}
+\newpage
+
+```{r taxacultures, echo = FALSE, warning=FALSE}
 
  if (knitr::is_html_output()) {
   knitr::kable(TaxaCultures,
@@ -229,6 +243,8 @@ TaxaCultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
   }
 ```
 
+
+\newpage
 
 *Fragilariopsis cylindrus* is a psychrophilic [@fialaLighttemperatureInteractionsGrowth1990] pennate diatom measuring 15-55 µm which forms large blooms in the high salinity and subzero temperatures of Arctic and Antarctic sea-ice systems [@otteDiatomFragilariopsisCylindrus2023; @cefarelliDiversityDiatomGenus2010], and is a keystone species for polar ecosystems [@vonquillfeldt:hal-03218115; @otteDiatomFragilariopsisCylindrus2023; @kangFragilariopsisCylindrusGrunow1992].  Sequenced in 2017, *Fragilariopsis cylindrus* has since become the model psychrophilic diatom species for investigating molecular and physiological mechanisms of cold adaptation [@mockEvolutionaryGenomicsColdadapted2017]. Conversely, *Thalassiosira pseudonana* (*Cyclotella nana*) is a centric diatom (2.5-15 μm) found in diverse freshwater, coastal, brackish, and marine habitats [@poulsenThalassiosiraPseudonanaCyclotella2023], across a range of salinities and temperatures (4–25°C) [@poulsenThalassiosiraPseudonanaCyclotella2023].
 *Chlamydomonas* sp. ICE-MDV and *Chlamydomonas priscui* are halotolerant algae isolated from the perennially ice-covered hypersaline Lake Bonney, in McMurdo Dry Valleys, Antarctica [@cookAntarcticPsychrophilesChlamydomonas2019; @stahl-rommelCyclicElectronFlow2022]. With 15 to 20 μm biflagellate cells, *Chlamydomonas* sp. ICE-MDV dominates the shallow photic zone, where it experiences relatively higher irradiance, extreme nutrient limitation, and lower salinity [@cookAntarcticPsychrophilesChlamydomonas2019; @liUltrastructuralSingleCellLevelCharacterization2016]. The smaller *Chlamydomonas priscui* dominates the deep photic zone, characterized by permanent low temperatures, low irradiance, and high salinity [@cvetkovskaTemperatureStressPsychrophilic2022; @hunerPhotosyntheticAdaptationMulticellularity2023]. *Chlamydomonas malina* is a marine microalga isolated from the Arctic Beaufort Sea, around 10 μm in length and 5 μm in width, growing optimally at 4°C [@balzanoDiversityCulturedPhotosynthetic2012; @morales-sanchezTemperatureDependentLipidAccumulation2020].   *Chlamydomonas klinobasis* strain 041-99 is a freshwater microalga isolated from an ephemeral snowfield on Svalbard Island, Norway, of around 12 x 6 μm (P. Osmers, unpub), growing from 2-6°C [@hulattPolarSnowAlgae2017].
@@ -302,7 +318,7 @@ Statistical significance of the wavelet power at a periodicity of four indicates
 The patterns in the persistence of S-State cycling within taxa were then modelled using the nonparametric method of Generalized Additive Modelling (GAM). GAM predict the damping index based on a tensor product smooth of the two predictors, measurement temperature, and equivalent effective light level. The response variable is linked to the independent variables using a smoothing function, where many localized polynomials are joined to form a piecewise function called a spline [@pinillaNonParametricGeneralizedAdditive2021]. For each strain, GAM were fit to the data using the restricted maximum likelihood method (REML).  For GAM we only included data from taxa grown and measured at their respective approximate optimal salinities (Table \@ref(tab:taxacultures)).
  
 The GAM examines the response of S-State damping to the measurement temperature (°C) and the equivalent effective light level (µmol photons m^-2^ s^-1^) for the measurement flash spacing. The generalized additive models were fitted using the R-package *`mgcv`* [@R-mgcv].  Only S-State damping estimates for which the amplitude of standard error was smaller than 320% of the fitted
-S-State damping were included in the GAM. Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [@schoenigWorkshopGeneralizedAdditive2023] using the function gam.check from the R-package *`mgcv`* [@R-mgcv] (Table \@ref(fig:gammodeldiagnostic)). Based on the fitted models, the damping index can then be predicted for other combinations of measurement temperature and effective light [@woodGeneralizedAdditiveModels2017], represented with a contour plot.
+S-State damping were included in the GAM. Models were validated by verifying the choice of basis dimensions (k) and evaluating the residual plots [@schoenigWorkshopGeneralizedAdditive2023] using the function gam.check from the R-package *`mgcv`* [@R-mgcv] (Figure \@ref(fig:gammodeldiagnostic)). Based on the fitted models, the damping index can then be predicted for other combinations of measurement temperature and effective light [@woodGeneralizedAdditiveModels2017], represented with a contour plot.
 
 ## Analyses of Variance {.unnumbered} 
 Analyses of Variance (ANOVA) were run using the aov function [@rcoreteamLanguageEnvironmentStatistical2023] to detect effects of taxa , measurement effective light levels (derived from flash spacing and σ~PSII~), measurement temperature, and growth salinity, upon the Damping Index.
@@ -358,20 +374,25 @@ knitr::include_graphics(file.path("Figures","AlgaeGAMOptSal.png"))
 
 The *Chlamydomonas* strains we used can survive under a range of salinities. Furthermore, across several species of *Chlamydomonas* growth under higher salinities increases photosynthetic resilience during stress [@kalraChlamydomonasSpUWO2020; @kalraHighSaltinducedPSIsupercomplex2023;  @stahl-rommelCyclicElectronFlow2022]. Therefore, to test for effects of salinity acclimation upon the performance of PSII under extreme low light, we grew each *Chlamydomonas* strain across three growth-permissive salinities (Table \@ref(tab:taxacultures))  and then performed saturating flash trains over a range of flash spacings, and at measurement temperatures flanking the growth temperature for each taxa.  We ran an ANOVA for damping indices testing effects of taxa, effective equivalent light level (derived from the saturating flash spacing and σ~PSII~), measurement temperature, and the growth concentration of NaCl, with interactions among all factors (Table \@ref(tab:chlamyfullaovinteract)).  As expected, taxa, effective equivalent light level and measurement temperature all showed strongly significant influences on damping indices.  NaCl concentration also showed a significant influence on damping indices across strains, with significant interaction between NaCl and effective equivalent light level.
 
+\newpage
+
 ```{r chlamyfullaovinteract, echo = FALSE}
 
 ChlamyFull_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "ChlamyFull_aovinteract.Rds"))
  
  knitr::kable(ChlamyFull_aovinteract,  caption = "Analyses of Variation of damping indices, testing effects of *Chlamydomonas* taxa, effective equivalent light level (LightLevel_ue, µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II, σ~PSII~, (A^2^)), measurement temperature (Temp_C), and the growth media concentration of NaCl (NaCl_mM), with interactions among all factors.  Degrees of freedom (df);	Sum of Squares of Residuals (sumsq);	Mean of Sum of Squares of Residuals (meansq);	F statistic (statistic); P Value (p.value)",
+  format = "pandoc",
     digits = c(0,0,0,0,1,2)
  )
 
 ```
 
 
+\newpage
+
 We then ran the ANOVA for each taxa separately (Table \@ref(tab:chlamystrainsaovinteract)).  Within a taxa only *Chlamydomonas priscui* showed a significant effect of NaCl on damping indices, suggesting the statistical influence of NaCl detected across taxa derives from different taxa growing at different salinites and showing different responses of damping indices, rather than a direct effect of NaCl on damping indices in most strains.
 
-```{r chlamystrainsaovinteract, echo = FALSE}
+```{r chlamystrainsaovinteract, echo = FALSE, warning = FALSE}
 
 #, out.height = "100%", out.width = "100%", align = 'c'
 
@@ -385,11 +406,13 @@ ChlamyStrains_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "
     Strain == "Fragilariopsis_cylindrus" ~ "F. cylindrus", 
     Strain == "Thalassiosira_pseudonana" ~ "T. pseudonana",
     Strain == "Chlamydomonas_klinobasis" ~ "C. klinobasis",            
-    Strain == "Chlamydomonas_euryale" ~ "C. euryale"))
+    Strain == "Chlamydomonas_euryale" ~ "C. euryale"))|>
+   mutate(Strain = paste0("*", Strain, "*"))
 
  knitr::kable(ChlamyStrains_aovinteract,
   caption = "Analyses of Variation for each *Chlamydomonas* species, testing effects upon damping indices of effective equivalent light level (LightLevel_ue, µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II,σ~PSII~, (A^2^)), measurement temperature (Temp_C), and the growth media concentration of NaCl (NaCl_mM), with interactions among all factors.  Degrees of freedom (df);	Sum of Squares of Residuals (sumsq);	Mean of Sum of Squares of Residuals (meansq);	F statistic (statistic); P Value (p.value)", 
-    col.names = c("Strain", "term", "df", "sumsq", "meansq", "statistic", "p.value"),  
+  format = "pandoc", 
+    col.names = c("Taxa", "term", "df", "sumsq", "meansq", "statistic", "p.value"),  
     digits = c(0,0,0,0,0,1,2)
   )  |>
   kableExtra::column_spec(1, italic = TRUE) |>
@@ -397,6 +420,10 @@ ChlamyStrains_aovinteract <- readRDS(file = file.path("Data", "ProcessedData", "
 
 
 ```
+
+
+\newpage
+
 
 # Discussion {.unnumbered}
 
@@ -454,7 +481,7 @@ TakuvikSackvilleFunction <- rbind(FragilariopsisFunction, ThalassiosiraFunction,
 ```
 
 
-```{r fluormeas, echo = FALSE}
+```{r fluormeas, echo = FALSE, warning = FALSE}
 ChlamyMeasurements <- readRDS(file = file.path("Data", "ProcessedData", "Low_Chlamy_dampingYear.Rds")) |>
   select(-c(DampingIndex, TempDiff_C, Year, NaCl_opt)) |>
   relocate(GrowthTemp_C, .after = LightLevel_ue)
@@ -487,7 +514,8 @@ FluorMeas <- rbind(ChlamyMeasurements, TakuvikSackvilleMeasurements) |>
     Strain == "Fragilariopsis_cylindrus" ~ "F. cylindrus", 
     Strain == "Thalassiosira_pseudonana" ~ "T. pseudonana",
     Strain == "Chlamydomonas_klinobasis" ~ "C. klinobasis",            
-    Strain == "Chlamydomonas_euryale" ~ "C. euryale"))
+    Strain == "Chlamydomonas_euryale" ~ "C. euryale"))|>
+   mutate(Strain = paste0("*", Strain, "*"))
   
 
 if (knitr::is_html_output()) {
@@ -513,25 +541,30 @@ if (knitr::is_html_output()) {
 
 \newpage
 
-```{r gammodeltemp, echo = FALSE}
+```{r gammodeltemp, echo = FALSE, warning = FALSE}
 
-GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))|>
+GAMStats <- readRDS(file = file.path("Data", "ProcessedData", "GAMStats.Rds"))
+
+GAMStats <- GAMStats|>
   mutate(Strain = case_when(
-    Strain == "Chlamydomonas_ICEMDV" ~ "C. ICEMDV", 
+    Strain == "Chlamydomonas_ICEMDV" ~ "C. ICEMDV",
     Strain == "Chlamydomonas_malina" ~"C. malina",
     Strain == "Chlamydomonas_priscui" ~ "C. priscui",
     Strain == "Chlamydomonas_reinhardtii" ~ "C. reinhardtii",
     Strain == "Chlorella_vulgaris" ~ "C. vulgaris",
-    Strain == "Fragilariopsis_cylindrus" ~ "F. cylindrus", 
+    Strain == "Fragilariopsis_cylindrus" ~ "F. cylindrus",
     Strain == "Thalassiosira_pseudonana" ~ "T. pseudonana",
-    Strain == "Chlamydomonas_klinobasis" ~ "C. klinobasis",            
-    Strain == "Chlamydomonas_euryale" ~ "C. euryale"))
+    Strain == "Chlamydomonas_klinobasis" ~ "C. klinobasis",
+    Strain == "Chlamydomonas_euryale" ~ "C. euryale")) |>
+   mutate(Strain = paste0("*", Strain, "*"))
 
 knitr::kable(GAMStats,
   caption = "Summary statistics by phytoplankton strain of Generalized Additive Models (GAM) using the restricted maximum likelihood (REML) method to model the response of the damping of S-State induced chlorophyll fluorescence oscillations to the predictors of measurement temperature (°C) and the effective light level (µmol photons m^-2^s^-1^). GAM were fit at the optimal growth salinity for each strain, and separate models were fit for strains with multiple growth temperatures. The GAM terms indicate main effect smooth (s) and interaction-only tensor product (ti); the edf (effective degrees of freedom) of the smooth;  ref.df (reference degrees of freedom); statistic and p.value",
-    digits = c(0,0,2,2,2,2))|>
-  kableExtra::column_spec(1, italic = TRUE) |>
-  kableExtra::kable_classic()
+  format = "pandoc")
+  # ,
+  #   digits = c(0,0,2,2,2,2))|>
+  #  kableExtra::column_spec(1, italic = TRUE) |>
+  # kableExtra::kable_classic()
 
 ```
 
@@ -542,48 +575,25 @@ DampingIndex_Gam <- readRDS(file = file.path("Data", "ProcessedData", "DampingIn
 ```
 
 
-```{r gammodeldiagnostic,  fig.cap = "Generalized Additive Model (GAM) diagnostic outputs from mgcv::gam.check() for polar and temperate diatoms, of consecutive flashes before damping of S-State induced chlorophyll fluorescence oscillations. GAM predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II, σ~PSII~ (A^2^)).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE, warnings = FALSE, comment = NA, results='asis'}
-
-# original code
-
-DampingIndex_Gam$GamModel |>
-  rlang::set_names(
-    paste0(
-      "*", DampingIndex_Gam$StrainLabel, "*",
-      ", Growth Temperature ",
-      DampingIndex_Gam$GrowthTemp_C, " °C",
-      ", Salinity ",
-      DampingIndex_Gam$NaCl_opt, " mM"
-    )
-  ) |>
-  purrr::iwalk(~ {
-    cat("\n\n**Strain:** ", .y, sep = "")
-    mgcv::gam.check(.x)
-    cat("\n\\pagebreak\n") # add a pagebreak between strain outputs when knit to WORD
-  })
+```{r gammodeldiagnostic,  fig.cap = "Generalized Additive Model (GAM) diagnostic outputs from mgcv::gam.check() for polar and temperate diatoms, of consecutive flashes before damping of S-State induced chlorophyll fluorescence oscillations. GAM predicted by the temperature (°C) imposed during measurements and the effective light level (µmol photons m^-2^s^-1^, estimated from flash spacings (s) and effective absorption cross-section of photosystem II, σ~PSII~ (A^2^)).", out.height =  "100%", out.width = "100%", align = 'c', echo = FALSE, warning = FALSE, comment = NA, results='asis'}
 
 
 # fix for diagnostic output text alignment
-# DampingIndex_Gam$GamModel |>
-#   rlang::set_names(
-#     paste0(
-#       "*", DampingIndex_Gam$StrainLabel, "*",
-#       ", Growth Temperature ",
-#       DampingIndex_Gam$GrowthTemp_C, " °C",
-#       ", Salinity ",
-#       DampingIndex_Gam$NaCl_opt, " mM"
-#     )
-#   ) |>
-#   purrr::iwalk(~ {
-#     cat("\n\n **Strain:** ", .y, sep = "")  #\n adds lines
-#     mgcv::gam.check(.x)  # plots
-#     out <- capture.output(mgcv::gam.check(.x, rep = 0)) # diagnostic table is captured rep= 0 does not capture the plot
-# 
-#     # print in a verbatim block so Word keeps alignment
-#     cat("\n\n```Diagnostic data\n", paste(out, collapse = "\n"), "\n```\n", sep = "") #  code inside ``` are executed
-#     cat("\n\\pagebreak\n") # add a pagebreak between strain outputs when knit to WORD
-#   })
-
+DampingIndex_Gam$GamModel |>
+  rlang::set_names(
+    paste0(
+      "**Strain:** *", DampingIndex_Gam$StrainLabel, "*",
+      ", Growth Temperature ", DampingIndex_Gam$GrowthTemp_C, " °C",
+      ", Salinity ", DampingIndex_Gam$NaCl_opt, " mM"
+    )
+  ) |>
+  purrr::iwalk(~ {
+    cat("\n\n", .y, "\n\n", sep = "") # adds lines then prints the strain labels (.y)
+    out <- capture.output(mgcv::gam.check(.x, rep = 0)) # captures the model output, rep = 0 
+    txt <- paste0("\n\n", "```\n", paste(out, collapse = "\n"), "\n```\n\n")
+    cat(knitr::asis_output(txt)) #prints text as is, needed for proper alignment
+    cat("\n\\pagebreak\n")
+  })
 
 
 ```
