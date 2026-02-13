@@ -212,21 +212,23 @@ purrr::walk(DampingIndex_Gam$GamModel, gam.check)
 DampingIndex_Gam <- readRDS(file = file.path("..", "Data", "ProcessedData", "DampingIndex_Gam.RDS"))
 
 
+
+# fix for diagnostic output text alignment
 DampingIndex_Gam$GamModel |>
   rlang::set_names(
     paste0(
-      "*", DampingIndex_Gam$StrainLabel, "*",
-      ", Growth Temperature ",
-      DampingIndex_Gam$GrowthTemp_C, " °C",
-      ", Salinity ",
-      DampingIndex_Gam$NaCl_opt, " mM"
+      "**Strain:** *", DampingIndex_Gam$StrainLabel, "*",
+      ", Growth Temperature ", DampingIndex_Gam$GrowthTemp_C, " °C",
+      ", Salinity ", DampingIndex_Gam$NaCl_opt, " mM"
     )
   ) |>
   purrr::iwalk(~ {
-    cat("\n\n**Strain:** ", .y, sep = "")
-    mgcv::gam.check(.x)
+    cat("\n\n", .y, "\n\n", sep = "") # adds lines then prints the strain labels (.y)
+    out <- capture.output(mgcv::gam.check(.x, rep = 0)) # captures the model output, rep = 0 
+    txt <- paste0("\n\n", "```\n", paste(out, collapse = "\n"), "\n```\n\n")
+    cat(knitr::asis_output(txt)) #prints text as is, needed for proper alignment
+    cat("\n\\pagebreak\n")
   })
-
 
 
 ```
