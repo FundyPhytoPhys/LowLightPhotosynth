@@ -169,11 +169,9 @@ spacing.diatom <- sstate_damping %>%
 # Run this chunk each time for each strain to generate strain specific hypervolume by changing the value for Gamstrain and selecting the corresponding "scale_x_continuous" in ggplot below. 
 # Example scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 2), expand = c(0, 0)) + # For C.vulgaris 
 
-#Separate Gams were generated for each experiment year. Chose which year to plot here. 
-# GamYear = "2023" #"2023" "2025"
 
 # plotting all strains and adding a facet-wrap does not work as each strain has different x-axis ranges.
-GamStrain = "Chlamydomonas_ICEMDV"
+GamStrain = "Chlamydomonas_priscui"
 #Chlamydomonas_ICEMDV                     #remember to change scale_x_continuous
 #Chlamydomonas_malina                     #remember to change scale_x_continuous                  
 #Chlamydomonas_priscui                   #remember to change scale_x_continuous
@@ -182,7 +180,7 @@ GamStrain = "Chlamydomonas_ICEMDV"
 #Chlamydomonas_klinobasis                 #remember to change scale_x_continuous
 #Chlamydomonas_euryale                    #remember to change scale_x_continuous
 
-ErrorTol = 320
+ErrorTol = 100
 
 
 DampingIndex_Hyper <- DampingIndex_Pred %>% 
@@ -245,11 +243,11 @@ ContourLines <- ContourLines$quantileValue
     # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
     #               label.placer = label_placer_fraction(frac = 0.4)) +
       # scale_x_continuous(limits = c(10, 26), breaks = seq(10, 26, by = 2), expand = c(0, 0)) + # For C.vulgaris
-    scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 2), expand = c(0, 0)) + # For C.ICE
-      # scale_x_continuous(limits = c(12, 28), breaks = seq(12, 28, by = 2), expand = c(0, 0)) + # For C.reinhardtii
-      # scale_x_continuous(limits = c(2, 16), breaks = seq(2, 16, by = 2), expand = c(0, 0)) + # For C.priscui
-       # scale_x_continuous(limits = c(2, 12), breaks = seq(2, 12, by = 2), expand = c(0, 0)) + # For C.klinobasis ,  For C.malina
-     # scale_x_continuous(limits = c(16, 28), breaks = seq(16, 28, by = 2), expand = c(0, 0)) + #  For Chlamydomonas_euryale
+    # scale_x_continuous(limits = c(4, 12), breaks = seq(4, 12, by = 2), expand = c(0, 0)) + # For C.ICE
+       # scale_x_continuous(limits = c(12, 28), breaks = seq(12, 28, by = 2), expand = c(0, 0)) + # For C.reinhardtii
+        scale_x_continuous(limits = c(2, 16), breaks = seq(2, 16, by = 2), expand = c(0, 0)) + # For C.priscui
+        # scale_x_continuous(limits = c(2, 12), breaks = seq(2, 12, by = 2), expand = c(0, 0)) + # For C.klinobasis ,  For C.malina
+      # scale_x_continuous(limits = c(16, 28), breaks = seq(16, 28, by = 2), expand = c(0, 0)) + #  For Chlamydomonas_euryale
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
                        sec.axis = dup_axis(breaks = c(spacing.algae$LightLevel_ue.mean), 
                                            labels = c(spacing.algae$PulseSpace_s),
@@ -389,14 +387,14 @@ cowplot::save_plot(
 
 # plotting all strains and adding a facet-wrap does not work as each strain has different x-axis ranges.
 
- GamStrain = "Fragilariopsis_cylindrus"
+ GamStrain = "Thalassiosira_pseudonana"
 #Fragilariopsis_cylindrus                     #remember to change scale_x_continuous
 #Thalassiosira_pseudonana                     #remember to change scale_x_continuous
 
 # select growth temp; F.c was grown at 0 and 6°C and T.p was grown at 22°C
-GamTemp = 6 #0 #6 #22 for T.p
+GamTemp = 22 #0 #6 #22 for T.p
 
-ErrorTol = 320
+ErrorTol = 100
 
 
 DampingIndex_Hyper <- DampingIndex_Pred %>% 
@@ -460,8 +458,8 @@ ContourLines <- ContourLines$quantileValue
                         label.placer = label_placer_fraction(frac = 0.4)) +
     # geom_text_contour(breaks = ContourLines, stroke = 0.1, size = 3.3,
     #               label.placer = label_placer_fraction(frac = 0.4)) +
-     # scale_x_continuous(limits = c(10, 28), breaks = seq(10, 28, by = 2), expand = c(0, 0)) + # For T.pseudonana
-     scale_x_continuous(limits = c(0, 10), breaks = seq(0, 10, by = 2), expand = c(0, 0)) + # For F.c
+      scale_x_continuous(limits = c(10, 28), breaks = seq(10, 28, by = 2), expand = c(0, 0)) + # For T.pseudonana
+     # scale_x_continuous(limits = c(0, 10), breaks = seq(0, 10, by = 2), expand = c(0, 0)) + # For F.c
     scale_y_continuous(limits = c(0, 0.7), breaks = seq(0.2, 0.6, by = 0.2), expand=c(0,0), 
                        sec.axis = dup_axis(breaks = c(spacing.diatom$LightLevel_ue.mean), 
                                            labels = c(spacing.diatom$PulseSpace_s),
