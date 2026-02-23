@@ -75,6 +75,13 @@ Scripts for processing raw data into cleaned data, outside derived code, and use
 A folder OldR is used to store outdated code.
 Typically organize .Rmd in modules; Import; Tidy; Process saving .Rds out of each step.
 
+### Figures
+
+Figures folder contains .png outputs from code .Rmd that generate figures.
+The .png files are pulled into the file
+LowLightManuscript_Edits.docx
+as needed to 'knit' outputs  .html or .docx
+
 ### Docs
 
 Project notes, other documentation, etc.
