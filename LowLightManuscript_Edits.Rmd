@@ -30,13 +30,6 @@ institute:
 - ens: 'Institut de Biologie de l Ecole Normale Superieure (IBENS), CNRS, INSERM, PSL Universite Paris, 75005, Paris, France'
 date: "`r Sys.Date()`"
 output:
-  bookdown::word_document2:
-    code_folding: show
-    reference_docx: KnitTemplate.docx
-    fig_caption: yes
-    pandoc_args:
-      - '--lua-filter=scholarly-metadata.lua'
-      - '--lua-filter=author-info-blocks.lua'  
   bookdown::html_document2:
     code_folding: show
     keep_md: yes
@@ -44,6 +37,13 @@ output:
     pandoc_args:
       - '--lua-filter=scholarly-metadata.lua'
       - '--lua-filter=author-info-blocks.lua'
+  bookdown::word_document2:
+    code_folding: show
+    reference_docx: KnitTemplate.docx
+    fig_caption: yes
+    pandoc_args:
+      - '--lua-filter=scholarly-metadata.lua'
+      - '--lua-filter=author-info-blocks.lua'  
 keywords: "Photosystem II, Polar Phytoplankton, Low Light Photosynthesis"
 abstract: "Polar phytoplankton achieve slow, but ecologically significant, productivity under exceptionally low light, where the sequential arrivals of photons at Photosystem II complexes are widely spaced in time. We hypothesized that maintaining photosynthesis under such low growth light involves suppression of energetically wasteful photochemical 'misses' in Photosystem II. Under full darkness Photosystem II relaxes predominantly to the S1 oxidation state of the oxygen evolving complex.  After such dark relaxation we applied series of single turnover, saturating, flashes to advance Photosystem II through sequential photochemical charge separations, progressively oxidizing the oxygen evolving complex through sequential increments through the S-States, resulting in four-step changes in Photosystem II chlorophyll fluorescence yield. We tracked these oscillations in chlorophyll fluorescence to measure the persistence of synchronized S-States across the Photosystem II populations in diatoms and green algae, in response to changing measurement temperatures and extremely low effective light levels, which we emulated by increasing the spacing between photon deliveries. Prolonged synchronous S-State cycling indicates fewer desynchronizations from wasteful photochemical misses and, thus, potentially more efficient photosynthetic energy conversion under low growth light. We observed that colder temperatures result in more sustained cycling at longer photon spacings, within taxa. Further, polar taxa maintained synchronized cycles for longer than did temperate taxa, even under comparable measurement conditions. Our findings support our hypothesis that diverse lineages of polar phytoplankton can suppress energetically wasteful photochemical misses under low temperature, to help sustain photosynthesis even under extremely low growth light. Therefore, ambient temperature interacts with the lower-light limitation on photosynthesis."
 bibliography: [LL_PolarManuscript.bib, packages.bib]
@@ -247,7 +247,7 @@ TaxaCultures <- rbind(ChlamyCultures, TakuvikCultures, SackvilleCultures)  |>
 
 *Fragilariopsis cylindrus* is a psychrophilic [@fialaLighttemperatureInteractionsGrowth1990] pennate diatom measuring 15-55 µm which forms large blooms in the high salinity and subzero temperatures of Arctic and Antarctic sea-ice systems [@otteDiatomFragilariopsisCylindrus2023; @cefarelliDiversityDiatomGenus2010], and is a keystone species for polar ecosystems [@vonquillfeldtDiatomFragilariopsisCylindrus2004; @otteDiatomFragilariopsisCylindrus2023; @kangFragilariopsisCylindrusGrunow1992].  Sequenced in 2017, *Fragilariopsis cylindrus* has since become the model psychrophilic diatom species for investigating molecular and physiological mechanisms of cold adaptation [@mockEvolutionaryGenomicsColdadapted2017]. Conversely, *Thalassiosira pseudonana* (*Cyclotella nana*) is a centric diatom (2.5-15 μm) found in diverse freshwater, coastal, brackish, and marine habitats [@poulsenThalassiosiraPseudonanaCyclotella2023], across a range of salinities and temperatures (4–25°C) [@poulsenThalassiosiraPseudonanaCyclotella2023].
 *Chlamydomonas* sp. ICE-MDV and *Chlamydomonas priscui* are halotolerant algae isolated from the perennially ice-covered hypersaline Lake Bonney, in McMurdo Dry Valleys, Antarctica [@cookAntarcticPsychrophilesChlamydomonas2019; @stahl-rommelCyclicElectronFlow2022]. With 15 to 20 μm biflagellate cells, *Chlamydomonas* sp. ICE-MDV dominates the shallow photic zone, where it experiences relatively higher irradiance, extreme nutrient limitation, and lower salinity [@cookAntarcticPsychrophilesChlamydomonas2019; @liUltrastructuralSingleCellLevelCharacterization2016]. The smaller *Chlamydomonas priscui* dominates the deep photic zone, characterized by permanent low temperatures, low irradiance, and high salinity [@cvetkovskaTemperatureStressPsychrophilic2022; @hunerPhotosyntheticAdaptationMulticellularity2023]. *Chlamydomonas malina* is a marine microalga isolated from the Arctic Beaufort Sea, around 10 μm in length and 5 μm in width, growing optimally at 4°C [@balzanoDiversityCulturedPhotosynthetic2012; @morales-sanchezTemperatureDependentLipidAccumulation2020].   *Chlamydomonas klinobasis* strain 041-99 is a freshwater microalga isolated from an ephemeral snowfield on Svalbard Island, Norway, of around 12 x 6 μm (P. Osmers, unpub), growing from 2-6°C [@hulattPolarSnowAlgae2017].
-The temperate *Chlamydomonas reinhardtii* is a model green alga approximately 10 μm in diameter, found in freshwater soil and aquatic environments with an optimal temperature range of 20-32°C [@sassoMolecularManipulationDomesticated2018; @xieChlamydomonasReinhardtiiThermal2013]. The temperate marine *Chlamydomonas euryale* is approximately 4 μm in diameter, isolated from various locations within the northern Atlantic and Pacific, including the Yellow Sea, with a known growth temperature range of 18-26°C [@burchEnvironmentalManipulationGrowth2015; @canuelInteractionEffectEDTA2021, @carrascofloresMarineChlamydomonasSp2021; @CCMP219NCMABigelow].
+The temperate *Chlamydomonas reinhardtii* is a model green alga approximately 10 μm in diameter, found in freshwater soil and aquatic environments with an optimal temperature range of 20-32°C [@sassoMolecularManipulationDomesticated2018; @xieChlamydomonasReinhardtiiThermal2013]. The temperate marine *Chlamydomonas euryale* is approximately 4 μm in diameter, isolated from various locations within the northern Atlantic and Pacific, including the Yellow Sea, with a known growth temperature range of 18-26°C [@burchEnvironmentalManipulationGrowth2015; @canuelInteractionEffectEDTA2021; @carrascofloresMarineChlamydomonasSp2021; @CCMP219NCMABigelow].
 *Chlorella vulgaris*, ranging from 2 μm to 10 μm in size, is primarily found in freshwater environments and grows optimally at 27°C [@wielCharacterizationChlorellaVulgaris2017; @leyvaAccumulationFattyAcids2014].
 
 *Thalassiosira pseudonana* and *Chlorella vulgaris* were cultured by Naaman Omar (Mount Allison University); *Chlamydomonas* strains were cultured by Mackenzie Poirier (Cvetkovska Lab, University of Ottawa) as reported previously  [@poirierLightQualityAffects2025]; while *Fragilariopsis cylindrus* was cultured by Sébastien Guérin (Takuvik International Research Laboratory, Université Laval).
